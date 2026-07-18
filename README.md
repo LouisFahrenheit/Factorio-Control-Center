@@ -3,6 +3,13 @@
 Web panel for managing Factorio dedicated servers in your browser. Install on
 your PC or VPS — add servers and manage everything from one place.
 
+<p align="center">
+  <img src="docs/images/01_server_list.png" width="49%">
+  <img src="docs/images/02_server_control.png" width="49%">
+  <img src="docs/images/03_mods.png" width="49%">
+  <img src="docs/images/04_map_generator.png" width="49%">
+</p>
+
 **Русский:** [README.ru.md](README.ru.md)
 
 **Translations:** [TRANSLATING.md](TRANSLATING.md)

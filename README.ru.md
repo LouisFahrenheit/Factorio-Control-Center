@@ -3,6 +3,13 @@
 Веб-панель для управления выделенными серверами Factorio в браузере. Ставится на
 ПК или VPS: добавляете серверы и управляете всем из одного места.
 
+<p align="center">
+  <img src="docs/images/01_server_list.png" width="49%">
+  <img src="docs/images/02_server_control.png" width="49%">
+  <img src="docs/images/03_mods.png" width="49%">
+  <img src="docs/images/04_map_generator.png" width="49%">
+</p>
+
 **English:** [README.md](README.md)
 
 ## Возможности
