@@ -102,8 +102,8 @@ The start menu shows the URL to open.
 Use **`StartDEV.bat`** or **`StartDEV.sh`** — dev/prod run, build, pack release.
 
 ```bash
-git clone <repo-url>
-cd <install-folder>
+git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
+cd Factorio-Control-Center
 ```
 
 Or manually:

@@ -99,8 +99,8 @@ sudo loginctl enable-linger $USER
 Используйте **`StartDEV.bat`** или **`StartDEV.sh`** — dev/prod, сборка, pack release.
 
 ```bash
-git clone <repo-url>
-cd <install-folder>
+git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
+cd Factorio-Control-Center
 ```
 
 Или вручную:
