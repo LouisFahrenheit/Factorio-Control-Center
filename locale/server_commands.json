@@ -1,0 +1,242 @@
+{
+  "version": "2.0",
+  "categories": {
+    "player": {
+      "commands": [
+        {
+          "id": "mining_speed",
+          "command": "/c game.players[\"{player}\"].force.manual_mining_speed_modifier={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "100"
+        },
+        {
+          "id": "crafting_speed",
+          "command": "/c game.players[\"{player}\"].force.manual_crafting_speed_modifier={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "100"
+        },
+        {
+          "id": "character_speed",
+          "command": "/c game.players[\"{player}\"].character_running_speed_modifier={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "1"
+        },
+        {
+          "id": "set_reach_distance",
+          "command": "/c game.players[\"{player}\"].force.character_build_distance_bonus={value}; game.players[\"{player}\"].force.character_reach_distance_bonus={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "10"
+        },
+        {
+          "id": "inventory_size",
+          "command": "/c game.players[\"{player}\"].force.character_inventory_slots_bonus={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "80"
+        },
+        {
+          "id": "research_speed",
+          "command": "/c game.players[\"{player}\"].force.laboratory_speed_modifier={value}",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "1"
+        },
+        {
+          "id": "toggle_cheat_mode",
+          "command": "/c game.players[\"{player}\"].cheat_mode={value}",
+          "has_player": true,
+          "has_boolean": true,
+          "default_value": "true"
+        },
+        {
+          "id": "teleport_spawn",
+          "command": "/c game.players[\"{player}\"].teleport({0,0})",
+          "has_player": true
+        },
+        {
+          "id": "teleport_all_spawn",
+          "command": "/c for _, player in pairs(game.connected_players) do player.teleport({0, 0}) end"
+        },
+        {
+          "id": "god_mode_on",
+          "command": "/c game.players[\"{player}\"].character.destroy()",
+          "has_player": true
+        },
+        {
+          "id": "god_mode_off",
+          "command": "/c game.players[\"{player}\"].create_character()",
+          "has_player": true
+        }
+      ]
+    },
+    "game": {
+      "commands": [
+        {
+          "id": "game_speed",
+          "command": "/c game.speed={value}",
+          "has_value": true,
+          "default_value": "1"
+        },
+        {
+          "id": "toggle_pollution",
+          "command": "/c game.map_settings.pollution.enabled={value}",
+          "has_boolean": true,
+          "default_value": "false"
+        },
+        {
+          "id": "add_pollution",
+          "command": "/c local player=game.players[\"{player}\"] player.surface.pollute(player.position, {value})",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "1000000"
+        },
+        {
+          "id": "remove_pollution",
+          "command": "/c game.players[\"{player}\"].surface.clear_pollution()",
+          "has_player": true,
+          "requires_value": false
+        },
+        {
+          "id": "toggle_always_day",
+          "command": "/c game.players[\"{player}\"].surface.always_day={value}",
+          "has_player": true,
+          "has_boolean": true,
+          "default_value": "true"
+        }
+      ]
+    },
+    "items": {
+      "commands": [
+        {
+          "id": "give_item",
+          "command": "/c game.players[\"{player}\"].insert{name=\"{item}\", count={count}, quality=\"{quality}\"}",
+          "has_player": true,
+          "has_item": true,
+          "items": {
+            "logistic-robot": 50,
+            "construction-robot": 50,
+            "roboport": 10,
+            "active-provider-chest": 50,
+            "buffer-chest": 50,
+            "passive-provider-chest": 50,
+            "requester-chest": 50,
+            "storage-chest": 50,
+            "big-mining-drill": 20,
+            "electric-mining-drill": 50,
+            "pumpjack": 20,
+            "foundry": 20,
+            "electromagnetic-plant": 20,
+            "biochamber": 20,
+            "cryogenic-plant": 20,
+            "captive-biter-spawner": 1,
+            "fusion-generator": 5,
+            "fusion-reactor": 1,
+            "bulk-inserter": 50,
+            "stack-inserter": 50,
+            "beacon": 20,
+            "efficiency-module-3": 50,
+            "productivity-module-3": 50,
+            "quality-module-3": 50,
+            "speed-module-3": 50,
+            "biolab": 5,
+            "lab": 10,
+            "foundation": 50,
+            "spidertron": 1,
+            "power-armor-mk2": 1,
+            "mech-armor": 1,
+            "rocket-turret": 10,
+            "rocket": 100,
+            "explosive-rocket": 100,
+            "railgun-turret": 10,
+            "railgun-ammo": 10,
+            "atomic-bomb": 10,
+            "infinity-chest": 10,
+            "infinity-pipe": 10,
+            "electric-energy-interface": 10,
+            "heat-interface": 20,
+            "linked-chest": 10,
+            "linked-belt": 10
+          },
+          "has_count": true,
+          "has_quality": true
+        },
+        {
+          "id": "give_power_armor_mk2",
+          "command": "/c local p=game.players[\"{player}\"] p.insert{name=\"power-armor-mk2\",count=1} local g=p.get_inventory(5)[1].grid g.put({name=\"fission-reactor-equipment\"}) g.put({name=\"fission-reactor-equipment\"}) g.put({name=\"fission-reactor-equipment\"}) g.put({name=\"exoskeleton-equipment\"}) g.put({name=\"exoskeleton-equipment\"}) g.put({name=\"exoskeleton-equipment\"}) g.put({name=\"exoskeleton-equipment\"}) g.put({name=\"energy-shield-mk2-equipment\"}) g.put({name=\"energy-shield-mk2-equipment\"}) g.put({name=\"personal-roboport-mk2-equipment\"}) g.put({name=\"night-vision-equipment\"}) g.put({name=\"battery-mk2-equipment\"}) g.put({name=\"battery-mk2-equipment\"}) p.insert{name=\"construction-robot\",count=25}",
+          "has_player": true
+        },
+        {
+          "id": "give_legendary_armor",
+          "command": "/c local p=game.players[\"{player}\"] p.insert{name=\"power-armor-mk2\",count=1,quality=\"legendary\"} local g=p.get_inventory(5)[1].grid g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"fission-reactor-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"exoskeleton-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"energy-shield-mk2-equipment\",quality=\"legendary\"})g.put({name=\"personal-roboport-mk2-equipment\",quality=\"legendary\"})g.put({name=\"night-vision-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"})g.put({name=\"battery-mk2-equipment\",quality=\"legendary\"}) p.insert{name=\"construction-robot\",count=50,quality=\"legendary\"}",
+          "has_player": true
+        }
+      ]
+    },
+    "enemies": {
+      "commands": [
+        {
+          "id": "toggle_peaceful_mode",
+          "command": "/c game.players[\"{player}\"].surface.peaceful_mode={value}",
+          "has_player": true,
+          "has_boolean": true,
+          "default_value": "true"
+        },
+        {
+          "id": "evolution_factor",
+          "command": "/c game.forces[\"enemy\"].set_evolution_factor({value}, game.players[\"{player}\"].surface)",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "0.37"
+        },
+        {
+          "id": "disable_evolution_time",
+          "command": "/c game.map_settings.enemy_evolution.time_factor=0"
+        },
+        {
+          "id": "disable_evolution_pollution",
+          "command": "/c game.map_settings.enemy_evolution.pollution_factor=0"
+        },
+        {
+          "id": "disable_expansion",
+          "command": "/c game.map_settings.enemy_expansion.enabled=false"
+        },
+        {
+          "id": "kill_nearby_enemies",
+          "command": "/c local p=game.players[\"{player}\"] local cnt=0 for k,e in pairs(p.surface.find_entities_filtered({force=\"enemy\",radius={value},position=p.position})) do cnt=cnt+1 e.destroy() end game.print(cnt)",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "250"
+        },
+        {
+          "id": "kill_all_enemies",
+          "command": "/c game.forces[\"enemy\"].kill_all_units()"
+        }
+      ]
+    },
+    "map": {
+      "commands": [
+        {
+          "id": "reveal_around",
+          "command": "/c local player=game.players[\"{player}\"] local radius={value} player.force.chart(player.surface,{{player.position.x-radius,player.position.y-radius},{player.position.x+radius,player.position.y+radius}})",
+          "has_player": true,
+          "has_value": true,
+          "default_value": "500"
+        },
+        {
+          "id": "hide_map",
+          "command": "/c local p=game.players[\"{player}\"] if p then for c in p.surface.get_chunks() do p.force.unchart_chunk({x=c.x,y=c.y},p.surface) end end",
+          "has_player": true
+        },
+        {
+          "id": "reveal_all",
+          "command": "/c game.players[\"{player}\"].force.chart_all()",
+          "has_player": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+client/dist/
+client/dist-ssr/
+
+# Release staging (pack-release.mjs)
+.release-staging/
+
+# Release archives (npm run pack:release)
+release/
+
+# Runtime data & logs (created on first run)
+data/
+logs/
+*.log
+
+# Local settings (API tokens, credentials)
+fcc-settings.ini
+
+# Test coverage
+coverage/
+
+# Environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

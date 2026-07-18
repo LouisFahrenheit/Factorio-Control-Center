@@ -1,0 +1,127 @@
+{
+  "categories": {
+    "player": "Player",
+    "game": "Game",
+    "items": "Items",
+    "enemies": "Enemies",
+    "map": "Map"
+  },
+  "commands": {
+    "mining_speed": {
+      "name": "Mining Speed",
+      "description": "Mining speed modifier"
+    },
+    "crafting_speed": {
+      "name": "Crafting Speed",
+      "description": "Crafting speed modifier"
+    },
+    "character_speed": {
+      "name": "Character Speed",
+      "description": "Character running speed modifier"
+    },
+    "set_reach_distance": {
+      "name": "Reach Distance",
+      "description": "Increases build and interaction distance"
+    },
+    "inventory_size": {
+      "name": "Inventory Size",
+      "description": "Set inventory size"
+    },
+    "research_speed": {
+      "name": "Research Speed",
+      "description": "Laboratory speed modifier (1 = 100%, 2 = 200%)"
+    },
+    "toggle_cheat_mode": {
+      "name": "Cheat Mode",
+      "description": "Free and instant item crafting"
+    },
+    "teleport_spawn": {
+      "name": "Teleport to Spawn",
+      "description": "Teleport player to spawn point"
+    },
+    "teleport_all_spawn": {
+      "name": "Teleport All to Spawn",
+      "description": "Teleport all players to spawn point"
+    },
+    "god_mode_on": {
+      "name": "God Mode On",
+      "description": "Removes character, allows flight and invincibility"
+    },
+    "god_mode_off": {
+      "name": "God Mode Off",
+      "description": "Creates a new character at spawn point"
+    },
+    "game_speed": {
+      "name": "Game Speed",
+      "description": "Change game speed"
+    },
+    "toggle_pollution": {
+      "name": "Pollution",
+      "description": "Enable/disable pollution"
+    },
+    "add_pollution": {
+      "name": "Add Pollution",
+      "description": "Add pollution at player's position"
+    },
+    "remove_pollution": {
+      "name": "Remove Pollution",
+      "description": "Remove all pollution around the player"
+    },
+    "toggle_always_day": {
+      "name": "Always Day",
+      "description": "Night never comes"
+    },
+    "give_item": {
+      "name": "Give Item",
+      "description": "Give an item to a player"
+    },
+    "give_power_armor_mk2": {
+      "name": "Give MK2 Armor",
+      "description": "Give a complete MK2 armor set"
+    },
+    "give_legendary_armor": {
+      "name": "Give Legendary Armor Set",
+      "description": "Give a legendary armor set"
+    },
+    "toggle_peaceful_mode": {
+      "name": "Peaceful Mode",
+      "description": "Does not affect already spawned enemies"
+    },
+    "evolution_factor": {
+      "name": "Evolution Factor",
+      "description": "Set evolution factor (0-1)"
+    },
+    "disable_evolution_time": {
+      "name": "Disable Evolution (Time)",
+      "description": "Disable evolution over time"
+    },
+    "disable_evolution_pollution": {
+      "name": "Disable Evolution (Pollution)",
+      "description": "Disable evolution from pollution"
+    },
+    "disable_expansion": {
+      "name": "Disable Expansion",
+      "description": "Disable enemy base expansion"
+    },
+    "kill_nearby_enemies": {
+      "name": "Kill Nearby Enemies",
+      "description": "Kill enemies within radius"
+    },
+    "kill_all_enemies": {
+      "name": "Kill All Enemies (Units Only)",
+      "description": "Kill all enemies on the map, bases remain"
+    },
+    "reveal_around": {
+      "name": "Generate Surrounding Map",
+      "description": "Generate map within radius around the player"
+    },
+    "hide_map": {
+      "name": "Hide Map",
+      "description": "Hide all revealed map areas"
+    },
+    "reveal_all": {
+      "name": "Reveal All",
+      "description": "Reveal all generated map areas"
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "categories": {
+    "player": "Игрок",
+    "game": "Игра",
+    "items": "Предметы",
+    "enemies": "Враги",
+    "map": "Карта"
+  },
+  "commands": {
+    "mining_speed": {
+      "name": "Скорость добычи",
+      "description": "Модификатор скорости добычи"
+    },
+    "crafting_speed": {
+      "name": "Скорость крафта",
+      "description": "Модификатор скорости крафта"
+    },
+    "character_speed": {
+      "name": "Скорость персонажа",
+      "description": "Модификатор скорости бега персонажа"
+    },
+    "set_reach_distance": {
+      "name": "Дальность взаимодействия",
+      "description": "Увеличивает дистанцию строительства и взаимодействия"
+    },
+    "inventory_size": {
+      "name": "Размер инвентаря",
+      "description": "Установить размер инвентаря"
+    },
+    "research_speed": {
+      "name": "Скорость исследований",
+      "description": "Модификатор скорости лабораторий (1 = 100%, 2 = 200%)"
+    },
+    "toggle_cheat_mode": {
+      "name": "Чит режим",
+      "description": "Бесплатный и мгновенный крафт предметов"
+    },
+    "teleport_spawn": {
+      "name": "Телепорт на спавн",
+      "description": "Телепортировать игрока на спавн"
+    },
+    "teleport_all_spawn": {
+      "name": "Телепорт всех на спавн",
+      "description": "Телепортировать всех игроков на спавн"
+    },
+    "god_mode_on": {
+      "name": "Режим бога Вкл",
+      "description": "Удаляет персонажа, позволяет летать и неуязвимость"
+    },
+    "god_mode_off": {
+      "name": "Режим бога Выкл",
+      "description": "Создаёт нового персонажа на спавне"
+    },
+    "game_speed": {
+      "name": "Скорость игры",
+      "description": "Изменить скорость игры"
+    },
+    "toggle_pollution": {
+      "name": "Загрязнение",
+      "description": "Включить/выключить загрязнение"
+    },
+    "add_pollution": {
+      "name": "Добавить загрязнение",
+      "description": "Добавить загрязнение на позиции игрока"
+    },
+    "remove_pollution": {
+      "name": "Удалить загрязнение",
+      "description": "Удалить всё загрязнение вокруг игрока"
+    },
+    "toggle_always_day": {
+      "name": "Всегда день",
+      "description": "Ночь не наступает"
+    },
+    "give_item": {
+      "name": "Выдать предмет",
+      "description": "Выдать предмет игроку"
+    },
+    "give_power_armor_mk2": {
+      "name": "Выдать МК2 броню",
+      "description": "Выдать полный комплект МК2 брони"
+    },
+    "give_legendary_armor": {
+      "name": "Выдать легендарный сет",
+      "description": "Выдать легендарный сет брони"
+    },
+    "toggle_peaceful_mode": {
+      "name": "Мирный режим",
+      "description": "Не влияет на тех кто уже заспавнился."
+    },
+    "evolution_factor": {
+      "name": "Фактор эволюции",
+      "description": "Установить фактор эволюции (0-1)"
+    },
+    "disable_evolution_time": {
+      "name": "Откл эволюцию (время)",
+      "description": "Отключить эволюцию по времени"
+    },
+    "disable_evolution_pollution": {
+      "name": "Откл эволюцию (загр)",
+      "description": "Отключить эволюцию от загрязнения"
+    },
+    "disable_expansion": {
+      "name": "Откл расширение",
+      "description": "Отключить расширение баз"
+    },
+    "kill_nearby_enemies": {
+      "name": "Убить все вражеское рядом",
+      "description": "Убить врагов в радиусе"
+    },
+    "kill_all_enemies": {
+      "name": "Убить всех врагов на карте",
+      "description": "Убить всех врагов на карте, базы останутся"
+    },
+    "reveal_around": {
+      "name": "Открыть карту вокруг",
+      "description": "Сгенерировать карту в радиусе"
+    },
+    "hide_map": {
+      "name": "Скрыть карту",
+      "description": "Скрыть всю сгенерированную карту"
+    },
+    "reveal_all": {
+      "name": "Показать карту",
+      "description": "Открыть всю сгенерированную карту"
+    }
+  }
+}

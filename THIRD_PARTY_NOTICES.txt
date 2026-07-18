@@ -1,0 +1,709 @@
+THIRD-PARTY NOTICES
+Factorio Control Center
+Version 1.0.0
+
+This file lists third-party software included in or distributed with
+Factorio Control Center. See the LICENSE file for this application.
+
+Bundled components
+=====================================
+
+Material Symbols by Google
+  License: Apache License 2.0
+  https://fonts.google.com/icons
+
+Tabler Icons
+  License: MIT
+  https://github.com/tabler/tabler-icons
+
+NSSM (Non-Sucking Service Manager) by Iain Patterson
+  License: Public domain
+  https://nssm.cc/
+  Bundled in Windows releases only.
+
+Factorio game assets (icons and sprites)
+  Images Copyright Wube Software
+  Used with permission.
+
+Server dependencies (production node_modules)
+=============================================
+
+@borewit/text-codec@0.2.2
+  License: MIT
+  Repository: https://github.com/Borewit/text-codec
+
+@lukeed/csprng@1.1.0
+  License: MIT
+  Repository: https://github.com/lukeed/csprng
+
+@nestjs/common@11.1.21
+  License: MIT
+  Repository: https://github.com/nestjs/nest
+
+@nestjs/config@4.0.4
+  License: MIT
+  Repository: https://github.com/nestjs/config
+
+@nestjs/core@11.1.27
+  License: MIT
+  Repository: https://github.com/nestjs/nest
+
+@nestjs/platform-express@11.1.27
+  License: MIT
+  Repository: https://github.com/nestjs/nest
+
+@nestjs/serve-static@5.0.5
+  License: MIT
+  Repository: https://github.com/nestjs/serve-static
+
+@tokenizer/inflate@0.4.1
+  License: MIT
+  Repository: https://github.com/Borewit/tokenizer-inflate
+
+@tokenizer/token@0.3.0
+  License: MIT
+  Repository: https://github.com/Borewit/tokenizer-token
+
+@types/validator@13.15.10
+  License: MIT
+  Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+accepts@2.0.0
+  License: MIT
+  Repository: https://github.com/jshttp/accepts
+
+adm-zip@0.5.17
+  License: MIT
+  Repository: https://github.com/cthackers/adm-zip
+
+append-field@1.0.0
+  License: MIT
+  Repository: https://github.com/LinusU/node-append-field
+
+body-parser@2.2.2
+  License: MIT
+  Repository: https://github.com/expressjs/body-parser
+
+buffer-from@1.1.2
+  License: MIT
+  Repository: https://github.com/LinusU/buffer-from
+
+busboy@1.6.0
+  License: MIT
+  Repository: https://github.com/mscdex/busboy
+
+bytes@3.1.2
+  License: MIT
+  Repository: https://github.com/visionmedia/bytes.js
+
+call-bind-apply-helpers@1.0.2
+  License: MIT
+  Repository: https://github.com/ljharb/call-bind-apply-helpers
+
+call-bound@1.0.4
+  License: MIT
+  Repository: https://github.com/ljharb/call-bound
+
+class-transformer@0.5.1
+  License: MIT
+  Repository: https://github.com/typestack/class-transformer
+
+class-validator@0.15.1
+  License: MIT
+  Repository: https://github.com/typestack/class-validator
+
+concat-stream@2.0.0
+  License: MIT
+  Repository: https://github.com/maxogden/concat-stream
+
+content-disposition@1.1.0
+  License: MIT
+  Repository: https://github.com/jshttp/content-disposition
+
+content-type@1.0.5
+  License: MIT
+  Repository: https://github.com/jshttp/content-type
+
+content-type@2.0.0
+  License: MIT
+  Repository: https://github.com/jshttp/content-type
+
+cookie-signature@1.2.2
+  License: MIT
+  Repository: https://github.com/visionmedia/node-cookie-signature
+
+cookie@0.7.2
+  License: MIT
+  Repository: https://github.com/jshttp/cookie
+
+cors@2.8.6
+  License: MIT
+  Repository: https://github.com/expressjs/cors
+
+debug@4.4.3
+  License: MIT
+  Repository: https://github.com/debug-js/debug
+
+depd@2.0.0
+  License: MIT
+  Repository: https://github.com/dougwilson/nodejs-depd
+
+dotenv-expand@12.0.3
+  License: BSD-2-Clause
+  Repository: https://github.com/motdotla/dotenv-expand
+
+dotenv@16.6.1
+  License: BSD-2-Clause
+  Repository: https://github.com/motdotla/dotenv
+
+dotenv@17.4.1
+  License: BSD-2-Clause
+  Repository: https://github.com/motdotla/dotenv
+
+dunder-proto@1.0.1
+  License: MIT
+  Repository: https://github.com/es-shims/dunder-proto
+
+ee-first@1.1.1
+  License: MIT
+  Repository: https://github.com/jonathanong/ee-first
+
+encodeurl@2.0.0
+  License: MIT
+  Repository: https://github.com/pillarjs/encodeurl
+
+es-define-property@1.0.1
+  License: MIT
+  Repository: https://github.com/ljharb/es-define-property
+
+es-errors@1.3.0
+  License: MIT
+  Repository: https://github.com/ljharb/es-errors
+
+es-object-atoms@1.1.1
+  License: MIT
+  Repository: https://github.com/ljharb/es-object-atoms
+
+escape-html@1.0.3
+  License: MIT
+  Repository: https://github.com/component/escape-html
+
+etag@1.8.1
+  License: MIT
+  Repository: https://github.com/jshttp/etag
+
+express@5.2.1
+  License: MIT
+  Repository: https://github.com/expressjs/express
+
+fast-safe-stringify@2.1.1
+  License: MIT
+  Repository: https://github.com/davidmarkclements/fast-safe-stringify
+
+file-type@21.3.4
+  License: MIT
+  Repository: https://github.com/sindresorhus/file-type
+
+finalhandler@2.1.1
+  License: MIT
+  Repository: https://github.com/pillarjs/finalhandler
+
+forwarded@0.2.0
+  License: MIT
+  Repository: https://github.com/jshttp/forwarded
+
+fresh@2.0.0
+  License: MIT
+  Repository: https://github.com/jshttp/fresh
+
+function-bind@1.1.2
+  License: MIT
+  Repository: https://github.com/Raynos/function-bind
+
+get-intrinsic@1.3.0
+  License: MIT
+  Repository: https://github.com/ljharb/get-intrinsic
+
+get-proto@1.0.1
+  License: MIT
+  Repository: https://github.com/ljharb/get-proto
+
+gopd@1.2.0
+  License: MIT
+  Repository: https://github.com/ljharb/gopd
+
+has-symbols@1.1.0
+  License: MIT
+  Repository: https://github.com/inspect-js/has-symbols
+
+hasown@2.0.4
+  License: MIT
+  Repository: https://github.com/inspect-js/hasOwn
+
+http-errors@2.0.1
+  License: MIT
+  Repository: https://github.com/jshttp/http-errors
+
+iconv-lite@0.7.2
+  License: MIT
+  Repository: https://github.com/pillarjs/iconv-lite
+
+ieee754@1.2.1
+  License: BSD-3-Clause
+  Repository: https://github.com/feross/ieee754
+
+inherits@2.0.4
+  License: ISC
+  Repository: https://github.com/isaacs/inherits
+
+ini@7.0.0
+  License: ISC
+  Repository: https://github.com/npm/ini
+
+ipaddr.js@1.9.1
+  License: MIT
+  Repository: https://github.com/whitequark/ipaddr.js
+
+is-promise@4.0.0
+  License: MIT
+  Repository: https://github.com/then/is-promise
+
+iterare@1.2.1
+  License: ISC
+  Repository: https://github.com/felixfbecker/iterare
+
+libphonenumber-js@1.13.2
+  License: MIT
+  Repository: git+https://gitlab.com/catamphetamine/libphonenumber-js
+
+load-esm@1.0.3
+  License: MIT
+  Repository: https://github.com/Borewit/load-esm
+
+lodash@4.18.1
+  License: MIT
+  Repository: https://github.com/lodash/lodash
+
+math-intrinsics@1.1.0
+  License: MIT
+  Repository: https://github.com/es-shims/math-intrinsics
+
+media-typer@0.3.0
+  License: MIT
+  Repository: https://github.com/jshttp/media-typer
+
+media-typer@1.1.0
+  License: MIT
+  Repository: https://github.com/jshttp/media-typer
+
+merge-descriptors@2.0.0
+  License: MIT
+  Repository: https://github.com/sindresorhus/merge-descriptors
+
+mime-db@1.52.0
+  License: MIT
+  Repository: https://github.com/jshttp/mime-db
+
+mime-db@1.54.0
+  License: MIT
+  Repository: https://github.com/jshttp/mime-db
+
+mime-types@2.1.35
+  License: MIT
+  Repository: https://github.com/jshttp/mime-types
+
+mime-types@3.0.2
+  License: MIT
+  Repository: https://github.com/jshttp/mime-types
+
+ms@2.1.3
+  License: MIT
+  Repository: https://github.com/vercel/ms
+
+multer@2.2.0
+  License: MIT
+  Repository: https://github.com/expressjs/multer
+
+negotiator@1.0.0
+  License: MIT
+  Repository: https://github.com/jshttp/negotiator
+
+node-stream-zip@1.15.0
+  License: MIT
+  Repository: https://github.com/antelle/node-stream-zip
+
+object-assign@4.1.1
+  License: MIT
+  Repository: https://github.com/sindresorhus/object-assign
+
+object-inspect@1.13.4
+  License: MIT
+  Repository: https://github.com/inspect-js/object-inspect
+
+on-finished@2.4.1
+  License: MIT
+  Repository: https://github.com/jshttp/on-finished
+
+once@1.4.0
+  License: ISC
+  Repository: https://github.com/isaacs/once
+
+parseurl@1.3.3
+  License: MIT
+  Repository: https://github.com/pillarjs/parseurl
+
+path-to-regexp@8.4.2
+  License: MIT
+  Repository: https://github.com/pillarjs/path-to-regexp
+
+proxy-addr@2.0.7
+  License: MIT
+  Repository: https://github.com/jshttp/proxy-addr
+
+qs@6.15.2
+  License: BSD-3-Clause
+  Repository: https://github.com/ljharb/qs
+
+range-parser@1.2.1
+  License: MIT
+  Repository: https://github.com/jshttp/range-parser
+
+raw-body@3.0.2
+  License: MIT
+  Repository: https://github.com/stream-utils/raw-body
+
+readable-stream@3.6.2
+  License: MIT
+  Repository: https://github.com/nodejs/readable-stream
+
+reflect-metadata@0.2.2
+  License: Apache-2.0
+  Repository: https://github.com/rbuckton/reflect-metadata
+
+router@2.2.0
+  License: MIT
+  Repository: https://github.com/pillarjs/router
+
+rxjs@7.8.2
+  License: Apache-2.0
+  Repository: https://github.com/reactivex/rxjs
+
+safe-buffer@5.2.1
+  License: MIT
+  Repository: https://github.com/feross/safe-buffer
+
+safer-buffer@2.1.2
+  License: MIT
+  Repository: https://github.com/ChALkeR/safer-buffer
+
+send@1.2.1
+  License: MIT
+  Repository: https://github.com/pillarjs/send
+
+serve-static@2.2.1
+  License: MIT
+  Repository: https://github.com/expressjs/serve-static
+
+setprototypeof@1.2.0
+  License: ISC
+  Repository: https://github.com/wesleytodd/setprototypeof
+
+side-channel-list@1.0.1
+  License: MIT
+  Repository: https://github.com/ljharb/side-channel-list
+
+side-channel-map@1.0.1
+  License: MIT
+  Repository: https://github.com/ljharb/side-channel-map
+
+side-channel-weakmap@1.0.2
+  License: MIT
+  Repository: https://github.com/ljharb/side-channel-weakmap
+
+side-channel@1.1.0
+  License: MIT
+  Repository: https://github.com/ljharb/side-channel
+
+statuses@2.0.2
+  License: MIT
+  Repository: https://github.com/jshttp/statuses
+
+streamsearch@1.1.0
+  License: MIT
+  Repository: https://github.com/mscdex/streamsearch
+
+string_decoder@1.3.0
+  License: MIT
+  Repository: https://github.com/nodejs/string_decoder
+
+strtok3@10.3.5
+  License: MIT
+  Repository: https://github.com/Borewit/strtok3
+
+toidentifier@1.0.1
+  License: MIT
+  Repository: https://github.com/component/toidentifier
+
+token-types@6.1.2
+  License: MIT
+  Repository: https://github.com/Borewit/token-types
+
+tslib@2.8.1
+  License: 0BSD
+  Repository: https://github.com/Microsoft/tslib
+
+type-is@1.6.18
+  License: MIT
+  Repository: https://github.com/jshttp/type-is
+
+type-is@2.1.0
+  License: MIT
+  Repository: https://github.com/jshttp/type-is
+
+typedarray@0.0.6
+  License: MIT
+  Repository: https://github.com/substack/typedarray
+
+uid@2.0.2
+  License: MIT
+  Repository: https://github.com/lukeed/uid
+
+uint8array-extras@1.5.0
+  License: MIT
+  Repository: https://github.com/sindresorhus/uint8array-extras
+
+unpipe@1.0.0
+  License: MIT
+  Repository: https://github.com/stream-utils/unpipe
+
+util-deprecate@1.0.2
+  License: MIT
+  Repository: https://github.com/TooTallNate/util-deprecate
+
+uuid@14.0.0
+  License: MIT
+  Repository: https://github.com/uuidjs/uuid
+
+validator@13.15.35
+  License: MIT
+  Repository: https://github.com/validatorjs/validator.js
+
+vary@1.1.2
+  License: MIT
+  Repository: https://github.com/jshttp/vary
+
+wrappy@1.0.2
+  License: ISC
+  Repository: https://github.com/npm/wrappy
+
+Client UI bundle dependencies (production)
+==========================================
+
+@babel/runtime@7.29.2
+  License: MIT
+  Repository: https://github.com/babel/babel
+
+@floating-ui/core@1.7.5
+  License: MIT
+  Repository: https://github.com/floating-ui/floating-ui
+
+@floating-ui/dom@1.7.6
+  License: MIT
+  Repository: https://github.com/floating-ui/floating-ui
+
+@floating-ui/react-dom@2.1.8
+  License: MIT
+  Repository: https://github.com/floating-ui/floating-ui
+
+@floating-ui/react@0.27.19
+  License: MIT
+  Repository: https://github.com/floating-ui/floating-ui
+
+@floating-ui/utils@0.2.11
+  License: MIT
+  Repository: https://github.com/floating-ui/floating-ui
+
+@mantine/core@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@mantine/hooks@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@mantine/modals@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@mantine/notifications@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@mantine/nprogress@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@mantine/store@8.3.18
+  License: MIT
+  Repository: https://github.com/mantinedev/mantine
+
+@tabler/icons-react@3.44.0
+  License: MIT
+  Repository: https://github.com/tabler/tabler-icons
+
+@tabler/icons@3.44.0
+  License: MIT
+  Repository: https://github.com/tabler/tabler-icons
+
+@tanstack/query-core@5.100.11
+  License: MIT
+  Repository: https://github.com/TanStack/query
+
+@tanstack/react-query@5.100.11
+  License: MIT
+  Repository: https://github.com/TanStack/query
+
+@types/react@19.2.15
+  License: MIT
+  Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+clsx@2.1.1
+  License: MIT
+  Repository: https://github.com/lukeed/clsx
+
+cookie@1.1.1
+  License: MIT
+  Repository: https://github.com/jshttp/cookie
+
+csstype@3.2.3
+  License: MIT
+  Repository: https://github.com/frenic/csstype
+
+detect-node-es@1.1.0
+  License: MIT
+  Repository: https://github.com/thekashey/detect-node
+
+dom-helpers@5.2.1
+  License: MIT
+  Repository: https://github.com/react-bootstrap/dom-helpers
+
+framer-motion@12.39.0
+  License: MIT
+  Repository: https://github.com/motiondivision/motion
+
+get-nonce@1.0.1
+  License: MIT
+  Repository: https://github.com/theKashey/get-nonce
+
+js-tokens@4.0.0
+  License: MIT
+  Repository: https://github.com/lydell/js-tokens
+
+loose-envify@1.4.0
+  License: MIT
+  Repository: https://github.com/zertosh/loose-envify
+
+motion-dom@12.39.0
+  License: MIT
+  Repository: https://github.com/motiondivision/motion
+
+motion-utils@12.39.0
+  License: MIT
+  Repository: https://github.com/motiondivision/motion
+
+motion@12.39.0
+  License: MIT
+  Repository: https://github.com/motiondivision/motion
+
+object-assign@4.1.1
+  License: MIT
+  Repository: https://github.com/sindresorhus/object-assign
+
+prop-types@15.8.1
+  License: MIT
+  Repository: https://github.com/facebook/prop-types
+
+react-dom@19.2.6
+  License: MIT
+  Repository: https://github.com/facebook/react
+
+react-is@16.13.1
+  License: MIT
+  Repository: https://github.com/facebook/react
+
+react-number-format@5.4.5
+  License: MIT
+  Repository: https://github.com/s-yadav/react-number-format
+
+react-remove-scroll-bar@2.3.8
+  License: MIT
+  Repository: https://github.com/theKashey/react-remove-scroll-bar
+
+react-remove-scroll@2.7.2
+  License: MIT
+  Repository: https://github.com/theKashey/react-remove-scroll
+
+react-router-dom@7.15.1
+  License: MIT
+  Repository: https://github.com/remix-run/react-router
+
+react-router@7.15.1
+  License: MIT
+  Repository: https://github.com/remix-run/react-router
+
+react-style-singleton@2.2.3
+  License: MIT
+  Repository: https://github.com/theKashey/react-style-singleton
+
+react-textarea-autosize@8.5.9
+  License: MIT
+  Repository: https://github.com/Andarist/react-textarea-autosize
+
+react-transition-group@4.4.5
+  License: BSD-3-Clause
+  Repository: https://github.com/reactjs/react-transition-group
+
+react@19.2.6
+  License: MIT
+  Repository: https://github.com/facebook/react
+
+scheduler@0.27.0
+  License: MIT
+  Repository: https://github.com/facebook/react
+
+set-cookie-parser@2.7.2
+  License: MIT
+  Repository: https://github.com/nfriedly/set-cookie-parser
+
+tabbable@6.4.0
+  License: MIT
+  Repository: https://github.com/focus-trap/tabbable
+
+tslib@2.8.1
+  License: 0BSD
+  Repository: https://github.com/Microsoft/tslib
+
+type-fest@4.41.0
+  License: (MIT OR CC0-1.0)
+  Repository: https://github.com/sindresorhus/type-fest
+
+use-callback-ref@1.3.3
+  License: MIT
+  Repository: https://github.com/theKashey/use-callback-ref
+
+use-composed-ref@1.4.0
+  License: MIT
+  Repository: https://github.com/Andarist/use-composed-ref
+
+use-isomorphic-layout-effect@1.2.1
+  License: MIT
+  Repository: https://github.com/Andarist/use-isomorphic-layout-effect
+
+use-latest@1.3.0
+  License: MIT
+  Repository: https://github.com/Andarist/use-latest
+
+use-sidecar@1.1.3
+  License: MIT
+  Repository: https://github.com/theKashey/use-sidecar
+

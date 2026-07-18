@@ -1,0 +1,1449 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOGIN PORTAL — единая «терминальная» карточка
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.login-screen {
+  --login-portal-max: 700px;
+  --login-fields-max: 360px;
+  --login-shimmer-a: rgba(var(--accent-rgb), 0.09);
+  --login-shimmer-b: rgba(var(--accent-rgb), 0.03);
+  position: relative;
+  isolation: isolate;
+  gap: 0;
+  padding: 20px 20px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ——— Login page ambient background (per theme) ——— */
+
+.login-screen__bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: #0c0e12;
+}
+
+.login-screen__bg-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Плавный перелив фона в двух цветах — без видимых волн */
+.login-screen__bg-layer--shimmer {
+  z-index: 0;
+  inset: -18%;
+  opacity: 0.72;
+  filter: blur(72px);
+  background:
+    radial-gradient(ellipse 72% 66% at 28% 36%, var(--login-shimmer-a) 0%, transparent 64%),
+    radial-gradient(ellipse 78% 72% at 74% 64%, var(--login-shimmer-b) 0%, transparent 66%);
+  animation: login-bg-shimmer-flow 72s ease-in-out infinite alternate;
+}
+
+@keyframes login-bg-shimmer-flow {
+  0% {
+    opacity: 0.64;
+    transform: translate3d(-1.2%, -0.8%, 0) scale(1.02);
+  }
+  100% {
+    opacity: 0.78;
+    transform: translate3d(1.2%, 0.8%, 0) scale(1.05);
+  }
+}
+
+.login-screen__bg-layer--glow {
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 62% 54% at 50% 42%,
+    rgba(var(--accent-rgb), 0.07) 0%,
+    rgba(var(--accent-rgb), 0.025) 46%,
+    transparent 78%
+  );
+  animation: login-bg-breathe 22s ease-in-out infinite;
+}
+
+.login-screen__bg-layer--drift {
+  z-index: 1;
+  opacity: 0.22;
+  filter: blur(18px);
+  background:
+    radial-gradient(circle at 18% 24%, rgba(var(--accent-rgb), 0.05) 0, transparent 34%),
+    radial-gradient(circle at 82% 68%, rgba(var(--accent-rgb), 0.04) 0, transparent 38%),
+    radial-gradient(circle at 52% 88%, rgba(var(--accent-rgb), 0.03) 0, transparent 32%);
+  animation: login-bg-drift 48s ease-in-out infinite alternate;
+}
+
+.login-screen__bg-layer--stars {
+  display: none;
+  z-index: 1;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.login-screen__bg-layer--vignette {
+  z-index: 2;
+  background: radial-gradient(ellipse 80% 74% at 50% 48%, transparent 38%, rgba(0, 0, 0, 0.58) 100%);
+  opacity: 0.78;
+}
+
+@keyframes login-bg-breathe {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes login-bg-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(1.2%, -0.8%, 0) scale(1.012);
+  }
+}
+
+.login-screen > .login-portal {
+  position: relative;
+  z-index: 1;
+}
+
+.login-screen__theme-slot {
+  width: min(100%, var(--login-portal-max));
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 200;
+  margin-bottom: 6px;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+/* ——— Portal shell ——— */
+
+.login-portal {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, var(--login-portal-max));
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, var(--bg-widget) 92%, white 2%) 0%,
+      color-mix(in srgb, var(--bg-main) 88%, black 4%) 48%,
+      color-mix(in srgb, var(--bg-widget) 85%, black 6%) 100%
+    );
+  border: 1px solid color-mix(in srgb, var(--border) 70%, var(--accent) 8%);
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.58),
+    0 8px 24px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 48px rgba(var(--accent-rgb), 0.08);
+  animation: login-portal-in 1.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes login-portal-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* FX layers */
+.login-portal__fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.login-portal__aura {
+  position: absolute;
+  inset: -40% -20%;
+  background: radial-gradient(
+    ellipse 58% 48% at 50% 0%,
+    rgba(var(--accent-rgb), 0.2) 0%,
+    rgba(var(--accent-rgb), 0.05) 38%,
+    transparent 68%
+  );
+}
+
+.login-portal__grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
+
+.login-portal__scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.04) 48%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  animation: login-portal-scan 16s linear infinite;
+  opacity: 0.55;
+}
+
+@keyframes login-portal-scan {
+  0% {
+    background-position: 0 -120%;
+  }
+  100% {
+    background-position: 0 220%;
+  }
+}
+
+.login-portal__rim {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(var(--accent-rgb), 0.55) 55deg,
+    transparent 110deg,
+    rgba(var(--accent-rgb), 0.25) 180deg,
+    transparent 240deg,
+    rgba(var(--accent-rgb), 0.45) 300deg,
+    transparent 360deg
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0.65;
+  animation: login-portal-rim 28s linear infinite;
+}
+
+@keyframes login-portal-rim {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Corners on portal */
+.login-portal > .login-screen__corner {
+  z-index: 4;
+  width: 20px;
+  height: 20px;
+  opacity: 0.92;
+}
+
+.login-portal > .login-screen__corner--tl { top: 10px; left: 10px; }
+.login-portal > .login-screen__corner--tr { top: 10px; right: 10px; }
+.login-portal > .login-screen__corner--bl { bottom: 10px; left: 10px; }
+.login-portal > .login-screen__corner--br { bottom: 10px; right: 10px; }
+
+/* ——— Brand / headline ——— */
+
+.login-portal__brand {
+  position: relative;
+  z-index: 2;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 26px 32px 16px;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-align: center;
+}
+
+.login-portal__headline {
+  margin: 0;
+  font: inherit;
+  font-weight: inherit;
+}
+
+.login-screen__brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.login-screen__brand-primary {
+  display: block;
+  font-size: clamp(3.15rem, 12.5vw, 5.35rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.85),
+    0 0 32px rgba(var(--accent-rgb), 0.32);
+}
+
+.login-screen__brand-secondary {
+  display: block;
+  font-size: clamp(1.22rem, 3.8vw, 1.55rem);
+  font-weight: 600;
+  letter-spacing: 0.36em;
+  text-indent: 0.36em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.92;
+  text-shadow: 0 0 16px rgba(var(--accent-rgb), 0.45);
+}
+
+/* ——— Gate / form panel (flattened inside portal) ——— */
+
+.login-portal__gate {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+
+.login-portal__gate .panel__title {
+  margin: 0;
+  padding: 0 32px 10px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: none !important;
+  border: none !important;
+  text-shadow: none;
+}
+
+.login-portal__gate .panel__body {
+  padding: 0 32px 14px;
+  background: transparent !important;
+}
+
+.login-screen__fields {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: var(--login-fields-max);
+  margin-inline: auto;
+}
+
+/* Input cards — icon | field, без заливки под текстом */
+.login-portal__input {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: transparent;
+  box-shadow: none;
+  cursor: text;
+}
+
+.login-portal__input:focus-within {
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  box-shadow: none;
+}
+
+.login-portal__input-icon {
+  display: grid;
+  place-items: center;
+  grid-column: 1;
+  color: color-mix(in srgb, var(--accent) 72%, var(--text-dim) 28%);
+  opacity: 0.9;
+  border-right: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.login-portal__input-body {
+  grid-column: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 12px 7px;
+  gap: 1px;
+}
+
+.login-portal__input-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.login-portal__input-control--pass .login-portal__input-field {
+  padding-right: 30px;
+}
+
+.login-portal__input-toggle {
+  position: absolute;
+  top: 50%;
+  right: -2px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.login-portal__input-toggle:hover,
+.login-portal__input-toggle.is-on {
+  color: var(--accent);
+  background: transparent;
+}
+
+.login-portal__input-toggle:focus,
+.login-portal__input-toggle:focus-visible {
+  outline: none;
+}
+
+.login-portal__input-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  line-height: 1.2;
+}
+
+.login-portal__input-field {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.96rem;
+  line-height: 1.3;
+}
+
+.login-portal__input-field:focus,
+.login-portal__input-field:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.login-portal__input-field::placeholder {
+  color: color-mix(in srgb, var(--text-dim) 75%, transparent);
+}
+
+/* Браузерный autofill — без цветной подложки под текстом */
+.login-portal__input-field:-webkit-autofill,
+.login-portal__input-field:-webkit-autofill:hover,
+.login-portal__input-field:-webkit-autofill:focus,
+.login-portal__input-field:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 99999s ease-out 0s;
+}
+
+.login-portal__input-field:autofill {
+  box-shadow: 0 0 0 1000px transparent inset !important;
+}
+
+/* CTA */
+.login-portal__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 2px;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  background: var(--fcc-btn-bg);
+  border: 1px solid var(--fcc-btn-border);
+  box-shadow: var(--fcc-btn-shadow);
+  transition:
+    background-color 0.22s var(--fcc-hover-ease),
+    border-color 0.22s var(--fcc-hover-ease),
+    color 0.22s var(--fcc-hover-ease),
+    box-shadow 0.22s var(--fcc-hover-ease),
+    opacity 0.2s ease;
+}
+
+.login-portal__cta-mark {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.65);
+}
+
+.login-portal__cta-text {
+  line-height: 1;
+}
+
+.login-portal__cta:hover:not(:disabled) {
+  background: var(--fcc-btn-bg-hover);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--fcc-btn-border) 72%);
+  color: var(--text);
+}
+
+.login-portal__cta:active:not(:disabled) {
+  background: var(--fcc-btn-bg-active);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--fcc-btn-border) 66%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.login-portal__cta:disabled {
+  background: var(--fcc-btn-bg-disabled);
+  border-color: color-mix(in srgb, var(--border-dark) 55%, transparent);
+  color: var(--text-muted);
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.login-screen__caps {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 0.62rem;
+}
+
+/* ——— Telemetry deck (продолжение портала, без отдельной «лотка») ——— */
+
+.login-portal .login-portal__telemetry.login-screen__hud {
+  position: relative;
+  z-index: 2;
+  display: block !important;
+  width: 100%;
+  max-width: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 14%) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent) !important;
+  font-family: "Consolas", "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
+  font-size: 1rem;
+  color: var(--text);
+  overflow: hidden;
+  text-transform: none;
+}
+
+.login-portal__telemetry .login-screen__hud-value,
+.login-portal__telemetry .login-screen__hud-value--accent {
+  font-size: inherit;
+  text-shadow: none !important;
+}
+
+.login-portal__telemetry-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  background: color-mix(in srgb, var(--bg-widget) 14%, transparent);
+}
+
+.login-portal__telemetry-head-tag {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 65%, var(--text-dim) 35%);
+  opacity: 0.88;
+}
+
+.login-portal__telemetry-head-line {
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--accent-rgb), 0.35) 0%,
+    rgba(var(--accent-rgb), 0.08) 55%,
+    transparent 100%
+  );
+}
+
+.login-portal__telemetry-rail {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 0.9fr 1.35fr;
+  align-items: stretch;
+  width: 100%;
+  min-height: 58px;
+  padding: 0;
+}
+
+.login-portal__telemetry-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 8px 10px;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+.login-portal__telemetry-slot + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.login-portal__telemetry-label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  line-height: 1.1;
+  opacity: 0.88;
+}
+
+.login-portal__telemetry-value,
+.login-portal__telemetry .login-screen__hud-value:not(.login-screen__hud-value--accent) {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  text-shadow: none;
+  filter: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.login-portal__telemetry-slot--status {
+  background: transparent;
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--accent) 12%, var(--border) 88%);
+}
+
+.login-portal__telemetry-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.login-portal__telemetry-slot--status .login-screen__hud-pulse {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.4);
+  animation: login-pulse 2.4s ease-in-out infinite;
+}
+
+.login-portal__telemetry .login-screen__hud-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.login-portal__telemetry-slot--status .login-screen__hud-value,
+.login-portal__telemetry-slot--status .login-screen__hud-value--accent {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: none;
+  filter: none;
+}
+
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied {
+  background: color-mix(in srgb, var(--error) 6%, transparent);
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--error) 22%, var(--border) 78%);
+}
+
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-value,
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-value--accent {
+  color: var(--error);
+}
+
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-pulse {
+  background: var(--error);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--error) 65%, transparent);
+}
+
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-value,
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-value--accent,
+.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value,
+.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value--accent {
+  color: var(--online-green, var(--accent));
+}
+
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-pulse,
+.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-pulse {
+  background: var(--online-green, var(--accent));
+  box-shadow: 0 0 7px color-mix(in srgb, var(--online-green, #6a9a5c) 55%, transparent);
+}
+
+.login-portal__foot {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+}
+
+.login-portal__msg {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0 20px 6px;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.login-portal__msg:not(:empty) {
+  min-height: 1.4em;
+  padding-bottom: 8px;
+}
+
+.login-portal__msg:empty {
+  display: none;
+}
+
+/* ——— Theme picker ——— */
+
+.login-theme-picker {
+  position: relative;
+  z-index: 210;
+}
+
+.login-theme-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px 5px 7px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 70%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.login-theme-picker__trigger:hover,
+.login-theme-picker.is-open .login-theme-picker__trigger {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border) 52%);
+  color: var(--text);
+}
+
+.login-theme-picker__icon {
+  color: var(--accent);
+}
+
+.login-theme-picker__chevron {
+  opacity: 0.55;
+  transition: transform 0.18s ease;
+}
+
+.login-theme-picker.is-open .login-theme-picker__chevron {
+  transform: rotate(180deg);
+}
+
+.login-theme-picker__current {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-theme-picker__swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.login-theme-picker__swatch[data-theme-chip='fcc_classic'],
+.login-theme-picker__option[data-theme-chip='fcc_classic'] .login-theme-picker__swatch {
+  background: linear-gradient(135deg, #da8216, #8c8c8c);
+}
+
+.login-theme-picker__swatch[data-theme-chip='dark_space'],
+.login-theme-picker__option[data-theme-chip='dark_space'] .login-theme-picker__swatch {
+  background: linear-gradient(135deg, #0a0a0c, #aac4d6);
+}
+
+.login-theme-picker__swatch[data-theme-chip='vulcanus'],
+.login-theme-picker__option[data-theme-chip='vulcanus'] .login-theme-picker__swatch {
+  background: linear-gradient(135deg, #ff6a1c, #ffc24a);
+}
+
+.login-theme-picker__swatch[data-theme-chip='ion_storm'],
+.login-theme-picker__option[data-theme-chip='ion_storm'] .login-theme-picker__swatch {
+  background: linear-gradient(135deg, #38ddf0, #9a6ae8);
+}
+
+.login-theme-picker__swatch[data-theme-chip='cryogenics'],
+.login-theme-picker__option[data-theme-chip='cryogenics'] .login-theme-picker__swatch {
+  background: linear-gradient(135deg, #8ec4e8, #c07838);
+}
+
+.login-theme-picker__menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 220;
+  min-width: 10.5rem;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background: color-mix(in srgb, var(--bg-widget) 96%, var(--bg-main) 4%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: login-menu-in 0.14s ease-out;
+}
+
+@keyframes login-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.login-theme-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.login-theme-picker__option:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+}
+
+.login-theme-picker__option.is-active {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text);
+}
+
+/* ═══ Theme personalities ═══ */
+
+:root[data-theme='fcc_classic'] .login-screen__brand-primary,
+:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
+  color: #dc8000;
+  background: none;
+  -webkit-text-fill-color: #dc8000;
+  filter: none;
+  text-shadow:
+    1px 1px 0 #391e07,
+    2px 2px 0 #391e07,
+    3px 3px 0 #391e07,
+    4px 4px 0 #391e07,
+    5px 5px 0 #391e07,
+    7px 8px 14px rgba(57, 30, 7, 0.85);
+}
+
+:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
+  color: #e1dbcf;
+  -webkit-text-fill-color: #e1dbcf;
+}
+
+:root[data-theme='dark_space'] .login-portal,
+:root[data-theme='ion_storm'] .login-portal {
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(8, 10, 18, 0.98), rgba(2, 4, 10, 0.99));
+  border-color: #1a2030;
+}
+
+:root[data-theme='dark_space'] .login-screen__brand-primary,
+:root[data-theme='ion_storm'] .login-screen__brand-primary {
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  background: none;
+  filter: none;
+  text-shadow:
+    0 0 28px rgba(var(--accent-rgb), 0.55),
+    0 0 10px rgba(var(--accent-rgb), 0.85);
+}
+
+:root[data-theme='dark_space'] .login-portal__input,
+:root[data-theme='ion_storm'] .login-portal__input {
+  border-radius: 0;
+  background: transparent;
+  border-color: #1a2030;
+}
+
+:root[data-theme='dark_space'] .login-portal__cta,
+:root[data-theme='ion_storm'] .login-portal__cta {
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .login-portal__cta {
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .login-portal {
+  border-radius: 0;
+  background: linear-gradient(180deg, #1e1a16, #12100d);
+}
+
+:root[data-theme='vulcanus'] .login-screen__brand-primary {
+  color: #f2e0cc;
+  text-shadow: 0 0 20px rgba(255, 106, 28, 0.35);
+}
+
+:root[data-theme='cryogenics'] .login-portal {
+  border-color: var(--cryo-contour);
+  background: linear-gradient(180deg, #2e2e31, #242628);
+}
+
+:root[data-theme='cryogenics'] .login-screen__brand-primary {
+  color: var(--cryo-panel-text);
+}
+
+:root[data-theme='cryogenics'] .login-screen__brand-secondary {
+  color: color-mix(in srgb, var(--accent) 50%, rgb(var(--cryo-copper-rgb)) 50%);
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__brand-primary,
+:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__brand-secondary {
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  filter: none;
+  text-shadow: none;
+}
+
+:root[data-theme='ion_storm'] .login-portal__rim {
+  animation-duration: 22s;
+  opacity: 0.85;
+}
+
+:root[data-theme='ion_storm'] .login-portal__aura {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    rgba(56, 221, 240, 0.16) 0%,
+    rgba(150, 95, 205, 0.08) 42%,
+    transparent 70%
+  );
+}
+
+/* ——— Theme ambient backgrounds on login page ——— */
+
+:root[data-theme='fcc_classic'] .login-screen {
+  --login-steel-rgb: 140, 140, 140;
+  --login-shimmer-a: rgba(218, 130, 22, 0.12);
+  --login-shimmer-b: rgba(var(--login-steel-rgb), 0.14);
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg {
+  background: #141312;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg-layer--glow {
+  background: radial-gradient(
+    ellipse 64% 54% at 50% 40%,
+    rgba(var(--accent-rgb), 0.06) 0%,
+    rgba(var(--login-steel-rgb), 0.05) 50%,
+    transparent 76%
+  );
+  opacity: 0.55;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg-layer--drift {
+  background:
+    radial-gradient(circle at 22% 30%, rgba(218, 130, 22, 0.045) 0, transparent 34%),
+    radial-gradient(circle at 78% 62%, rgba(var(--login-steel-rgb), 0.06) 0, transparent 38%);
+  opacity: 0.2;
+}
+
+/* Dark Space — чёрный космос + звёздное поле (без перелива) */
+:root[data-theme='dark_space'] .login-screen__bg {
+  background: #000000;
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--shimmer,
+:root[data-theme='dark_space'] .login-screen__bg-layer--glow,
+:root[data-theme='dark_space'] .login-screen__bg-layer--drift {
+  display: none;
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--stars {
+  display: block;
+  animation: login-ds-stars-warp 22s linear infinite;
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--stars-b {
+  animation-delay: -11s;
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--stars-a {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 1) 0 2.4px, transparent 3.6px),
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.96) 0 2.2px, transparent 3.4px),
+    radial-gradient(circle at 78% 24%, rgba(210, 228, 255, 0.95) 0 2px, transparent 3.2px),
+    radial-gradient(circle at 14% 72%, rgba(255, 238, 215, 0.92) 0 1.9px, transparent 3px),
+    radial-gradient(circle at 84% 76%, rgba(230, 238, 255, 0.92) 0 1.9px, transparent 3px),
+    radial-gradient(circle at 36% 36%, rgba(255, 255, 255, 0.9) 0 1.8px, transparent 2.9px),
+    radial-gradient(circle at 64% 62%, rgba(190, 218, 255, 0.9) 0 1.8px, transparent 2.9px),
+    radial-gradient(circle at 30% 84%, rgba(255, 246, 232, 0.88) 0 1.7px, transparent 2.7px),
+    radial-gradient(circle at 70% 12%, rgba(255, 255, 255, 0.88) 0 1.7px, transparent 2.7px),
+    radial-gradient(circle at 44% 22%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
+    radial-gradient(circle at 56% 78%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
+    radial-gradient(circle at 18% 44%, rgba(215, 232, 255, 0.68) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 82% 48%, rgba(255, 255, 255, 0.68) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 26% 58%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 74% 38%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 50% 86%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 8% 30%, rgba(255, 255, 255, 0.56) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 92% 64%, rgba(255, 255, 255, 0.56) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 40% 8%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 60% 92%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 12% 90%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 32% 50%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px),
+    radial-gradient(circle at 68% 50%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px);
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--stars-b {
+  background-image:
+    radial-gradient(circle at 38% 12%, rgba(255, 255, 255, 1) 0 2.4px, transparent 3.6px),
+    radial-gradient(circle at 62% 88%, rgba(215, 232, 255, 0.96) 0 2.2px, transparent 3.4px),
+    radial-gradient(circle at 88% 42%, rgba(255, 236, 210, 0.95) 0 2px, transparent 3.2px),
+    radial-gradient(circle at 12% 58%, rgba(255, 255, 255, 0.92) 0 1.9px, transparent 3px),
+    radial-gradient(circle at 50% 30%, rgba(235, 244, 255, 0.92) 0 1.9px, transparent 3px),
+    radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.9) 0 1.8px, transparent 2.9px),
+    radial-gradient(circle at 74% 70%, rgba(255, 244, 228, 0.88) 0 1.8px, transparent 2.9px),
+    radial-gradient(circle at 26% 30%, rgba(195, 220, 255, 0.88) 0 1.8px, transparent 2.9px),
+    radial-gradient(circle at 70% 26%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
+    radial-gradient(circle at 30% 74%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
+    radial-gradient(circle at 54% 50%, rgba(220, 235, 255, 0.68) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 46% 50%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 18% 36%, rgba(255, 255, 255, 0.62) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 82% 64%, rgba(255, 255, 255, 0.62) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 6% 14%, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 94% 86%, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 24% 6%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 76% 94%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 88% 22%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 12% 78%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 62% 18%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px),
+    radial-gradient(circle at 38% 82%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px);
+}
+
+@keyframes login-ds-stars-warp {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+:root[data-theme='dark_space'] .login-screen__bg-layer--vignette {
+  opacity: 0.28;
+  background: radial-gradient(ellipse 82% 76% at 50% 48%, transparent 48%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+:root[data-theme='ion_storm'] .login-screen {
+  --login-shimmer-a: rgba(36, 140, 158, 0.1);
+  --login-shimmer-b: rgba(88, 58, 128, 0.11);
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg {
+  background: #080a14;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--shimmer {
+  animation-duration: 72s;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--glow {
+  background:
+    radial-gradient(ellipse 56% 46% at 30% 36%, rgba(36, 140, 158, 0.07) 0, transparent 74%),
+    radial-gradient(ellipse 50% 42% at 72% 58%, rgba(88, 58, 128, 0.06) 0, transparent 72%);
+  animation: login-bg-breathe 26s ease-in-out infinite, login-ion-aurora 42s ease-in-out infinite;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--drift {
+  background:
+    radial-gradient(ellipse 80% 60% at 40% 44%, rgba(36, 140, 158, 0.04) 0, transparent 68%),
+    radial-gradient(ellipse 70% 55% at 68% 56%, rgba(88, 58, 128, 0.035) 0, transparent 66%);
+  animation: login-bg-drift 52s ease-in-out infinite alternate;
+}
+
+@keyframes login-ion-aurora {
+  0%,
+  100% {
+    filter: hue-rotate(0deg) brightness(0.92);
+  }
+  50% {
+    filter: hue-rotate(8deg) brightness(0.98);
+  }
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--shimmer {
+  display: none;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg {
+  background: #120a06;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--glow {
+  background: radial-gradient(
+    ellipse 62% 50% at 50% 62%,
+    rgba(180, 72, 18, 0.08) 0%,
+    rgba(120, 48, 12, 0.04) 42%,
+    transparent 74%
+  );
+  opacity: 0.6;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--drift {
+  filter: blur(20px);
+  background:
+    radial-gradient(ellipse 70% 55% at 28% 38%, rgba(180, 72, 18, 0.045) 0, transparent 68%),
+    radial-gradient(ellipse 65% 50% at 72% 58%, rgba(120, 48, 12, 0.04) 0, transparent 66%);
+  opacity: 0.22;
+  animation: login-bg-drift 50s ease-in-out infinite alternate;
+}
+
+/* Cryogenics — море темы + снег, без перелива */
+:root[data-theme='cryogenics'] .login-screen__bg {
+  background: transparent;
+}
+
+:root[data-theme='cryogenics'] .login-screen__bg-layer--shimmer,
+:root[data-theme='cryogenics'] .login-screen__bg-layer--glow,
+:root[data-theme='cryogenics'] .login-screen__bg-layer--drift {
+  display: none;
+}
+
+:root[data-theme='cryogenics'] .login-screen__bg-layer--vignette {
+  opacity: 0.32;
+}
+
+/* ——— Login → servers handoff ——— */
+
+.fcc-workspace-stage--login-reveal {
+  min-height: 100vh;
+}
+
+.fcc-workspace-stage--login-reveal .fcc-workspace-view {
+  min-height: 100vh;
+}
+
+.login-screen.is-leaving .login-screen__bg {
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+
+.login-screen.is-leaving .login-screen__theme-slot {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.45s ease;
+}
+
+.login-screen.is-leaving .login-portal {
+  transform: scale(0.99);
+  transition:
+    transform 0.55s cubic-bezier(0.33, 0.02, 0.22, 1),
+    opacity 0.55s ease;
+}
+
+.login-screen.is-success .login-portal__gate .panel__title {
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-shadow: none;
+  transition: color 0.45s ease, letter-spacing 0.55s ease;
+}
+
+.login-screen.is-success .login-portal__cta,
+.login-screen.is-success .login-portal__input {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value,
+.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value--accent {
+  color: var(--online-green, var(--accent));
+}
+
+/* Углы при success — без вспышки */
+.login-portal:has(.login-screen__panel.is-success) > .login-screen__corner {
+  animation: none;
+}
+
+:root[data-theme='dark_space'] .login-portal .login-portal__telemetry.login-screen__hud,
+:root[data-theme='ion_storm'] .login-portal .login-portal__telemetry.login-screen__hud {
+  border-top-color: #1a3050 !important;
+  box-shadow: inset 0 1px 0 rgba(80, 160, 220, 0.05) !important;
+}
+
+:root[data-theme='dark_space'] .login-portal__telemetry-head,
+:root[data-theme='ion_storm'] .login-portal__telemetry-head {
+  border-bottom-color: #1a2838;
+  background: rgba(8, 10, 18, 0.28);
+}
+
+:root[data-theme='dark_space'] .login-portal__telemetry-slot + .login-portal__telemetry-slot,
+:root[data-theme='ion_storm'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.1);
+}
+
+:root[data-theme='dark_space'] .login-portal__telemetry-slot--status,
+:root[data-theme='ion_storm'] .login-portal__telemetry-slot--status {
+  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.16);
+}
+
+:root[data-theme='dark_space'] .login-portal__telemetry-label,
+:root[data-theme='ion_storm'] .login-portal__telemetry-label {
+  color: rgba(100, 140, 170, 0.75);
+}
+
+:root[data-theme='dark_space'] .login-portal__telemetry-value,
+:root[data-theme='ion_storm'] .login-portal__telemetry-value {
+  color: #dce8f0;
+  text-shadow: none;
+}
+
+:root[data-theme='fcc_classic'] .login-portal__telemetry-head {
+  background: color-mix(in srgb, var(--bg-widget) 22%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+:root[data-theme='vulcanus'] .login-portal .login-portal__telemetry.login-screen__hud {
+  border-top-color: color-mix(in srgb, var(--accent) 28%, var(--border) 72%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 140, 60, 0.06) !important;
+}
+
+:root[data-theme='vulcanus'] .login-portal__telemetry-head {
+  background: rgba(30, 26, 22, 0.35);
+  border-bottom-color: color-mix(in srgb, var(--accent) 18%, var(--border) 82%);
+}
+
+:root[data-theme='vulcanus'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--accent) 10%, var(--border) 90%);
+}
+
+:root[data-theme='cryogenics'] .login-portal .login-portal__telemetry.login-screen__hud {
+  border-top-color: var(--cryo-contour) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+:root[data-theme='cryogenics'] .login-portal__telemetry-head {
+  background: color-mix(in srgb, var(--bg-widget) 20%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--cryo-contour) 55%, transparent);
+}
+
+:root[data-theme='cryogenics'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--cryo-contour) 45%, transparent);
+}
+
+:root[data-theme='cryogenics'] .login-portal__telemetry-label {
+  color: var(--cryo-panel-muted);
+}
+
+:root[data-theme='cryogenics'] .login-portal__telemetry-value {
+  color: var(--cryo-panel-text);
+  text-shadow: none;
+}
+
+/* Сброс legacy app.css — HUD не отдельная карточка, а низ портала */
+:root[data-theme='dark_space'] .login-portal .login-portal__telemetry.login-screen__hud,
+:root[data-theme='ion_storm'] .login-portal .login-portal__telemetry.login-screen__hud,
+:root[data-theme='vulcanus'] .login-portal .login-portal__telemetry.login-screen__hud,
+:root[data-theme='cryogenics'] .login-portal .login-portal__telemetry.login-screen__hud,
+:root[data-theme='fcc_classic'] .login-portal .login-portal__telemetry.login-screen__hud {
+  background: transparent !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+@media (max-width: 520px) {
+  .login-portal {
+    border-radius: 14px;
+    width: min(100%, 100%);
+  }
+
+  .login-screen__brand-primary {
+    letter-spacing: 0.12em;
+    text-indent: 0.12em;
+    font-size: clamp(2.75rem, 11.5vw, 3.85rem);
+  }
+
+  .login-screen__brand-secondary {
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    font-size: clamp(1.02rem, 4.1vw, 1.22rem);
+  }
+
+  .login-portal__gate .panel__body {
+    padding-inline: 18px;
+  }
+
+  .login-portal__telemetry-head {
+    padding-inline: 10px;
+  }
+
+  .login-portal__brand {
+    padding: 20px 20px 12px;
+  }
+
+  .login-portal__telemetry-rail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-height: 52px;
+  }
+
+  .login-portal__telemetry-slot {
+    padding: 7px 4px 8px;
+    gap: 3px;
+  }
+
+  .login-portal__telemetry-head-tag {
+    font-size: 0.62rem;
+  }
+
+  .login-portal__telemetry-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+
+  .login-portal__telemetry-value {
+    font-size: 0.92rem;
+  }
+
+  .login-portal__telemetry-slot--status .login-screen__hud-value {
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-portal,
+  .login-portal__scan,
+  .login-portal__rim,
+  .login-theme-picker__menu,
+  .login-portal__cta-mark,
+  .login-portal__telemetry-slot--status .login-screen__hud-pulse,
+  .login-screen__bg-layer--shimmer,
+  .login-screen__bg-layer--glow,
+  .login-screen__bg-layer--drift,
+  .login-screen__bg-layer--stars,
+  .login-screen.is-leaving .login-screen__bg,
+  .login-screen.is-leaving .login-screen__theme-slot,
+  .login-screen.is-leaving .login-portal,
+  .login-screen.is-success .login-portal__gate .panel__title,
+  .login-screen.is-success .login-portal__cta,
+  .login-screen.is-success .login-portal__input {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  :root[data-theme='dark_space'] .login-screen__bg-layer--stars {
+    transform: scale(1);
+    opacity: 0.88;
+  }
+}

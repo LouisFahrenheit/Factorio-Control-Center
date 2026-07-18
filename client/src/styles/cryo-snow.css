@@ -1,0 +1,69 @@
+.cryo-snow-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Below #root (z-index: 1) — ambient snow stays on the backdrop. */
+  z-index: 0;
+}
+
+.cryo-snow-layer--ambient {
+  opacity: 0.45;
+}
+
+.cryo-snowflake {
+  position: absolute;
+  top: -5vh;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f4f8fc 0%, #dce8f4 45%, rgba(220, 232, 244, 0.4) 100%);
+  box-shadow: 0 0 8px rgba(220, 232, 244, 0.28);
+  will-change: transform, opacity;
+}
+
+:root[data-theme='cryogenics'] .login-screen {
+  position: relative;
+}
+
+.cryo-snow-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0.94;
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success .cryo-snow-canvas,
+:root[data-theme='cryogenics'] .login-screen.login-granted--cryogenics .cryo-snow-canvas {
+  z-index: 18;
+  opacity: 1;
+}
+
+/* Заморозка уже проиграна — при смене вкладок без повторной анимации */
+:root[data-theme='cryogenics'] .panel-shell.cryo-frozen.cryo-frozen-settled,
+:root[data-theme='cryogenics'] #instanceScreen.instance-screen.cryo-frozen.cryo-frozen-settled,
+:root[data-theme='cryogenics'] .status-bar--panel.cryo-frozen.cryo-frozen-settled,
+:root[data-theme='cryogenics'] .status-bar--instances.cryo-frozen.cryo-frozen-settled {
+  transition: none;
+}
+
+:root[data-theme='cryogenics'] .panel-shell.cryo-frozen.cryo-frozen-settled::before,
+:root[data-theme='cryogenics'] .panel-shell.cryo-frozen.cryo-frozen-settled::after,
+:root[data-theme='cryogenics'] #instanceScreen.instance-screen.cryo-frozen.cryo-frozen-settled::before,
+:root[data-theme='cryogenics'] #instanceScreen.instance-screen.cryo-frozen.cryo-frozen-settled::after,
+:root[data-theme='cryogenics'] .status-bar--panel.cryo-frozen.cryo-frozen-settled::before,
+:root[data-theme='cryogenics'] .status-bar--panel.cryo-frozen.cryo-frozen-settled::after,
+:root[data-theme='cryogenics'] .status-bar--instances.cryo-frozen.cryo-frozen-settled::before,
+:root[data-theme='cryogenics'] .status-bar--instances.cryo-frozen.cryo-frozen-settled::after {
+  transition: none;
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success .cryo-brand-snow-canvas {
+  opacity: 1 !important;
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__brand--melting .login-screen__brand-text {
+  filter: brightness(1.08);
+  text-shadow: 0 0 18px rgba(220, 232, 244, 0.35);
+}

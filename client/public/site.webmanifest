@@ -1,0 +1,37 @@
+{
+  "name": "Factorio Control Center",
+  "short_name": "FCC",
+  "description": "Self-hosted web panel for managing dedicated Factorio servers.",
+  "id": "/",
+  "start_url": "/mobile",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#211f1d",
+  "theme_color": "#da8216",
+  "icons": [
+    {
+      "src": "/brand/favicon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/favicon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}

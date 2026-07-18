@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Factorio Control Center</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/brand/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png" />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#da8216" />
+    <meta name="description" content="Self-hosted web panel for managing dedicated Factorio servers." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Factorio Control Center" />
+    <meta
+      property="og:description"
+      content="Self-hosted web panel for managing dedicated Factorio servers."
+    />
+    <meta property="og:image" content="/brand/favicon-512.png" />
+    <script>
+      (function () {
+        document.documentElement.classList.add('locale-booting');
+        try {
+          var userTheme = localStorage.getItem('fcc_user_theme');
+          var t = userTheme || 'fcc_classic';
+          if (
+            t !== 'fcc_classic' &&
+            t !== 'dark_space' &&
+            t !== 'vulcanus' &&
+            t !== 'ion_storm' &&
+            t !== 'cryogenics'
+          ) {
+            t = 'fcc_classic';
+          }
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'fcc_classic';
+        }
+        try {
+          var pref = localStorage.getItem('fcc_ui_scale') || 'auto';
+          var allowed = ['auto', '1', '1.25', '1.5', '1.75', '2'];
+          if (allowed.indexOf(pref) < 0) pref = 'auto';
+          var w = window.innerWidth || 0;
+          var h = window.innerHeight || 0;
+          var scale = 1;
+          if (pref === 'auto') {
+            // Keep in sync with UI_SCALE_AUTO_TIERS in src/theme/uiScaleCore.ts
+            var tiers = [
+              [3840, 2160, 2],
+              [3200, 1800, 1.75],
+              [2600, 1460, 1.5],
+              [2200, 1250, 1.25],
+            ];
+            for (var i = 0; i < tiers.length; i++) {
+              if (w >= tiers[i][0] && h >= tiers[i][1]) {
+                scale = tiers[i][2];
+                break;
+              }
+            }
+          } else {
+            scale = parseFloat(pref) || 1;
+          }
+          document.documentElement.dataset.uiScale = pref;
+          document.documentElement.style.setProperty('--ui-scale', String(scale));
+        } catch (e) {
+          document.documentElement.dataset.uiScale = 'auto';
+          document.documentElement.style.setProperty('--ui-scale', '1');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

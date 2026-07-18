@@ -1,0 +1,375 @@
+/* ——— Body FX during grant (Vulcanus) ——— */
+:root[data-theme='vulcanus'] body.vulcanus-login-granted::before {
+  animation: vulcanus-forge-ignite 1.35s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes vulcanus-forge-ignite {
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+  40% {
+    filter: brightness(1.14) saturate(1.12);
+  }
+  100% {
+    filter: brightness(1.04) saturate(1.04);
+  }
+}
+
+/* ——— Vulcanus: panel / HUD (veils already in app.css) ——— */
+:root[data-theme='vulcanus'] .login-screen__panel.is-success {
+  animation: login-grant-pulse-vulcan 1.25s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes login-grant-pulse-vulcan {
+  0% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 0 rgba(255, 106, 28, 0);
+    filter: brightness(1);
+  }
+  42% {
+    box-shadow:
+      0 14px 30px rgba(0, 0, 0, 0.55),
+      0 0 34px rgba(255, 106, 28, 0.38),
+      inset 0 0 16px rgba(255, 106, 28, 0.1);
+    filter: brightness(1.08);
+  }
+  100% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(255, 106, 28, 0.2);
+    filter: brightness(1.03);
+  }
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel.is-success .login-screen__corner {
+  animation: login-grant-corner-vulcan 1.15s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes login-grant-corner-vulcan {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  45% {
+    transform: scale(1.12);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 106, 28, 0.65));
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+    filter: none;
+  }
+}
+
+:root[data-theme='vulcanus'] .login-screen.is-success .login-screen__hud-pulse {
+  animation: login-pulse-grant-vulcan 1.05s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes login-pulse-grant-vulcan {
+  0% {
+    transform: scale(1);
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(255, 106, 28, 0.55);
+  }
+  48% {
+    transform: scale(1.55);
+    background: #ffc24a;
+    box-shadow: 0 0 24px rgba(255, 194, 74, 0.85);
+  }
+  100% {
+    transform: scale(1.14);
+    background: #ff8a28;
+    box-shadow: 0 0 16px rgba(255, 106, 28, 0.65);
+  }
+}
+
+/* ——— Classic: мягкий «online»-импульс ——— */
+:root[data-theme='fcc_classic'] .login-screen__panel.is-success {
+  animation: login-grant-pulse-classic 0.9s ease-out forwards;
+}
+
+@keyframes login-grant-pulse-classic {
+  0% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 0 rgba(var(--accent-rgb), 0);
+  }
+  38% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 28px rgba(var(--accent-rgb), 0.45);
+  }
+  100% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 14px rgba(var(--accent-rgb), 0.22);
+  }
+}
+
+:root[data-theme='fcc_classic'] .login-screen.is-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background: radial-gradient(ellipse 90% 60% at 50% 50%, rgba(var(--accent-rgb), 0.12) 0%, transparent 68%);
+  opacity: 0;
+  animation: login-classic-flash 1.05s ease-out forwards;
+}
+
+@keyframes login-classic-flash {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ——— Unique LEAVE transitions per theme ——— */
+
+:root[data-theme='dark_space'] .login-screen.login-leaving--dark_space {
+  opacity: 0;
+  transform: scale(1.08) translateY(-18px);
+  filter: brightness(1.45) saturate(0.82);
+  transition:
+    opacity 620ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    transform 620ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    filter 580ms cubic-bezier(0.33, 0.02, 0.22, 1);
+}
+
+:root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm {
+  opacity: 0;
+  transform: scale(0.91) translateY(6px);
+  filter: brightness(1.25) saturate(1.15);
+  transition:
+    opacity 720ms cubic-bezier(0.36, 0.08, 0.22, 1),
+    transform 720ms cubic-bezier(0.34, 0.06, 0.2, 1),
+    filter 680ms cubic-bezier(0.33, 0.06, 0.22, 1);
+}
+
+:root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus {
+  opacity: 0;
+  transform: scale(1.025) translateY(12px);
+  filter: blur(5px) sepia(0.22) brightness(0.86);
+  transition:
+    opacity 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    transform 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    filter 650ms cubic-bezier(0.33, 0.02, 0.22, 1);
+}
+
+:root[data-theme='fcc_classic'] .login-screen.login-leaving--classic {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 520ms ease, transform 520ms ease;
+}
+
+:root[data-theme='cryogenics'] .login-screen.login-leaving--cryogenics {
+  opacity: 0;
+  transform: scale(1.012) translateY(8px);
+  filter: blur(4px) brightness(1.14) saturate(0.9);
+  transition:
+    opacity 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    transform 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    filter 650ms cubic-bezier(0.33, 0.02, 0.22, 1);
+}
+
+/* ——— Cryogenics: оттепель (veils + panel; снег в cryo-snow.css) ——— */
+:root[data-theme='cryogenics'] .login-screen.is-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background:
+    radial-gradient(ellipse 115% 75% at 50% 108%, rgba(var(--cryo-copper-rgb), 0.28) 0%, transparent 58%),
+    radial-gradient(ellipse 85% 55% at 50% 38%, rgba(170, 196, 214, 0.14) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(238, 244, 250, 0.06) 0%, rgba(var(--cryo-copper-rgb), 0.08) 100%);
+  opacity: 0;
+  animation: cryo-login-defrost-veil 1.25s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(238, 244, 250, 0.35) 0, transparent 42%),
+    radial-gradient(circle at 78% 72%, rgba(220, 232, 244, 0.28) 0, transparent 38%),
+    radial-gradient(circle at 52% 24%, rgba(var(--cryo-copper-rgb), 0.12) 0, transparent 48%);
+  animation: cryo-login-steam-rise 1.15s cubic-bezier(0.34, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes cryo-login-defrost-veil {
+  0% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  65% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.32;
+    transform: scale(1);
+  }
+}
+
+@keyframes cryo-login-steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(1.03);
+  }
+}
+
+:root[data-theme='cryogenics'] .login-screen__panel.is-success {
+  animation: cryo-login-panel-thaw 1.25s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes cryo-login-panel-thaw {
+  0% {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.42), 0 0 0 rgba(var(--cryo-copper-rgb), 0);
+    filter: brightness(1) saturate(1);
+  }
+  35% {
+    box-shadow:
+      0 14px 30px rgba(0, 0, 0, 0.42),
+      0 0 32px rgba(var(--cryo-copper-rgb), 0.42),
+      inset 0 0 18px rgba(var(--cryo-copper-rgb), 0.12);
+    filter: brightness(1.1) saturate(1.08);
+  }
+  100% {
+    box-shadow:
+      0 14px 30px rgba(0, 0, 0, 0.42),
+      0 0 20px rgba(var(--cryo-copper-rgb), 0.22);
+    filter: brightness(1.04) saturate(1.02);
+  }
+}
+
+:root[data-theme='cryogenics'] .login-screen__panel.is-success .panel__title {
+  letter-spacing: 0.14em;
+  text-shadow:
+    0 0 12px rgba(var(--cryo-copper-rgb), 0.55),
+    0 0 24px rgba(var(--accent-rgb), 0.35);
+}
+
+:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__hud-pulse {
+  animation: cryo-login-hud-thaw 1.05s cubic-bezier(0.33, 0.06, 0.22, 1) forwards;
+}
+
+@keyframes cryo-login-hud-thaw {
+  0% {
+    transform: scale(1);
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+  }
+  45% {
+    transform: scale(1.65);
+    background: rgba(var(--cryo-copper-rgb), 1);
+    box-shadow: 0 0 22px rgba(var(--cryo-copper-rgb), 0.75);
+  }
+  100% {
+    transform: scale(1.12);
+    background: rgba(var(--cryo-copper-rgb), 0.92);
+    box-shadow: 0 0 14px rgba(var(--cryo-copper-rgb), 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vulcanus'] body.vulcanus-login-granted::before,
+  :root[data-theme='vulcanus'] .login-screen__panel.is-success,
+  :root[data-theme='vulcanus'] .login-screen__panel.is-success .login-screen__corner,
+  :root[data-theme='vulcanus'] .login-screen.is-success .login-screen__hud-pulse,
+  :root[data-theme='fcc_classic'] .login-screen__panel.is-success,
+  :root[data-theme='fcc_classic'] .login-screen.is-success::before,
+  :root[data-theme='dark_space'] .login-screen.login-leaving--dark_space,
+  :root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm,
+  :root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus,
+  :root[data-theme='fcc_classic'] .login-screen.login-leaving--classic,
+  :root[data-theme='cryogenics'] .login-screen.is-success::before,
+  :root[data-theme='cryogenics'] .login-screen.is-success::after,
+  :root[data-theme='cryogenics'] .login-screen__panel.is-success,
+  :root[data-theme='cryogenics'] .login-screen.is-success .login-screen__hud-pulse,
+  :root[data-theme='cryogenics'] .login-screen.login-leaving--cryogenics {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='vulcanus'] body.vulcanus-login-granted::before,
+:root[data-web-disable-effects='1'][data-theme='vulcanus'] .login-screen__panel.is-success,
+:root[data-web-disable-effects='1'][data-theme='vulcanus'] .login-screen__panel.is-success .login-screen__corner,
+:root[data-web-disable-effects='1'][data-theme='vulcanus'] .login-screen.is-success .login-screen__hud-pulse,
+:root[data-web-disable-effects='1'][data-theme='fcc_classic'] .login-screen__panel.is-success,
+:root[data-web-disable-effects='1'][data-theme='fcc_classic'] .login-screen.is-success::before,
+:root[data-web-disable-effects='1'][data-theme='dark_space'] .login-screen.login-leaving--dark_space,
+:root[data-web-disable-effects='1'][data-theme='ion_storm'] .login-screen.login-leaving--ion_storm,
+:root[data-web-disable-effects='1'][data-theme='vulcanus'] .login-screen.login-leaving--vulcanus,
+:root[data-web-disable-effects='1'][data-theme='fcc_classic'] .login-screen.login-leaving--classic,
+:root[data-web-disable-effects='1'][data-theme='cryogenics'] .login-screen.is-success::before,
+:root[data-web-disable-effects='1'][data-theme='cryogenics'] .login-screen.is-success::after,
+:root[data-web-disable-effects='1'][data-theme='cryogenics'] .login-screen__panel.is-success,
+:root[data-web-disable-effects='1'][data-theme='cryogenics'] .login-screen.is-success .login-screen__hud-pulse,
+:root[data-web-disable-effects='1'][data-theme='cryogenics'] .login-screen.login-leaving--cryogenics {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* ═══ Login: без вспышек (перекрывает app.css и правила выше) ═══ */
+
+.login-screen.is-success::before,
+.login-screen.is-success::after {
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+.login-screen__panel.is-success,
+.login-portal__gate.is-success {
+  animation: none !important;
+  filter: none !important;
+}
+
+.login-screen__panel.is-success .panel__title {
+  text-shadow: none !important;
+}
+
+.login-screen__panel.is-success .login-screen__corner,
+.login-portal:has(.login-screen__panel.is-success) > .login-screen__corner {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.login-screen.is-success .login-screen__hud-pulse {
+  animation: none !important;
+  transform: none !important;
+  background: var(--online-green, var(--accent)) !important;
+  box-shadow: 0 0 6px rgba(120, 200, 64, 0.4) !important;
+}
+
+:root[data-theme='dark_space'] .login-screen.login-leaving--dark_space,
+:root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm,
+:root[data-theme='cryogenics'] .login-screen.login-leaving--cryogenics,
+:root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus {
+  filter: none !important;
+}
+
+body.dark-space-warp-jump::before,
+body.dark-space-warp-jump::after,
+body.ion-storm-warp::before,
+body.ion-storm-warp::after,
+:root[data-theme='vulcanus'] body.vulcanus-login-granted::before {
+  animation: none !important;
+  filter: none !important;
+}
