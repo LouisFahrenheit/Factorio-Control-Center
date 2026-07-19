@@ -76,6 +76,16 @@
 
 ## Установка и запуск
 
+<p align="center">
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest">
+    <img src="docs/images/download_windows.svg" height="60" alt="Скачать для Windows">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest">
+    <img src="docs/images/download_linux.svg" height="60" alt="Скачать для Linux">
+  </a>
+</p>
+
 1. Скачайте релиз с GitHub Releases.
    - **Windows** — распакуйте, запустите **`Start.bat`**.
    - **Linux** — **Быстрый старт**:

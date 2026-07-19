@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80" role="img" aria-label="Download for Linux">
+  <defs>
+    <clipPath id="left-cell-linux">
+      <rect width="72" height="80" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Button background -->
+  <rect width="300" height="80" rx="6" fill="#282828"/>
+
+  <!-- Left icon cell -->
+  <rect width="72" height="80" fill="#1e1e1e" clip-path="url(#left-cell-linux)"/>
+
+  <!-- Divider -->
+  <line x1="72.5" y1="0" x2="72.5" y2="80" stroke="#3e3e3e" stroke-width="1"/>
+
+  <!-- Download icon, centered at (36, 40) — IDENTICAL to Windows badge -->
+  <g transform="translate(36,40)" stroke="#e8a640" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <line x1="0" y1="-14" x2="0" y2="1"/>
+    <polyline points="-7,-5 0,3 7,-5"/>
+    <path d="M-10,9 L-10,14 L10,14 L10,9"/>
+  </g>
+
+  <!-- Terminal icon, centered at (96, 40) -->
+  <!-- Window frame: 26x22px -->
+  <rect x="83" y="29" width="26" height="22" rx="2" fill="none" stroke="white" stroke-width="1.5"/>
+  <!-- Title bar separator -->
+  <line x1="83" y1="34.5" x2="109" y2="34.5" stroke="white" stroke-width="1"/>
+  <!-- Chevron prompt > -->
+  <polyline points="87,40 92,43.5 87,47" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Cursor _ -->
+  <line x1="94" y1="47" x2="100" y2="47" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- OS name -->
+  <text x="117" y="38" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="15" font-weight="700" fill="#cccccc">Linux</text>
+  <!-- File extension -->
+  <text x="117" y="54" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11" fill="#666666">.tar.gz</text>
+
+  <!-- Outer frame — drawn LAST so it renders on top of the icon cell -->
+  <rect x="0.75" y="0.75" width="298.5" height="78.5" rx="5.5" fill="none" stroke="#555555" stroke-width="1.5"/>
+</svg>

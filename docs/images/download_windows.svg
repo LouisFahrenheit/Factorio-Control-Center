@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80" role="img" aria-label="Download for Windows">
+  <defs>
+    <clipPath id="left-cell-win">
+      <rect width="72" height="80" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Button background -->
+  <rect width="300" height="80" rx="6" fill="#282828"/>
+
+  <!-- Left icon cell -->
+  <rect width="72" height="80" fill="#1e1e1e" clip-path="url(#left-cell-win)"/>
+
+  <!-- Divider -->
+  <line x1="72.5" y1="0" x2="72.5" y2="80" stroke="#3e3e3e" stroke-width="1"/>
+
+  <!-- Download icon, centered at (36, 40) -->
+  <g transform="translate(36,40)" stroke="#e8a640" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <line x1="0" y1="-14" x2="0" y2="1"/>
+    <polyline points="-7,-5 0,3 7,-5"/>
+    <path d="M-10,9 L-10,14 L10,14 L10,9"/>
+  </g>
+
+  <!-- Windows logo: 2×2 grid of 9×9 squares, 2px gap, centered at (94,40) -->
+  <rect x="84" y="30" width="9" height="9" fill="white"/>
+  <rect x="95" y="30" width="9" height="9" fill="white"/>
+  <rect x="84" y="41" width="9" height="9" fill="white"/>
+  <rect x="95" y="41" width="9" height="9" fill="white"/>
+
+  <!-- OS name -->
+  <text x="112" y="38" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="15" font-weight="700" fill="#cccccc">Windows</text>
+  <!-- File extension -->
+  <text x="112" y="54" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11" fill="#666666">.zip</text>
+
+  <!-- Outer frame — drawn LAST so it renders on top of the icon cell -->
+  <rect x="0.75" y="0.75" width="298.5" height="78.5" rx="5.5" fill="none" stroke="#555555" stroke-width="1.5"/>
+</svg>
