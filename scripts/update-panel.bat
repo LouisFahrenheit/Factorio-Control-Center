@@ -113,6 +113,7 @@ if not exist "%SRC%\dist\main.js" (
     exit /b 1
 )
 
+(
 echo Updating %FCC_DIR% ...
 robocopy "%SRC%" "%FCC_DIR%" /E /XD data logs /XF fcc-settings.ini /NFL /NDL /NJH /NJS /nc /ns /np
 if errorlevel 8 (
@@ -128,7 +129,7 @@ set "NPM_ERR=!ERRORLEVEL!"
 popd
 rmdir /s /q "%STAGING%" 2>nul
 
-if not "%NPM_ERR%"=="0" (
+if not "!NPM_ERR!"=="0" (
     echo ERROR: npm ci failed.
     exit /b 1
 )
@@ -137,7 +138,7 @@ set "NEW_VER=?"
 for /f "usebackq delims=" %%V in (`node "%SCRIPT_DIR%\read-app-version.mjs" 2^>nul`) do set "NEW_VER=%%V"
 
 echo.
-echo Update complete: %CURRENT_VER% -^> %NEW_VER%
+echo Update complete: %CURRENT_VER% -^> !NEW_VER!
 
 sc query "FactorioControlCenter" >nul 2>&1
 if errorlevel 1 (
@@ -151,3 +152,4 @@ if errorlevel 1 (
     echo Service start failed. Try Start.bat -^> 5. Start service or 1. Start panel.
 )
 exit /b 0
+)
