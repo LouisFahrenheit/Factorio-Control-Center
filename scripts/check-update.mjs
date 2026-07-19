@@ -16,13 +16,26 @@ async function checkUpdate() {
     return;
   }
 
+  function isNewer(latest, current) {
+    if (!latest || latest === current) return false;
+    const currentParts = current.split('.').map(Number);
+    const latestParts = latest.split('.').map(Number);
+    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+        const c = currentParts[i] || 0;
+        const l = latestParts[i] || 0;
+        if (l > c) return true;
+        if (l < c) return false;
+    }
+    return false;
+  }
+
   try {
     if (fs.existsSync(cachePath)) {
       try {
         const cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
         // 4 hours cache (14400000 ms)
         if (Date.now() - cache.timestamp < 14400000) {
-          if (cache.hasUpdate && cache.latestVersion !== currentVersion) {
+          if (cache.hasUpdate && isNewer(cache.latestVersion, currentVersion)) {
             console.log(`v${currentVersion} (Update available: v${cache.latestVersion})`);
           } else {
             console.log(`v${currentVersion}`);
@@ -60,21 +73,7 @@ async function checkUpdate() {
       latestVersion = latestVersion.slice(1);
     }
 
-    let hasUpdate = false;
-    if (latestVersion && latestVersion !== currentVersion) {
-        const currentParts = currentVersion.split('.').map(Number);
-        const latestParts = latestVersion.split('.').map(Number);
-        for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
-            const c = currentParts[i] || 0;
-            const l = latestParts[i] || 0;
-            if (l > c) {
-                hasUpdate = true;
-                break;
-            } else if (l < c) {
-                break;
-            }
-        }
-    }
+    let hasUpdate = isNewer(latestVersion, currentVersion);
 
     const dataDir = path.join(__dirname, '..', 'data');
     if (!fs.existsSync(dataDir)) {
