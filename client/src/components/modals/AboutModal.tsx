@@ -38,7 +38,20 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
           .then((data) => {
             if (data && data.tag_name) {
               const latest = data.tag_name.replace(/^v/, '');
-              if (latest !== currentVer) {
+              
+              const isNewer = (l: string, c: string) => {
+                const lParts = l.split('.').map(Number);
+                const cParts = c.split('.').map(Number);
+                for (let i = 0; i < Math.max(lParts.length, cParts.length); i++) {
+                  const lv = lParts[i] || 0;
+                  const cv = cParts[i] || 0;
+                  if (lv > cv) return true;
+                  if (lv < cv) return false;
+                }
+                return false;
+              };
+
+              if (isNewer(latest, currentVer)) {
                 setLatestVersion(latest);
               }
             }
@@ -70,18 +83,20 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
           </section>
 
           <div className="about-modal__stats">
-            <div className="about-modal__stat">
+            <div className="about-modal__stat" style={{ alignItems: 'center', textAlign: 'center' }}>
               <span className="about-modal__stat-label">{t('about_version_label')}</span>
               <span className="about-modal__stat-value" id="aboutVerLine">
-                {version}
-                {latestVersion && (
-                  <span style={{ marginLeft: '8px', color: 'var(--color-primary, #62c3f5)' }}>
-                    {t('about_update_available', latestVersion)}
-                  </span>
-                )}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span>{version}</span>
+                  {latestVersion && (
+                    <span style={{ color: 'var(--color-primary, #62c3f5)', fontSize: '0.9em', marginTop: '2px', textAlign: 'center' }}>
+                      {t('about_update_available', latestVersion)}
+                    </span>
+                  )}
+                </div>
               </span>
             </div>
-            <div className="about-modal__stat">
+            <div className="about-modal__stat" style={{ alignItems: 'center', textAlign: 'center' }}>
               <span className="about-modal__stat-label">{t('about_build_label')}</span>
               <span className="about-modal__stat-value about-modal__stat-value--muted" id="aboutBuildLine">
                 {build}
@@ -93,6 +108,7 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
               target="_blank"
               rel="noopener noreferrer"
               id="aboutGithubLink"
+              style={{ alignItems: 'center', textAlign: 'center' }}
             >
               <span className="about-modal__stat-label">{t('about_github')}</span>
               <span className="about-modal__stat-value">Factorio-Control-Center</span>
