@@ -21,7 +21,8 @@
 
 <p align="center">
   <a href="README.md"><img src="docs/images/badge_en.svg" alt="English"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a>
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a> &nbsp;
+  <img src="docs/images/badge_ai_ru.svg" alt="Использован ИИ">
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>

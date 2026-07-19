@@ -21,7 +21,8 @@ your PC or VPS — add servers and manage everything from one place.
 
 <p align="center">
   <a href="README.ru.md"><img src="docs/images/badge_ru.svg" alt="Русский"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a>
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a> &nbsp;
+  <img src="docs/images/badge_ai.svg" alt="AI Assisted">
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
