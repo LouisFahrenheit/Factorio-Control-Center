@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60" viewBox="0 0 240 60" role="img" aria-label="FCC Development">
+  <defs>
+    <clipPath id="left-cell-dev">
+      <rect width="60" height="60" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Button background -->
+  <rect width="240" height="60" rx="6" fill="#282828"/>
+
+  <!-- Left icon cell -->
+  <rect width="60" height="60" fill="#1e1e1e" clip-path="url(#left-cell-dev)"/>
+
+  <!-- Divider -->
+  <line x1="60.5" y1="0" x2="60.5" y2="60" stroke="#3e3e3e" stroke-width="1"/>
+
+  <!-- Code icon </>, centered at (30, 30) -->
+  <g transform="translate(30,30)" stroke="#e8a640" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polyline points="-4,-6 -10,0 -4,6" />
+    <polyline points="4,-6 10,0 4,6" />
+    <line x1="2" y1="-8" x2="-2" y2="8" />
+  </g>
+
+  <!-- Title -->
+  <text x="80" y="28" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="14" font-weight="700" fill="#cccccc">FCC</text>
+  <!-- Subtitle -->
+  <text x="80" y="44" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="12" fill="#888888">Development</text>
+
+  <!-- Outer frame -->
+  <rect x="0.75" y="0.75" width="238.5" height="58.5" rx="5.5" fill="none" stroke="#555555" stroke-width="1.5"/>
+</svg>

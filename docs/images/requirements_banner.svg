@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60" viewBox="0 0 240 60" role="img" aria-label="FCC Requirements">
+  <defs>
+    <clipPath id="left-cell-req">
+      <rect width="60" height="60" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Button background -->
+  <rect width="240" height="60" rx="6" fill="#282828"/>
+
+  <!-- Left icon cell -->
+  <rect width="60" height="60" fill="#1e1e1e" clip-path="url(#left-cell-req)"/>
+
+  <!-- Divider -->
+  <line x1="60.5" y1="0" x2="60.5" y2="60" stroke="#3e3e3e" stroke-width="1"/>
+
+  <!-- Clipboard / Requirements icon, centered at (30, 30) -->
+  <g transform="translate(30,30)" stroke="#e8a640" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Paper/board -->
+    <path d="M -4 -7 H -6 A 2 2 0 0 0 -8 -5 V 9 A 2 2 0 0 0 -6 11 H 6 A 2 2 0 0 0 8 9 V -5 A 2 2 0 0 0 6 -7 H 4" />
+    <!-- Clip -->
+    <rect x="-3" y="-9" width="6" height="4" rx="1" />
+    <!-- Checkmark -->
+    <polyline points="-3,3 0,6 5,-1" />
+  </g>
+
+  <!-- Title -->
+  <text x="80" y="28" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="14" font-weight="700" fill="#cccccc">FCC</text>
+  <!-- Subtitle -->
+  <text x="80" y="44" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="12" fill="#888888">Requirements</text>
+
+  <!-- Outer frame -->
+  <rect x="0.75" y="0.75" width="238.5" height="58.5" rx="5.5" fill="none" stroke="#555555" stroke-width="1.5"/>
+</svg>

@@ -12,7 +12,7 @@
 
 **English:** [README.md](README.md)
 
-## Возможности
+<h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
 
 **Сервер**
 
@@ -63,7 +63,7 @@
 - Русский и английский язык интерфейса
 - Несколько тем — все тёмные. Светлой не будет: без ламп и бетона это всё равно starter base
 
-## Требования
+<h2 id="requirements"><img src="docs/images/requirements_banner.svg" alt="FCC Requirements"></h2>
 
 - **ОС:** Windows 10+ или Linux (systemd)
 - **[Node.js 24+](https://nodejs.org/)**
@@ -74,7 +74,7 @@
   Глобальный токен**. Без них можно работать с вручную установленным
   сервером, но загрузки с портала и обновления из панели недоступны.
 
-## Установка и запуск
+<h2 id="install-and-run"><img src="docs/images/install_banner.svg" alt="FCC Install and run"></h2>
 
 <p align="center">
   <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip"><img src="docs/images/download_windows.svg" height="60" alt="Скачать для Windows"></a>
@@ -118,7 +118,7 @@ sudo loginctl enable-linger $USER
 
 Адрес для входа показывается в меню запуска.
 
-## Разработка
+<h2 id="development"><img src="docs/images/development_banner.svg" alt="FCC Development"></h2>
 
 Используйте **`StartDEV.bat`** или **`StartDEV.sh`** — dev/prod, сборка, pack release.
 

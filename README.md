@@ -14,7 +14,7 @@ your PC or VPS — add servers and manage everything from one place.
 
 **Translations:** [TRANSLATING.md](TRANSLATING.md)
 
-## Features
+<h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
 
 **Server**
 
@@ -65,7 +65,7 @@ your PC or VPS — add servers and manage everything from one place.
 - English and Russian UI
 - Several themes — all dark. No light mode; without lights and concrete, it's just a starter base anyway
 
-## Requirements
+<h2 id="requirements"><img src="docs/images/requirements_banner.svg" alt="FCC Requirements"></h2>
 
 - **OS:** Windows 10+ or Linux (systemd)
 - **[Node.js 24+](https://nodejs.org/)**
@@ -76,7 +76,7 @@ your PC or VPS — add servers and manage everything from one place.
   Without them you can still run a manually installed server, but portal downloads
   and in-panel updates will not work.
 
-## Install and run
+<h2 id="install-and-run"><img src="docs/images/install_banner.svg" alt="FCC Install and run"></h2>
 
 <p align="center">
   <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip"><img src="docs/images/download_windows.svg" height="60" alt="Download for Windows"></a>
@@ -121,7 +121,7 @@ sudo loginctl enable-linger $USER
 
 The start menu shows the URL to open.
 
-## Development
+<h2 id="development"><img src="docs/images/development_banner.svg" alt="FCC Development"></h2>
 
 Use **`StartDEV.bat`** or **`StartDEV.sh`** — dev/prod run, build, pack release.
 
