@@ -22,7 +22,7 @@ async function checkUpdate() {
         const cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
         // 4 hours cache (14400000 ms)
         if (Date.now() - cache.timestamp < 14400000) {
-          if (cache.hasUpdate) {
+          if (cache.hasUpdate && cache.latestVersion !== currentVersion) {
             console.log(`v${currentVersion} (Update available: v${cache.latestVersion})`);
           } else {
             console.log(`v${currentVersion}`);
