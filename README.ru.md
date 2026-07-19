@@ -1,4 +1,13 @@
-# Factorio Control Center
+<p align="center">
+  <img src="docs/images/logo.svg" alt="Factorio Control Center">
+</p>
+
+<p align="center">
+  <a href="#features"><img src="docs/images/menu_ru_features.svg" alt="Возможности"></a> &nbsp;
+  <a href="#requirements"><img src="docs/images/menu_ru_requirements.svg" alt="Требования"></a> &nbsp;
+  <a href="#install-and-run"><img src="docs/images/menu_ru_install.svg" alt="Установка и запуск"></a> &nbsp;
+  <a href="#development"><img src="docs/images/menu_ru_development.svg" alt="Разработка"></a>
+</p>
 
 Веб-панель для управления выделенными серверами Factorio в браузере. Ставится на
 ПК или VPS: добавляете серверы и управляете всем из одного места.
@@ -10,7 +19,10 @@
   <img src="docs/images/04_map_generator.png" width="49%">
 </p>
 
-**English:** [README.md](README.md)
+<p align="center">
+  <a href="README.md"><img src="docs/images/badge_en.svg" alt="English"></a> &nbsp;
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a>
+</p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
 

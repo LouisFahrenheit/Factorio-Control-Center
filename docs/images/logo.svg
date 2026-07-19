@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120" role="img" aria-label="FACTORIO CONTROL CENTER">
+  <!-- FACTORIO 3D Shadow -->
+  <text x="304" y="74" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="64" font-weight="900" fill="#180e02" letter-spacing="12">FACTORIO</text>
+  <text x="303" y="73" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="64" font-weight="900" fill="#180e02" letter-spacing="12">FACTORIO</text>
+  <text x="302" y="72" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="64" font-weight="900" fill="#180e02" letter-spacing="12">FACTORIO</text>
+  <text x="301" y="71" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="64" font-weight="900" fill="#180e02" letter-spacing="12">FACTORIO</text>
+  
+  <!-- FACTORIO Main -->
+  <text x="300" y="70" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="64" font-weight="900" fill="#da8216" letter-spacing="12">FACTORIO</text>
+
+  <!-- CONTROL CENTER 3D Shadow -->
+  <text x="302" y="106" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#180e02" letter-spacing="10">CONTROL CENTER</text>
+  <text x="301" y="105" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#180e02" letter-spacing="10">CONTROL CENTER</text>
+  
+  <!-- CONTROL CENTER Main -->
+  <text x="300" y="104" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#e0ddd8" letter-spacing="10">CONTROL CENTER</text>
+</svg>

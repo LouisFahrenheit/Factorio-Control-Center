@@ -1,6 +1,15 @@
-# Factorio Control Center
+<p align="center">
+  <img src="docs/images/logo.svg" alt="Factorio Control Center">
+</p>
 
-Web panel for managing Factorio dedicated servers in your browser. Install on
+<p align="center">
+  <a href="#features"><img src="docs/images/menu_features.svg" alt="Features"></a> &nbsp;
+  <a href="#requirements"><img src="docs/images/menu_requirements.svg" alt="Requirements"></a> &nbsp;
+  <a href="#install-and-run"><img src="docs/images/menu_install.svg" alt="Install and run"></a> &nbsp;
+  <a href="#development"><img src="docs/images/menu_development.svg" alt="Development"></a>
+</p>
+
+Web panel for managing Factorio dedicated servers. Install on
 your PC or VPS — add servers and manage everything from one place.
 
 <p align="center">
@@ -10,9 +19,10 @@ your PC or VPS — add servers and manage everything from one place.
   <img src="docs/images/04_map_generator.png" width="49%">
 </p>
 
-**Русский:** [README.ru.md](README.ru.md)
-
-**Translations:** [TRANSLATING.md](TRANSLATING.md)
+<p align="center">
+  <a href="README.ru.md"><img src="docs/images/badge_ru.svg" alt="Русский"></a> &nbsp;
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a>
+</p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
 
@@ -22,7 +32,7 @@ your PC or VPS — add servers and manage everything from one place.
 - Live server log and history
 - RCON console
 - Server updates via the official API
-- Multiple servers in one panel — not enough? Just make more
+- Multiple servers in one panel
 - Full automatic setup for a new server — just create or upload a save to get started
 - Protection against accidental updates
 
@@ -77,6 +87,7 @@ your PC or VPS — add servers and manage everything from one place.
   and in-panel updates will not work.
 
 <h2 id="install-and-run"><img src="docs/images/install_banner.svg" alt="FCC Install and run"></h2>
+
 
 <p align="center">
   <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip"><img src="docs/images/download_windows.svg" height="60" alt="Download for Windows"></a>

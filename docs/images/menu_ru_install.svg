@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="155" height="28" viewBox="0 0 155 28" role="img" aria-label="Установка и запуск">
+  <rect x="0.5" y="0.5" width="154" height="27" rx="13.5" fill="#1e1e1e" stroke="#3e3e3e" stroke-width="1"/>
+  <circle cx="14" cy="14" r="3" fill="#e8a640"/>
+  <text x="24" y="18" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="12" font-weight="600" fill="#cccccc">Установка и запуск</text>
+</svg>
