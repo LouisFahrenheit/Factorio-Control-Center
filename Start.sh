@@ -119,9 +119,13 @@ ensure_deps
 
 while true; do
   load_bind_port
+  UPDATE_MSG="$(node "$FCC_DIR/scripts/check-update.mjs" 2>/dev/null || true)"
+  if [[ -n "$UPDATE_MSG" ]]; then
+    UPDATE_MSG=" $UPDATE_MSG"
+  fi
   clear
   echo
-  echo " Factorio Control Center"
+  echo " Factorio Control Center${UPDATE_MSG}"
   echo " -----------------------"
   echo " Panel: ${PANEL_URL}"
   echo

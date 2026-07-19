@@ -25,9 +25,11 @@ call :detect_release
 call :ensure_deps
 
 :menu
+set "UPDATE_MSG="
+for /f "usebackq delims=" %%A in (`node "%FCC_DIR%\scripts\check-update.mjs" 2^>nul`) do set "UPDATE_MSG= %%A"
 cls
 echo.
-echo  Factorio Control Center
+echo  Factorio Control Center!UPDATE_MSG!
 echo.
 echo  1. Start panel
 echo  2. Stop panel

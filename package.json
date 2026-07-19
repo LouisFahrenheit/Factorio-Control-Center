@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/LouisFahrenheit/DEV-Main.git"
+    "url": "https://github.com/LouisFahrenheit/Factorio-Control-Center.git"
   },
   "scripts": {
     "build": "nest build",
@@ -39,7 +39,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/serve-static": "^5.0.5",
-    "adm-zip": "^0.5.17",
+    "adm-zip": "^0.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "ini": "^7.0.0",

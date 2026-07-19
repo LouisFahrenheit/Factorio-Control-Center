@@ -2,7 +2,7 @@
 # Apply a release archive over the current install (keeps data/, logs/, fcc-settings.ini).
 set -euo pipefail
 
-RELEASE_URL="https://github.com/LouisFahrenheit/DEV-Main/releases/latest/download/factorio-control-center-linux.tar.gz"
+RELEASE_URL="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FCC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
