@@ -19,13 +19,32 @@ interface AboutModalProps {
 export function AboutModal({ open, onClose, t }: AboutModalProps) {
   const [version, setVersion] = useState('—');
   const [build, setBuild] = useState('—');
+  const [latestVersion, setLatestVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setLatestVersion(null);
+      return;
+    }
     void fetchAppHealth().then((h) => {
-      setVersion(String(h?.version || '—'));
+      const currentVer = String(h?.version || '—');
+      setVersion(currentVer);
       const b = String(h?.build || '').trim();
       setBuild(b || '—');
+
+      if (currentVer !== '—' && currentVer !== '0.0.0') {
+        fetch('https://api.github.com/repos/LouisFahrenheit/Factorio-Control-Center/releases/latest')
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && data.tag_name) {
+              const latest = data.tag_name.replace(/^v/, '');
+              if (latest !== currentVer) {
+                setLatestVersion(latest);
+              }
+            }
+          })
+          .catch(() => {});
+      }
     });
   }, [open]);
 
@@ -55,6 +74,11 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
               <span className="about-modal__stat-label">{t('about_version_label')}</span>
               <span className="about-modal__stat-value" id="aboutVerLine">
                 {version}
+                {latestVersion && (
+                  <span style={{ marginLeft: '8px', color: 'var(--color-primary, #62c3f5)' }}>
+                    {t('about_update_available', latestVersion)}
+                  </span>
+                )}
               </span>
             </div>
             <div className="about-modal__stat">
@@ -65,13 +89,13 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
             </div>
             <a
               className="about-modal__stat about-modal__stat--link"
-              href="https://github.com/LouisFahrenheit"
+              href="https://github.com/LouisFahrenheit/Factorio-Control-Center"
               target="_blank"
               rel="noopener noreferrer"
               id="aboutGithubLink"
             >
               <span className="about-modal__stat-label">{t('about_github')}</span>
-              <span className="about-modal__stat-value">LouisFahrenheit</span>
+              <span className="about-modal__stat-value">Factorio-Control-Center</span>
             </a>
           </div>
 

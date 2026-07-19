@@ -933,6 +933,7 @@
   "confirm_delete_command": "Вы уверены, что хотите удалить команду \"{}\"?",
   "about_title": "О программе",
   "about_version_label": "Версия",
+  "about_update_available": "(Доступно: v{0})",
   "about_build_label": "Сборка",
   "about_credits_section": "Лицензии и атрибуция",
   "about_github": "GitHub",
