@@ -12,6 +12,23 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js not found. Installing Node.js 24..."
+  if command -v apt-get >/dev/null 2>&1; then
+    curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+    apt-get install -y nodejs
+  elif command -v dnf >/dev/null 2>&1; then
+    curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
+    dnf install -y nodejs
+  elif command -v yum >/dev/null 2>&1; then
+    curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
+    yum install -y nodejs
+  else
+    echo "ERROR: Unsupported package manager. Please install Node.js 24 manually."
+    exit 1
+  fi
+fi
+
 echo "1. Downloading latest release..."
 curl -fsSL -o /tmp/fcc.tar.gz "https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz"
 
