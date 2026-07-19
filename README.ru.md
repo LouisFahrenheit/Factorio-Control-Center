@@ -78,7 +78,11 @@
 
 1. Скачайте релиз с GitHub Releases.
    - **Windows** — распакуйте, запустите **`Start.bat`**.
-   - **Linux** — пример для `/opt`: скачайте `factorio-control-center-linux.tar.gz` в `/opt`, затем:
+   - **Linux** — **Быстрый старт**:
+     ```bash
+     bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
+     ```
+     Или ручная установка (пример для `/opt`): скачайте `factorio-control-center-linux.tar.gz` в `/opt`, затем:
 
      ```bash
      cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh

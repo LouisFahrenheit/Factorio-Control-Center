@@ -80,7 +80,11 @@ your PC or VPS — add servers and manage everything from one place.
 
 1. Download the release from GitHub Releases.
    - **Windows** — unpack and run **`Start.bat`**.
-   - **Linux** — example for `/opt`: download `factorio-control-center-linux.tar.gz` to `/opt`, then:
+   - **Linux** — **Quick start**:
+     ```bash
+     bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
+     ```
+     Or manual install: download `factorio-control-center-linux.tar.gz` to `/opt`, then:
 
      ```bash
      cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh
