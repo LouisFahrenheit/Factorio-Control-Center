@@ -214,6 +214,7 @@ function stageAppTree(destNest) {
     'read-bind-port.mjs',
     'read-app-version.mjs',
     'read-panel-log.mjs',
+    'check-update.mjs',
     'run-prod-service.bat',
     'run-prod-service.sh',
     'install-service.bat',
