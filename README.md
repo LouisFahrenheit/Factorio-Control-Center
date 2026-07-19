@@ -79,11 +79,11 @@ your PC or VPS — add servers and manage everything from one place.
 ## Install and run
 
 <p align="center">
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest">
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip">
     <img src="docs/images/download_windows.svg" height="60" alt="Download for Windows">
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest">
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz">
     <img src="docs/images/download_linux.svg" height="60" alt="Download for Linux">
   </a>
 </p>
