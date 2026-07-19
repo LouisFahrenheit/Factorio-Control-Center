@@ -93,7 +93,14 @@ your PC or VPS — add servers and manage everything from one place.
 2. In the menu — **1. Start panel**, open the URL from the output: `http://127.0.0.1/` on your PC, `http://server_IP/` on a VPS (port — shown in the menu).
 3. Log in: `admin` / `admin` — change the password right away.
 
-**Autostart** — option **3** in the menu. Windows: **`Start.bat` as Administrator**. Linux: user service (as **root** — system service). After a user install on Linux:
+### Autostart (Service Installation)
+
+You can configure the panel to start automatically when your system boots. In the main menu, select **3. Install service**. 
+
+- **Windows:** Run **`Start.bat` as Administrator** before installing the service.
+- **Linux:** If you run the panel as `root`, it installs a system-wide service. If you run it as a normal user, it installs a user service.
+
+**Note for Linux user services:** To ensure the panel starts at boot without requiring you to log in, enable lingering for your user:
 
 ```bash
 sudo loginctl enable-linger $USER
