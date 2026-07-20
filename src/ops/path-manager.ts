@@ -39,7 +39,7 @@ export class PathManager {
   listSaves(): { name: string; mtime: number }[] {
     if (!existsSync(this.savesDir)) return [];
     return readdirSync(this.savesDir)
-      .filter((f) => f.toLowerCase().endsWith('.zip'))
+      .filter((f) => f.toLowerCase().endsWith('.zip') && !f.toLowerCase().endsWith('.tmp.zip'))
       .map((name) => {
         const st = statSync(join(this.savesDir, name));
         return { name, mtime: st.mtimeMs };

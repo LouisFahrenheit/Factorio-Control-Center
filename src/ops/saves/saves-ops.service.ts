@@ -281,7 +281,7 @@ export class SavesOpsService {
     const files = require('fs').existsSync(savesDir)
       ? require('fs')
           .readdirSync(savesDir)
-          .filter((f: string) => f.toLowerCase().endsWith('.zip'))
+          .filter((f: string) => f.toLowerCase().endsWith('.zip') && !f.toLowerCase().endsWith('.tmp.zip'))
       : [];
     return (
       files
