@@ -480,7 +480,7 @@
   "modpack_rename_dialog_label": "Новое имя:",
   "modpack_rename_failed": "Не удалось переименовать модпак:\n{0}",
   "modpack_delete_confirm_title": "Удаление модпака",
-  "modpack_delete_confirm_msg": "Безвозвратно удалить модпак «{0}»?",
+  "modpack_delete_confirm_msg": "Удалить модпак «{0}»?\n\nВсе файлы модпака будут удалены",
   "modpack_delete_failed": "Не удалось удалить модпак:\n{0}",
   "modpack_reset_confirm_msg": "Сбросить папку mods?\n\nВсе установленные моды будут удалены\nФайл mod-settings.dat будет удалён\n\nПродолжить?",
   "modpack_reset_failed": "Не удалось выполнить сброс модов.",

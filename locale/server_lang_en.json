@@ -479,7 +479,7 @@
   "modpack_rename_dialog_label": "New name:",
   "modpack_rename_failed": "Failed to rename modpack:\n{0}",
   "modpack_delete_confirm_title": "Delete modpack",
-  "modpack_delete_confirm_msg": "Permanently delete modpack «{0}»?",
+  "modpack_delete_confirm_msg": "Delete modpack «{0}»?\n\nAll modpack files will be deleted",
   "modpack_delete_failed": "Failed to delete modpack:\n{0}",
   "modpack_reset_confirm_msg": "Reset the mods folder?\n\nAll installed mods will be deleted\nmod-settings.dat will be deleted\n\nContinue?",
   "modpack_reset_failed": "Failed to reset mods.",
