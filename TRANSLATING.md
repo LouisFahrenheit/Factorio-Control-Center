@@ -1,9 +1,6 @@
 # Translating Factorio Control Center
 
-Factorio has always grown through its community — players helping players across languages and time zones.
-Every new language makes it a little easier for someone else to run their servers in their own language.
-
-If you can help — a full translation, a few fixed lines, or corrections to what's already there — I'd be truly grateful. Thank you.
+If you can help - a full translation, a few fixed lines, or corrections to what's already there - I'd be truly grateful. Thank you.
 The factory must grow.
 
 ---
@@ -15,10 +12,10 @@ English is the reference; every other file must have **exactly the same keys**.
 
 | Code | Language | UI file | Commands file | Status |
 |------|----------|---------|---------------|--------|
-| `en` | English | `server_lang_en.json` | `server_commands_en.json` | Reference — do not translate |
-| `ru` | Russian | `server_lang_ru.json` | `server_commands_ru.json` | **Complete** — shipped |
+| `en` | English | `server_lang_en.json` | `server_commands_en.json` | Reference - do not translate |
+| `ru` | Russian | `server_lang_ru.json` | `server_commands_ru.json` | **Complete** - shipped |
 
-For **`de`, `fr`, `es`, `ja`, `zh`, `pl`, `pt-br`, `uk`, `ko`, `it`, `cs`, `tr`, `nl`**: add `locale/server_lang_XX.json` and translate — that's all. The language menu already has names for these codes. **No code changes.**
+For **`de`, `fr`, `es`, `ja`, `zh`, `pl`, `pt-br`, `uk`, `ko`, `it`, `cs`, `tr`, `nl`**: add `locale/server_lang_XX.json` and translate - that's all. The language menu already has names for these codes. **No code changes.**
 
 Your language not listed? Open an issue or PR to request a picker label (`lang_name_*`).
 
@@ -32,7 +29,7 @@ Your language not listed? Open an issue or PR to request a picker label (`lang_n
    locale/server_lang_en.json  →  locale/server_lang_XX.json
    ```
 
-2. Translate **values only** — keep every **key** identical to English.
+2. Translate **values only** - keep every **key** identical to English.
 
 3. Verify locally:
 
@@ -53,7 +50,7 @@ The panel merges `server_commands.json` with `server_commands_<code>.json` for t
 ### Translate command text
 
 1. Copy `server_commands_en.json` → `server_commands_XX.json`.
-2. Translate **values** in `categories` and `commands` — keep every **key** (category id, command id) identical.
+2. Translate **values** in `categories` and `commands` - keep every **key** (category id, command id) identical.
 3. Do **not** edit RCON templates in `server_commands.json` unless you are changing the commands themselves.
 
 ### Add a new preset command
@@ -80,11 +77,11 @@ You can propose new built-in RCON presets (not only translations).
    }
    ```
 
-   - `id` — unique snake_case key
-   - `command` — RCON template; placeholders: `{player}`, `{value}`, `{boolean}`, `{item}`, `{count}`, `{quality}`
-   - flags — only what the UI needs: `has_player`, `has_value`, `has_boolean`, `has_item`, `has_count`, `has_quality`; optional `default_value` (and `items` map for item pickers)
+   - `id` - unique snake_case key
+   - `command` - RCON template; placeholders: `{player}`, `{value}`, `{boolean}`, `{item}`, `{count}`, `{quality}`
+   - flags - only what the UI needs: `has_player`, `has_value`, `has_boolean`, `has_item`, `has_count`, `has_quality`; optional `default_value` (and `items` map for item pickers)
 
-2. In `server_commands_en.json`, add `name` and `description` under `commands` for that same `id` (required). Other `server_commands_XX.json` files are optional — missing locales fall back to English.
+2. In `server_commands_en.json`, add `name` and `description` under `commands` for that same `id` (required). Other `server_commands_XX.json` files are optional - missing locales fall back to English.
 
 3. Open a pull request, or send the files to the maintainer, with a short note on what the command does and when admins would use it.
 
@@ -105,7 +102,7 @@ You can propose new built-in RCON presets (not only translations).
 | `api_error_*` | Generic API error codes |
 | `web_error_*` | Network / panel connectivity errors |
 
-**Placeholders** — keep the same style as in English; do not convert between them.
+**Placeholders** - keep the same style as in English; do not convert between them.
 
 | Syntax | Usage |
 |--------|-------|
@@ -125,7 +122,7 @@ You can propose new built-in RCON presets (not only translations).
 
 ## Tips for translators
 
-- Keep UI labels concise — many appear in narrow table columns.
+- Keep UI labels concise - many appear in narrow table columns.
 - Preserve `\n` line breaks where present; they are intentional in dialogs and errors.
 - Do **not** translate product names: **Factorio**, **FCC**, **RCON**, **Space Age**, file extensions (`.fcc`).
 - Quoted game/mod names in messages stay as `{0}` placeholders.
