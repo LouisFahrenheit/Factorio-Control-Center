@@ -40,7 +40,7 @@ your PC or VPS - add servers and manage everything from one place.
 **Saves**
 
 - Save management: list, upload, download, delete, rename, copy
-- Built-in map generator with all in-game settings
+- Built-in map generator with all in-game settings (vanila and Space Age)
 - `.fcc` presets - save generator settings, export a file, and share it
 
 **Mods**
@@ -51,7 +51,7 @@ your PC or VPS - add servers and manage everything from one place.
 - Import mods from a save
 - Automatic dependency resolution
 - Built-in mod settings editor
-- `.fcc` modpacks - export, share, and import on another panel; mods download from the portal; you can also copy the modpack folder directly
+- `.fcc` modpacks - export, share, and import on another panel (you can also copy the modpack folder directly)
 - Symlink support for modpacks
 
 **Players and moderation**
