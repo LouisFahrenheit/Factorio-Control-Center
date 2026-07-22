@@ -1,4 +1,4 @@
-import { createElement, type ReactNode } from 'react';
+import { createElement, useState, type ReactNode } from 'react';
 import { modals } from '@mantine/modals';
 import { AppIcon } from '../components/AppIcon';
 import { ModDependenciesConfirmBody } from '../components/modals/ModDependenciesConfirmBody';
@@ -20,6 +20,7 @@ type ModDepsModalOptions = {
   confirmLabel?: string;
   cancelLabel?: string;
   conflicts?: ModInstallConflictInfo[];
+  recommended?: string[];
 };
 
 function normalizeNames(names: string[]): string[] {
@@ -114,83 +115,132 @@ function modalTitle(title: string, hasConflicts: boolean): ReactNode {
   );
 }
 
+function ModDepsModalWrapper({
+  copy,
+  list,
+  conflictList,
+  recommendedList,
+  buttons,
+  finish,
+  t,
+}: {
+  copy: ReturnType<typeof variantCopy>;
+  list: string[];
+  conflictList: ModInstallConflictInfo[];
+  recommendedList: string[];
+  buttons: ModDepsButton[];
+  finish: (value: string | null, recommended: string[]) => void;
+  t: TFunc;
+}) {
+  const [selectedRecommended, setSelectedRecommended] = useState<Set<string>>(new Set());
+
+  const toggleRecommended = (name: string) => {
+    setSelectedRecommended((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+
+  return createElement(
+    'div',
+    { className: 'mod-deps-confirm__shell' },
+    createElement(ModDependenciesConfirmBody, {
+      intro: copy.intro,
+      outro: copy.outro,
+      deps: list,
+      countLabel: t('mod_deps_confirm_count', list.length),
+      conflicts: conflictList,
+      conflictsIntro: copy.conflictsIntro,
+      conflictsCountLabel: conflictList.length ? t('mod_list_conflicts_count', conflictList.length) : '',
+      conflictTagLabel: t('mod_list_conflict_tag'),
+      conflictBuiltinLabel: t('mod_list_conflict_builtin'),
+      recommended: recommendedList,
+      recommendedSelection: selectedRecommended,
+      onToggleRecommended: toggleRecommended,
+      recommendedIntro: t('mod_list_recommended_intro'),
+      recommendedCountLabel: recommendedList.length ? t('mod_list_recommended_count', recommendedList.length) : '',
+    }),
+    createElement(
+      'div',
+      { className: 'mod-deps-confirm__footer' },
+      ...buttons.map((b) =>
+        createElement(
+          'button',
+          {
+            key: b.value,
+            type: 'button',
+            className: 'btn' + (b.primary ? ' btn--primary' : ''),
+            onClick: () => finish(b.value, Array.from(selectedRecommended)),
+          },
+          b.text,
+        ),
+      ),
+    ),
+  );
+}
+
 function openDepsModal(
   deps: string[],
   conflicts: ModInstallConflictInfo[],
+  recommended: string[],
   variant: ModDepsConfirmVariant,
   t: TFunc,
   buttons: ModDepsButton[],
-): Promise<string | null> {
+): Promise<{ value: string | null; checkedRecommended: string[] }> {
   const list = normalizeNames(deps);
   const conflictList = normalizeConflicts(conflicts);
-  if (!list.length && !conflictList.length) {
-    return Promise.resolve(buttons.find((b) => b.primary)?.value ?? buttons[0]?.value ?? null);
+  const recommendedList = normalizeNames(recommended);
+  if (!list.length && !conflictList.length && !recommendedList.length) {
+    return Promise.resolve({
+      value: buttons.find((b) => b.primary)?.value ?? buttons[0]?.value ?? null,
+      checkedRecommended: [],
+    });
   }
 
   const copy = variantCopy(variant, t);
-  const title =
-    conflictList.length && !list.length ? t('mod_list_conflicts_title') : copy.title;
+    const title =
+      conflictList.length && !list.length && !recommendedList.length ? t('mod_list_conflicts_title') : copy.title;
 
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = (value: string | null) => {
-      if (settled) return;
-      settled = true;
-      modals.closeAll();
-      resolve(value);
-    };
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value: string | null, checkedRecommended: string[] = []) => {
+        if (settled) return;
+        settled = true;
+        modals.closeAll();
+        resolve({ value, checkedRecommended });
+      };
 
-    modals.open({
-      title: modalTitle(title, conflictList.length > 0),
-      centered: true,
-      size: 'lg',
-      classNames: {
-        content: 'fcc-modal fcc-modal--mod-deps',
-        header: 'mod-deps-confirm__modal-header',
-        body: 'mod-deps-confirm__modal-body',
-      },
-      children: createElement(
-        'div',
-        { className: 'mod-deps-confirm__shell' },
-        createElement(ModDependenciesConfirmBody, {
-          intro: copy.intro,
-          outro: copy.outro,
-          deps: list,
-          countLabel: t('mod_deps_confirm_count', list.length),
-          conflicts: conflictList,
-          conflictsIntro: copy.conflictsIntro,
-          conflictsCountLabel: conflictList.length ? t('mod_list_conflicts_count', conflictList.length) : '',
-          conflictTagLabel: t('mod_list_conflict_tag'),
-          conflictBuiltinLabel: t('mod_list_conflict_builtin'),
+      modals.open({
+        title: modalTitle(title, conflictList.length > 0),
+        centered: true,
+        size: 'lg',
+        classNames: {
+          content: 'fcc-modal fcc-modal--mod-deps',
+          header: 'mod-deps-confirm__modal-header',
+          body: 'mod-deps-confirm__modal-body',
+        },
+        children: createElement(ModDepsModalWrapper, {
+          copy,
+          list,
+          conflictList,
+          recommendedList,
+          buttons,
+          finish,
+          t,
         }),
-        createElement(
-          'div',
-          { className: 'mod-deps-confirm__footer' },
-          ...buttons.map((b) =>
-            createElement(
-              'button',
-              {
-                key: b.value,
-                type: 'button',
-                className: 'btn' + (b.primary ? ' btn--primary' : ''),
-                onClick: () => finish(b.value),
-              },
-              b.text,
-            ),
-          ),
-        ),
-      ),
-      onClose: () => finish(null),
+        onClose: () => finish(null, []),
+      });
     });
-  });
-}
+  }
 
 export async function modDepsConfirm(
   deps: string[],
   variant: ModDepsConfirmVariant,
   t: TFunc,
   options?: ModDepsModalOptions,
-): Promise<boolean> {
+): Promise<{ confirmed: boolean; recommendedToInstall?: string[] }> {
   const confirmLabel =
     options?.confirmLabel ??
     (variant === 'install'
@@ -200,11 +250,12 @@ export async function modDepsConfirm(
         : t('ok'));
   const cancelLabel = options?.cancelLabel ?? t('cancel');
   const conflicts = options?.conflicts ?? [];
-  const value = await openDepsModal(deps, conflicts, variant, t, [
+  const recommended = options?.recommended ?? [];
+  const { value, checkedRecommended } = await openDepsModal(deps, conflicts, recommended, variant, t, [
     { text: cancelLabel, value: 'cancel' },
     { text: confirmLabel, value: 'confirm', primary: true },
   ]);
-  return value === 'confirm';
+  return { confirmed: value === 'confirm', recommendedToInstall: checkedRecommended };
 }
 
 export async function modDepsUploadChoice(
@@ -212,7 +263,7 @@ export async function modDepsUploadChoice(
   t: TFunc,
   conflicts: ModInstallConflictInfo[] = [],
 ): Promise<ModDepsUploadChoice> {
-  const value = await openDepsModal(deps, conflicts, 'upload', t, [
+  const { value } = await openDepsModal(deps, conflicts, [], 'upload', t, [
     { text: t('cancel'), value: 'cancel' },
     { text: t('mod_list_upload_missing_deps_install_as_is_btn'), value: 'as_is' },
     { text: t('mod_list_upload_missing_deps_download_btn'), value: 'download', primary: true },

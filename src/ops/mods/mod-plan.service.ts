@@ -11,6 +11,7 @@ import { ModPortalService } from '../mod-portal/mod-portal.service';
 import {
   normalizeModListName,
   portalDependencyNames,
+  portalRecommendedDependencyNames,
   releaseConflictNames,
   releaseRequiresSpaceAge,
   disableModListEntriesByName,
@@ -45,6 +46,7 @@ export interface ModInstallPlanResult {
   conflicts_to_disable: string[];
   requires_conflict_confirmation: boolean;
   install_conflicts: ModInstallConflictInfo[];
+  recommended?: string[];
 }
 
 export interface ModPlanLogHooks {
@@ -189,6 +191,7 @@ export class ModPlanService {
       { name: string; is_builtin: boolean }
     >();
     const installTree = new Set<string>();
+    const recommendedMods = new Set<string>();
 
     const noteConflict = (raw: string): void => {
       const name = String(raw || '').trim();
@@ -247,6 +250,14 @@ export class ModPlanService {
         const r = await walk(d);
         if (!r.ok) return r;
       }
+      for (const dep of portalRecommendedDependencyNames(pv.release)) {
+        const d = String(dep || '').trim();
+        if (!d || this.portal.isBuiltin(d)) continue;
+        const isInstalled = installedModVersions(pm.modsDir, d).length > 0;
+        if (!isInstalled && !seen.has(d) && !installTree.has(normalizeModListName(d))) {
+          recommendedMods.add(d);
+        }
+      }
       return { ok: true };
     };
 
@@ -280,6 +291,9 @@ export class ModPlanService {
       conflicts_to_disable: conflictsToDisable,
       requires_conflict_confirmation: conflictsToDisable.length > 0,
       install_conflicts: installConflicts,
+      recommended: Array.from(recommendedMods).sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: 'base' }),
+      ),
     };
   }
 

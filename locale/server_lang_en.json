@@ -410,6 +410,8 @@
   "mod_list_conflicts_count": "{0} mods",
   "mod_list_conflict_tag": "Conflict",
   "mod_list_conflict_builtin": "built-in",
+  "mod_list_recommended_intro": "Recommended optional dependencies (check to install):",
+  "mod_list_recommended_count": "{0} recommended mod(s)",
   "mod_job_log_conflicts_disabled": "Disabled conflicting mods: {0}",
   "modpack_tab_modpacks": "Modpacks",
   "modpack_section_title": "Mod modpacks",

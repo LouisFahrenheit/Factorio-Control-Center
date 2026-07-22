@@ -411,6 +411,8 @@
   "mod_list_conflicts_count": "{0} модов",
   "mod_list_conflict_tag": "Конфликт",
   "mod_list_conflict_builtin": "встроенный",
+  "mod_list_recommended_intro": "Рекомендованные опциональные зависимости (отметьте для загрузки):",
+  "mod_list_recommended_count": "{0} рекомендованных модов",
   "mod_job_log_conflicts_disabled": "Отключены конфликтующие моды: {0}",
   "modpack_tab_modpacks": "Модпаки",
   "modpack_section_title": "Модпаки",

@@ -37,6 +37,7 @@ export interface ModInstallPlan {
   conflicts_to_disable?: string[];
   requires_conflict_confirmation?: boolean;
   install_conflicts?: ModInstallConflictInfo[];
+  recommended?: string[];
 }
 
 export interface ModCheckResultEntry {

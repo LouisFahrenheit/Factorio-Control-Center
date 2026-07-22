@@ -397,7 +397,13 @@ export function useMods(
       }
       const deps = Array.isArray(plan?.dependencies) ? plan.dependencies : [];
       const conflicts = installConflictsFromPlan(plan);
-      if ((deps.length || conflicts.length) && !(await modDepsConfirm(deps, 'install', t, { conflicts }))) return;
+      const recommended = Array.isArray(plan?.recommended) ? plan.recommended : [];
+      let checkedRecommended: string[] = [];
+      if (deps.length || conflicts.length || recommended.length) {
+        const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended });
+        if (!res.confirmed) return;
+        checkedRecommended = res.recommendedToInstall || [];
+      }
       let allowRg = false;
       if (plan?.requires_game_update_confirmation) {
         const flow = await openModGameVersionConfirm(t, {
@@ -409,11 +415,19 @@ export function useMods(
         allowRg = flow.allow_requires_game_update;
       }
       setInstallInput('');
-      await modJob.start('/api/mods/job/start-install', {
-        mod,
-        remove_old_zips: removeOldZips,
-        allow_requires_game_update: allowRg,
-      });
+      if (checkedRecommended.length > 0) {
+        await modJob.start('/api/mods/job/start-install-save', {
+          mods: [mod, ...checkedRecommended],
+          remove_old_zips: removeOldZips,
+          allow_requires_game_update: allowRg,
+        });
+      } else {
+        await modJob.start('/api/mods/job/start-install', {
+          mod,
+          remove_old_zips: removeOldZips,
+          allow_requires_game_update: allowRg,
+        });
+      }
     } catch (e) {
       setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
     }
@@ -700,10 +714,10 @@ export function useMods(
             .map((x) => String(x?.name || '').trim())
             .filter(Boolean);
           const conflicts = installConflictsFromPlan(plan);
-          if (!(await modDepsConfirm(depNames, 'update', t, { conflicts }))) return;
+          if (!(await modDepsConfirm(depNames, 'update', t, { conflicts })).confirmed) return;
         } else {
           const conflicts = installConflictsFromPlan(plan);
-          if (conflicts.length && !(await modDepsConfirm([], 'update', t, { conflicts }))) return;
+          if (conflicts.length && !(await modDepsConfirm([], 'update', t, { conflicts })).confirmed) return;
         }
         let allowRg = false;
         if (plan?.requires_game_update_confirmation) {

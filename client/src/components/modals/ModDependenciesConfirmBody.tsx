@@ -11,6 +11,11 @@ export interface ModDependenciesConfirmBodyProps {
   conflictsCountLabel?: string;
   conflictTagLabel?: string;
   conflictBuiltinLabel?: string;
+  recommended?: string[];
+  recommendedSelection?: Set<string>;
+  onToggleRecommended?: (name: string) => void;
+  recommendedIntro?: string;
+  recommendedCountLabel?: string;
 }
 
 export function ModDependenciesConfirmBody({
@@ -23,6 +28,11 @@ export function ModDependenciesConfirmBody({
   conflictsCountLabel,
   conflictTagLabel = 'Conflict',
   conflictBuiltinLabel = 'Built-in',
+  recommended,
+  recommendedSelection,
+  onToggleRecommended,
+  recommendedIntro,
+  recommendedCountLabel,
 }: ModDependenciesConfirmBodyProps) {
   const hasDeps = deps.length > 0;
   const hasConflicts = conflicts.length > 0;
@@ -88,6 +98,35 @@ export function ModDependenciesConfirmBody({
                       <span className="mod-deps-confirm__conflict-builtin">({conflictBuiltinLabel})</span>
                     ) : null}
                   </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+
+      {recommended && recommended.length > 0 ? (
+        <div className={'mod-deps-confirm__recommended' + (hasDeps || hasConflicts ? ' mod-deps-confirm__conflicts--split' : '')}>
+          {recommendedIntro ? <p className="mod-deps-confirm__conflicts-intro">{recommendedIntro}</p> : null}
+          {recommendedCountLabel ? (
+            <div className="mod-deps-confirm__meta">
+              <span className="mod-deps-confirm__count">
+                <AppIcon name="add_link" size={15} className="mod-deps-confirm__count-icon" />
+                {recommendedCountLabel}
+              </span>
+            </div>
+          ) : null}
+          <div className="mod-deps-confirm__list-wrap">
+            <ul className="mod-deps-confirm__list" role="list" style={{ padding: 0, listStyle: 'none' }}>
+              {recommended.map((name) => (
+                <li key={name} className="mod-deps-confirm__item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={recommendedSelection?.has(name)}
+                    onChange={() => onToggleRecommended?.(name)}
+                    style={{ margin: 0, cursor: 'pointer' }}
+                  />
+                  <span className="mod-deps-confirm__name" style={{ cursor: 'default' }}>{name}</span>
                 </li>
               ))}
             </ul>
