@@ -1154,7 +1154,7 @@
   "saves_manager_rename_invalid": "Invalid file name.",
   "saves_manager_rename_exists": "A file named \"{0}\" already exists.",
   "saves_manager_rename_failed": "Failed to rename save:\n{0}",
-  "saves_manager_delete_confirm": "Permanently delete \"{0}\"?",
+  "saves_manager_delete_confirm": "Delete save “{0}”?\n\nSave file will be permanently deleted",
   "saves_manager_launch_set": "Startup save selected {0}",
   "web_error_failed_fetch": "Could not connect to the panel.\nCheck that the server is running and reachable.",
   "web_error_load_failed": "Could not load data from the panel.\nCheck that the web panel is running.",

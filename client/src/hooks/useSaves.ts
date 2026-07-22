@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCreateSave } from './useCreateSave';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { modals } from '@mantine/modals';
+
 import { api, getToken } from '../api/client';
 import {
   buildSaveModCompareRows,
@@ -16,6 +16,7 @@ import {
 } from '../lib/saveUtils';
 import { randomMapSeed } from '../lib/mapGen/sliderScale';
 import { feedbackMsg } from '../lib/apiFeedback';
+import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { resolveStatusKind, type PanelStatus } from '../types/panel';
 
 export function useSaves(
@@ -201,11 +202,12 @@ export function useSaves(
 
   const remove = useCallback(
     async (name: string) => {
-      modals.openConfirmModal({
+      openFccConfirmModal({
         title: t('saves_manager_delete'),
-        children: t('saves_manager_delete_confirm', name),
-        labels: { confirm: t('saves_manager_delete'), cancel: t('cancel') },
-        confirmProps: { className: 'btn btn--danger' },
+        message: t('saves_manager_delete_confirm', name),
+        confirmLabel: t('saves_manager_delete'),
+        cancelLabel: t('cancel'),
+        variant: 'danger',
         onConfirm: async () => {
           await api(`/api/saves/${encodeURIComponent(name)}`, { method: 'DELETE' });
           await reload();
