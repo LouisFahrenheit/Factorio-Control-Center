@@ -15,6 +15,7 @@ import { openModGameVersionConfirm } from '../lib/modGameVersionConfirm';
 import { modDepsConfirm, modDepsUploadChoice } from '../lib/modDepsConfirm';
 import { openModUpdateAllFlow } from '../lib/modUpdateAllFlow';
 import { installConflictsFromPlan, mergeInstallConflicts } from '../lib/modConflictUtils';
+import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { feedbackMsg } from '../lib/apiFeedback';
 import { modsArchiveDownloadName, parseContentDispositionFilename } from '../lib/downloadFilename';
 import {
@@ -902,11 +903,12 @@ export function useMods(
         setModsMsg(t('server_running_mutate_blocked'), true);
         return;
       }
-      modals.openConfirmModal({
+      openFccConfirmModal({
         title: t('mod_list_remove_mod_btn'),
-        children: t('mod_list_remove_confirm', row.display_name || row.name || name),
-        labels: { confirm: t('mod_list_remove_mod_btn'), cancel: t('cancel') },
-        confirmProps: { className: 'btn btn--danger' },
+        message: t('mod_list_remove_confirm', row.display_name || row.name || name),
+        confirmLabel: t('mod_list_remove_mod_btn'),
+        cancelLabel: t('cancel'),
+        variant: 'danger',
         onConfirm: async () => {
           await api('/api/mods/remove', { method: 'POST', body: JSON.stringify({ name }) });
           setModsMsg(t('updated_successfully'), false);

@@ -525,7 +525,7 @@ body {
 }
 
 .fcc-modal--confirm {
-  width: min(460px, 92vw);
+  width: min(520px, 92vw);
 }
 
 .fcc-modal--confirm .fcc-confirm-modal__header {
@@ -577,7 +577,7 @@ body {
 
 .fcc-confirm-modal__lead {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.45;
   color: var(--text);
@@ -600,7 +600,7 @@ body {
   margin: 0;
   padding-left: 1.15em;
   color: var(--text-muted);
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
@@ -611,7 +611,7 @@ body {
 .fcc-confirm-modal__question {
   margin: 12px 0 0;
   color: var(--text-muted);
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.45;
 }
 

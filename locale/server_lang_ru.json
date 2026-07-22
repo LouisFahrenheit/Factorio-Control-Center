@@ -374,7 +374,7 @@
   "mod_list_portal_website_link": "mods.factorio.com",
   "mod_list_install_from_url_prompt": "Ссылка на страницу мода",
   "mod_list_remove_mod_btn": "Удалить",
-  "mod_list_remove_confirm": "Убрать «{0}» ({1}) из mod-list.json и удалить файлы мода из папки mods?",
+  "mod_list_remove_confirm": "Удалить мод «{0}»?\n\nМод будет удален из mod-list.json\nЕго .zip файл будет удален",
   "mod_list_portal_credentials_missing": "Укажите credentials в server-settings.json или заполните Глобальный логин/Глобальный токен в настройках панели.",
   "mod_list_portal_no_release": "На портале нет релизов для этого мода.",
   "mod_job_modal_title": "Операция с модами",
