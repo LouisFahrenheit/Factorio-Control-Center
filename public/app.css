@@ -10523,6 +10523,8 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  align-self: flex-start;
+  max-height: calc(100vh - 120px);
 }
 
 .create-save__preview-field {
@@ -10637,7 +10639,7 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 }
 
 .fu-modal.create-save-dialog .create-save__settings > .create-save__fieldset-lock {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -10648,29 +10650,29 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
 }
 
 .create-save__preview-slot-lock {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   width: 100%;
 }
 
 .create-save__preview-slot {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   padding: 12px;
 }
@@ -10678,11 +10680,13 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 .create-save__preview-toolbar {
   flex: 0 0 auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 
 .create-save__preview-tool-block {
@@ -10752,9 +10756,10 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 }
 
 .create-save__preview-viewport-wrap {
-  flex: 1 1 0;
+  flex: 0 1 auto;
   min-height: 0;
   width: 100%;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10858,7 +10863,7 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  margin-top: auto;
+  margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
 }
@@ -16105,22 +16110,20 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 
 #createSaveBackdrop.fu-modal-backdrop {
   padding: 6px 8px;
-  align-items: stretch;
+  align-items: center;
 }
 
 #createSaveBackdrop.fu-modal-backdrop .fu-modal.create-save-dialog {
   margin: 0 auto;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   width: 100%;
   max-width: none;
-  height: calc(100dvh - 12px);
   max-height: calc(100dvh - 12px);
-  min-height: calc(100dvh - 12px);
   border-radius: 10px;
 }
 
 .fu-modal.create-save-dialog .fu-modal__body {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   max-height: none;
   overflow-x: hidden;
@@ -16141,7 +16144,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal.create-save-dialog .create-save__custom {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
   display: flex;
@@ -16150,7 +16153,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal.create-save-dialog .create-save__layout {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
@@ -16205,7 +16208,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal.create-save-dialog .map-gen-card__body--preview {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   display: flex;
@@ -16213,7 +16216,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal.create-save-dialog .create-save__preview-row {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -16222,7 +16225,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal.create-save-dialog .create-save__preview-slot {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
