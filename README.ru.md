@@ -109,6 +109,31 @@
 2. В меню - **1. Start panel**, откройте адрес из вывода: `http://127.0.0.1/` на ПК, `http://IP_сервера/` на VPS (порт - в меню).
 3. Вход: `admin` / `admin` - сразу смените пароль.
 
+### Запуск через Docker
+
+**Быстрый старт:**
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
+```
+
+Этот скрипт автоматически установит Docker (если его нет), скачает `docker-compose.yml`, загрузит готовый образ и запустит контейнер. После завершения откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и войдите с помощью `admin` / `admin`.
+
+**Ручная установка через Docker:**
+1. Скачайте файл `docker-compose.yml`.
+2. Выполните команду: `docker-compose up -d`
+3. Откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и войдите с помощью `admin` / `admin`.
+
+**Обновление панели (Docker):**
+Чтобы обновиться до последней версии (ваши данные не потеряются):
+```bash
+cd /opt/factorio-control-center
+docker-compose pull
+docker-compose up -d
+```
+
+**Примечание:** По умолчанию `docker-compose.yml` пробрасывает UDP-порты `34197-34207`, что позволяет запускать до 11 серверов Factorio. Вы можете изменить этот диапазон или использовать `host networking`, если вам нужно больше.
+
 ### Автозапуск (Установка службы)
 
 Вы можете настроить панель так, чтобы она запускалась автоматически при включении системы. Для этого выберите пункт **3. Install service** в главном меню запуска.
@@ -128,6 +153,7 @@ sudo loginctl enable-linger $USER
 
 - **Авто** - на Linux без root: **8080** (HTTP) или **8443** (HTTPS); иначе **80** / **443**
 - **Пользовательский** - порт в настройках или в `fcc-settings.ini` (`port_mode=custom`, `listen_port=…`)
+  *(Примечание: при использовании Docker не меняйте порт в настройках панели! Изменяйте маппинг портов в файле `docker-compose.yml`)*
 
 Адрес для входа показывается в меню запуска.
 
@@ -150,6 +176,15 @@ npm run client:dev     # UI → http://127.0.0.1:5173/login
 ```
 
 Локальная сборка: `npm run pack:release` → `release/factorio-control-center-win.zip` и `release/factorio-control-center-linux.tar.gz`.
+
+**Сборка из исходников (Docker):**
+Если вы хотите изменить код панели и собрать свой собственный Docker-образ:
+1. Склонируйте репозиторий и перейдите в него.
+2. В `docker-compose.yml` замените `image: ghcr.io/louisfahrenheit/factorio-control-center:latest` на `build: .`
+3. Выполните команду:
+   ```bash
+   docker-compose up -d --build
+   ```
 
 ## Безопасность
 

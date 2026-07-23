@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  factorio-control-center:
+    image: ghcr.io/louisfahrenheit/factorio-control-center:latest
+    container_name: factorio-control-center
+    restart: unless-stopped
+    ports:
+      - "8080:80/tcp"  # Web Panel
+      - "34197-34207:34197-34207/udp" # Factorio Servers
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - FCC_SETTINGS_PATH=/app/data/fcc-settings.ini

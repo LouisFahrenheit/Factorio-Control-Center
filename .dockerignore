@@ -1,0 +1,16 @@
+node_modules
+client/node_modules
+dist
+client/dist
+data
+logs
+.git
+.github
+test
+docs
+release
+.editorconfig
+.prettierrc
+eslint.config.mjs
+jest.config.js
+fcc-settings.ini
