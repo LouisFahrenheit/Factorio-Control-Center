@@ -25,23 +25,23 @@ fi
 # 3. Check for docker-compose or docker compose plugin
 COMPOSE_CMD="docker compose"
 if ! docker compose version >/dev/null 2>&1; then
-  if command -v docker-compose >/dev/null 2>&1; then
+  if command -v docker-compose >/dev/null 2>&1 && docker-compose version | grep -iq "v2"; then
     COMPOSE_CMD="docker-compose"
   else
-    echo "Docker Compose not found. Installing..."
+    echo "Modern Docker Compose not found or outdated. Installing..."
     if command -v apt-get >/dev/null 2>&1; then
       apt-get update -y || true
       if ! apt-get install -y docker-compose-plugin; then
         echo "Failed to install docker-compose-plugin via apt. Downloading standalone binary..."
         curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         chmod +x /usr/local/bin/docker-compose
-        COMPOSE_CMD="docker-compose"
+        COMPOSE_CMD="/usr/local/bin/docker-compose"
       fi
     else
       echo "Downloading standalone docker-compose binary..."
       curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
       chmod +x /usr/local/bin/docker-compose
-      COMPOSE_CMD="docker-compose"
+      COMPOSE_CMD="/usr/local/bin/docker-compose"
     fi
   fi
 fi
