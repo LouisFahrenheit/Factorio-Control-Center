@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import {
   Body,
   Controller,
@@ -124,6 +125,33 @@ export class ApiController {
   @Get('health')
   health() {
     const plat = process.platform;
+    let is_docker = false;
+    const docker_volumes: string[] = [];
+
+    if (plat === 'linux') {
+      try {
+        if (fs.existsSync('/.dockerenv')) {
+          is_docker = true;
+          const mounts = fs.readFileSync('/proc/mounts', 'utf8');
+          const ignorePrefixes = ['/proc', '/sys', '/dev', '/etc', '/run', '/tmp', '/var/lib/docker'];
+          const lines = mounts.split('\n');
+          for (const line of lines) {
+            const parts = line.split(' ');
+            if (parts.length >= 2) {
+              const target = parts[1];
+              if (target === '/') continue;
+              if (ignorePrefixes.some((p) => target.startsWith(p))) continue;
+              if (!docker_volumes.includes(target)) {
+                docker_volumes.push(target);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
     return {
       ok: true,
       version: APP_VERSION,
@@ -133,6 +161,8 @@ export class ApiController {
         : plat.startsWith('linux')
           ? 'linux'
           : 'unix',
+      is_docker,
+      docker_volumes,
     };
   }
 

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { AppIcon } from '../AppIcon';
 import type { AppIconName } from '../../lib/appIcons';
 import { CancelButton } from '../CancelButton';
@@ -29,6 +30,14 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
   const { form, mode, setForm, hasFactorioCredentials } = editor;
   const isAdd = mode === 'add';
   const downloadDisabled = isAdd && !hasFactorioCredentials;
+
+  const isOutsideDockerVolumes = useMemo(() => {
+    if (!editor.isDocker) return false;
+    const path = form.serverPath.trim();
+    if (!path) return false;
+    if (!editor.dockerVolumes || editor.dockerVolumes.length === 0) return true;
+    return !editor.dockerVolumes.some(v => path.startsWith(v));
+  }, [editor.isDocker, form.serverPath, editor.dockerVolumes]);
 
   return (
     <ModalBackdrop open={editor.open} id="instanceEditorBackdrop" onClose={editor.close}>
@@ -239,6 +248,12 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
                         </button>
                       </span>
                       <span className="instance-editor-field__hint">{t('instances_server_path_help')}</span>
+                      {isOutsideDockerVolumes ? (
+                        <div className="instances-default-creds-banner instance-editor-docker-warning" role="alert" style={{ marginTop: '12px' }}>
+                          <AppIcon name="info" size={20} />
+                          <span>{t('instances_docker_volume_warning')}</span>
+                        </div>
+                      ) : null}
                     </label>
                   </div>
                 </section>

@@ -136,6 +136,9 @@ docker-compose up -d
 
 **Note:** By default, `docker-compose.yml` maps UDP ports `34197-34207` to allow running up to 11 Factorio instances. You can adjust this range or use host networking if you need more.
 
+**Docker Volumes & Data Persistence:**
+By default, the `docker-compose.yml` mounts `./data` to `/app/data` and `./logs` to `/app/logs`. When creating a server inside the panel, you **must** select a path inside `/app/data` (e.g., `/app/data/servers/my_server`) to ensure your server files are saved to your host machine. If you select a path outside of the mounted volumes (like `/opt/factorio`), the server will be deleted and all data lost when the Docker container is updated or recreated. To store servers in another directory on your host, you must manually add a new volume mapping in your `docker-compose.yml` (e.g., `- /mnt/disk/servers:/servers`).
+
 ### Autostart (Service Installation)
 
 You can configure the panel to start automatically when your system boots. In the main menu, select **3. Install service**. 

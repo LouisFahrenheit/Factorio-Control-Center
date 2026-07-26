@@ -41,6 +41,8 @@ export interface InstanceEditorApi {
   mode: InstanceEditorMode;
   form: InstanceEditorForm;
   setForm: Dispatch<SetStateAction<InstanceEditorForm>>;
+  isDocker: boolean;
+  dockerVolumes: string[];
   saving: boolean;
   hasFactorioCredentials: boolean;
   showPackageBuild: boolean;
@@ -99,6 +101,8 @@ export function useInstanceEditor({
   const [editId, setEditId] = useState('');
   const [form, setForm] = useState<InstanceEditorForm>(() => emptyEditorForm(rows));
   const [saving, setSaving] = useState(false);
+  const [isDocker, setIsDocker] = useState(false);
+  const [dockerVolumes, setDockerVolumes] = useState<string[]>([]);
   const [hasFactorioCredentials, setHasFactorioCredentials] = useState(false);
   const [hostOs, setHostOs] = useState('');
   const [releases, setReleases] = useState<ReleaseVersions>({ stable: [], experimental: [] });
@@ -147,7 +151,7 @@ export function useInstanceEditor({
 
   const loadEditorBootstrap = useCallback(async (): Promise<boolean> => {
     const [health, program, rel] = await Promise.all([
-      api<{ host_os?: string }>('/api/health').catch(() => ({ host_os: '' })),
+      api<{ host_os?: string; is_docker?: boolean; docker_volumes?: string[] }>('/api/health').catch(() => ({ host_os: '', is_docker: false, docker_volumes: [] })),
       api<{ factorio_global_credentials_present?: boolean }>('/api/config/program').catch(() => ({
         factorio_global_credentials_present: false,
       })),
@@ -156,6 +160,8 @@ export function useInstanceEditor({
       })),
     ]);
     setHostOs(String(health.host_os || '').toLowerCase());
+    setIsDocker(!!health.is_docker);
+    setDockerVolumes(health.docker_volumes || []);
     const hasCreds = !!program.factorio_global_credentials_present;
     setHasFactorioCredentials(hasCreds);
     if (rel && rel.ok !== false) {
@@ -647,6 +653,8 @@ export function useInstanceEditor({
     mode,
     form,
     setForm,
+    isDocker,
+    dockerVolumes,
     saving,
     hasFactorioCredentials,
     showPackageBuild,
