@@ -12,37 +12,42 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# (Git is no longer required because we just download the compose file using curl)
+# Install Docker if missing or daemon not running
+if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+  echo "Docker not found or not running. Installing..."
 
-# 2. Install Docker if missing
-if ! command -v docker >/dev/null 2>&1; then
-  echo "Docker not found. Installing..."
-  curl -fsSL https://get.docker.com -o get-docker.sh
-  sh get-docker.sh
-  rm get-docker.sh
+  apt-get update -y
+  apt-get install -y ca-certificates curl gnupg
+
+  # Add Docker's official GPG key
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")/gpg | gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+  chmod a+r /etc/apt/keyrings/docker.gpg
+
+  # Add Docker's official apt repository
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$(. /etc/os-release && echo "$ID") \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+  systemctl enable docker
+  systemctl start docker
+
+  echo "Docker installed successfully."
 fi
 
-# 3. Check for docker-compose or docker compose plugin
-COMPOSE_CMD="docker compose"
+# Verify docker compose plugin is available
 if ! docker compose version >/dev/null 2>&1; then
-  if command -v docker-compose >/dev/null 2>&1 && docker-compose version | grep -iq "v2"; then
-    COMPOSE_CMD="docker-compose"
-  else
-    echo "Modern Docker Compose not found or outdated. Installing..."
-    if command -v apt-get >/dev/null 2>&1; then
-      apt-get update -y || true
-      if ! apt-get install -y docker-compose-plugin; then
-        echo "Failed to install docker-compose-plugin via apt. Downloading standalone binary..."
-        curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-        COMPOSE_CMD="/usr/local/bin/docker-compose"
-      fi
-    else
-      echo "Downloading standalone docker-compose binary..."
-      curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      chmod +x /usr/local/bin/docker-compose
-      COMPOSE_CMD="/usr/local/bin/docker-compose"
-    fi
+  echo "Docker Compose plugin not found. Installing..."
+  apt-get update -y
+  if ! apt-get install -y docker-compose-plugin; then
+    echo "Downloading standalone docker-compose binary..."
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
   fi
 fi
 
@@ -52,7 +57,7 @@ cd /opt/factorio-control-center
 curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/docker-compose.yml
 
 echo "2. Starting Docker container..."
-$COMPOSE_CMD up -d
+docker compose up -d
 
 echo
 echo "================================================="
