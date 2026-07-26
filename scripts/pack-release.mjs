@@ -237,7 +237,7 @@ function stageAppTree(destNest) {
 }
 
 const version = readVersion();
-const releaseBuildId = formatReleaseBuildId();
+const releaseBuildId = process.env.FCC_BUILD_ID || formatReleaseBuildId();
 const constantsPath = readConstantsFile();
 const buildNumber = process.env.FCC_BUILD_NUMBER
   ? parseInt(process.env.FCC_BUILD_NUMBER, 10)
