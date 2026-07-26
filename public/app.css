@@ -734,7 +734,7 @@ body::after {
   box-sizing: border-box;
   max-width: 1640px;
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh / var(--ui-scale, 1));
   margin: 0 auto;
   padding: 10px 16px 16px;
   font-size: var(--ui-font-size);
@@ -4730,7 +4730,7 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .instance-screen {
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh / var(--ui-scale, 1) - 140px);
   display: flex;
   flex-direction: column;
 }
@@ -4739,7 +4739,7 @@ table.data.data--modpacks tbody tr:hover td {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh / var(--ui-scale, 1) - 200px);
 }
 
 .instance-screen .panel__body > .tab-panels__stage {
@@ -4817,7 +4817,7 @@ table.data.data--modpacks tbody tr:hover td {
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
-  min-height: min(520px, calc(100vh - 260px));
+  min-height: min(520px, calc(100vh / var(--ui-scale, 1) - 260px));
   padding: 24px 16px;
   overflow: hidden;
 }
@@ -10524,7 +10524,7 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   min-width: 0;
   min-height: 0;
   align-self: flex-start;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh / var(--ui-scale, 1) - 120px);
 }
 
 .create-save__preview-field {
@@ -13961,8 +13961,8 @@ table.data.data--players-stats tbody tr:hover td {
 }
 
 .maintenance-tab__panel--reports {
-  min-height: min(420px, calc(100vh - 280px));
-  max-height: calc(100vh - 280px);
+  min-height: min(420px, calc(100vh / var(--ui-scale, 1) - 280px));
+  max-height: calc(100vh / var(--ui-scale, 1) - 280px);
 }
 
 .maintenance-tab__empty {
