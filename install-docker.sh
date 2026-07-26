@@ -30,10 +30,18 @@ if ! docker compose version >/dev/null 2>&1; then
   else
     echo "Docker Compose not found. Installing..."
     if command -v apt-get >/dev/null 2>&1; then
-      apt-get install -y docker-compose-plugin || apt-get install -y docker-compose
+      apt-get update -y || true
+      if ! apt-get install -y docker-compose-plugin; then
+        echo "Failed to install docker-compose-plugin via apt. Downloading standalone binary..."
+        curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+        COMPOSE_CMD="docker-compose"
+      fi
     else
-      echo "ERROR: Please install docker-compose manually."
-      exit 1
+      echo "Downloading standalone docker-compose binary..."
+      curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      chmod +x /usr/local/bin/docker-compose
+      COMPOSE_CMD="docker-compose"
     fi
   fi
 fi
