@@ -11,7 +11,7 @@ import {
   setLocalThemeOverride,
 } from '../../theme/themes';
 import { getLocalLanguageOverride, setLocalLanguageOverride } from '../../i18n/locale';
-import { readUserToastDurationSec, readUserShowServerListModBadges, setUserShowServerListModBadges, setUserToastDurationSec } from '../../lib/userPrefs';
+import { readUserToastDurationSec, readUserShowServerListModBadges, setUserShowServerListModBadges, setUserToastDurationSec, readUserShowServerListSpaceAgeBadge, setUserShowServerListSpaceAgeBadge } from '../../lib/userPrefs';
 import type { ProgramSettings } from '../../types/programSettings';
 import { AppIcon } from '../AppIcon';
 import { FccSwitch } from '../FccSwitch';
@@ -33,6 +33,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
   const [disableEffects, setDisableEffects] = useState(false);
   const [translateModNames, setTranslateModNames] = useState(true);
   const [showModBadges, setShowModBadges] = useState(true);
+  const [showSABadge, setShowSABadge] = useState(true);
 
   useEffect(() => {
     if (!open) return;
@@ -42,6 +43,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     setToastSec(readUserToastDurationSec());
     setDisableEffects(localStorage.getItem('fcc_user_web_disable_effects') === '1');
     setShowModBadges(readUserShowServerListModBadges());
+    setShowSABadge(readUserShowServerListSpaceAgeBadge());
     void api<ProgramSettings>('/api/config/program')
       .then((r) => {
         setTranslateModNames(r.translate_mod_names !== false);
@@ -80,6 +82,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     else document.documentElement.removeAttribute('data-web-disable-effects');
     localStorage.setItem('fcc_user_web_disable_effects', disableEffects ? '1' : '0');
     setUserShowServerListModBadges(showModBadges);
+    setUserShowServerListSpaceAgeBadge(showSABadge);
     onClose();
     if (prevLang !== String(lang || '').trim().toLowerCase()) {
       window.location.reload();
@@ -204,6 +207,19 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   checked={showModBadges}
                   onChange={setShowModBadges}
                   label={t('program_show_server_list_mod_badges_cb')}
+                />
+              </div>
+              <div
+                className="user-settings-field user-settings-field--switch"
+                title={t('program_show_server_list_sa_badge_tip')}
+              >
+                <FccSwitch
+                  id="cbShowServerListSABadges"
+                  className="user-settings-field__switch"
+                  labelClassName="user-settings-field__switch-label"
+                  checked={showSABadge}
+                  onChange={setShowSABadge}
+                  label={t('program_show_server_list_sa_badge_cb')}
                 />
               </div>
             </div>

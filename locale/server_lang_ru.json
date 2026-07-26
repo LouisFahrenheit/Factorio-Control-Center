@@ -1207,6 +1207,8 @@
   "program_sync_whitelist_cb": "Белый список",
   "program_web_disable_effects_cb": "Отключить эффекты",
   "program_show_server_list_mod_badges_cb": "Показывать значки модов в списке серверов",
+  "program_show_server_list_sa_badge_cb": "Показывать значок Space Age в списке серверов",
+  "program_show_server_list_sa_badge_tip": "Если отключено, значок Space Age (или текст SA) не будет отображаться рядом с названиями серверов",
   "program_show_server_list_mod_badges_tip": "Иконки Krastorio, Nullius, Space Exploration и других крупных оверхолов рядом с именем сервера.",
   "program_toast_duration_sec_label": "Время показа уведомлений",
   "program_toast_duration_sec_tip": "Как долго показывать уведомления в углу экрана.",

@@ -1206,6 +1206,8 @@
   "program_sync_whitelist_cb": "Whitelist",
   "program_web_disable_effects_cb": "Disable visual effects",
   "program_show_server_list_mod_badges_cb": "Show mod badges in server list",
+  "program_show_server_list_sa_badge_cb": "Show Space Age badge in server list",
+  "program_show_server_list_sa_badge_tip": "If disabled, the Space Age badge (or SA text) will not be shown next to server names",
   "program_show_server_list_mod_badges_tip": "Icons for Krastorio, Nullius, Space Exploration, and other major overhauls next to the server name.",
   "program_toast_duration_sec_label": "Notification display time",
   "program_toast_duration_sec_tip": "How long corner notifications stay visible.",

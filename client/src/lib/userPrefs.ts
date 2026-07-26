@@ -2,6 +2,7 @@ const TOAST_SEC_MIN = 1;
 const TOAST_SEC_MAX = 20;
 const TOAST_STORAGE_KEY = 'fcc_user_toast_duration_sec';
 const SERVER_LIST_MOD_BADGES_KEY = 'fcc_user_show_server_list_mod_badges';
+const SERVER_LIST_SA_BADGE_KEY = 'fcc_user_show_server_list_sa_badge';
 
 export const USER_PREFS_CHANGED_EVENT = 'fcc-user-prefs-changed';
 
@@ -64,6 +65,23 @@ export function readUserShowServerListModBadges(): boolean {
 export function setUserShowServerListModBadges(show: boolean): void {
   try {
     localStorage.setItem(SERVER_LIST_MOD_BADGES_KEY, show ? '1' : '0');
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readUserShowServerListSpaceAgeBadge(): boolean {
+  try {
+    return localStorage.getItem(SERVER_LIST_SA_BADGE_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+export function setUserShowServerListSpaceAgeBadge(show: boolean): void {
+  try {
+    localStorage.setItem(SERVER_LIST_SA_BADGE_KEY, show ? '1' : '0');
     dispatchUserPrefsChanged();
   } catch {
     /* ignore */

@@ -9,6 +9,7 @@ import {
 } from '../../lib/motionPresets';
 import { useServerListIconsProbe } from '../../lib/serverListIcons';
 import { useUserShowServerListModBadges } from '../../hooks/useUserShowServerListModBadges';
+import { useUserShowServerListSpaceAgeBadge } from '../../hooks/useUserShowServerListSpaceAgeBadge';
 import { webEffectsReduced } from '../../theme/webEffects';
 import { AppIcon } from '../AppIcon';
 import { InstanceGameVersionCell } from './InstanceGameVersionCell';
@@ -93,6 +94,7 @@ export function InstanceTable({
   const placeholder = t('server_uptime_placeholder');
   const { ready: listIconsReady, isAvailable: isListIconAvailable } = useServerListIconsProbe();
   const showModBadges = useUserShowServerListModBadges();
+  const showSABadge = useUserShowServerListSpaceAgeBadge();
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(listEnterDelay);
   const clickTimerRef = useRef<number | null>(null);
@@ -217,6 +219,7 @@ export function InstanceTable({
                         hasSpaceAge={it.hasSpaceAge}
                         modBadges={it.modBadges}
                         showModBadges={showModBadges}
+                        showSpaceAgeBadge={showSABadge}
                         iconsReady={listIconsReady}
                         isIconAvailable={isListIconAvailable}
                         t={t}

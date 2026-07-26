@@ -9,6 +9,7 @@ interface InstanceListBadgesProps {
   hasSpaceAge?: boolean;
   modBadges?: ServerListModBadgeId[];
   showModBadges?: boolean;
+  showSpaceAgeBadge?: boolean;
   iconsReady: boolean;
   isIconAvailable: (url: string) => boolean;
   t: (key: string, ...args: (string | number)[]) => string;
@@ -18,6 +19,7 @@ export function InstanceListBadges({
   hasSpaceAge,
   modBadges = [],
   showModBadges = true,
+  showSpaceAgeBadge = true,
   iconsReady,
   isIconAvailable,
   t,
@@ -25,7 +27,7 @@ export function InstanceListBadges({
   const badges = showModBadges
     ? modBadges.filter((id) => iconsReady && isIconAvailable(SERVER_LIST_MOD_BADGE_ICON_URL[id]))
     : [];
-  const showSa = !!hasSpaceAge;
+  const showSa = !!hasSpaceAge && showSpaceAgeBadge;
 
   if (!showSa && badges.length === 0) return null;
   if (!iconsReady) return null;
