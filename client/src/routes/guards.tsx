@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import type { ReactNode } from 'react';
 import { getToken, setToken } from '../api/client';
 import { AppLoadingShell } from '../components/AppLoadingShell';

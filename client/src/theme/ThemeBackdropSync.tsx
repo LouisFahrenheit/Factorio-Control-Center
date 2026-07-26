@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useAuth } from '../hooks/useAuth';

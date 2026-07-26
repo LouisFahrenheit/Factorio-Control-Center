@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { IconEye, IconEyeOff, IconLock, IconUser } from '@tabler/icons-react';
 import { api, isLoginDeniedError, localizeAuthError, setToken } from '../api/client';

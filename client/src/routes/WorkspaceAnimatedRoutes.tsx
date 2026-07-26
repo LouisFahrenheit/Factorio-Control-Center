@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { WorkspaceNavRegistrar } from '../components/WorkspaceNavRegistrar';
 import { WorkspaceViewTransition } from '../components/WorkspaceViewTransition';
 import InstancesPage from '../pages/InstancesPage';

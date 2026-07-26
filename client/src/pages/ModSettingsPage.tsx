@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { modals } from '@mantine/modals';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { AppLoadingShell } from '../components/AppLoadingShell';
 import { TabLoadingPlaceholder } from '../components/TabLoadingPlaceholder';
 import { AppStatusBar } from '../components/AppStatusBar';

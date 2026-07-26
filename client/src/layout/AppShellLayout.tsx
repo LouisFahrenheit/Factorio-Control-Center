@@ -11,7 +11,7 @@ import {
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconArrowLeft, IconLogout } from '@tabler/icons-react';
 import { type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { setToken } from '../api/client';
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 

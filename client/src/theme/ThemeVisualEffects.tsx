@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 import { CryoSnowOverlay } from './CryoSnowOverlay';
 import { useEffectiveTheme } from './useEffectiveTheme';
