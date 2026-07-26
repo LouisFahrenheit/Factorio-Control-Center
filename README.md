@@ -123,15 +123,15 @@ This script will automatically install Docker (if missing), download the `docker
 
 **Manual Docker Installation:**
 1. Download the `docker-compose.yml` file.
-2. Run: `docker-compose up -d`
+2. Run: `docker compose up -d`
 3. Open `http://127.0.0.1:8080/` (or your server's IP) and log in with `admin` / `admin`.
 
 **Updating Docker Installation:**
 To update to the latest version without losing any data:
 ```bash
 cd /opt/factorio-control-center
-docker-compose pull
-docker-compose up -d
+docker compose pull
+docker compose up -d
 ```
 
 **Note:** By default, `docker-compose.yml` maps UDP ports `34197-34207` to allow running up to 11 Factorio instances. You can adjust this range or use host networking if you need more.

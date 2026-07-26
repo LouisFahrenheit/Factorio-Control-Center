@@ -121,15 +121,15 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio
 
 **Ручная установка через Docker:**
 1. Скачайте файл `docker-compose.yml`.
-2. Выполните команду: `docker-compose up -d`
+2. Выполните команду: `docker compose up -d`
 3. Откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и войдите с помощью `admin` / `admin`.
 
 **Обновление панели (Docker):**
 Чтобы обновиться до последней версии (ваши данные не потеряются):
 ```bash
 cd /opt/factorio-control-center
-docker-compose pull
-docker-compose up -d
+docker compose pull
+docker compose up -d
 ```
 
 **Примечание:** По умолчанию `docker-compose.yml` пробрасывает UDP-порты `34197-34207`, что позволяет запускать до 11 серверов Factorio. Вы можете изменить этот диапазон или использовать `host networking`, если вам нужно больше.
