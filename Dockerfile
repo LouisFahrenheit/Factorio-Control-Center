@@ -13,7 +13,9 @@ COPY . .
 
 # Build both client and server (this uses 'npm run build:all' from root)
 ARG FCC_BUILD_ID=dev
+ARG FCC_BUILD_NUMBER
 RUN if [ "$FCC_BUILD_ID" != "dev" ]; then sed -i "s/export const APP_BUILD = 'dev';/export const APP_BUILD = '${FCC_BUILD_ID}';/" src/constants/fcc.constants.ts; fi
+RUN if [ -n "$FCC_BUILD_NUMBER" ]; then sed -i "s/export const APP_BUILD_NUMBER = [0-9]*;/export const APP_BUILD_NUMBER = ${FCC_BUILD_NUMBER};/" src/constants/fcc.constants.ts; fi
 RUN npm run build:all
 
 # Stage 2: Production Image

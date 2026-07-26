@@ -32,6 +32,8 @@ jobs:
 
       - name: Build release archives
         run: npm run pack:release
+        env:
+          FCC_BUILD_NUMBER: ${{ github.run_number }}
 
       - name: Resolve version
         id: version
@@ -83,6 +85,7 @@ jobs:
           context: .
           push: true
           build-args: |
+            FCC_BUILD_NUMBER=${{ github.run_number }}
             FCC_BUILD_ID=${{ steps.version.outputs.version }}
           tags: |
             ghcr.io/${{ steps.docker_meta.outputs.owner }}/factorio-control-center:latest

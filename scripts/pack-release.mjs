@@ -239,7 +239,9 @@ function stageAppTree(destNest) {
 const version = readVersion();
 const releaseBuildId = formatReleaseBuildId();
 const constantsPath = readConstantsFile();
-const buildNumber = readBuildNumber(constantsPath) + 1;
+const buildNumber = process.env.FCC_BUILD_NUMBER
+  ? parseInt(process.env.FCC_BUILD_NUMBER, 10)
+  : readBuildNumber(constantsPath) + 1;
 const bundleName = 'factorio-control-center';
 const sharedNest = join(stagingRoot, '_shared', 'factorio-control-center');
 const winBundleDir = join(stagingRoot, 'win', bundleName);
