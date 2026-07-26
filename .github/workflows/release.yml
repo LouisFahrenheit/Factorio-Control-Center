@@ -82,6 +82,8 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            FCC_BUILD_ID=${{ steps.version.outputs.version }}
           tags: |
             ghcr.io/${{ steps.docker_meta.outputs.owner }}/factorio-control-center:latest
             ghcr.io/${{ steps.docker_meta.outputs.owner }}/factorio-control-center:${{ steps.version.outputs.version }}
