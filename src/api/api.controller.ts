@@ -402,8 +402,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Put('config/server')
-  serverConfigSet(@Body() body: Record<string, unknown>) {
-    return this.bridge.submit('set_server_ini', body);
+  serverConfigSet(@Body() body: Record<string, unknown>, @Req() req: Request) {
+    return this.bridge.submit('set_server_ini', {
+      ...body,
+      web_actor: this.bridge.webActor(this.me(req)),
+    });
   }
 
   @UseGuards(AuthGuard)

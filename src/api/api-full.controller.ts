@@ -76,6 +76,7 @@ export class ApiFullController {
 
   @Post('server/create-save')
   serverCreateSave(
+    @Req() req: Request,
     @Body()
     body: {
       name?: string;
@@ -95,6 +96,7 @@ export class ApiFullController {
       map_gen_settings: body.map_gen_settings,
       map_settings: body.map_settings,
       map_exchange_string: body.map_exchange_string,
+      web_actor: this.bridge.webActor(this.user(req)),
     });
   }
 
@@ -367,8 +369,10 @@ export class ApiFullController {
   }
 
   @Post('files/server-settings/create-from-example')
-  serverSettingsExample() {
-    return this.bridge.submit('create_server_settings_from_example');
+  serverSettingsExample(@Req() req: Request) {
+    return this.bridge.submit('create_server_settings_from_example', {
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Put('files/admin-list')
@@ -430,8 +434,14 @@ export class ApiFullController {
   }
 
   @Post('mods/version')
-  modsVersion(@Body() body: { name?: string; version?: string }) {
-    return this.bridge.submit('mods_set_version', body);
+  modsVersion(
+    @Body() body: { name?: string; version?: string },
+    @Req() req: Request,
+  ) {
+    return this.bridge.submit('mods_set_version', {
+      ...body,
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Post('mods/remove')
@@ -787,18 +797,31 @@ export class ApiFullController {
   }
 
   @Post('modpacks/:name/rename')
-  modpackRename(@Param('name') name: string, @Body() body: { new?: string }) {
-    return this.bridge.submit('modpack_rename', { old: name, new: body.new });
+  modpackRename(
+    @Param('name') name: string,
+    @Body() body: { new?: string },
+    @Req() req: Request,
+  ) {
+    return this.bridge.submit('modpack_rename', {
+      old: name,
+      new: body.new,
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Delete('modpacks/:name')
-  modpackDelete(@Param('name') name: string) {
-    return this.bridge.submit('modpack_delete', { name });
+  modpackDelete(@Param('name') name: string, @Req() req: Request) {
+    return this.bridge.submit('modpack_delete', {
+      name,
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Post('modpacks/reset')
-  modpackReset() {
-    return this.bridge.submit('modpack_reset');
+  modpackReset(@Req() req: Request) {
+    return this.bridge.submit('modpack_reset', {
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Post('modpacks/import-upload')
@@ -806,6 +829,7 @@ export class ApiFullController {
   async modpackImportUpload(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: { name?: string; apply_settings?: string },
+    @Req() req: Request,
   ) {
     const tmp = join(
       tmpdir(),
@@ -821,6 +845,7 @@ export class ApiFullController {
         tmp_path: tmp,
         name: body.name || '',
         apply_settings: apply,
+        actor: this.bridge.webActor(this.user(req)),
       });
     } finally {
       try {
