@@ -21,7 +21,7 @@ export function FactorioPortalUsername({ username, t, className }: FactorioPorta
       className={rootClass}
       title={label}
     >
-      {label}
+      {name}
     </a>
   );
 }
