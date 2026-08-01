@@ -245,11 +245,39 @@ export class FilesOpsService {
       return { ok: false, error: 'server_running' };
     const p = sel.pm.modSettingsDat;
     try {
+      let beforeDoc: Record<string, unknown> = {};
+      if (existsSync(p)) {
+        try {
+          const beforeMs = ModSettings.load(readFileSync(p));
+          beforeDoc = JSON.parse(modSettingsToJsonText(beforeMs));
+        } catch {}
+      }
+
       const ms = modSettingsFromJson(data);
+      const afterDoc = JSON.parse(modSettingsToJsonText(ms));
+      
+      const changes: { key: string; from: string; to: string }[] = [];
+      const beforeData = (beforeDoc?.data && typeof beforeDoc.data === 'object' ? beforeDoc.data : {}) as Record<string, any>;
+      const afterData = (afterDoc?.data && typeof afterDoc.data === 'object' ? afterDoc.data : {}) as Record<string, any>;
+
+      for (const scope of ['startup', 'runtime-global', 'runtime-per-user']) {
+        const bScope = (beforeData[scope] && typeof beforeData[scope] === 'object' ? beforeData[scope] : {}) as Record<string, any>;
+        const aScope = (afterData[scope] && typeof afterData[scope] === 'object' ? afterData[scope] : {}) as Record<string, any>;
+        const keys = new Set([...Object.keys(bScope), ...Object.keys(aScope)]);
+        for (const key of keys) {
+          const bv = bScope[key]?.value;
+          const av = aScope[key]?.value;
+          if (JSON.stringify(bv) === JSON.stringify(av)) continue;
+          const sf = bv === undefined ? '—' : (typeof bv === 'object' ? JSON.stringify(bv) : String(bv));
+          const st = av === undefined ? '—' : (typeof av === 'object' ? JSON.stringify(av) : String(av));
+          changes.push({ key: `[${scope}] ${key}`, from: sf, to: st });
+        }
+      }
+
       mkdirSync(sel.pm.modsDir, { recursive: true });
       writeFileSync(p, ms.save());
       this.modSettingsSchema.invalidateInstance(sel.item.id);
-      return { ok: true, path: p };
+      return { ok: true, path: p, settings_changes: changes };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'expected_mod_settings_root')

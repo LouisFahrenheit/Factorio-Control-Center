@@ -412,8 +412,17 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                           <td>
                             <HistoryActionBadge label={row.actionLabel} variant={row.actionVariant} />
                           </td>
-                          <td className="history-col-reason" title={row.detailVal}>
-                            {row.detailVal}
+                          <td className="history-col-reason" title={row.detailVal.length <= 80 ? row.detailVal : undefined}>
+                            {row.detailVal.length > 80 || row.detailVal.includes('\n') ? (
+                              <HistoryDetailCell
+                                detail={row.detailVal}
+                                payload={detailPayload(row)}
+                                t={t}
+                                onOpen={openDetailModal}
+                              />
+                            ) : (
+                              row.detailVal
+                            )}
                           </td>
                           <td className="history-col-date">{row.actionDate}</td>
                           <td className="history-col-actor">{row.actorVal}</td>
@@ -462,8 +471,17 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                           <td>
                             <HistoryActionBadge label={row.actionLabel} variant={row.actionVariant} />
                           </td>
-                          <td className="history-col-reason" title={row.detailVal}>
-                            {row.detailVal}
+                          <td className="history-col-reason" title={row.detailVal.length <= 80 ? row.detailVal : undefined}>
+                            {row.detailVal.length > 80 || row.detailVal.includes('\n') ? (
+                              <HistoryDetailCell
+                                detail={row.detailVal}
+                                payload={detailPayload(row)}
+                                t={t}
+                                onOpen={openDetailModal}
+                              />
+                            ) : (
+                              row.detailVal
+                            )}
                           </td>
                           <td className="history-col-date">{row.actionDate}</td>
                           <td className="history-col-actor">{row.actorVal}</td>

@@ -888,6 +888,8 @@
   "history_action_modpack_import": "Импорт модпака",
   "history_action_symlink_pref": "Симлинки при активации",
   "history_action_remove_old_zips_pref": "Удалять старые .zip",
+  "history_action_mod_settings_change": "Изменение настроек модов",
+  "history_action_mod_settings_upload": "Загрузка настроек модов",
   "history_change_ip": "IP",
   "history_change_port": "Порт",
   "history_change_save": "Сохранение",

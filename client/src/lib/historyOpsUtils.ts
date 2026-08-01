@@ -39,6 +39,8 @@ const MODS_ACTION_KEYS: Record<string, string> = {
   modpack_import: 'history_action_modpack_import',
   symlink_pref: 'history_action_symlink_pref',
   remove_old_zips_pref: 'history_action_remove_old_zips_pref',
+  mod_settings_change: 'history_action_mod_settings_change',
+  mod_settings_upload: 'history_action_mod_settings_upload',
 };
 
 const COMMANDS_ACTION_KEYS: Record<string, string> = {
@@ -78,7 +80,7 @@ function formatChanges(
       const fieldLabel = field !== fieldKey ? field : c.key;
       return `${fieldLabel}: ${c.from} → ${c.to}`;
     })
-    .join('; ');
+    .join('\n');
 }
 
 function formatModJobHistoryItem(x: unknown): string {

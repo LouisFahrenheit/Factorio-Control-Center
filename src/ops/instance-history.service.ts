@@ -58,6 +58,8 @@ const MODS_OPS = new Set([
   'modpack_rename',
   'mods_set_prefs',
   'set_program_settings',
+  'mod_settings_write_json',
+  'upload_mod_settings_dat',
 ]);
 
 const COMMANDS_OPS = new Set(['rcon_exec', 'write_commands_catalog']);
@@ -439,6 +441,13 @@ export class InstanceHistoryService {
           };
         }
         return null;
+      case 'mod_settings_write_json':
+        return this.settingsChangeEvent(base, 'mod_settings_change', result);
+      case 'upload_mod_settings_dat':
+        return {
+          ...base,
+          action: 'mod_settings_upload',
+        };
       default:
         return null;
     }
