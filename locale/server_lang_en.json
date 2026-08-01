@@ -1466,6 +1466,7 @@
   "instances_col_path": "Server path",
   "instances_server_path_help": "Path to server files or an empty folder.",
   "instances_docker_volume_warning": "The selected path is outside of mounted Docker volumes! All data at this path will be permanently lost when the container is updated or recreated.",
+  "instances_docker_port_warning": "Warning: FCC is running in Docker. Ensure port {0} is mapped in docker-compose.yml or players won't be able to connect (default range is 34197-34207).",
   "instances_col_port": "Port",
   "instances_col_server_port": "Server Port",
   "instances_server_ip_label": "Server IP",

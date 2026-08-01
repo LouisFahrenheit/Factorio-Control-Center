@@ -39,6 +39,13 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
     return !editor.dockerVolumes.some(v => path.startsWith(v));
   }, [editor.isDocker, form.serverPath, editor.dockerVolumes]);
 
+  const isOutsideDockerPortRange = useMemo(() => {
+    if (!editor.isDocker) return false;
+    const port = Number(form.port);
+    if (!Number.isFinite(port) || port < 1 || port > 65535) return false;
+    return port < 34197 || port > 34207;
+  }, [editor.isDocker, form.port]);
+
   return (
     <ModalBackdrop open={editor.open} id="instanceEditorBackdrop" onClose={editor.close}>
       <div
@@ -201,6 +208,12 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
                             value={form.port}
                             onChange={(e) => setForm((f) => ({ ...f, port: e.target.value }))}
                           />
+                          {isOutsideDockerPortRange ? (
+                            <div className="instances-default-creds-banner instance-editor-docker-warning" role="alert" style={{ marginTop: '12px' }}>
+                              <AppIcon name="info" size={20} />
+                              <span>{t('instances_docker_port_warning', form.port)}</span>
+                            </div>
+                          ) : null}
                         </label>
                         <label className="instance-editor-field instance-editor-field--compact" htmlFor="instanceEditorRconPort">
                           <span className="instance-editor-field__label">{t('instances_rcon_port_label')}</span>

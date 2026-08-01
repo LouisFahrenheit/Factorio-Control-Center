@@ -1467,6 +1467,7 @@
   "instances_col_path": "Путь к серверу",
   "instances_server_path_help": "Путь к файлам сервера или пустая папка.",
   "instances_docker_volume_warning": "Выбранный путь находится вне примонтированных томов Docker! Все данные по этому пути будут безвозвратно удалены при обновлении или пересоздании контейнера.",
+  "instances_docker_port_warning": "Внимание: FCC запущен в Docker. Убедитесь, что порт {0} проброшен в docker-compose.yml, иначе игроки не смогут подключиться (диапазон по умолчанию: 34197-34207).",
   "instances_col_port": "Порт",
   "instances_col_server_port": "Порт сервера",
   "instances_server_ip_label": "IP сервера",

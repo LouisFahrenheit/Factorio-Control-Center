@@ -153,6 +153,7 @@ sudo loginctl enable-linger $USER
 ```
 
 **Firewall:** Factorio's UDP port opens automatically only when running as admin/root - otherwise set it up yourself.
+*(Note for Docker: This built-in function does not work inside containers due to network isolation. However, Docker automatically manages the host firewall and opens the ports specified in the `ports` section of your `docker-compose.yml`. Just ensure your game servers use ports from this mapped range.)*
 
 **Panel ports:**
 
