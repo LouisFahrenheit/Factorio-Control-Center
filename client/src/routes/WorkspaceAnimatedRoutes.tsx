@@ -1,10 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { useLocation } from 'react-router';
 import { WorkspaceNavRegistrar } from '../components/WorkspaceNavRegistrar';
 import { WorkspaceViewTransition } from '../components/WorkspaceViewTransition';
-import InstancesPage from '../pages/InstancesPage';
-import PanelPage from '../pages/PanelPage';
-import ModSettingsPage from '../pages/ModSettingsPage';
 import { RequireAuth } from './guards';
+
+const InstancesPage   = lazy(() => import('../pages/InstancesPage'));
+const PanelPage       = lazy(() => import('../pages/PanelPage'));
+const ModSettingsPage = lazy(() => import('../pages/ModSettingsPage'));
 
 function PanelRouteSwitch() {
   const { pathname } = useLocation();
@@ -24,15 +26,17 @@ export function WorkspaceAnimatedRoutes() {
     <>
       <WorkspaceNavRegistrar />
       <WorkspaceViewTransition view={view}>
-        {isPanel ? (
-          <RequireAuth>
-            <PanelRouteSwitch />
-          </RequireAuth>
-        ) : (
-          <RequireAuth instanceMode>
-            <InstancesPage />
-          </RequireAuth>
-        )}
+        <Suspense fallback={null}>
+          {isPanel ? (
+            <RequireAuth>
+              <PanelRouteSwitch />
+            </RequireAuth>
+          ) : (
+            <RequireAuth instanceMode>
+              <InstancesPage />
+            </RequireAuth>
+          )}
+        </Suspense>
       </WorkspaceViewTransition>
     </>
   );
