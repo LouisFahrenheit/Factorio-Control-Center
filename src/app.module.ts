@@ -44,6 +44,7 @@ import { CommandsCatalogService } from './ops/commands-catalog.service';
 import { InstancePropagateService } from './ops/instance-propagate.service';
 import { InstanceHistoryService } from './ops/instance-history.service';
 import { PagesController } from './pages/pages.controller';
+import { FallbackController } from './pages/fallback.controller';
 import { LogRotationService } from './logging/log-rotation.service';
 import { WebPanelLogService } from './logging/web-panel-log.service';
 import { WebPanelEventLogService } from './logging/web-panel-event-log.service';
@@ -92,6 +93,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     ApiController,
     ApiFullController,
     AuthController,
+    FallbackController,
   ],
   providers: [
     PathsService,

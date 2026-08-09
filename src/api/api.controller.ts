@@ -1,4 +1,6 @@
 import * as fs from 'fs';
+import { join } from 'path';
+import { getModDetailsCached, modPackagePathsForInternalName } from '../ops/mod-display-titles.util';
 import {
   Body,
   Controller,
@@ -9,12 +11,15 @@ import {
   Put,
   Query,
   Req,
+  Res,
   UseGuards,
   BadRequestException,
   ForbiddenException,
+  NotFoundException,
   UnauthorizedException,
+  Headers,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { requestBearerToken } from '../auth/auth.util';
 import { SessionService } from '../auth/session.service';
@@ -56,10 +61,14 @@ const ADMIN_ONLY_INSTANCE_PANEL_KEYS = [
   'require_unique_instance_game_ports',
   'server_settings_default_public_off',
   'server_settings_apply_global_credentials',
+  'public_page_enabled',
+  'public_page_route',
 ] as const;
 
 @Controller('api')
 export class ApiController {
+  private readonly downloadRateLimits = new Map<string, number[]>();
+
   constructor(
     private readonly bridge: ApiBridgeService,
     private readonly locale: LocaleService,
@@ -180,6 +189,16 @@ export class ApiController {
       available_languages: this.locale.listAvailableLanguages(),
       default_toast_duration_sec: w.toast_duration_sec,
       panel_default_language: this.config.langCode,
+      public_page_enabled: w.public_page_enabled,
+      public_page_route: w.public_page_route,
+      public_page_title: w.public_page_title || '',
+      public_page_subtitle: w.public_page_subtitle || '',
+      public_page_theme: w.public_page_theme || '',
+      public_page_hide_title: w.public_page_hide_title || false,
+      public_page_hide_subtitle: w.public_page_hide_subtitle || false,
+      public_page_allow_mod_downloads: w.public_page_allow_mod_downloads,
+      public_page_show_players: w.public_page_show_players,
+      public_page_contact_link: w.public_page_contact_link || '',
     };
   }
 
@@ -193,6 +212,101 @@ export class ApiController {
   @Get('status')
   status() {
     return this.bridge.submit('status');
+  }
+
+  @Get('public-servers')
+  async publicServers(@Headers('x-fcc-ui-lang') uiLang?: string) {
+    if (!this.config.webPanel.public_page_enabled) {
+      throw new ForbiddenException('Public servers page is disabled');
+    }
+    const data = (await this.bridge.submit('instances_list')) as { ok: boolean; items?: Record<string, unknown>[] };
+    if (!data.ok || !Array.isArray(data.items)) {
+      return { ok: false, items: [] };
+    }
+    const lang = uiLang || this.config.langCode || 'en';
+    const publicItems = data.items
+      .filter((it) => it.isPublic)
+      .map((it) => {
+        const publicMods = Array.isArray(it.publicMods)
+          ? it.publicMods.map((m: { name: string; title: string; version?: string }) => {
+              const sp = String(it.serverPath || '');
+              if (!sp) return m;
+              const modsDir = join(sp, 'mods');
+              const packages = modPackagePathsForInternalName(modsDir, m.name);
+              const details = packages.length > 0 ? getModDetailsCached(packages[0], lang) : { title: m.title, version: m.version };
+              return { name: m.name, title: details.title, version: details.version };
+            })
+          : [];
+        return {
+          id: it.id,
+          name: it.name,
+          publicDescription: it.publicDescription,
+          publicConnectionAddress: it.publicConnectionAddress || this.config.webPanel.public_host || '',
+          status: it.status,
+          ip: it.ip,
+          port: it.port,
+          gameVersion: it.gameVersion,
+          hasSpaceAge: it.hasSpaceAge,
+          modBadges: it.modBadges,
+          modsCount: it.modsCount,
+          publicMods,
+          onlineCount: it.onlineCount,
+          publicPlayers: this.config.webPanel.public_page_show_players ? it.publicPlayers : [],
+          uptimeSeconds: it.uptimeSeconds,
+          requireUserVerification: it.requireUserVerification,
+          serverSettingsName: it.serverSettingsName,
+          serverSettingsDesc: it.serverSettingsDesc,
+          serverSettingsAutoPause: it.serverSettingsAutoPause,
+          serverSettingsMaxPlayers: it.serverSettingsMaxPlayers,
+          serverSettingsAfkAutokick: it.serverSettingsAfkAutokick,
+        };
+      });
+    return { ok: true, items: publicItems };
+  }
+
+  @Get('public-servers/:id/download-mods')
+  async downloadInstanceModsPublic(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    if (!this.config.webPanel.public_page_enabled) {
+      throw new ForbiddenException('Public page is disabled');
+    }
+    if (!this.config.webPanel.public_page_allow_mod_downloads) {
+      throw new ForbiddenException('Public mod downloads are disabled');
+    }
+
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000;
+    const maxRequests = 3;
+
+    let timestamps = this.downloadRateLimits.get(ip) || [];
+    timestamps = timestamps.filter((t) => now - t < windowMs);
+    if (timestamps.length >= maxRequests) {
+      throw new ForbiddenException(
+        'Rate limit exceeded. Please try again in 15 minutes.',
+      );
+    }
+    timestamps.push(now);
+    this.downloadRateLimits.set(ip, timestamps);
+
+    const inst = this.instances.getById(id);
+    if (!inst || !inst.isPublic) {
+      throw new NotFoundException('Public server not found');
+    }
+
+    const data = await this.instances.withInstance(id, () =>
+      this.bridge.submit('build_mods_archive'),
+    );
+
+    const path = String(data.path || '');
+    if (!path || !fs.existsSync(path)) {
+      throw new NotFoundException('Mods archive not found');
+    }
+
+    return res.download(path, String(data.name || 'mods.zip'));
   }
 
   @UseGuards(AuthGuard)

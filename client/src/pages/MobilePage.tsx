@@ -324,7 +324,7 @@ export default function MobilePage() {
                       onClick={() => changeTheme(item.id)}
                     >
                       <span className="mobile-theme-chip__swatch" aria-hidden="true" />
-                      <span className="mobile-theme-chip__label">{item.label}</span>
+                      <span className="mobile-theme-chip__label">{t('ui_theme_' + item.id) || item.label}</span>
                     </button>
                   ))}
                 </div>

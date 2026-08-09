@@ -1,6 +1,6 @@
 import AdmZip from 'adm-zip';
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
+import { basename, dirname, extname, join, normalize, resolve } from 'path';
 
 export type LocaleSections = Record<string, Record<string, string>>;
 
@@ -375,4 +375,87 @@ export function resolveModDisplayTitlesBatch(opts: {
     );
   }
   return out;
+}
+
+function getVersionFromInfo(pkgPath: string): string {
+  try {
+    if (!pkgPath.toLowerCase().endsWith('.zip')) {
+      const infoPath = join(pkgPath, 'info.json');
+      if (existsSync(infoPath)) {
+        const info = JSON.parse(readFileSync(infoPath, 'utf-8'));
+        if (typeof info.version === 'string' && info.version.trim()) {
+          return info.version.trim();
+        }
+      }
+    } else {
+      const zip = new AdmZip(pkgPath);
+      for (const ent of zip.getEntries()) {
+        if (ent.isDirectory) continue;
+        const parts = ent.entryName.replace(/\\/g, '/').split('/');
+        if (parts.length === 2 && parts[1] === 'info.json') {
+          const info = JSON.parse(zip.readAsText(ent, 'utf8'));
+          if (typeof info.version === 'string' && info.version.trim()) {
+            return info.version.trim();
+          }
+          break;
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  const base = basename(pkgPath).replace(/\.zip$/i, '');
+  const idx = base.indexOf('_');
+  return idx >= 0 ? base.slice(idx + 1) : '';
+}
+
+const modDetailsLangCache = new Map<string, Map<string, { mtime: number; title: string; version: string }>>();
+
+export function getModDetailsCached(pkgPath: string, lang: string): { title: string; version: string } {
+  const lc = String(lang || 'en').trim().toLowerCase();
+  let langMap = modDetailsLangCache.get(lc);
+  if (!langMap) {
+    langMap = new Map();
+    modDetailsLangCache.set(lc, langMap);
+  }
+  
+  try {
+    const stat = statSync(pkgPath);
+    const mtime = stat.mtimeMs;
+    const cached = langMap.get(pkgPath);
+    if (cached && cached.mtime === mtime) {
+      return { title: cached.title, version: cached.version };
+    }
+    
+    const folder = dirname(pkgPath);
+    const name = basename(pkgPath).replace(/\.zip$/i, '').split('_')[0];
+    const dataDir = join(dirname(folder), 'data');
+    
+    const { active, en } = loadModListLocales(
+      folder,
+      dataDir,
+      [name],
+      lc,
+    );
+    const sections = lc !== 'en' ? active : en;
+    const cache = new Map<string, string>();
+    const title = resolveModRowTitle(
+      name,
+      folder,
+      dataDir,
+      sections,
+      cache,
+    );
+    
+    const version = getVersionFromInfo(pkgPath);
+    const finalTitle = title || name;
+    langMap.set(pkgPath, { mtime, title: finalTitle, version });
+    return { title: finalTitle, version };
+  } catch {
+    const base = basename(pkgPath).replace(/\.zip$/i, '');
+    const idx = base.indexOf('_');
+    const name = idx >= 0 ? base.slice(0, idx) : base;
+    const version = idx >= 0 ? base.slice(idx + 1) : '';
+    return { title: name, version };
+  }
 }

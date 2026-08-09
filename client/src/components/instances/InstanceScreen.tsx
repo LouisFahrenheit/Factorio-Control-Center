@@ -33,6 +33,7 @@ import { InstancePathBrowserModal } from './InstancePathBrowserModal';
 import { AppIcon } from '../AppIcon';
 import { InstanceRowMenu } from './InstanceRowMenu';
 import { InstanceSettingsTab } from './InstanceSettingsTab';
+import { InstancePublicTab } from './InstancePublicTab';
 import { InstanceTable } from './InstanceTable';
 import { InstanceServersBar } from './InstanceServersBar';
 import { InstanceServersEmpty, InstanceServersNoResults } from './InstanceServersEmpty';
@@ -45,7 +46,7 @@ import {
 
 type InstancesApi = ReturnType<typeof useInstances>;
 
-type InstanceTabKey = 'servers' | 'maintenance' | 'settings' | 'access';
+type InstanceTabKey = 'servers' | 'maintenance' | 'settings' | 'access' | 'public';
 
 interface InstanceScreenProps {
   user: AuthUser | null;
@@ -91,7 +92,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
 
   const tabAllowed = useCallback(
     (key: InstanceTabKey) => {
-      if (key === 'settings' || key === 'access') return isAdmin(user);
+      if (key === 'settings' || key === 'access' || key === 'public') return isAdmin(user);
       if (key === 'maintenance') return userHasTab(user, 'maintenance');
       return true;
     },
@@ -228,7 +229,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
     selectedId || '',
     t,
   );
-  const programSettings = useProgramSettings(activeTab === 'settings', t, () => void reloadLocale());
+  const programSettings = useProgramSettings(activeTab === 'settings' || activeTab === 'public', t, () => void reloadLocale());
   const webUsers = useWebUsers(activeTab === 'access', t);
 
   const instanceEditor = useInstanceEditor({
@@ -353,6 +354,24 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
               <span className="sub-tabs__tab-inner">
                 <AppIcon name="settings" size={18} />
                 {t('instances_tab_settings')}
+              </span>
+            </button>
+          )}
+          {tabAllowed('public') && (
+            <button
+              type="button"
+              className={
+                'sub-tabs__tab btn--with-icon' + (activeTab === 'public' ? ' sub-tabs__tab--active' : '')
+              }
+              id="instanceTabPublicBtn"
+              role="tab"
+              aria-selected={activeTab === 'public'}
+              {...{ [TAB_INDICATOR_ID_ATTR]: 'public' }}
+              onClick={() => activateTab('public')}
+            >
+              <span className="sub-tabs__tab-inner">
+                <AppIcon name="lan" size={18} />
+                {t('instances_tab_public') || 'Public Page'}
               </span>
             </button>
           )}
@@ -577,6 +596,9 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <InstanceSettingsTab settings={programSettings} t={t} />
           )}
           {activeTab === 'access' && <InstanceAccessTab webUsers={webUsers} t={t} />}
+          {activeTab === 'public' && (
+            <InstancePublicTab instances={rows} instancesApi={instances} settings={programSettings} t={t} />
+          )}
         </TabPanelsTransition>
       </motion.div>
 

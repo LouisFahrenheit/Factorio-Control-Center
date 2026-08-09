@@ -34,6 +34,16 @@ export interface WebPanelIni {
   log_write_audit: boolean;
   log_reformat_timestamps: boolean;
   mod_download_concurrency: number;
+  public_page_enabled: boolean;
+  public_page_allow_mod_downloads: boolean;
+  public_page_route: string;
+  public_page_title: string;
+  public_page_subtitle: string;
+  public_page_theme: string;
+  public_page_hide_title: boolean;
+  public_page_hide_subtitle: boolean;
+  public_page_show_players: boolean;
+  public_page_contact_link: string;
 }
 
 @Injectable()
@@ -120,6 +130,16 @@ export class FccConfigService {
         1,
         Math.min(8, num('mod_download_concurrency', 4)),
       ),
+      public_page_enabled: bool('public_page_enabled', false),
+      public_page_allow_mod_downloads: bool('public_page_allow_mod_downloads', false),
+      public_page_route: String(w.public_page_route || '/servers'),
+      public_page_title: String(w.public_page_title || ''),
+      public_page_subtitle: String(w.public_page_subtitle || ''),
+      public_page_theme: String(w.public_page_theme || ''),
+      public_page_hide_title: bool('public_page_hide_title', false),
+      public_page_hide_subtitle: bool('public_page_hide_subtitle', false),
+      public_page_show_players: bool('public_page_show_players', false),
+      public_page_contact_link: String(w.public_page_contact_link || ''),
     };
   }
 

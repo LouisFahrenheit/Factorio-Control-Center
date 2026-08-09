@@ -204,6 +204,43 @@ export function readServerSettingsNetworkFlags(serverPath: string): {
   }
 }
 
+export interface ServerSettingsDetails {
+  name: string;
+  description: string;
+  auto_pause: boolean;
+  max_players: number;
+  afk_autokick_interval: number;
+}
+
+export function readServerSettingsDetails(serverPath: string): ServerSettingsDetails {
+  const settingsPath = join(serverPath, 'server-settings.json');
+  const defaults: ServerSettingsDetails = {
+    name: '',
+    description: '',
+    auto_pause: true,
+    max_players: 0,
+    afk_autokick_interval: 0,
+  };
+  if (!existsSync(settingsPath)) {
+    return defaults;
+  }
+  try {
+    const data = JSON.parse(readFileSync(settingsPath, 'utf-8')) as Record<
+      string,
+      unknown
+    >;
+    return {
+      name: typeof data.name === 'string' ? data.name : '',
+      description: typeof data.description === 'string' ? data.description : '',
+      auto_pause: data.auto_pause !== false,
+      max_players: typeof data.max_players === 'number' ? data.max_players : 0,
+      afk_autokick_interval: typeof data.afk_autokick_interval === 'number' ? data.afk_autokick_interval : 0,
+    };
+  } catch {
+    return defaults;
+  }
+}
+
 export function readJsonPath(path: string): OpResult {
   if (!existsSync(path)) return { ok: false, error: 'not_found', data: null };
   try {

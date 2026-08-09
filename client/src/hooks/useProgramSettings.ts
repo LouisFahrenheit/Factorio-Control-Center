@@ -255,6 +255,144 @@ export function useProgramSettings(
     [saveField],
   );
 
+  const setPublicPageEnabled = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, public_page_enabled: checked }));
+      try {
+        await saveField({ public_page_enabled: checked });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_enabled: !checked }));
+      }
+    },
+    [saveField],
+  );
+
+  const setPublicPageAllowModDownloads = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, public_page_allow_mod_downloads: checked }));
+      try {
+        await saveField({ public_page_allow_mod_downloads: checked });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_allow_mod_downloads: !checked }));
+      }
+    },
+    [saveField],
+  );
+
+  const setPublicPageShowPlayers = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, public_page_show_players: checked }));
+      try {
+        await saveField({ public_page_show_players: checked });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_show_players: !checked }));
+      }
+    },
+    [saveField],
+  );
+
+  const setPublicPageContactLink = useCallback(
+    async (link: string) => {
+      const prev = draft.public_page_contact_link;
+      setDraft((d) => ({ ...d, public_page_contact_link: link }));
+      try {
+        await saveField({ public_page_contact_link: link });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_contact_link: prev }));
+      }
+    },
+    [draft.public_page_contact_link, saveField],
+  );
+
+  const setPublicPageRoute = useCallback(
+    async (route: string) => {
+      const prev = draft.public_page_route;
+      setDraft((d) => ({ ...d, public_page_route: route }));
+      try {
+        await saveField({ public_page_route: route });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_route: prev }));
+      }
+    },
+    [draft.public_page_route, saveField],
+  );
+
+  const setPublicHost = useCallback(
+    async (host: string) => {
+      const prev = draft.public_host;
+      setDraft((d) => ({ ...d, public_host: host }));
+      try {
+        await saveField({ public_host: host });
+      } catch {
+        setDraft((d) => ({ ...d, public_host: prev }));
+      }
+    },
+    [draft.public_host, saveField],
+  );
+
+  const setPublicPageTitle = useCallback(
+    async (title: string) => {
+      const prev = draft.public_page_title;
+      setDraft((d) => ({ ...d, public_page_title: title }));
+      try {
+        await saveField({ public_page_title: title });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_title: prev }));
+      }
+    },
+    [draft.public_page_title, saveField],
+  );
+
+  const setPublicPageTheme = useCallback(
+    async (theme: string) => {
+      const prev = draft.public_page_theme;
+      setDraft((d) => ({ ...d, public_page_theme: theme }));
+      try {
+        await saveField({ public_page_theme: theme });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_theme: prev }));
+      }
+    },
+    [draft.public_page_theme, saveField],
+  );
+
+  const setPublicPageHideTitle = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, public_page_hide_title: checked }));
+      try {
+        await saveField({ public_page_hide_title: checked });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_hide_title: !checked }));
+      }
+    },
+    [saveField],
+  );
+
+  const setPublicPageHideSubtitle = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, public_page_hide_subtitle: checked }));
+      try {
+        await saveField({ public_page_hide_subtitle: checked });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_hide_subtitle: !checked }));
+      }
+    },
+    [saveField],
+  );
+
+  const setPublicPageSubtitle = useCallback(
+    async (subtitle: string) => {
+      const prev = draft.public_page_subtitle;
+      setDraft((d) => ({ ...d, public_page_subtitle: subtitle }));
+      try {
+        await saveField({ public_page_subtitle: subtitle });
+      } catch {
+        setDraft((d) => ({ ...d, public_page_subtitle: prev }));
+      }
+    },
+    [draft.public_page_subtitle, saveField],
+  );
+
   const setLanguage = useCallback(
     async (language: string) => {
       const prev = draft.language;
@@ -450,6 +588,17 @@ export function useProgramSettings(
     restartWebPanel,
     uploadTlsFile,
     saveLogRotationSettings,
+    setPublicPageEnabled,
+    setPublicPageAllowModDownloads,
+    setPublicPageRoute,
+    setPublicHost,
+    setPublicPageTitle,
+    setPublicPageSubtitle,
+    setPublicPageTheme,
+    setPublicPageHideTitle,
+    setPublicPageHideSubtitle,
+    setPublicPageShowPlayers,
+    setPublicPageContactLink,
   };
 }
 

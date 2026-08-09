@@ -34,6 +34,16 @@ export interface ProgramSettings {
   log_rotation_max_mb?: number;
   log_rotation_interval_hours?: number;
   log_rotation_backup_count?: number;
+  public_page_enabled?: boolean;
+  public_page_route?: string;
+  public_page_title?: string;
+  public_page_subtitle?: string;
+  public_page_theme?: string;
+  public_page_hide_title?: boolean;
+  public_page_hide_subtitle?: boolean;
+  public_page_allow_mod_downloads?: boolean;
+  public_page_show_players?: boolean;
+  public_page_contact_link?: string;
   ok?: boolean;
   error?: string;
 }

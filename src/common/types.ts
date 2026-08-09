@@ -16,6 +16,9 @@ export interface InstanceItem {
   maintenanceLock?: boolean;
   blockUpdates?: boolean;
   experimentalUpdates?: boolean;
+  isPublic?: boolean;
+  publicDescription?: string;
+  publicConnectionAddress?: string;
 }
 
 export interface InstancesState {

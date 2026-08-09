@@ -18,6 +18,11 @@ export interface InstanceItem {
   autostartServer?: boolean;
   blockUpdates?: boolean;
   experimentalUpdates?: boolean;
+  isPublic?: boolean;
+  publicDescription?: string;
+  publicConnectionAddress?: string;
+  publicMods?: { name: string; title: string; version?: string }[];
+  publicPlayers?: string[];
   maintenanceLock?: boolean;
   maintenanceManualPending?: boolean;
   modJobRunning?: boolean;
@@ -26,6 +31,11 @@ export interface InstanceItem {
   serverPath?: string;
   ip?: string;
   rconPassword?: string;
+  serverSettingsName?: string;
+  serverSettingsDesc?: string;
+  serverSettingsAutoPause?: boolean;
+  serverSettingsMaxPlayers?: number;
+  serverSettingsAfkAutokick?: number;
 }
 
 export interface InstancesListResponse {

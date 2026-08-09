@@ -96,6 +96,16 @@ export class ProgramOpsService {
       log_write_maintenance: wp.log_write_maintenance,
       log_write_audit: wp.log_write_audit,
       log_reformat_timestamps: wp.log_reformat_timestamps,
+      public_page_enabled: wp.public_page_enabled,
+      public_page_allow_mod_downloads: wp.public_page_allow_mod_downloads,
+      public_page_route: wp.public_page_route,
+      public_page_title: wp.public_page_title,
+      public_page_subtitle: wp.public_page_subtitle,
+      public_page_theme: wp.public_page_theme,
+      public_page_hide_title: wp.public_page_hide_title,
+      public_page_hide_subtitle: wp.public_page_hide_subtitle,
+      public_page_show_players: wp.public_page_show_players,
+      public_page_contact_link: wp.public_page_contact_link || '',
       theme,
       available_themes: [...KNOWN_THEMES],
       language,
@@ -232,6 +242,16 @@ export class ProgramOpsService {
       'public_port',
       'listen_host',
       'listen_port',
+      'public_page_enabled',
+      'public_page_allow_mod_downloads',
+      'public_page_route',
+      'public_page_title',
+      'public_page_subtitle',
+      'public_page_theme',
+      'public_page_hide_title',
+      'public_page_hide_subtitle',
+      'public_page_show_players',
+      'public_page_contact_link',
     ] as const;
 
     for (const key of wpKeys) {
@@ -245,7 +265,12 @@ export class ProgramOpsService {
         key === 'server_settings_apply_global_credentials' ||
         key.startsWith('log_write_') ||
         key === 'log_reformat_timestamps' ||
-        key === 'tls_enabled'
+        key === 'tls_enabled' ||
+        key === 'public_page_enabled' ||
+        key === 'public_page_allow_mod_downloads' ||
+        key === 'public_page_hide_title' ||
+        key === 'public_page_hide_subtitle' ||
+        key === 'public_page_show_players'
       ) {
         ini.web_panel[key] =
           typeof raw === 'boolean'
