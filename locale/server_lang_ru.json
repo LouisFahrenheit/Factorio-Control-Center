@@ -1614,7 +1614,7 @@
   "public_page_route": "Маршрут публичной страницы",
   "public_servers": "Публичные серверы",
   "public_servers_desc": "Управление видимостью серверов на публичной странице и их описание.",
-  "toggle_public": "Переключить публичную видимость",
+
   "public_description_placeholder": "Введите публичное описание...",
   "no_description": "Нет описания",
   "public_servers_page_title": "Серверы Factorio",
@@ -1630,10 +1630,10 @@
   "server_status_stopped": "Выключен",
   "public_page_title": "Заголовок страницы",
   "public_page_subtitle": "Подзаголовок страницы",
-  "view_mod_list": "Посмотреть список модов",
+
   "public_page_theme": "Тема страницы",
   "theme_default": "Как в панели",
-  "public_page_theme_desc": "Переопределяет тему для публичной страницы серверов.",
+
   "public_page_hide_title": "Скрыть заголовок",
   "public_page_hide_subtitle": "Скрыть подзаголовок",
   "server_name": "Имя сервера",
@@ -1646,12 +1646,12 @@
   "page_not_found_subtitle": "Страница не найдена",
   "page_not_found_desc": "Запрашиваемая страница не существует или была отключена администратором.",
   "public_page_allow_mod_downloads": "Разрешить скачивание модов",
-  "public_page_allow_mod_downloads_desc": "Разрешает пользователям скачивать активные моды сервера в виде ZIP-архива.",
+
   "download_mods_zip": "Скачать моды (.zip)",
   "download_limit_exceeded": "Превышен лимит скачиваний. Попробуйте через 15 минут.",
   "download_complete": "Загрузка архива модов успешно запущена!",
   "public_page_show_players": "Показывать список игроков",
-  "public_page_show_players_desc": "Разрешает пользователям просматривать список подключённых игроков.",
+
   "online_players": "Игроки в сети",
   "public_page_contact_link": "Ссылка на контакты / сообщество",
   "public_page_contact_link_desc": "Ссылка на ваш Discord, Telegram или веб-сайт. Отображается вверху публичной страницы.",

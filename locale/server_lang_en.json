@@ -1614,7 +1614,7 @@
   "public_page_route": "Public Page Route",
   "public_servers": "Public Servers",
   "public_servers_desc": "Manage server visibility on the public page and their descriptions.",
-  "toggle_public": "Toggle public visibility",
+
   "public_description_placeholder": "Enter public description...",
   "no_description": "No description",
   "public_servers_page_title": "Factorio Servers",
@@ -1630,10 +1630,10 @@
   "server_status_stopped": "Offline",
   "public_page_title": "Page Title",
   "public_page_subtitle": "Page Subtitle",
-  "view_mod_list": "View mod list",
+
   "public_page_theme": "Page Theme",
   "theme_default": "Same as panel theme",
-  "public_page_theme_desc": "Overrides the theme used for the public servers page.",
+
   "public_page_hide_title": "Hide Page Title",
   "public_page_hide_subtitle": "Hide Page Subtitle",
   "server_name": "Server Name",
@@ -1646,12 +1646,12 @@
   "page_not_found_subtitle": "Page Not Found",
   "page_not_found_desc": "The requested page does not exist or has been disabled by the administrator.",
   "public_page_allow_mod_downloads": "Allow mods download",
-  "public_page_allow_mod_downloads_desc": "Allows users to download active server mods as a ZIP archive.",
+
   "download_mods_zip": "Download mods (.zip)",
   "download_limit_exceeded": "Rate limit exceeded. Please try again in 15 minutes.",
   "download_complete": "Mods download started!",
   "public_page_show_players": "Show online players list",
-  "public_page_show_players_desc": "Allows users to view the list of online players.",
+
   "online_players": "Online Players",
   "public_page_contact_link": "External Contact Link",
   "public_page_contact_link_desc": "A link to your Discord, Telegram, or website, displayed at the top of the public page.",
