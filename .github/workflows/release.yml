@@ -1,5 +1,3 @@
-# Monorepo (DEV-Main): the active workflow is ../../.github/workflows/release.yml
-# This copy applies only if this folder is the repository root.
 name: Release
 
 on:
