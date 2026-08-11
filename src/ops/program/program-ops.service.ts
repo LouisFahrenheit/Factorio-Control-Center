@@ -69,11 +69,9 @@ export class ProgramOpsService {
     const langs = this.availableLanguages();
     const theme = this.normalizeTheme(shared.theme);
     const language = this.normalizeLang(ini.language?.code, langs);
-    const selected = this.instances.getSelected();
 
     return {
       ok: true,
-      autostart_server: !!selected?.autostartServer,
       translate_mod_names: this.bool(shared.translate_mod_names, true),
       web_disable_effects: wp.web_disable_effects,
       sync_bans_across_instances: wp.sync_bans_across_instances,
@@ -181,12 +179,7 @@ export class ProgramOpsService {
       this.portal.clearVerifyCache();
     }
 
-    if ('autostart_server' in kwargs) {
-      const val = this.bool(kwargs.autostart_server);
-      const id = this.instances.getSelectedId();
-      const item = id ? this.instances.getById(id) : undefined;
-      if (item) this.instances.update(id, { ...item, autostartServer: val });
-    }
+
 
     if ('translate_mod_names' in kwargs) {
       ini.shared.translate_mod_names = this.bool(kwargs.translate_mod_names)
