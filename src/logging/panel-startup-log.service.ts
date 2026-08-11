@@ -101,8 +101,8 @@ export class PanelStartupLogService {
     const userCount = this.users.load().users.length;
     const lang = this.config.langCode || 'en';
     const nodeVersion = process.version;
-    const selected = this.instances.getSelected();
-    const autostartQueued = !!selected?.autostartServer;
+    const autostartCount = this.instances.load().items.filter(i => i.autostartServer).length;
+    const autostartQueued = autostartCount > 0;
     const { total: maintTotal, active: maintActive } =
       this.countMaintenanceTasks();
 

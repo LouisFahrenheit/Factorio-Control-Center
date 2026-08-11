@@ -25,7 +25,14 @@ export class InstanceAutostartService {
 
   /** Run after the web panel HTTP listener is up (legacy headless parity). */
   scheduleAfterPanelStart(): void {
-    setTimeout(() => void this.maybeAutostart(0), AUTOSTART_DELAY_MS);
+    setTimeout(() => void this.runAutostarts(), AUTOSTART_DELAY_MS);
+  }
+
+  private async runAutostarts(): Promise<void> {
+    const items = this.instances.load().items.filter(i => i.autostartServer);
+    for (const item of items) {
+      await this.maybeAutostart(item.id, 0);
+    }
   }
 
   private formatLocale(key: string, ...args: (string | number)[]): string {
@@ -52,8 +59,8 @@ export class InstanceAutostartService {
     return String(item?.name || item?.id || '?').trim() || '?';
   }
 
-  async maybeAutostart(attempt: number): Promise<void> {
-    let item = this.instances.getSelected();
+  async maybeAutostart(instanceId: string, attempt: number): Promise<void> {
+    let item = this.instances.getById(instanceId);
     try {
       if (!item?.autostartServer) return;
     } catch (e) {
@@ -89,7 +96,7 @@ export class InstanceAutostartService {
           result.error === 'missing_server_settings' &&
           attempt + 1 < MAX_ATTEMPTS
         ) {
-          setTimeout(() => void this.maybeAutostart(attempt + 1), RETRY_MS);
+          setTimeout(() => void this.maybeAutostart(instanceId, attempt + 1), RETRY_MS);
           return;
         }
         this.logLine(
