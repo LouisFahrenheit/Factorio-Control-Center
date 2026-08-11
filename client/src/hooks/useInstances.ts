@@ -16,6 +16,7 @@ import { notifyErr, notifyWarn } from '../lib/notify';
 import type { InstanceItem, InstancesListResponse } from '../types/instance';
 import type { AuthUser } from '../types/instance';
 import { getStoredSelectedInstance, setStoredSelectedInstance } from '../lib/selectedInstanceStorage';
+import { isSocketConnected } from '../api/socket';
 
 type StatusOverride = { status: string; until: number };
 
@@ -42,7 +43,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     queryKey: ['instances'],
     queryFn: () => api<InstancesListResponse>('/api/instances'),
     enabled,
-    refetchInterval: enabled ? 3000 : false,
+    refetchInterval: enabled ? (isSocketConnected() ? 15_000 : 3000) : false,
   });
 
   const rows = useMemo(() => {

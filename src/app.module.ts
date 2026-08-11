@@ -51,6 +51,7 @@ import { WebPanelEventLogService } from './logging/web-panel-event-log.service';
 import { PanelStartupLogService } from './logging/panel-startup-log.service';
 import { WebPanelListenerService } from './http/web-panel-listener.service';
 import { FirewallService } from './ops/firewall/firewall.service';
+import { EventsGateway } from './ws/events.gateway';
 
 const fccRoot = resolve(trimPath(process.env.FCC_ROOT_DIR) || process.cwd());
 const publicAssets = join(fccRoot, 'public', 'assets');
@@ -138,6 +139,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     PanelStartupLogService,
     WebPanelListenerService,
     AuthGuard,
+    EventsGateway,
     {
       provide: APP_INTERCEPTOR,
       useClass: InstanceContextInterceptor,

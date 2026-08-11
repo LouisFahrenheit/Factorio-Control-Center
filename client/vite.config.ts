@@ -45,6 +45,11 @@ export default defineConfig({
         target: nestTarget,
         changeOrigin: true,
       },
+      '/socket.io': {
+        target: nestTarget,
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   build: {

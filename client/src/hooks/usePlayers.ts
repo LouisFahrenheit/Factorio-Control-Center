@@ -9,6 +9,7 @@ import {
 } from '../lib/playerUtils';
 import { isNetworkFetchError, notifyNetworkFetchError } from '../lib/networkErrors';
 import { notifyErr, notifyWarn } from '../lib/notify';
+import { isSocketConnected } from '../api/socket';
 import type { AuthUser } from '../types/instance';
 import type { PlayersSummary } from '../types/players';
 
@@ -29,7 +30,8 @@ export function usePlayers(
 
   const canEditAdmins = canEditServerAdminList(user);
 
-  const accessPollMs = enabled && !historyOnly ? 2000 : false;
+  const wsActive = isSocketConnected();
+  const accessPollMs = enabled && !historyOnly ? (wsActive ? 15_000 : 2000) : false;
 
   const summaryQuery = useQuery({
     queryKey: ['players', 'summary'],

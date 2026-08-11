@@ -5,6 +5,7 @@ import { UsersService } from './auth/users.service';
 import { WebPanelListenerService } from './http/web-panel-listener.service';
 import { InstanceAutostartService } from './instances/instance-autostart.service';
 import { PanelStartupLogService } from './logging/panel-startup-log.service';
+import { FccWsAdapter } from './ws/ws-adapter';
 import { APP_NAME, APP_VERSION } from './constants/fcc.constants';
 
 process.title = `${APP_NAME} v${APP_VERSION}`;
@@ -16,6 +17,10 @@ async function bootstrap() {
 
   app.get(PathsService);
   app.get(UsersService).load();
+
+  // Create the WS adapter and register it before app.init()
+  const wsAdapter = new FccWsAdapter(app);
+  app.useWebSocketAdapter(wsAdapter);
 
   // Required when using a custom http/https server instead of app.listen().
   await app.init();
@@ -44,6 +49,12 @@ async function bootstrap() {
     const msg = e instanceof Error ? e.message : String(e);
     console.error(`Failed to start web listener: ${msg}`);
     process.exit(1);
+  }
+
+  // Attach Socket.IO WebSocket adapter to the same HTTP server
+  const httpServer = listener.getServer();
+  if (httpServer) {
+    wsAdapter.setHttpServer(httpServer);
   }
 
   app.get(PanelStartupLogService).logReady();

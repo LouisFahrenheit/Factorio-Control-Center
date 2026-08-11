@@ -44,6 +44,10 @@ export class WebPanelListenerService implements OnModuleDestroy {
     return this.lastError;
   }
 
+  getServer(): ListenerServer | null {
+    return this.server;
+  }
+
   async onModuleDestroy(): Promise<void> {
     await this.stop();
   }
