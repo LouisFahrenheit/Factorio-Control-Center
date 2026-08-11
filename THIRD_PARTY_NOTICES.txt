@@ -1,6 +1,6 @@
 THIRD-PARTY NOTICES
 Factorio Control Center
-Version 1.0.0
+Version 1.1.0
 
 This file lists third-party software included in or distributed with
 Factorio Control Center. See the LICENSE file for this application.
@@ -80,7 +80,7 @@ append-field@1.0.0
   License: MIT
   Repository: https://github.com/LinusU/node-append-field
 
-body-parser@2.2.2
+body-parser@2.3.0
   License: MIT
   Repository: https://github.com/expressjs/body-parser
 
@@ -571,9 +571,9 @@ clsx@2.1.1
   License: MIT
   Repository: https://github.com/lukeed/clsx
 
-cookie@1.1.1
+cookie-es@3.1.1
   License: MIT
-  Repository: https://github.com/jshttp/cookie
+  Repository: https://github.com/unjs/cookie-es
 
 csstype@3.2.3
   License: MIT
@@ -623,9 +623,9 @@ prop-types@15.8.1
   License: MIT
   Repository: https://github.com/facebook/prop-types
 
-react-dom@19.2.6
+react-dom@19.2.8
   License: MIT
-  Repository: https://github.com/facebook/react
+  Repository: https://github.com/react/react
 
 react-is@16.13.1
   License: MIT
@@ -643,11 +643,7 @@ react-remove-scroll@2.7.2
   License: MIT
   Repository: https://github.com/theKashey/react-remove-scroll
 
-react-router-dom@7.15.1
-  License: MIT
-  Repository: https://github.com/remix-run/react-router
-
-react-router@7.15.1
+react-router@8.3.0
   License: MIT
   Repository: https://github.com/remix-run/react-router
 
@@ -663,17 +659,13 @@ react-transition-group@4.4.5
   License: BSD-3-Clause
   Repository: https://github.com/reactjs/react-transition-group
 
-react@19.2.6
+react@19.2.8
   License: MIT
-  Repository: https://github.com/facebook/react
+  Repository: https://github.com/react/react
 
 scheduler@0.27.0
   License: MIT
   Repository: https://github.com/facebook/react
-
-set-cookie-parser@2.7.2
-  License: MIT
-  Repository: https://github.com/nfriedly/set-cookie-parser
 
 tabbable@6.4.0
   License: MIT
