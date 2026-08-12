@@ -35,7 +35,7 @@ export default function InstancesPage() {
 
   const { user, logout } = useAuth();
 
-  const instances = useInstances(ready, t);
+  const instances = useInstances(true, t);
   const freshLoginReveal = isFreshLoginReveal();
   useAppShellReveal();
 

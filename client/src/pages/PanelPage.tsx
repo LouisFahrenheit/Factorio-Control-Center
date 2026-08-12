@@ -50,7 +50,7 @@ export default function PanelPage() {
   const { ready, strings } = useLocale();
   const { user, logout } = useAuth();
   useAppShellReveal();
-  const instances = useInstances(ready, t);
+  const instances = useInstances(true, t);
   const [activeTab, setActiveTab] = useState<PanelTabKey>('main');
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);

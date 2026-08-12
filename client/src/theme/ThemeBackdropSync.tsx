@@ -20,7 +20,7 @@ export function ThemeBackdropSync() {
   const isMobile = pathname === '/mobile' || pathname.startsWith('/mobile/');
   const loggedIn = !!user && !isLogin;
 
-  const instances = useInstances(ready && loggedIn && (isInstances || isPanel || isMobile), t);
+  const instances = useInstances(loggedIn && (isInstances || isPanel || isMobile), t);
 
   const panelStatusQ = useQuery({
     queryKey: ['panel', 'status'],

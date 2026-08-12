@@ -20,7 +20,7 @@ export default function MobilePage() {
   const t = useT();
   const { ready, availableLanguages, panelDefaultLanguage, reload: reloadLocale } = useLocale();
   const { user, logout } = useAuth();
-  const instances = useInstances(ready, t);
+  const instances = useInstances(true, t);
   const programQuery = useQuery({
     queryKey: ['program', 'settings'],
     queryFn: () => api<ProgramSettings>('/api/config/program'),

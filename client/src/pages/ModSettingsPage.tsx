@@ -35,7 +35,7 @@ export default function ModSettingsPage() {
   const t = useT();
   const { ready } = useLocale();
   const { user, logout } = useAuth();
-  const instances = useInstances(ready, t);
+  const instances = useInstances(true, t);
   const selectedId = String(instances.selectedId || '');
   const selectedInstance = useMemo(
     () => instances.rows.find((x) => String(x.id) === selectedId),
