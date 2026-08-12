@@ -20,7 +20,7 @@ import { shouldAutoEnterPanel } from '../lib/navFlags';
 import { navigateWorkspace } from '../lib/workspaceNav';
 
 import { useLocale, useT } from '../i18n/LocaleProvider';
-
+import { useSocket } from '../hooks/useSocket';
 import type { InstanceItem } from '../types/instance';
 
 
@@ -39,8 +39,9 @@ export default function InstancesPage() {
   const freshLoginReveal = isFreshLoginReveal();
   useAppShellReveal();
 
-  const [aboutOpen, setAboutOpen] = useState(false);
+  useSocket(!!user, '');
 
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
 

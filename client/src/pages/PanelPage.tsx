@@ -41,6 +41,7 @@ import { goToServers } from '../lib/goToServers';
 import { allowedPanelTabs, type PanelTabKey } from '../lib/permissions';
 import { resolveStatusKind } from '../types/panel';
 import { useLocale, useT } from '../i18n/LocaleProvider';
+import { useSocket } from '../hooks/useSocket';
 import type { ProgramSettings } from '../types/programSettings';
 
 export default function PanelPage() {
@@ -60,6 +61,8 @@ export default function PanelPage() {
     () => instances.rows.find((x) => String(x.id) === selectedId),
     [instances.rows, selectedId],
   );
+
+  useSocket(!!user, selectedId);
   const blockUpdates = !!selectedInstance?.blockUpdates;
   const experimentalUpdates = !!selectedInstance?.experimentalUpdates;
   const canMods = userHasTab(user, 'mods');

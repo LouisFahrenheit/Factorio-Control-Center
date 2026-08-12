@@ -29,6 +29,7 @@ import {
 } from './mod-deps';
 import { InstanceHistoryService } from './instance-history.service';
 import { panelLogLineTimestamp, panelTimestamp } from '../common/datetime.util';
+import { EventsGateway } from '../ws/events.gateway';
 import {
   FactorioLogSessionState,
   LIVE_LOG_RING_MAX,
@@ -97,6 +98,7 @@ export class RuntimeService implements OnModuleDestroy {
     private readonly config: FccConfigService,
     private readonly firewall: FirewallService,
     private readonly instanceHistory: InstanceHistoryService,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   onModuleDestroy(): void {
@@ -266,6 +268,8 @@ export class RuntimeService implements OnModuleDestroy {
       rt.stopping = false;
       rt.stopWatchdogActive = false;
       this.emitServerShutdownLogOnce(rt);
+      // Push status change: server process exited
+      this.emitRuntimeStatus(rt);
     });
 
     return { ok: true };
@@ -529,6 +533,12 @@ export class RuntimeService implements OnModuleDestroy {
     if (this.logRotation.logWriteInstanceEnabled()) {
       this.logRotation.appendLine(rt.logPath, line);
     }
+    // Push log line to WebSocket subscribers
+    try {
+      this.eventsGateway.emitLogLine(rt.instanceId, line);
+    } catch {
+      /* ignore WS errors */
+    }
   }
 
   private appendRuntimeEvent(rt: InstanceRuntime, text: string): void {
@@ -544,12 +554,24 @@ export class RuntimeService implements OnModuleDestroy {
   private parseRuntimeLine(rt: InstanceRuntime, line: string): void {
     if (CHAT_LOG_TAG_RE.test(line)) {
       this.logRotation.appendLine(join(rt.serverPath, 'chat_log.txt'), line);
+      // Push chat line to WebSocket subscribers
+      try {
+        this.eventsGateway.emitChatLine(rt.instanceId, line);
+      } catch {
+        /* ignore WS errors */
+      }
     }
 
     const joinMatch = JOIN_RE.exec(line);
     if (joinMatch?.[1]) {
       rt.onlinePlayers[joinMatch[1]] = new Date().toISOString();
       this.appendPlayerHistory(rt, joinMatch[1], 'JOIN');
+      // Push players update to WebSocket subscribers
+      try {
+        this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
+      } catch {
+        /* ignore WS errors */
+      }
       return;
     }
 
@@ -560,6 +582,12 @@ export class RuntimeService implements OnModuleDestroy {
     if (leaveName) {
       delete rt.onlinePlayers[leaveName];
       this.appendPlayerHistory(rt, leaveName, 'LEAVE');
+      // Push players update to WebSocket subscribers
+      try {
+        this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
+      } catch {
+        /* ignore WS errors */
+      }
       return;
     }
 
@@ -572,6 +600,8 @@ export class RuntimeService implements OnModuleDestroy {
       rt.lastStartFailed = false;
       rt.missingStartupDependencies = [];
       rt.missingStartupDepsSeen.clear();
+      // Push status change: server is now in-game
+      this.emitRuntimeStatus(rt);
     }
 
     if (!rt.inGame) {
@@ -616,6 +646,38 @@ export class RuntimeService implements OnModuleDestroy {
       );
     } catch {
       /* ignore */
+    }
+  }
+
+  /** Emit a lightweight status snapshot via WebSocket. */
+  private emitRuntimeStatus(rt: InstanceRuntime): void {
+    try {
+      const running = !!(rt.proc && rt.proc.exitCode === null);
+      let statusKind = 'stopped';
+      if (running && rt.stopping) statusKind = 'stopping';
+      else if (running && rt.inGame) statusKind = 'running';
+      else if (running) statusKind = 'starting';
+      else if (rt.lastStartFailed) statusKind = 'error';
+
+      this.eventsGateway.emitStatusUpdate(rt.instanceId, {
+        server_running: running && rt.inGame,
+        server_starting: running && !rt.inGame && !rt.stopping,
+        server_stopping: running && rt.stopping,
+        status_kind: statusKind,
+        last_start_failed: rt.lastStartFailed,
+        last_exit_code: rt.lastExitCode,
+        game_bind: rt.bind,
+        uptime_seconds:
+          running && rt.inGame
+            ? Math.max(0, Math.floor(Date.now() / 1000 - rt.startedAt))
+            : null,
+        online_players: Object.entries(rt.onlinePlayers).map(
+          ([name, since]) => ({ name, since }),
+        ),
+        game_version: rt.gameVersion,
+      });
+    } catch {
+      /* ignore WS errors */
     }
   }
 }

@@ -14,6 +14,8 @@ import { notifyApiError, notifyNetworkFetchError } from '../lib/networkErrors';
 import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import { resolveStatusKind, type PanelStatus } from '../types/panel';
 import type { InstanceItem } from '../types/instance';
+import { useSocketLogLines } from './useSocket';
+import { isSocketConnected } from '../api/socket';
 
 interface SaveRow {
   name?: string;
@@ -99,11 +101,27 @@ export function useServerControl(
     }
   }, [enabled, selectedId, t]);
 
+  // Append a single log line received via WebSocket
+  const appendWsLogLine = useCallback((line: string) => {
+    setLogLines((prev) => {
+      const next = [...prev, line];
+      // Keep only last 500 lines to avoid memory bloat
+      return next.length > 500 ? next.slice(-500) : next;
+    });
+  }, []);
+
+  // Subscribe to WS log_line events
+  useSocketLogLines(enabled, appendWsLogLine);
+
+  // Initial load + fallback polling (reduced rate when WS is active)
   useEffect(() => {
     if (!enabled) return;
     void refreshLogs();
 
     const logPollMs = (): number => {
+      // If WebSocket is connected, poll much less frequently (just as a safety net)
+      if (isSocketConnected()) return 30_000;
+      // Original polling logic when WS is not available
       if (kind === 'starting' || kind === 'stopping') return 450;
       if (kind === 'stopped' || kind === 'error' || kind === 'maintenance' || kind === 'maintenance_manual') {
         return 10_000;
