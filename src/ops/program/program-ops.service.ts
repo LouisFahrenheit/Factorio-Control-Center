@@ -131,6 +131,7 @@ export class ProgramOpsService {
       effective_listen_port: resolveBindPort(wp),
       effective_public_host: resolveDisplayHost(wp),
       effective_public_port: resolveDisplayPort(wp, resolveBindPort(wp)),
+      is_docker: existsSync('/.dockerenv'),
     };
   }
 

@@ -26,6 +26,7 @@ export interface ProgramSettings {
   effective_listen_port?: number;
   effective_public_host?: string;
   effective_public_port?: number;
+  is_docker?: boolean;
   log_write_instance?: boolean;
   log_write_web?: boolean;
   log_write_maintenance?: boolean;

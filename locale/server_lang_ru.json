@@ -1178,6 +1178,8 @@
   "program_factorio_credentials_incomplete": "Укажите и логин, и токен Factorio.",
   "program_settings_group_web_tls": "Параметры HTTPS",
   "program_settings_group_web_tls_tip": "Если панель за прокси или по домену — укажите публичный адрес и порт для отображения ссылок; иначе используются поля «Адрес» и «Порт».",
+  "program_settings_group_web_tls_docker_tip": "При работе в Docker используйте внешний Reverse Proxy.",
+  "program_settings_docker_bind_disabled": "Внутренние адрес и порт заблокированы в Docker. Если вам нужен другой порт — измените его через флаг -p при запуске контейнера.",
   "web_panel_tls_save_btn": "Сохранить",
   "web_panel_tls_upload_cert_btn": "Загрузить…",
   "web_panel_tls_upload_key_btn": "Загрузить…",

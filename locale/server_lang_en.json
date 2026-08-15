@@ -1177,6 +1177,8 @@
   "program_factorio_credentials_incomplete": "Enter both Factorio username and token.",
   "program_settings_group_web_tls": "HTTPS settings",
   "program_settings_group_web_tls_tip": "When the panel is behind a reverse proxy or uses a domain name, set the public address and port for links; otherwise Address and Port are used.",
+  "program_settings_group_web_tls_docker_tip": "When running in Docker, use an external reverse proxy.",
+  "program_settings_docker_bind_disabled": "Binding address and port are locked in Docker. If you need a different port, change it via docker run -p.",
   "web_panel_tls_save_btn": "Save",
   "web_panel_tls_upload_cert_btn": "Upload…",
   "web_panel_tls_upload_key_btn": "Upload…",
