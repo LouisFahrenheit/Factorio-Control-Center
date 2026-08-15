@@ -1,5 +1,6 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { existsSync } from 'fs';
 
 const execFileAsync = promisify(execFile);
 
@@ -60,6 +61,8 @@ export async function linuxAddFactorioUdpRule(
   port: number,
 ): Promise<{ ok: boolean; detail: string; created: boolean }> {
   if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port', created: false };
+  if (existsSync('/.dockerenv')) return { ok: true, detail: '', created: false };
+
   const iptables = await iptablesBin();
   if (!iptables) return { ok: false, detail: 'iptables not found in PATH', created: false };
 
