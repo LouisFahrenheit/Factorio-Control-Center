@@ -69,6 +69,11 @@ jobs:
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tags=ghcr.io/$OWNER/factorio-control-center:test,ghcr.io/$OWNER/factorio-control-center:${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=ghcr.io/$OWNER/factorio-control-center:latest,ghcr.io/$OWNER/factorio-control-center:${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Log in to GitHub Container Registry
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
@@ -87,6 +92,4 @@ jobs:
           build-args: |
             FCC_BUILD_NUMBER=${{ github.run_number }}
             FCC_BUILD_ID=${{ steps.version.outputs.short_sha }}
-          tags: |
-            ghcr.io/${{ steps.docker_meta.outputs.owner }}/factorio-control-center:latest
-            ghcr.io/${{ steps.docker_meta.outputs.owner }}/factorio-control-center:${{ steps.version.outputs.version }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
