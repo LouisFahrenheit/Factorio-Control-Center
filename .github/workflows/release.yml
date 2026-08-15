@@ -70,7 +70,8 @@ jobs:
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "tags=ghcr.io/$OWNER/factorio-control-center:test,ghcr.io/$OWNER/factorio-control-center:${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+            SAFE_REF=$(echo "${{ github.ref_name }}" | tr '/' '-')
+            echo "tags=ghcr.io/$OWNER/factorio-control-center:test,ghcr.io/$OWNER/factorio-control-center:$SAFE_REF" >> "$GITHUB_OUTPUT"
           else
             echo "tags=ghcr.io/$OWNER/factorio-control-center:latest,ghcr.io/$OWNER/factorio-control-center:${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
           fi
