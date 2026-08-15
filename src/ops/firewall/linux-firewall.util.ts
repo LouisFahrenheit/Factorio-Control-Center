@@ -58,12 +58,12 @@ async function linuxUdpRuleExists(
 export async function linuxAddFactorioUdpRule(
   _programExe: string,
   port: number,
-): Promise<{ ok: boolean; detail: string }> {
-  if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port' };
+): Promise<{ ok: boolean; detail: string; created: boolean }> {
+  if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port', created: false };
   const iptables = await iptablesBin();
-  if (!iptables) return { ok: false, detail: 'iptables not found in PATH' };
+  if (!iptables) return { ok: false, detail: 'iptables not found in PATH', created: false };
 
-  if (await linuxUdpRuleExists(port, iptables)) return { ok: true, detail: '' };
+  if (await linuxUdpRuleExists(port, iptables)) return { ok: true, detail: '', created: false };
 
   try {
     const { stdout, stderr } = await execFileAsync(
@@ -85,16 +85,16 @@ export async function linuxAddFactorioUdpRule(
     );
     const combined = `${stdout || ''}${stderr || ''}`.trim();
     if (await linuxUdpRuleExists(port, iptables))
-      return { ok: true, detail: '' };
+      return { ok: true, detail: '', created: true };
     const low = combined.toLowerCase();
     if (low.includes('already exists') || low.includes('file exists'))
-      return { ok: true, detail: '' };
-    return { ok: false, detail: combined || 'iptables failed' };
+      return { ok: true, detail: '', created: false };
+    return { ok: false, detail: combined || 'iptables failed', created: false };
   } catch (e) {
     if (await linuxUdpRuleExists(port, iptables))
-      return { ok: true, detail: '' };
+      return { ok: true, detail: '', created: true };
     const msg = e instanceof Error ? e.message : String(e);
-    if (/timeout/i.test(msg)) return { ok: false, detail: 'timeout' };
-    return { ok: false, detail: msg };
+    if (/timeout/i.test(msg)) return { ok: false, detail: 'timeout', created: false };
+    return { ok: false, detail: msg, created: false };
   }
 }

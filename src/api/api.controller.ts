@@ -176,7 +176,7 @@ export class ApiController {
   }
 
   @Get('locale-bootstrap')
-  localeBootstrap(@Query('lang') lang?: string) {
+  async localeBootstrap(@Query('lang') lang?: string) {
     const loc = this.locale.getLocale(lang);
     const w = this.config.webPanel;
     return {
@@ -185,7 +185,7 @@ export class ApiController {
       strings: loc.strings,
       theme: this.config.sharedTheme,
       web_disable_effects: w.web_disable_effects,
-      default_web_credentials: this.users.defaultAdminPasswordActive(),
+      default_web_credentials: await this.users.defaultAdminPasswordActive(),
       available_languages: this.locale.listAvailableLanguages(),
       default_toast_duration_sec: w.toast_duration_sec,
       panel_default_language: this.config.langCode,

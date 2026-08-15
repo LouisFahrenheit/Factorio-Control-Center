@@ -1,6 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
-import { cpSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { cpSync, existsSync, rmSync } from 'fs';
 import { join, dirname, basename, resolve } from 'path';
 import { randomBytes } from 'crypto';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
@@ -19,6 +21,9 @@ import {
 import { hasFactorioExecutable } from '../ops/path-manager';
 import { initializeInstanceServerFiles } from './instance-server-init';
 import type { OpResult } from '../ops/ops-utils';
+import { GameInstance } from './game-instance.entity';
+import { MaintenanceSchedule } from '../maintenance/maintenance-schedule.entity';
+import { SystemPreference } from '../config/system-preference.entity';
 
 export interface InstanceRemoveOptions {
   deleteFromDisk?: boolean;
@@ -33,34 +38,66 @@ export type InstanceOpResult = OpResult & {
 };
 
 @Injectable()
-export class InstancesService {
+export class InstancesService implements OnModuleInit {
   private readonly log = new Logger(InstancesService.name);
   private readonly instanceContext = new AsyncLocalStorage<string>();
 
+  // In-memory cache for synchronous reads (getById, getSelectedId)
+  // to avoid refactoring 30+ files to async. Writes will be async.
+  private cache: GameInstance[] = [];
+  private selectedId = '';
+
   constructor(
+    @InjectRepository(GameInstance)
+    private readonly repo: Repository<GameInstance>,
+    @InjectRepository(SystemPreference)
+    private readonly prefs: Repository<SystemPreference>,
+    @InjectRepository(MaintenanceSchedule)
+    private readonly maintenanceRepo: Repository<MaintenanceSchedule>,
     private readonly paths: PathsService,
     private readonly config: FccConfigService,
     private readonly auditLog: AuditLogService,
   ) {}
 
-  load(): InstancesState {
-    const fallback: InstancesState = { version: 1, items: [], selectedId: '' };
-    const data = readJsonFile<InstancesState>(
-      this.paths.instancesPath,
-      fallback,
-    );
-    if (!Array.isArray(data.items)) data.items = [];
-    return data;
+  async onModuleInit() {
+    this.cache = await this.repo.find();
+    const pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
+    if (pref) {
+      this.selectedId = pref.value || '';
+    }
   }
 
-  save(state: InstancesState): void {
-    writeJsonFile(this.paths.instancesPath, state);
+  async reloadCache(): Promise<void> {
+    this.cache = await this.repo.find();
+    const pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
+    if (pref) {
+      this.selectedId = pref.value || '';
+    }
+  }
+
+  load(): InstancesState {
+    return { version: 2, items: this.cache, selectedId: this.selectedId };
+  }
+
+  async save(state: InstancesState): Promise<void> {
+    // Used mainly internally, now persists to DB.
+    this.cache = state.items as GameInstance[];
+    this.selectedId = state.selectedId;
+
+    await this.repo.save(this.cache);
+    let pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
+    if (!pref) {
+      pref = this.prefs.create({ key: 'instances.selected_id', value: this.selectedId });
+    } else {
+      pref.value = this.selectedId;
+    }
+    await this.prefs.save(pref);
   }
 
   getSelectedId(): string {
     const ctx = this.instanceContext.getStore();
     if (ctx) return ctx;
-    return String(this.load().selectedId || '').trim();
+    return this.selectedId;
   }
 
   getSelected(): InstanceItem | undefined {
@@ -70,7 +107,7 @@ export class InstancesService {
   }
 
   getById(id: string): InstanceItem | undefined {
-    return this.load().items.find((i) => i.id === id);
+    return this.cache.find((i) => i.id === id);
   }
 
   list(): InstancesState & { ok: true } {
@@ -78,12 +115,12 @@ export class InstancesService {
     return { ok: true, ...st };
   }
 
-  select(id: string): { ok: boolean; error?: string } {
+  async select(id: string): Promise<{ ok: boolean; error?: string }> {
     const st = this.load();
     if (!st.items.some((i) => i.id === id))
       return { ok: false, error: 'not_found' };
     st.selectedId = id;
-    this.save(st);
+    await this.save(st);
     return { ok: true };
   }
 
@@ -94,7 +131,7 @@ export class InstancesService {
     const key = this.serverPathKey(serverPath);
     if (!key) return undefined;
     const skipId = String(excludeId || '').trim();
-    return this.load().items.find((it) => {
+    return this.cache.find((it) => {
       if (skipId && it.id === skipId) return false;
       return this.serverPathKey(it.serverPath) === key;
     });
@@ -107,9 +144,9 @@ export class InstancesService {
     return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
   }
 
-  add(
+  async add(
     body: Partial<InstanceItem> & { autoFixPortsOnConflict?: boolean },
-  ): InstanceOpResult {
+  ): Promise<InstanceOpResult> {
     const st = this.load();
     const serverPathRaw = String(body.serverPath || '').trim();
     const serverPath = serverPathRaw ? resolve(serverPathRaw) : '';
@@ -127,7 +164,7 @@ export class InstancesService {
       };
     }
     const id = randomBytes(8).toString('hex');
-    const item: InstanceItem = {
+    const item = this.repo.create({
       id,
       name: String(body.name || `Server ${st.items.length + 1}`).trim(),
       serverPath,
@@ -143,7 +180,8 @@ export class InstancesService {
       maintenanceLock: false,
       blockUpdates: !!body.blockUpdates,
       experimentalUpdates: !!body.experimentalUpdates,
-    };
+    });
+    
     if (this.config.webPanel.require_unique_instance_game_ports) {
       const port = item.port;
       if (st.items.some((x) => x.port === port)) {
@@ -159,7 +197,7 @@ export class InstancesService {
     this.initializeServerFilesIfNeeded(serverPath);
     st.items.push(item);
     if (!st.selectedId) st.selectedId = id;
-    this.save(st);
+    await this.save(st);
     return { ok: true, item };
   }
 
@@ -181,7 +219,7 @@ export class InstancesService {
     }
   }
 
-  update(id: string, patch: Partial<InstanceItem>): InstanceOpResult {
+  async update(id: string, patch: Partial<InstanceItem>): Promise<InstanceOpResult> {
     const st = this.load();
     const item = st.items.find((i) => i.id === id);
     if (!item) return { ok: false, error: 'not_found' };
@@ -201,14 +239,14 @@ export class InstancesService {
       patch = { ...patch, serverPath };
     }
     Object.assign(item, patch, { id });
-    this.save(st);
+    await this.save(st);
     return { ok: true };
   }
 
-  remove(
+  async remove(
     id: string,
     opts: boolean | InstanceRemoveOptions = false,
-  ): { ok: boolean; error?: string } {
+  ): Promise<{ ok: boolean; error?: string }> {
     const options: InstanceRemoveOptions =
       typeof opts === 'boolean' ? { deleteFromDisk: opts } : opts || {};
     const deleteFromDisk = !!options.deleteFromDisk;
@@ -217,13 +255,27 @@ export class InstancesService {
     const st = this.load();
     const item = st.items.find((i) => i.id === id);
     if (!item) return { ok: false, error: 'not_found' };
+    
     st.items = st.items.filter((i) => i.id !== id);
     if (st.selectedId === id) st.selectedId = st.items[0]?.id || '';
-    this.save(st);
+    
+    // Remove from DB and update cache
+    await this.repo.delete(id);
+    this.cache = st.items as GameInstance[];
+    this.selectedId = st.selectedId;
+
+    // Update only the selected_id preference (no need to re-save all items)
+    let pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
+    if (!pref) {
+      pref = this.prefs.create({ key: 'instances.selected_id', value: this.selectedId });
+    } else {
+      pref.value = this.selectedId;
+    }
+    await this.prefs.save(pref);
 
     if (deleteData) {
       try {
-        this.purgeInstanceData(id);
+        await this.purgeInstanceData(id);
       } catch {
         return { ok: false, error: 'delete_failed' };
       }
@@ -238,7 +290,7 @@ export class InstancesService {
     return { ok: true };
   }
 
-  private purgeInstanceData(instanceId: string): void {
+  private async purgeInstanceData(instanceId: string): Promise<void> {
     const iid = String(instanceId || '').trim();
     if (!iid) return;
 
@@ -259,29 +311,25 @@ export class InstancesService {
       writeJsonFile(this.paths.maintenancePendingPath, pending);
     }
 
-    this.stripInstanceFromMaintenanceTasks(iid);
+    await this.stripInstanceFromMaintenanceTasks(iid);
   }
 
-  private stripInstanceFromMaintenanceTasks(instanceId: string): void {
-    const doc = readJsonFile<{
-      tasks?: Record<string, unknown>[];
-      scheduler_tz?: string;
-    }>(this.paths.maintenancePath, { tasks: [] });
+  private async stripInstanceFromMaintenanceTasks(instanceId: string): Promise<void> {
+    const tasks = await this.maintenanceRepo.find();
     let changed = false;
-    const tasks = (doc.tasks || []).map((raw) => {
-      if (!raw || typeof raw !== 'object') return raw;
-      const td = { ...raw };
-      const targets = taskTargetInstanceIds(td);
-      if (!targets.length || targets[0] === INSTANCE_ALL) return td;
-      if (!targets.includes(instanceId)) return td;
-      const filtered = targets.filter((x) => x !== instanceId);
-      changed = true;
+    for (const td of tasks) {
+      if (!Array.isArray(td.instanceIds)) continue;
+      const targets = td.instanceIds;
+      if (!targets.length || targets[0] === INSTANCE_ALL) continue;
+      if (!targets.includes(instanceId)) continue;
+      const filtered = targets.filter((x: string) => x !== instanceId);
       td.active = false;
-      td.instance_ids = filtered;
-      delete td.instance_id;
-      return td;
-    });
-    if (changed) writeJsonFile(this.paths.maintenancePath, { ...doc, tasks });
+      td.instanceIds = filtered;
+      changed = true;
+    }
+    if (changed) {
+      await this.maintenanceRepo.save(tasks);
+    }
   }
 
   private pickFreePort(preferred: number, used: Set<number>): number {
@@ -332,10 +380,10 @@ export class InstancesService {
     };
   }
 
-  clone(
+  async clone(
     id: string,
     name?: string,
-  ): { ok: boolean; item?: InstanceItem; error?: string } {
+  ): Promise<{ ok: boolean; item?: InstanceItem; error?: string }> {
     const src = this.getById(id);
     if (!src) return { ok: false, error: 'not_found' };
     const srcFolder =

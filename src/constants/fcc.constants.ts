@@ -38,7 +38,7 @@ export const APP_NAME = 'Factorio Control Center';
 export const APP_VERSION = readAppVersion();
 
 /** Incremented by `npm run pack:release` (never decremented). */
-export const APP_BUILD_NUMBER = 60;
+export const APP_BUILD_NUMBER = 61;
 
 /** Overwritten by `npm run pack:release`; `dev` uses git short SHA when available. */
 export const APP_BUILD = 'dev';

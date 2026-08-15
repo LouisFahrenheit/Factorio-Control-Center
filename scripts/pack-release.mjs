@@ -286,7 +286,7 @@ function copyBundle(targetDir, launcher, { omitNodeModules = false } = {}) {
 // CI builds on Linux: omit Linux node_modules; Start.bat runs npm ci --omit=dev on Windows.
 copyBundle(winBundleDir, 'Start.bat', { omitNodeModules: process.platform !== 'win32' });
 copyNssmForWindows(winBundleDir);
-copyBundle(linuxBundleDir, 'Start.sh');
+copyBundle(linuxBundleDir, 'Start.sh', { omitNodeModules: process.platform !== 'linux' });
 
 for (const rel of [
   'Start.sh',
@@ -318,5 +318,5 @@ console.log(`\nDone:`);
 console.log(`  Windows: ${zipPath}`);
 console.log(`  Linux:   ${tarPath}`);
 console.log('\nEach archive: factorio-control-center/ with Start.bat / Start.sh, dist, client/dist, public, locale');
-console.log('Linux archive includes prod node_modules; Windows archive omits node_modules when packed on Linux (npm ci on first Start.bat).');
+console.log('Archives omit node_modules if packed on a mismatched OS platform (npm ci will run on first start).');
 console.log('Not included: data/, fcc-settings.ini, src/, dev node_modules — created on first run.\n');

@@ -20,10 +20,10 @@ export function platformFirewallSupported(): boolean {
 export async function platformFirewallAddUdpAllow(
   programExe: string,
   port: number,
-): Promise<{ ok: boolean; detail: string }> {
+): Promise<{ ok: boolean; detail: string; created: boolean }> {
   if (process.platform === 'win32')
     return windowsAddFactorioUdpRule(programExe, port);
   if (process.platform === 'linux')
     return linuxAddFactorioUdpRule(programExe, port);
-  return { ok: false, detail: 'firewall auto-rule not supported on this OS' };
+  return { ok: false, detail: 'firewall auto-rule not supported on this OS', created: false };
 }

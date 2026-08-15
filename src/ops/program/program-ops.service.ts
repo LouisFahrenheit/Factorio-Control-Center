@@ -51,6 +51,10 @@ type IniData = Record<string, Record<string, string>>;
 
 const TLS_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
 
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SystemPreference } from '../../config/system-preference.entity';
+
 @Injectable()
 export class ProgramOpsService {
   constructor(
@@ -60,6 +64,8 @@ export class ProgramOpsService {
     private readonly logRotation: LogRotationService,
     private readonly listener: WebPanelListenerService,
     private readonly portal: ModPortalService,
+    @InjectRepository(SystemPreference)
+    private readonly sysPrefs: Repository<SystemPreference>,
   ) {}
 
   get(): OpResult {
@@ -342,7 +348,7 @@ export class ProgramOpsService {
     }
 
     delete ini.program;
-    this.saveIni(ini);
+    await this.saveIni(ini);
     this.logRotation.syncFromConfig();
 
     if (runtimeTouch) {
@@ -480,7 +486,7 @@ export class ProgramOpsService {
     return this.bool(ini.shared?.modpack_activate_use_symlinks, true);
   }
 
-  setServerIni(kwargs: Record<string, unknown>): OpResult {
+  async setServerIni(kwargs: Record<string, unknown>): Promise<OpResult> {
     const id = this.instances.getSelectedId();
     if (!id) return { ok: false, error: 'instance_not_found' };
     const selected = this.instances.getSelected();
@@ -523,32 +529,29 @@ export class ProgramOpsService {
     }
 
     if (!Object.keys(patch).length) return { ok: true, settings_changes: [] };
-    const updated = this.instances.update(id, patch);
+    const updated = await this.instances.update(id, patch);
     if (updated.ok === false) return updated;
     return { ok: true, settings_changes: changes };
   }
 
   private loadIni(): IniData {
-    if (!existsSync(this.paths.settingsPath)) return {};
-    const raw = readFileSync(this.paths.settingsPath, 'utf-8');
-    const parsed = (raw ? parse(raw) : {}) as Record<
-      string,
-      Record<string, unknown>
-    >;
     const out: IniData = {};
-    for (const [sec, kv] of Object.entries(parsed)) {
-      if (!kv || typeof kv !== 'object') continue;
-      out[sec] = {};
-      for (const [k, v] of Object.entries(kv)) {
-        out[sec][k] = String(v ?? '').trim();
+    for (const sec of ['shared', 'web_panel', 'language']) {
+      const kv = this.config.section(sec);
+      if (Object.keys(kv).length > 0) {
+        out[sec] = kv;
       }
     }
     return out;
   }
 
-  private saveIni(data: IniData): void {
-    writeFileSync(this.paths.settingsPath, stringify(data), 'utf-8');
-    this.config.reload();
+  private async saveIni(data: IniData): Promise<void> {
+    for (const [sec, kv] of Object.entries(data)) {
+      for (const [k, v] of Object.entries(kv)) {
+        await this.sysPrefs.save({ key: `${sec}.${k}`, value: String(v) });
+      }
+    }
+    await this.config.reload();
   }
 
   private availableLanguages(): string[] {

@@ -71,6 +71,9 @@ write_unit() {
   ensure_linux_executables "$FCC_DIR"
   chmod +x "$run_script" 2>/dev/null || true
   mkdir -p "$(dirname "$dest")"
+  local node_dir
+  node_dir="$(dirname "$(command -v node)")"
+
   cat >"$dest" <<EOF
 [Unit]
 Description=Factorio Control Center
@@ -80,6 +83,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=${FCC_DIR}
+Environment="PATH=${node_dir}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Environment=FCC_ROOT_DIR=${FCC_DIR}
 ExecStart=${run_script}
 Restart=on-failure

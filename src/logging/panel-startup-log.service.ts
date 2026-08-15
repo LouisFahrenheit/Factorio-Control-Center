@@ -34,7 +34,7 @@ export class PanelStartupLogService {
     private readonly firewall: FirewallService,
   ) {}
 
-  logReady(): void {
+  async logReady(): Promise<void> {
     const build = resolveAppBuild();
     const versionLine = `v${APP_VERSION}  build ${build}`;
     const banner = `${FCC_ASCII_LOGO}\n${versionLine}`;
@@ -47,7 +47,7 @@ export class PanelStartupLogService {
     this.webLog.appendFileBlock(centeredBanner);
     this.blankFile();
 
-    this.logSummary();
+    await this.logSummary();
 
     console.log('');
     this.blankFile();
@@ -83,7 +83,7 @@ export class PanelStartupLogService {
     }
     this.line('panel_startup_config', this.paths.settingsPath);
 
-    if (this.users.defaultAdminPasswordActive()) {
+    if (await this.users.defaultAdminPasswordActive()) {
       console.log('');
       this.blankFile();
       this.line('panel_startup_default_password_warning');
@@ -96,9 +96,10 @@ export class PanelStartupLogService {
     console.log('');
   }
 
-  private logSummary(): void {
+  private async logSummary(): Promise<void> {
     const serverCount = this.instances.load().items.length;
-    const userCount = this.users.load().users.length;
+    const users = await this.users.load();
+    const userCount = users.length;
     const lang = this.config.langCode || 'en';
     const nodeVersion = process.version;
     const autostartCount = this.instances.load().items.filter(i => i.autostartServer).length;

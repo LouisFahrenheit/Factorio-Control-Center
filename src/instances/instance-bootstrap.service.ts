@@ -162,7 +162,7 @@ export class InstanceBootstrapService {
       this.initializeDownloadedServer(
         String(this.state.server_path || targetPath || '').trim(),
       );
-      this.tryAutoAddInstance(targetPath, addPayload);
+      await this.tryAutoAddInstance(targetPath, addPayload);
       this.set({
         running: false,
         phase: 'done',
@@ -539,15 +539,15 @@ export class InstanceBootstrapService {
     );
   }
 
-  private tryAutoAddInstance(
+  private async tryAutoAddInstance(
     targetPath: string,
     addPayload: BootstrapAddPayload,
-  ): void {
+  ): Promise<void> {
     const serverPath = String(
       this.state.server_path || targetPath || '',
     ).trim();
     if (!serverPath) return;
-    const add = this.instances.add({
+    const add = await this.instances.add({
       name: addPayload.name,
       serverPath,
       ip: addPayload.ip,

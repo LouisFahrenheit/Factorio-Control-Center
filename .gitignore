@@ -19,6 +19,7 @@ logs/
 
 # Local settings (API tokens, credentials)
 fcc-settings.ini
+fcc-settings.ini.bak
 
 # Test coverage
 coverage/
@@ -49,3 +50,4 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+/maintenance

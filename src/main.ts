@@ -1,4 +1,32 @@
+import { config as dotenvConfig } from 'dotenv';
+import { join, resolve } from 'path';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { randomBytes } from 'crypto';
+
+const fccRootForEnv = resolve(
+  (process.env.FCC_ROOT_DIR || '').replace(/^["']+|["']+$/g, '').trim() || process.cwd(),
+);
+const envPath = join(fccRootForEnv, '.env');
+const envExamplePath = join(fccRootForEnv, '.env.example');
+
+if (!existsSync(envPath) && existsSync(envExamplePath)) {
+  let content = readFileSync(envExamplePath, 'utf8');
+  // Generate secure random strings for a fresh installation
+  const apiToken = randomBytes(32).toString('hex');
+  const appSecret = randomBytes(32).toString('base64');
+  
+  content = content.replace('API_TOKEN=', `API_TOKEN=${apiToken}`);
+  content = content.replace('APP_SECRET=', `APP_SECRET=${appSecret}`);
+  
+  writeFileSync(envPath, content, 'utf8');
+  // Use console.log since Nest Logger isn't initialized yet
+  console.log(`[Bootstrap] Created new .env file from .env.example with secure tokens.`);
+}
+
+dotenvConfig({ path: envPath });
+
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PathsService } from './config/paths.service';
 import { UsersService } from './auth/users.service';
@@ -11,7 +39,21 @@ import { APP_NAME, APP_VERSION } from './constants/fcc.constants';
 process.title = `${APP_NAME} v${APP_VERSION}`;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const isDebug = String(process.env.DEBUG_LOGS).toLowerCase() === 'true';
+  const loggerLevels: any = isDebug 
+    ? ['log', 'error', 'warn', 'debug', 'verbose'] 
+    : ['log', 'error', 'warn'];
+
+  const app = await NestFactory.create(AppModule, { 
+    cors: true,
+    logger: loggerLevels,
+  });
+  const rootLogger = new Logger('Bootstrap');
+  
+  if (isDebug) {
+    rootLogger.debug(`DEBUG_LOGS is enabled! NestJS Logger initialized with debug levels.`);
+  }
+
   app.setGlobalPrefix('');
   app.enableShutdownHooks();
 
@@ -57,7 +99,7 @@ async function bootstrap() {
     wsAdapter.setHttpServer(httpServer);
   }
 
-  app.get(PanelStartupLogService).logReady();
+  await app.get(PanelStartupLogService).logReady();
   app.get(InstanceAutostartService).scheduleAfterPanelStart();
 }
 

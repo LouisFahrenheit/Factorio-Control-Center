@@ -6,6 +6,7 @@ import { trimPath } from '../common/trim.util';
 @Injectable()
 export class PathsService {
   readonly rootDir: string;
+  readonly envFilePath: string;
   readonly dataDir: string;
   readonly localeDir: string;
   readonly publicDir: string;
@@ -26,6 +27,7 @@ export class PathsService {
   constructor() {
     const rootRaw = trimPath(process.env.FCC_ROOT_DIR) || process.cwd();
     this.rootDir = resolve(rootRaw);
+    this.envFilePath = join(this.rootDir, '.env');
     this.dataDir = resolve(
       trimPath(process.env.FCC_DATA_DIR) || join(this.rootDir, 'data'),
     );

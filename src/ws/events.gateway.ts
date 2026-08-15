@@ -43,7 +43,7 @@ export class EventsGateway
 
   // ── Connection lifecycle ─────────────────────────────────────────────
 
-  handleConnection(client: Socket): void {
+  async handleConnection(client: Socket): Promise<void> {
     const token = String(
       (client.handshake?.auth as Record<string, unknown>)?.token || '',
     ).trim();
@@ -53,7 +53,7 @@ export class EventsGateway
       return;
     }
 
-    const user = this.sessions.resolve(token);
+    const user = await this.sessions.resolve(token);
     if (!user || !user.enabled) {
       client.disconnect(true);
       return;

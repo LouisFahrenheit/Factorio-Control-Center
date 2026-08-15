@@ -40,13 +40,13 @@ export async function windowsAdvfirewallRuleExists(
 export async function windowsAddFactorioUdpRule(
   programExe: string,
   port: number,
-): Promise<{ ok: boolean; detail: string }> {
+): Promise<{ ok: boolean; detail: string; created: boolean }> {
   const prog = resolve(String(programExe || '').trim());
-  if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port' };
+  if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port', created: false };
 
   const ruleName = `FCC-Server-UDP-${port}`;
   if (await windowsAdvfirewallRuleExists(ruleName))
-    return { ok: true, detail: '' };
+    return { ok: true, detail: '', created: false };
 
   const args = [
     'advfirewall',
@@ -64,21 +64,21 @@ export async function windowsAddFactorioUdpRule(
     const { stdout, stderr } = await execFileAsync('netsh', args, EXEC_OPTS);
     const combined = `${stdout || ''}${stderr || ''}`.trim();
     if (await windowsAdvfirewallRuleExists(ruleName))
-      return { ok: true, detail: '' };
+      return { ok: true, detail: '', created: true };
     const low = combined.toLowerCase();
     if (
       low.includes('already exists') ||
       low.includes('already been created') ||
       low.includes('duplicate')
     ) {
-      return { ok: true, detail: '' };
+      return { ok: true, detail: '', created: false };
     }
-    return { ok: false, detail: combined || 'netsh failed' };
+    return { ok: false, detail: combined || 'netsh failed', created: false };
   } catch (e) {
     if (await windowsAdvfirewallRuleExists(ruleName))
-      return { ok: true, detail: '' };
+      return { ok: true, detail: '', created: true };
     const msg = e instanceof Error ? e.message : String(e);
-    if (/timeout/i.test(msg)) return { ok: false, detail: 'timeout' };
-    return { ok: false, detail: msg };
+    if (/timeout/i.test(msg)) return { ok: false, detail: 'timeout', created: false };
+    return { ok: false, detail: msg, created: false };
   }
 }
