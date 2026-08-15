@@ -537,6 +537,7 @@
   "panel_startup_summary_maintenance": "Maintenance schedule: {} tasks ({} active)",
   "panel_startup_summary_maintenance_none": "Maintenance schedule: none",
   "panel_startup_url": "Panel URL: {}",
+  "panel_startup_docker_port_notice": "Container port (Docker): {}",
   "panel_startup_url_local": "On this machine: {}://127.0.0.1:{}/",
   "panel_startup_lan_url": "On LAN: {}",
   "panel_startup_public_url": "Public address: {}",

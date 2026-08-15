@@ -538,6 +538,7 @@
   "panel_startup_summary_maintenance": "Расписание обслуживания: {} задач ({} активных)",
   "panel_startup_summary_maintenance_none": "Расписание обслуживания: нет",
   "panel_startup_url": "URL панели: {}",
+  "panel_startup_docker_port_notice": "Порт контейнера (Docker): {}",
   "panel_startup_url_local": "На этой машине: {}://127.0.0.1:{}/",
   "panel_startup_lan_url": "В локальной сети: {}",
   "panel_startup_public_url": "Публичный адрес: {}",
