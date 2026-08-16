@@ -8,6 +8,8 @@ import {
   platformFirewallSupported,
 } from './platform-firewall.util';
 
+import { existsSync } from 'fs';
+
 @Injectable()
 export class FirewallService {
   constructor(
@@ -17,6 +19,7 @@ export class FirewallService {
   ) {}
 
   logStartupNotice(): void {
+    if (existsSync('/.dockerenv')) return;
     if (!platformFirewallSupported()) return;
     const key = platformFirewallIsElevated()
       ? 'firewall_web_startup_elevated'
