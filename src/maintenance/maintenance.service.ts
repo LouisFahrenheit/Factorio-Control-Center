@@ -987,8 +987,9 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   }
 
   private maintLog(msg: string): void {
+    if (!this.logRotation.logWriteMaintenanceEnabled()) return;
     const line = `${new Date().toISOString()} [Maintenance] ${msg}`;
-    this.logRotation.appendLine('maintenance', line);
+    this.logRotation.appendLine(this.paths.maintenanceSchedulerLogPath(), line);
   }
 
   private appendReport(report: Record<string, unknown>): void {

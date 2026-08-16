@@ -35,6 +35,7 @@ export type InstanceOpResult = OpResult & {
   item?: InstanceItem;
   error?: string;
   errorArgs?: (string | number)[];
+  changes?: string[];
 };
 
 @Injectable()
@@ -238,9 +239,23 @@ export class InstancesService implements OnModuleInit {
       }
       patch = { ...patch, serverPath };
     }
+    const changes: string[] = [];
+    for (const key of Object.keys(patch)) {
+      if (key === 'id' || key === 'web_actor' || key === 'actor' || key.startsWith('_')) continue;
+      const oldVal = (item as any)[key];
+      const newVal = (patch as any)[key];
+      if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+        if (key.toLowerCase().includes('password')) {
+          changes.push(`${key}=(changed)`);
+        } else {
+          changes.push(`${key}=${String(newVal)}`);
+        }
+      }
+    }
+
     Object.assign(item, patch, { id });
     await this.save(st);
-    return { ok: true };
+    return { ok: true, changes };
   }
 
   async remove(

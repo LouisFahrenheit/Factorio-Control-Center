@@ -107,9 +107,50 @@ export class AuthController {
     @Body() body: Record<string, unknown>,
   ) {
     const actor = await this.requireAdmin(auth);
+    const beforeList = await this.users.listPublic();
+    const before = beforeList.find(
+      (u) => u.username.toLowerCase() === username.toLowerCase(),
+    );
+
     const r = await this.users.updateUser(username, body, actor);
     if (!r.ok) throw new ForbiddenException(r.error);
-    this.eventLog.logAuth('user_update', actor, username);
+
+    const changes: string[] = [];
+    if (body.password) changes.push('password changed');
+
+    if (before) {
+      if (body.role !== undefined && body.role !== before.role) {
+        changes.push(`role=${body.role}`);
+      }
+      if (body.enabled !== undefined && body.enabled !== before.enabled) {
+        changes.push(`enabled=${body.enabled}`);
+      }
+      if (
+        body.tabs !== undefined &&
+        JSON.stringify(body.tabs) !== JSON.stringify(before.tabs)
+      ) {
+        changes.push(`tabs=[${(body.tabs as string[]).join(', ')}]`);
+      }
+      if (
+        body.instance_ids !== undefined &&
+        JSON.stringify(body.instance_ids) !== JSON.stringify(before.instance_ids)
+      ) {
+        const ids = body.instance_ids as string[];
+        if (ids.includes('*')) {
+          changes.push(`servers=[All Servers]`);
+        } else {
+          const insts = this.instances.list().items;
+          const names = ids.map((id) => {
+            const i = insts.find((inst: any) => inst.id === id);
+            return i ? i.name || id : id;
+          });
+          changes.push(`servers=[${names.join(', ')}]`);
+        }
+      }
+    }
+
+    const detail = `${username}${changes.length ? ` (${changes.join(', ')})` : ''}`;
+    this.eventLog.logAuth('user_update', actor, detail);
     return { ok: true };
   }
 
