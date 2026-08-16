@@ -73,49 +73,100 @@ function listCfgFilesRecursive(dir: string): string[] {
   return out.sort();
 }
 
+const modsDirCache = new Map<string, { mtime: number; entries: { name: string; isDir: boolean }[] }>();
+
 export function modPackagePathsForInternalName(
   modsDir: string,
   modInternal: string,
 ): string[] {
   if (!existsSync(modsDir)) return [];
+  
+  const stat = statSync(modsDir);
+  let cached = modsDirCache.get(modsDir);
+  if (!cached || cached.mtime !== stat.mtimeMs) {
+    const entries = readdirSync(modsDir, { withFileTypes: true }).map(e => ({
+      name: e.name,
+      isDir: e.isDirectory()
+    }));
+    cached = { mtime: stat.mtimeMs, entries };
+    modsDirCache.set(modsDir, cached);
+  }
+
   const mi = modInternal.toLowerCase();
   const out: string[] = [];
-  for (const ent of readdirSync(modsDir, { withFileTypes: true })) {
+  for (const ent of cached.entries) {
     if (ent.name === 'mod-list.json') continue;
     const p = join(modsDir, ent.name);
-    const stem = ent.isDirectory() ? ent.name : ent.name.replace(/\.zip$/i, '');
+    const stem = ent.isDir ? ent.name : ent.name.replace(/\.zip$/i, '');
     const sl = stem.toLowerCase();
     if (sl === mi || sl.startsWith(`${mi}_`)) out.push(p);
   }
   return out;
 }
 
+const dataPacksLocaleCache = new Map<string, LocaleSections>();
+
 function mergeDataPacksLocalePass(
   dataDir: string,
   lc: string,
   sections: LocaleSections,
 ): void {
-  if (!existsSync(dataDir)) return;
-  let packs: { name: string; path: string }[] = [];
-  try {
-    packs = readdirSync(dataDir, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => ({ name: d.name, path: join(dataDir, d.name) }))
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
-      );
-  } catch {
-    return;
-  }
-  for (const pack of packs) {
-    const locDir = join(pack.path, 'locale', lc);
-    for (const cfg of listCfgFilesRecursive(locDir)) {
+  const key = `${dataDir}::${lc}`;
+  let cached = dataPacksLocaleCache.get(key);
+  
+  if (!cached) {
+    cached = {};
+    if (existsSync(dataDir)) {
+      let packs: { name: string; path: string }[] = [];
       try {
-        mergeLocaleText(sections, readFileSync(cfg, 'utf-8'));
+        packs = readdirSync(dataDir, { withFileTypes: true })
+          .filter((d) => d.isDirectory())
+          .map((d) => ({ name: d.name, path: join(dataDir, d.name) }))
+          .sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+          );
       } catch {
-        /* ignore */
+        // ignore
+      }
+      for (const pack of packs) {
+        const locDir = join(pack.path, 'locale', lc);
+        for (const cfg of listCfgFilesRecursive(locDir)) {
+          try {
+            mergeLocaleText(cached, readFileSync(cfg, 'utf-8'));
+          } catch {
+            /* ignore */
+          }
+        }
       }
     }
+    dataPacksLocaleCache.set(key, cached);
+  }
+
+  for (const [secName, pairs] of Object.entries(cached)) {
+    if (!sections[secName]) {
+      sections[secName] = Object.create(pairs);
+    } else {
+      Object.setPrototypeOf(sections[secName], pairs);
+    }
+  }
+}
+
+const admZipCache = new Map<string, { mtime: number, zip: AdmZip }>();
+
+function getAdmZipCached(zipPath: string): AdmZip | null {
+  try {
+    const stat = statSync(zipPath);
+    const cached = admZipCache.get(zipPath);
+    if (cached && cached.mtime === stat.mtimeMs) return cached.zip;
+    const zip = new AdmZip(zipPath);
+    admZipCache.set(zipPath, { mtime: stat.mtimeMs, zip });
+    if (admZipCache.size > 200) {
+      const firstKey = admZipCache.keys().next().value;
+      if (firstKey) admZipCache.delete(firstKey);
+    }
+    return zip;
+  } catch {
+    return null;
   }
 }
 
@@ -137,7 +188,8 @@ function mergeLocaleOneMod(
           }
         }
       } else if (pkg.toLowerCase().endsWith('.zip')) {
-        const zip = new AdmZip(pkg);
+        const zip = getAdmZipCached(pkg);
+        if (!zip) continue;
         for (const name of zip
           .getEntries()
           .map((e) => e.entryName)
@@ -231,7 +283,8 @@ function readTitleFromZip(
   sections: LocaleSections,
 ): string | null {
   try {
-    const zip = new AdmZip(zipPath);
+    const zip = getAdmZipCached(zipPath);
+    if (!zip) return null;
     for (const ent of zip.getEntries()) {
       if (ent.isDirectory) continue;
       const parts = ent.entryName.replace(/\\/g, '/').split('/');
@@ -263,9 +316,15 @@ function loadModListLocales(
       .toLowerCase() || 'en';
   mergeDataPacksLocalePass(dataDir, 'en', active);
   for (const mod of modNames) mergeLocaleOneMod(modsDir, mod, 'en', active);
-  const en = Object.fromEntries(
-    Object.entries(active).map(([k, v]) => [k, { ...v }]),
-  );
+  
+  const en: LocaleSections = {};
+  for (const [k, v] of Object.entries(active)) {
+    const proto = Object.getPrototypeOf(v);
+    const clone = Object.create(proto);
+    Object.assign(clone, v);
+    en[k] = clone;
+  }
+  
   if (lang !== 'en') {
     mergeDataPacksLocalePass(dataDir, lang, active);
     for (const mod of modNames) mergeLocaleOneMod(modsDir, mod, lang, active);
@@ -388,7 +447,8 @@ function getVersionFromInfo(pkgPath: string): string {
         }
       }
     } else {
-      const zip = new AdmZip(pkgPath);
+      const zip = getAdmZipCached(pkgPath);
+      if (!zip) return '';
       for (const ent of zip.getEntries()) {
         if (ent.isDirectory) continue;
         const parts = ent.entryName.replace(/\\/g, '/').split('/');
