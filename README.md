@@ -72,6 +72,7 @@ your PC or VPS - add servers and manage everything from one place.
 **Access and UI**
 
 - Roles: administrator, server engineer, moderator - per-tab and per-server permissions
+- **Public page**: optionally expose a read-only status page showing active servers, players, and mod downloads without requiring login
 - Full desktop UI and a simplified mobile view
 - English and Russian UI
 - Several themes - all dark.
