@@ -337,8 +337,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('instances')
-  instancesAdd(@Body() body: Record<string, unknown>) {
-    return this.bridge.submit('instances_add', body);
+  instancesAdd(@Body() body: Record<string, unknown>, @Req() req: Request) {
+    return this.bridge.submit('instances_add', {
+      ...body,
+      web_actor: this.bridge.webActor(this.me(req)),
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -382,14 +385,20 @@ export class ApiController {
   instancesClone(
     @Param('id') id: string,
     @Body() body: Record<string, unknown>,
+    @Req() req: Request,
   ) {
-    return this.bridge.submit('instances_clone', { id, ...body });
+    return this.bridge.submit('instances_clone', {
+      id,
+      ...body,
+      web_actor: this.bridge.webActor(this.me(req)),
+    });
   }
 
   @UseGuards(AuthGuard)
   @Delete('instances/:id')
   instancesRemove(
     @Param('id') id: string,
+    @Req() req: Request,
     @Query('deleteFromDisk') deleteFromDisk?: string,
     @Query('deleteData') deleteData?: string,
   ) {
@@ -397,6 +406,7 @@ export class ApiController {
       id,
       deleteFromDisk: deleteFromDisk === '1' || deleteFromDisk === 'true',
       deleteData: deleteData === '1' || deleteData === 'true',
+      web_actor: this.bridge.webActor(this.me(req)),
     });
   }
 

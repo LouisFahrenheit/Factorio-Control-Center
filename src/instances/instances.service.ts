@@ -261,7 +261,7 @@ export class InstancesService implements OnModuleInit {
   async remove(
     id: string,
     opts: boolean | InstanceRemoveOptions = false,
-  ): Promise<{ ok: boolean; error?: string }> {
+  ): Promise<{ ok: boolean; error?: string; name?: string }> {
     const options: InstanceRemoveOptions =
       typeof opts === 'boolean' ? { deleteFromDisk: opts } : opts || {};
     const deleteFromDisk = !!options.deleteFromDisk;
@@ -292,17 +292,17 @@ export class InstancesService implements OnModuleInit {
       try {
         await this.purgeInstanceData(id);
       } catch {
-        return { ok: false, error: 'delete_failed' };
+        return { ok: false, error: 'delete_failed', name: item.name };
       }
     }
     if (deleteFromDisk && existsSync(item.serverPath)) {
       try {
         rmSync(item.serverPath, { recursive: true, force: true });
       } catch {
-        return { ok: false, error: 'delete_failed' };
+        return { ok: false, error: 'delete_failed', name: item.name };
       }
     }
-    return { ok: true };
+    return { ok: true, name: item.name };
   }
 
   private async purgeInstanceData(instanceId: string): Promise<void> {

@@ -20,7 +20,6 @@ const LOGGED_OPS = new Set([
   'set_program_settings',
   'restart_web_panel',
   'upload_web_tls_file',
-  'set_server_ini',
   'maintenance_run_now',
   'maintenance_set',
   'maintenance_clear_manual',
@@ -34,22 +33,7 @@ const LOGGED_OPS = new Set([
   'whitelist_remove',
   'whitelist_clear',
   'sync_bans',
-  'write_server_settings',
-  'write_mod_list',
   'write_admin_list',
-  'mod_settings_write_json',
-  'mods_set_enabled',
-  'mods_remove',
-  'upload_mod_archive',
-  'modpack_activate',
-  'modpack_save_current',
-  'modpack_import_upload',
-  'rename_save',
-  'delete_save',
-  'duplicate_save',
-  'set_launch_save',
-  'upload_save_archive',
-  'create_save',
   'factorio_update',
   'announcements_write',
   'write_commands_catalog',
@@ -113,11 +97,15 @@ export class WebPanelEventLogService {
     const actor = String(kwargs.actor || kwargs.web_actor || '').trim() || '?';
     const ok = result.ok !== false;
     const error = ok ? undefined : String(result.error || 'error');
-    const instId = String(kwargs.id || result.id || '');
+    const selected = this.instances.getSelected();
+    const instId = String(kwargs.id || result.id || selected?.id || '');
     let instName = instId;
     if (instId) {
       const inst = this.instances.getById(instId);
       if (inst && inst.name) instName = inst.name;
+    }
+    if (result.name && typeof result.name === 'string') {
+      instName = result.name;
     }
 
     let message = '';
@@ -125,9 +113,11 @@ export class WebPanelEventLogService {
       case 'instances_add':
         message = `Added new server`;
         break;
-      case 'instances_remove':
-        message = `Removed server`;
+      case 'instances_remove': {
+        const withFiles = kwargs.deleteFromDisk || kwargs.deleteData;
+        message = `Deleted server (files ${withFiles ? 'deleted' : 'kept'})`;
         break;
+      }
       case 'instances_update': {
         const changesList = Array.isArray(result.changes) ? result.changes : [];
         const changes = changesList.join(', ');
