@@ -66,7 +66,7 @@ export class FccConfigService implements OnModuleInit {
   async reload(): Promise<void> {
     const all = await this.sysPrefs.find();
     this.cache = {};
-    const appSecret = this.env.get('APP_SECRET') || '';
+    const appSecret = this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
 
     for (const p of all) {
       if (p.key.endsWith('.global_token')) {
@@ -234,7 +234,7 @@ export class FccConfigService implements OnModuleInit {
   }
 
   private async saveKeys(section: string, updates: Record<string, any>): Promise<void> {
-    const appSecret = this.env.get('APP_SECRET') || '';
+    const appSecret = this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
 
     for (const [k, v] of Object.entries(updates)) {
       if (v === undefined) continue;

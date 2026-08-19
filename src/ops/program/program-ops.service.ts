@@ -29,6 +29,7 @@ import {
   resolveGameBindIp,
 } from '../../common/network-validation';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
+import { encryptString } from '../../common/crypto.util';
 
 const RUNTIME_TOUCH_KEYS = new Set([
   'tls_enabled',
@@ -547,9 +548,14 @@ export class ProgramOpsService {
   }
 
   private async saveIni(data: IniData): Promise<void> {
+    const appSecret = process.env.APP_SECRET || '';
     for (const [sec, kv] of Object.entries(data)) {
       for (const [k, v] of Object.entries(kv)) {
-        await this.sysPrefs.save({ key: `${sec}.${k}`, value: String(v) });
+        let value = String(v);
+        if (k === 'global_token') {
+          value = encryptString(value, appSecret);
+        }
+        await this.sysPrefs.save({ key: `${sec}.${k}`, value });
       }
     }
     await this.config.reload();

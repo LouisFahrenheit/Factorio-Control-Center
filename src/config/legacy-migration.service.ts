@@ -325,6 +325,7 @@ DEBUG_LOGS=${w.debug_logs ?? 'false'}
     if (!existsSync(envPath)) {
       writeFileSync(envPath, envTemplate, 'utf-8');
       this.reportLines.push(` -> Created .env file from settings`);
+      process.env.APP_SECRET = appSecret;
     }
 
     if (dbCount > 0) {

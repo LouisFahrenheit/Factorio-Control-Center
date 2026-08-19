@@ -92,7 +92,7 @@ if not exist "%FCC_DIR%\logs" mkdir "%FCC_DIR%\logs"
 
 call :stop_and_delete_service
 
-"%NSSM_EXE%" install "%SERVICE_NAME%" "%NODE_EXE%" "%MAIN_JS%"
+"%NSSM_EXE%" install "%SERVICE_NAME%" "%NODE_EXE%" "\"%MAIN_JS%\""
 if errorlevel 1 (
     echo ERROR: nssm install failed.
     exit /b 1
