@@ -88,7 +88,10 @@
     "glob": "^13.0.6",
     "test-exclude": "^8.0.0",
     "multer": "^2.2.0",
-    "js-yaml": "^4.2.0"
+    "js-yaml": "^4.2.0",
+    "minimatch": {
+      "brace-expansion": "^1.1.18 || ^5.0.9"
+    }
   },
   "jest": {
     "moduleFileExtensions": [
