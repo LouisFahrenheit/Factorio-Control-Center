@@ -51,10 +51,22 @@ if ! docker compose version >/dev/null 2>&1; then
   fi
 fi
 
+echo "Configure web panel port..."
+read -r -p "Choose port for web panel [1-65535] (default 8080): " PANEL_PORT
+PANEL_PORT=${PANEL_PORT:-8080}
+if ! [[ "$PANEL_PORT" =~ ^[0-9]+$ ]] || [ "$PANEL_PORT" -lt 1 ] || [ "$PANEL_PORT" -gt 65535 ]; then
+  echo "Invalid port. Using default 8080."
+  PANEL_PORT=8080
+fi
+echo
+
 echo "1. Downloading docker-compose.yml to /opt/factorio-control-center..."
 mkdir -p /opt/factorio-control-center
 cd /opt/factorio-control-center
 curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/docker-compose.yml
+
+# Apply the custom port to docker-compose.yml
+sed -i "s/8080:80\/tcp/${PANEL_PORT}:80\/tcp/" docker-compose.yml
 
 echo "2. Starting Docker container..."
 docker compose up -d
@@ -72,7 +84,7 @@ echo
 echo "================================================="
 echo " Installation Complete!"
 echo " The panel is now running in Docker."
-echo " Open http://${SERVER_IP}:8080/ in your browser"
+echo " Open http://${SERVER_IP}:${PANEL_PORT}/ in your browser"
 echo " Default login: admin / admin"
 echo "================================================="
 
