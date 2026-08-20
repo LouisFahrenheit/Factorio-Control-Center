@@ -1,5 +1,5 @@
 # Stage 1: Build everything
-FROM node:24-alpine AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 # Install dependencies for both root and client
