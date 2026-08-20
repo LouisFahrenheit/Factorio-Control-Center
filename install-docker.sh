@@ -59,10 +59,20 @@ curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/LouisFahrenhe
 echo "2. Starting Docker container..."
 docker compose up -d
 
+# Detect server IP
+SERVER_IP=$(curl -sS --connect-timeout 2 https://api.ipify.org 2>/dev/null || true)
+if [[ -z "$SERVER_IP" ]]; then
+  SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || true)
+fi
+if [[ -z "$SERVER_IP" ]]; then
+  SERVER_IP="<YOUR_SERVER_IP>"
+fi
+
 echo
 echo "================================================="
 echo " Installation Complete!"
 echo " The panel is now running in Docker."
-echo " Open http://<YOUR_SERVER_IP>:8080/ in your browser"
+echo " Open http://${SERVER_IP}:8080/ in your browser"
 echo " Default login: admin / admin"
 echo "================================================="
+
