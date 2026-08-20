@@ -28,6 +28,14 @@ if ! command -v node >/dev/null 2>&1; then
     exit 1
   fi
 fi
+echo "Configure web panel port..."
+read -r -p "Choose port for web panel [1-65535] (default 8080): " PANEL_PORT
+PANEL_PORT=${PANEL_PORT:-8080}
+if ! [[ "$PANEL_PORT" =~ ^[0-9]+$ ]] || [ "$PANEL_PORT" -lt 1 ] || [ "$PANEL_PORT" -gt 65535 ]; then
+  echo "Invalid port. Using default 8080."
+  PANEL_PORT=8080
+fi
+echo
 
 echo "1. Downloading latest release..."
 curl -fsSL -o /tmp/fcc.tar.gz "https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz"
@@ -35,6 +43,26 @@ curl -fsSL -o /tmp/fcc.tar.gz "https://github.com/LouisFahrenheit/Factorio-Contr
 echo "2. Extracting to /opt..."
 tar -xzf /tmp/fcc.tar.gz -C /opt
 rm /tmp/fcc.tar.gz
+
+# Set up .env file
+if [ ! -f /opt/factorio-control-center/.env ]; then
+  if [ -f /opt/factorio-control-center/.env.example ]; then
+    cp /opt/factorio-control-center/.env.example /opt/factorio-control-center/.env
+  else
+    touch /opt/factorio-control-center/.env
+  fi
+fi
+
+# Set PORT in .env
+sed -i "s/^PORT=.*/PORT=${PANEL_PORT}/" /opt/factorio-control-center/.env
+# Handle case if PORT= is commented out or missing
+if ! grep -q "^PORT=" /opt/factorio-control-center/.env; then
+  if grep -q "^# PORT=" /opt/factorio-control-center/.env; then
+    sed -i "s/^# PORT=.*/PORT=${PANEL_PORT}/" /opt/factorio-control-center/.env
+  else
+    echo "PORT=${PANEL_PORT}" >> /opt/factorio-control-center/.env
+  fi
+fi
 
 echo
 echo "Who will manage the firewall (opening ports for game servers)?"

@@ -29,6 +29,18 @@ function parseIni(text) {
   return sections;
 }
 
+function parseEnv(text) {
+  const env = {};
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const kv = /^([^=]+)=(.*)$/.exec(line);
+    if (!kv) continue;
+    env[kv[1].trim()] = kv[2].trim();
+  }
+  return env;
+}
+
 function bool(v, d = false) {
   if (v === undefined || v === '') return d;
   return ['1', 'true', 'yes', 'on'].includes(String(v).toLowerCase());
@@ -47,6 +59,20 @@ function resolveAutoPort(tls) {
 }
 
 function main() {
+  // 1. Check .env first (as it overrides DB/INI settings)
+  const envPath = join(root, '.env');
+  if (existsSync(envPath)) {
+    const env = parseEnv(readFileSync(envPath, 'utf-8'));
+    if (env.PORT && env.PORT.trim()) {
+      const n = parseInt(env.PORT.trim(), 10);
+      if (Number.isFinite(n) && n >= 1 && n <= 65535) {
+        console.log(String(n));
+        return;
+      }
+    }
+  }
+
+  // 2. Fall back to fcc-settings.ini (legacy/DB migration)
   if (!existsSync(iniPath)) {
     // Match FccConfigService defaults when fcc-settings.ini is missing (port_mode=auto).
     console.log(String(resolveAutoPort(false)));
