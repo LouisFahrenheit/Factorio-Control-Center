@@ -460,6 +460,11 @@ export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
           <tr className="settings-table__row settings-table__row--footnote settings-table__row--sync-desc">
             <td colSpan={2} className="settings-table__footnote">
               {t('program_settings_group_web_tls_tip')}
+              {s.is_docker && (
+                <div style={{ marginTop: 6, color: 'var(--text-warning, #f59e0b)' }}>
+                  {t('program_settings_group_web_tls_docker_tip')}
+                </div>
+              )}
             </td>
           </tr>
           <tr className="settings-table__row settings-table__row--interface-pair settings-table__row--web-bind">
@@ -483,6 +488,8 @@ export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
                   spellCheck={false}
                   value={s.listen_host || '0.0.0.0'}
                   onChange={(e) => settings.patchDraft({ listen_host: e.target.value })}
+                  disabled={s.is_docker}
+                  title={s.is_docker ? t('program_settings_docker_bind_disabled') : undefined}
                 />
               </div>
               <div className="settings-table__interface-field settings-table__interface-field--port-narrow">
@@ -497,6 +504,8 @@ export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
                   max={65535}
                   value={s.listen_port ?? 8080}
                   onChange={(e) => settings.patchDraft({ listen_port: parseInt(e.target.value, 10) || 8080 })}
+                  disabled={s.is_docker}
+                  title={s.is_docker ? t('program_settings_docker_bind_disabled') : undefined}
                 />
               </div>
               <div className="settings-table__web-bind-status" aria-live="polite">

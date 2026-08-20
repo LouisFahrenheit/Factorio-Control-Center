@@ -32,6 +32,22 @@ Server dependencies (production node_modules)
   License: MIT
   Repository: https://github.com/Borewit/text-codec
 
+@cspotcode/source-map-support@0.8.1
+  License: MIT
+  Repository: https://github.com/cspotcode/node-source-map-support
+
+@jridgewell/resolve-uri@3.1.2
+  License: MIT
+  Repository: https://github.com/jridgewell/resolve-uri
+
+@jridgewell/sourcemap-codec@1.5.5
+  License: MIT
+  Repository: https://github.com/jridgewell/sourcemaps
+
+@jridgewell/trace-mapping@0.3.9
+  License: MIT
+  Repository: https://github.com/jridgewell/trace-mapping
+
 @lukeed/csprng@1.1.0
   License: MIT
   Repository: https://github.com/lukeed/csprng
@@ -52,9 +68,29 @@ Server dependencies (production node_modules)
   License: MIT
   Repository: https://github.com/nestjs/nest
 
+@nestjs/platform-socket.io@11.1.29
+  License: MIT
+  Repository: https://github.com/nestjs/nest
+
 @nestjs/serve-static@5.0.5
   License: MIT
   Repository: https://github.com/nestjs/serve-static
+
+@nestjs/typeorm@11.0.3
+  License: MIT
+  Repository: https://github.com/nestjs/typeorm
+
+@nestjs/websockets@11.1.29
+  License: MIT
+  Repository: https://github.com/nestjs/nest
+
+@socket.io/component-emitter@3.1.2
+  License: MIT
+  Repository: https://github.com/socketio/emitter
+
+@sqltools/formatter@1.2.5
+  License: MIT
+  Repository: https://github.com/mtxr/vscode-sqltools
 
 @tokenizer/inflate@0.4.1
   License: MIT
@@ -64,29 +100,129 @@ Server dependencies (production node_modules)
   License: MIT
   Repository: https://github.com/Borewit/tokenizer-token
 
+@tsconfig/node10@1.0.12
+  License: MIT
+  Repository: https://github.com/tsconfig/bases
+
+@tsconfig/node12@1.0.11
+  License: MIT
+  Repository: https://github.com/tsconfig/bases
+
+@tsconfig/node14@1.0.3
+  License: MIT
+  Repository: https://github.com/tsconfig/bases
+
+@tsconfig/node16@1.0.4
+  License: MIT
+  Repository: https://github.com/tsconfig/bases
+
+@types/cors@2.8.19
+  License: MIT
+  Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+@types/node@24.12.4
+  License: MIT
+  Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
 @types/validator@13.15.10
   License: MIT
   Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+@types/ws@8.18.1
+  License: MIT
+  Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+accepts@1.3.8
+  License: MIT
+  Repository: https://github.com/jshttp/accepts
 
 accepts@2.0.0
   License: MIT
   Repository: https://github.com/jshttp/accepts
 
+acorn-walk@8.3.5
+  License: MIT
+  Repository: https://github.com/acornjs/acorn
+
+acorn@8.16.0
+  License: MIT
+  Repository: https://github.com/acornjs/acorn
+
 adm-zip@0.6.0
   License: MIT
   Repository: https://github.com/cthackers/adm-zip
+
+ansi-regex@5.0.1
+  License: MIT
+  Repository: https://github.com/chalk/ansi-regex
+
+ansi-styles@4.3.0
+  License: MIT
+  Repository: https://github.com/chalk/ansi-styles
+
+ansis@4.3.1
+  License: ISC
+  Repository: https://github.com/webdiscus/ansis
+
+app-root-path@3.1.0
+  License: MIT
+  Repository: https://github.com/inxilpro/node-app-root-path
 
 append-field@1.0.0
   License: MIT
   Repository: https://github.com/LinusU/node-append-field
 
+arg@4.1.3
+  License: MIT
+  Repository: https://github.com/zeit/arg
+
+available-typed-arrays@1.0.7
+  License: MIT
+  Repository: https://github.com/inspect-js/available-typed-arrays
+
+balanced-match@4.0.4
+  License: MIT
+  Repository: https://github.com/juliangruber/balanced-match
+
+base64-js@1.5.1
+  License: MIT
+  Repository: https://github.com/beatgammit/base64-js
+
+base64id@2.0.0
+  License: MIT
+  Repository: https://github.com/faeldt/base64id
+
+better-sqlite3@12.11.1
+  License: MIT
+  Repository: https://github.com/WiseLibs/better-sqlite3
+
+bindings@1.5.0
+  License: MIT
+  Repository: https://github.com/TooTallNate/node-bindings
+
+bl@4.1.0
+  License: MIT
+  Repository: https://github.com/rvagg/bl
+
 body-parser@2.3.0
   License: MIT
   Repository: https://github.com/expressjs/body-parser
 
+brace-expansion@5.0.9
+  License: MIT
+  Repository: https://github.com/juliangruber/brace-expansion
+
 buffer-from@1.1.2
   License: MIT
   Repository: https://github.com/LinusU/buffer-from
+
+buffer@5.7.1
+  License: MIT
+  Repository: https://github.com/feross/buffer
+
+buffer@6.0.3
+  License: MIT
+  Repository: https://github.com/feross/buffer
 
 busboy@1.6.0
   License: MIT
@@ -100,9 +236,17 @@ call-bind-apply-helpers@1.0.2
   License: MIT
   Repository: https://github.com/ljharb/call-bind-apply-helpers
 
+call-bind@1.0.9
+  License: MIT
+  Repository: https://github.com/ljharb/call-bind
+
 call-bound@1.0.4
   License: MIT
   Repository: https://github.com/ljharb/call-bound
+
+chownr@1.1.4
+  License: ISC
+  Repository: https://github.com/isaacs/chownr
 
 class-transformer@0.5.1
   License: MIT
@@ -111,6 +255,18 @@ class-transformer@0.5.1
 class-validator@0.15.1
   License: MIT
   Repository: https://github.com/typestack/class-validator
+
+cliui@8.0.1
+  License: ISC
+  Repository: https://github.com/yargs/cliui
+
+color-convert@2.0.1
+  License: MIT
+  Repository: https://github.com/Qix-/color-convert
+
+color-name@1.1.4
+  License: MIT
+  Repository: https://github.com/colorjs/color-name
 
 concat-stream@2.0.0
   License: MIT
@@ -140,13 +296,45 @@ cors@2.8.6
   License: MIT
   Repository: https://github.com/expressjs/cors
 
+create-require@1.1.1
+  License: MIT
+  Repository: https://github.com/nuxt-contrib/create-require
+
+dayjs@1.11.21
+  License: MIT
+  Repository: https://github.com/iamkun/dayjs
+
 debug@4.4.3
   License: MIT
   Repository: https://github.com/debug-js/debug
 
+decompress-response@6.0.0
+  License: MIT
+  Repository: https://github.com/sindresorhus/decompress-response
+
+dedent@1.7.2
+  License: MIT
+  Repository: https://github.com/dmnd/dedent
+
+deep-extend@0.6.0
+  License: MIT
+  Repository: https://github.com/unclechu/node-deep-extend
+
+define-data-property@1.1.4
+  License: MIT
+  Repository: https://github.com/ljharb/define-data-property
+
 depd@2.0.0
   License: MIT
   Repository: https://github.com/dougwilson/nodejs-depd
+
+detect-libc@2.1.2
+  License: Apache-2.0
+  Repository: https://github.com/lovell/detect-libc
+
+diff@4.0.4
+  License: BSD-3-Clause
+  Repository: https://github.com/kpdecker/jsdiff
 
 dotenv-expand@12.0.3
   License: BSD-2-Clause
@@ -160,6 +348,10 @@ dotenv@17.4.1
   License: BSD-2-Clause
   Repository: https://github.com/motdotla/dotenv
 
+dotenv@17.4.2
+  License: BSD-2-Clause
+  Repository: https://github.com/motdotla/dotenv
+
 dunder-proto@1.0.1
   License: MIT
   Repository: https://github.com/es-shims/dunder-proto
@@ -168,9 +360,25 @@ ee-first@1.1.1
   License: MIT
   Repository: https://github.com/jonathanong/ee-first
 
+emoji-regex@8.0.0
+  License: MIT
+  Repository: https://github.com/mathiasbynens/emoji-regex
+
 encodeurl@2.0.0
   License: MIT
   Repository: https://github.com/pillarjs/encodeurl
+
+end-of-stream@1.4.5
+  License: MIT
+  Repository: https://github.com/mafintosh/end-of-stream
+
+engine.io-parser@5.2.3
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+engine.io@6.6.9
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
 
 es-define-property@1.0.1
   License: MIT
@@ -184,6 +392,10 @@ es-object-atoms@1.1.1
   License: MIT
   Repository: https://github.com/ljharb/es-object-atoms
 
+escalade@3.2.0
+  License: MIT
+  Repository: https://github.com/lukeed/escalade
+
 escape-html@1.0.3
   License: MIT
   Repository: https://github.com/component/escape-html
@@ -191,6 +403,10 @@ escape-html@1.0.3
 etag@1.8.1
   License: MIT
   Repository: https://github.com/jshttp/etag
+
+expand-template@2.0.3
+  License: (MIT OR WTFPL)
+  Repository: https://github.com/ralphtheninja/expand-template
 
 express@5.2.1
   License: MIT
@@ -204,9 +420,17 @@ file-type@21.3.4
   License: MIT
   Repository: https://github.com/sindresorhus/file-type
 
+file-uri-to-path@1.0.0
+  License: MIT
+  Repository: https://github.com/TooTallNate/file-uri-to-path
+
 finalhandler@2.1.1
   License: MIT
   Repository: https://github.com/pillarjs/finalhandler
+
+for-each@0.3.5
+  License: MIT
+  Repository: https://github.com/Raynos/for-each
 
 forwarded@0.2.0
   License: MIT
@@ -216,9 +440,17 @@ fresh@2.0.0
   License: MIT
   Repository: https://github.com/jshttp/fresh
 
+fs-constants@1.0.0
+  License: MIT
+  Repository: https://github.com/mafintosh/fs-constants
+
 function-bind@1.1.2
   License: MIT
   Repository: https://github.com/Raynos/function-bind
+
+get-caller-file@2.0.5
+  License: ISC
+  Repository: https://github.com/stefanpenner/get-caller-file
 
 get-intrinsic@1.3.0
   License: MIT
@@ -228,13 +460,29 @@ get-proto@1.0.1
   License: MIT
   Repository: https://github.com/ljharb/get-proto
 
+github-from-package@0.0.0
+  License: MIT
+  Repository: https://github.com/substack/github-from-package
+
+glob@13.0.6
+  License: BlueOak-1.0.0
+  Repository: https://github.com/isaacs/node-glob
+
 gopd@1.2.0
   License: MIT
   Repository: https://github.com/ljharb/gopd
 
+has-property-descriptors@1.0.2
+  License: MIT
+  Repository: https://github.com/inspect-js/has-property-descriptors
+
 has-symbols@1.1.0
   License: MIT
   Repository: https://github.com/inspect-js/has-symbols
+
+has-tostringtag@1.0.2
+  License: MIT
+  Repository: https://github.com/inspect-js/has-tostringtag
 
 hasown@2.0.4
   License: MIT
@@ -256,6 +504,10 @@ inherits@2.0.4
   License: ISC
   Repository: https://github.com/isaacs/inherits
 
+ini@1.3.8
+  License: ISC
+  Repository: https://github.com/isaacs/ini
+
 ini@7.0.0
   License: ISC
   Repository: https://github.com/npm/ini
@@ -264,9 +516,25 @@ ipaddr.js@1.9.1
   License: MIT
   Repository: https://github.com/whitequark/ipaddr.js
 
+is-callable@1.2.7
+  License: MIT
+  Repository: https://github.com/inspect-js/is-callable
+
+is-fullwidth-code-point@3.0.0
+  License: MIT
+  Repository: https://github.com/sindresorhus/is-fullwidth-code-point
+
 is-promise@4.0.0
   License: MIT
   Repository: https://github.com/then/is-promise
+
+is-typed-array@1.1.15
+  License: MIT
+  Repository: https://github.com/inspect-js/is-typed-array
+
+isarray@2.0.5
+  License: MIT
+  Repository: https://github.com/juliangruber/isarray
 
 iterare@1.2.1
   License: ISC
@@ -283,6 +551,14 @@ load-esm@1.0.3
 lodash@4.18.1
   License: MIT
   Repository: https://github.com/lodash/lodash
+
+lru-cache@11.4.0
+  License: BlueOak-1.0.0
+  Repository: https://github.com/isaacs/node-lru-cache
+
+make-error@1.3.6
+  License: ISC
+  Repository: https://github.com/JsCommunity/make-error
 
 math-intrinsics@1.1.0
   License: MIT
@@ -316,6 +592,26 @@ mime-types@3.0.2
   License: MIT
   Repository: https://github.com/jshttp/mime-types
 
+mimic-response@3.1.0
+  License: MIT
+  Repository: https://github.com/sindresorhus/mimic-response
+
+minimatch@10.2.5
+  License: BlueOak-1.0.0
+  Repository: https://github.com/isaacs/minimatch
+
+minimist@1.2.8
+  License: MIT
+  Repository: https://github.com/minimistjs/minimist
+
+minipass@7.1.3
+  License: BlueOak-1.0.0
+  Repository: https://github.com/isaacs/minipass
+
+mkdirp-classic@0.5.3
+  License: MIT
+  Repository: https://github.com/mafintosh/mkdirp-classic
+
 ms@2.1.3
   License: MIT
   Repository: https://github.com/vercel/ms
@@ -324,9 +620,21 @@ multer@2.2.0
   License: MIT
   Repository: https://github.com/expressjs/multer
 
+napi-build-utils@2.0.0
+  License: MIT
+  Repository: https://github.com/inspiredware/napi-build-utils
+
+negotiator@0.6.3
+  License: MIT
+  Repository: https://github.com/jshttp/negotiator
+
 negotiator@1.0.0
   License: MIT
   Repository: https://github.com/jshttp/negotiator
+
+node-abi@3.94.0
+  License: MIT
+  Repository: https://github.com/electron/node-abi
 
 node-stream-zip@1.15.0
   License: MIT
@@ -335,6 +643,10 @@ node-stream-zip@1.15.0
 object-assign@4.1.1
   License: MIT
   Repository: https://github.com/sindresorhus/object-assign
+
+object-hash@3.0.0
+  License: MIT
+  Repository: https://github.com/puleos/object-hash
 
 object-inspect@1.13.4
   License: MIT
@@ -352,13 +664,29 @@ parseurl@1.3.3
   License: MIT
   Repository: https://github.com/pillarjs/parseurl
 
+path-scurry@2.0.2
+  License: BlueOak-1.0.0
+  Repository: https://github.com/isaacs/path-scurry
+
 path-to-regexp@8.4.2
   License: MIT
   Repository: https://github.com/pillarjs/path-to-regexp
 
+possible-typed-array-names@1.1.0
+  License: MIT
+  Repository: https://github.com/ljharb/possible-typed-array-names
+
+prebuild-install@7.1.3
+  License: MIT
+  Repository: https://github.com/prebuild/prebuild-install
+
 proxy-addr@2.0.7
   License: MIT
   Repository: https://github.com/jshttp/proxy-addr
+
+pump@3.0.4
+  License: MIT
+  Repository: https://github.com/mafintosh/pump
 
 qs@6.15.2
   License: BSD-3-Clause
@@ -372,6 +700,10 @@ raw-body@3.0.2
   License: MIT
   Repository: https://github.com/stream-utils/raw-body
 
+rc@1.2.8
+  License: (BSD-2-Clause OR MIT OR Apache-2.0)
+  Repository: https://github.com/dominictarr/rc
+
 readable-stream@3.6.2
   License: MIT
   Repository: https://github.com/nodejs/readable-stream
@@ -379,6 +711,10 @@ readable-stream@3.6.2
 reflect-metadata@0.2.2
   License: Apache-2.0
   Repository: https://github.com/rbuckton/reflect-metadata
+
+require-directory@2.1.1
+  License: MIT
+  Repository: https://github.com/troygoode/node-require-directory
 
 router@2.2.0
   License: MIT
@@ -396,6 +732,10 @@ safer-buffer@2.1.2
   License: MIT
   Repository: https://github.com/ChALkeR/safer-buffer
 
+semver@7.8.0
+  License: ISC
+  Repository: https://github.com/npm/node-semver
+
 send@1.2.1
   License: MIT
   Repository: https://github.com/pillarjs/send
@@ -404,9 +744,17 @@ serve-static@2.2.1
   License: MIT
   Repository: https://github.com/expressjs/serve-static
 
+set-function-length@1.2.2
+  License: MIT
+  Repository: https://github.com/ljharb/set-function-length
+
 setprototypeof@1.2.0
   License: ISC
   Repository: https://github.com/wesleytodd/setprototypeof
+
+sha.js@2.4.12
+  License: (MIT AND BSD-3-Clause)
+  Repository: https://github.com/crypto-browserify/sha.js
 
 side-channel-list@1.0.1
   License: MIT
@@ -424,6 +772,30 @@ side-channel@1.1.0
   License: MIT
   Repository: https://github.com/ljharb/side-channel
 
+simple-concat@1.0.1
+  License: MIT
+  Repository: https://github.com/feross/simple-concat
+
+simple-get@4.0.1
+  License: MIT
+  Repository: https://github.com/feross/simple-get
+
+socket.io-adapter@2.5.8
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+socket.io-parser@4.2.7
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+socket.io@4.8.3
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+sql-highlight@6.1.0
+  License: MIT
+  Repository: https://github.com/scriptcoded/sql-highlight
+
 statuses@2.0.2
   License: MIT
   Repository: https://github.com/jshttp/statuses
@@ -436,9 +808,33 @@ string_decoder@1.3.0
   License: MIT
   Repository: https://github.com/nodejs/string_decoder
 
+string-width@4.2.3
+  License: MIT
+  Repository: https://github.com/sindresorhus/string-width
+
+strip-ansi@6.0.1
+  License: MIT
+  Repository: https://github.com/chalk/strip-ansi
+
+strip-json-comments@2.0.1
+  License: MIT
+  Repository: https://github.com/sindresorhus/strip-json-comments
+
 strtok3@10.3.5
   License: MIT
   Repository: https://github.com/Borewit/strtok3
+
+tar-fs@2.1.5
+  License: MIT
+  Repository: https://github.com/mafintosh/tar-fs
+
+tar-stream@2.2.0
+  License: MIT
+  Repository: https://github.com/mafintosh/tar-stream
+
+to-buffer@1.2.2
+  License: MIT
+  Repository: https://github.com/browserify/to-buffer
 
 toidentifier@1.0.1
   License: MIT
@@ -448,9 +844,17 @@ token-types@6.1.2
   License: MIT
   Repository: https://github.com/Borewit/token-types
 
+ts-node@10.9.2
+  License: MIT
+  Repository: https://github.com/TypeStrong/ts-node
+
 tslib@2.8.1
   License: 0BSD
   Repository: https://github.com/Microsoft/tslib
+
+tunnel-agent@0.6.0
+  License: Apache-2.0
+  Repository: https://github.com/mikeal/tunnel-agent
 
 type-is@1.6.18
   License: MIT
@@ -460,9 +864,21 @@ type-is@2.1.0
   License: MIT
   Repository: https://github.com/jshttp/type-is
 
+typed-array-buffer@1.0.3
+  License: MIT
+  Repository: https://github.com/inspect-js/typed-array-buffer
+
 typedarray@0.0.6
   License: MIT
   Repository: https://github.com/substack/typedarray
+
+typeorm@0.3.31
+  License: MIT
+  Repository: https://github.com/typeorm/typeorm
+
+typescript@5.9.3
+  License: Apache-2.0
+  Repository: https://github.com/microsoft/TypeScript
 
 uid@2.0.2
   License: MIT
@@ -472,6 +888,10 @@ uint8array-extras@1.5.0
   License: MIT
   Repository: https://github.com/sindresorhus/uint8array-extras
 
+undici-types@7.16.0
+  License: MIT
+  Repository: https://github.com/nodejs/undici
+
 unpipe@1.0.0
   License: MIT
   Repository: https://github.com/stream-utils/unpipe
@@ -480,9 +900,17 @@ util-deprecate@1.0.2
   License: MIT
   Repository: https://github.com/TooTallNate/util-deprecate
 
+uuid@11.1.1
+  License: MIT
+  Repository: https://github.com/uuidjs/uuid
+
 uuid@14.0.0
   License: MIT
   Repository: https://github.com/uuidjs/uuid
+
+v8-compile-cache-lib@3.0.1
+  License: MIT
+  Repository: https://github.com/cspotcode/v8-compile-cache-lib
 
 validator@13.15.35
   License: MIT
@@ -492,9 +920,37 @@ vary@1.1.2
   License: MIT
   Repository: https://github.com/jshttp/vary
 
+which-typed-array@1.1.22
+  License: MIT
+  Repository: https://github.com/inspect-js/which-typed-array
+
+wrap-ansi@7.0.0
+  License: MIT
+  Repository: https://github.com/chalk/wrap-ansi
+
 wrappy@1.0.2
   License: ISC
   Repository: https://github.com/npm/wrappy
+
+ws@8.21.3
+  License: MIT
+  Repository: https://github.com/websockets/ws
+
+y18n@5.0.8
+  License: ISC
+  Repository: https://github.com/yargs/y18n
+
+yargs-parser@21.1.1
+  License: ISC
+  Repository: https://github.com/yargs/yargs-parser
+
+yargs@17.7.3
+  License: MIT
+  Repository: https://github.com/yargs/yargs
+
+yn@3.1.1
+  License: MIT
+  Repository: https://github.com/sindresorhus/yn
 
 Client UI bundle dependencies (production)
 ==========================================
@@ -547,6 +1003,10 @@ Client UI bundle dependencies (production)
   License: MIT
   Repository: https://github.com/mantinedev/mantine
 
+@socket.io/component-emitter@3.1.2
+  License: MIT
+  Repository: https://github.com/socketio/emitter
+
 @tabler/icons-react@3.44.0
   License: MIT
   Repository: https://github.com/tabler/tabler-icons
@@ -579,6 +1039,10 @@ csstype@3.2.3
   License: MIT
   Repository: https://github.com/frenic/csstype
 
+debug@4.4.3
+  License: MIT
+  Repository: https://github.com/debug-js/debug
+
 detect-node-es@1.1.0
   License: MIT
   Repository: https://github.com/thekashey/detect-node
@@ -586,6 +1050,14 @@ detect-node-es@1.1.0
 dom-helpers@5.2.1
   License: MIT
   Repository: https://github.com/react-bootstrap/dom-helpers
+
+engine.io-client@6.6.6
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+engine.io-parser@5.2.3
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
 
 framer-motion@12.39.0
   License: MIT
@@ -614,6 +1086,10 @@ motion-utils@12.39.0
 motion@12.39.0
   License: MIT
   Repository: https://github.com/motiondivision/motion
+
+ms@2.1.3
+  License: MIT
+  Repository: https://github.com/vercel/ms
 
 object-assign@4.1.1
   License: MIT
@@ -667,6 +1143,14 @@ scheduler@0.27.0
   License: MIT
   Repository: https://github.com/facebook/react
 
+socket.io-client@4.8.3
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
+socket.io-parser@4.2.7
+  License: MIT
+  Repository: https://github.com/socketio/socket.io
+
 tabbable@6.4.0
   License: MIT
   Repository: https://github.com/focus-trap/tabbable
@@ -698,4 +1182,12 @@ use-latest@1.3.0
 use-sidecar@1.1.3
   License: MIT
   Repository: https://github.com/theKashey/use-sidecar
+
+ws@8.21.3
+  License: MIT
+  Repository: https://github.com/websockets/ws
+
+xmlhttprequest-ssl@2.1.2
+  License: MIT
+  Repository: https://github.com/mjwwit/node-XMLHttpRequest
 

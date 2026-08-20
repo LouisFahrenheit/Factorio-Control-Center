@@ -1,81 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   ALL_TABS,
   ENGINEER_TABS,
   MODERATOR_TABS,
 } from '../constants/fcc.constants';
-import { readJsonFile, writeJsonFile } from '../common/json-store';
-import { PathsService } from '../config/paths.service';
 import { PublicUserView, WebUserRecord } from '../common/types';
 import { hashPassword, verifyPassword } from './password.util';
+import { User, UserRole } from './user.entity';
 
-interface UsersFile {
-  version: number;
-  users: WebUserRecord[];
-}
-
-function isEnabledAdmin(u: WebUserRecord): boolean {
-  return u.role === 'administrator' && u.enabled !== false;
+function isEnabledAdmin(u: User): boolean {
+  return u.role === 'administrator' && u.enabled;
 }
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private readonly log = new Logger(UsersService.name);
   private defaultsInstalled = false;
+  private cache: User[] = [];
 
-  constructor(private readonly paths: PathsService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
 
-  load(): UsersFile {
-    const fallback: UsersFile = {
-      version: 1,
-      users: [
-        {
-          username: 'admin',
-          password_hash: hashPassword('admin'),
-          role: 'administrator',
-          tabs: [...ALL_TABS],
-          instance_ids: ['*'],
-          enabled: true,
-        },
-      ],
-    };
-    if (!require('fs').existsSync(this.paths.usersPath)) {
-      writeJsonFile(this.paths.usersPath, fallback);
-      this.defaultsInstalled = true;
-      return fallback;
-    }
-    const data = readJsonFile<UsersFile>(this.paths.usersPath, fallback);
-    if (!Array.isArray(data.users) || data.users.length === 0) {
-      writeJsonFile(this.paths.usersPath, fallback);
-      this.defaultsInstalled = true;
-      return fallback;
-    }
-    return data;
+  async onModuleInit() {
+    await this.load();
   }
 
-  save(data: UsersFile): void {
-    writeJsonFile(this.paths.usersPath, data);
+  async load(): Promise<User[]> {
+    const users = await this.userRepo.find();
+    if (users.length === 0) {
+      const admin = this.userRepo.create({
+        username: 'admin',
+        passwordHash: hashPassword('admin'),
+        role: 'administrator',
+        tabs: [...ALL_TABS],
+        instanceIds: ['*'],
+        enabled: true,
+      });
+      await this.userRepo.save(admin);
+      this.log.debug(`No users found. Default 'admin' user created.`);
+      this.defaultsInstalled = true;
+      this.cache = [admin];
+      return this.cache;
+    }
+    this.log.debug(`Loaded ${users.length} users from database.`);
+    this.cache = users;
+    return this.cache;
   }
 
-  findUser(username: string): WebUserRecord | undefined {
+  async findUser(username: string): Promise<User | undefined> {
     const needle = username.trim().toLowerCase();
-    return this.load().users.find(
-      (u) => u.username.trim().toLowerCase() === needle,
-    );
+    if (this.cache.length === 0) await this.load();
+    return this.cache.find((u) => u.username.trim().toLowerCase() === needle);
   }
 
-  defaultAdminPasswordActive(): boolean {
-    const u = this.findUser('admin');
+  async defaultAdminPasswordActive(): Promise<boolean> {
+    const u = await this.findUser('admin');
     if (!u?.enabled) return false;
-    return verifyPassword('admin', u.password_hash);
+    return verifyPassword('admin', u.passwordHash);
   }
 
-  normalizeRole(role: string): WebUserRecord['role'] {
+  normalizeRole(role: string): UserRole {
     if (role === 'administrator') return 'administrator';
     if (role === 'server_engineer') return 'server_engineer';
     return 'moderator';
   }
 
-  cleanTabs(raw: unknown, role: WebUserRecord['role']): string[] {
+  cleanTabs(raw: unknown, role: UserRole): string[] {
     if (role === 'administrator') return [...ALL_TABS];
     const tabs = Array.isArray(raw) ? raw : [];
     const out: string[] = [];
@@ -90,21 +84,21 @@ export class UsersService {
     return out;
   }
 
-  defaultTabsForRole(role: WebUserRecord['role']): string[] {
+  defaultTabsForRole(role: UserRole): string[] {
     if (role === 'administrator') return [...ALL_TABS];
     if (role === 'server_engineer') return [...ENGINEER_TABS];
     return [...MODERATOR_TABS];
   }
 
-  private actorIsEnabledAdmin(actorUsername: string): boolean {
-    const actor = this.findUser(actorUsername);
+  private async actorIsEnabledAdmin(actorUsername: string): Promise<boolean> {
+    const actor = await this.findUser(actorUsername);
     return !!actor && isEnabledAdmin(actor);
   }
 
   private wouldRemoveLastEnabledAdmin(
-    users: WebUserRecord[],
-    target: WebUserRecord,
-    nextRole: WebUserRecord['role'],
+    users: User[],
+    target: User,
+    nextRole: UserRole,
     nextEnabled: boolean,
   ): boolean {
     const wasEnabledAdmin = isEnabledAdmin(target);
@@ -118,14 +112,14 @@ export class UsersService {
     return others.length === 0;
   }
 
-  private hasEnabledAdministrator(users: WebUserRecord[]): boolean {
+  private hasEnabledAdministrator(users: User[]): boolean {
     return users.some(isEnabledAdmin);
   }
 
-  publicView(u: WebUserRecord): PublicUserView {
+  publicView(u: User): PublicUserView {
     const role = this.normalizeRole(u.role);
     const tabs = this.cleanTabs(u.tabs, role);
-    let inst = Array.isArray(u.instance_ids) ? [...u.instance_ids] : [];
+    let inst = Array.isArray(u.instanceIds) ? [...u.instanceIds] : [];
     inst = inst.map((x) => String(x).trim()).filter(Boolean);
     if (role === 'administrator' && !inst.includes('*')) inst.unshift('*');
     return {
@@ -137,48 +131,51 @@ export class UsersService {
     };
   }
 
-  listPublic(): PublicUserView[] {
-    return this.load().users.map((u) => this.publicView(u));
+  async listPublic(): Promise<PublicUserView[]> {
+    const users = await this.load();
+    return users.map((u) => this.publicView(u));
   }
 
-  createUser(
+  async createUser(
     body: {
       username: string;
-      password: string;
+      password?: string;
       role?: string;
       tabs?: string[];
       instance_ids?: string[];
       enabled?: boolean;
     },
     actorUsername: string,
-  ): { ok: boolean; error?: string } {
-    if (!this.actorIsEnabledAdmin(actorUsername))
+  ): Promise<{ ok: boolean; error?: string }> {
+    if (!(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
-    const data = this.load();
+    const users = await this.load();
     const username = String(body.username || '').trim();
     if (!username) return { ok: false, error: 'invalid_username' };
     if (
-      data.users.some(
+      users.some(
         (u) => u.username.toLowerCase() === username.toLowerCase(),
       )
     )
       return { ok: false, error: 'user_exists' };
     const role = this.normalizeRole(body.role || 'moderator');
-    if (role === 'administrator' && !this.actorIsEnabledAdmin(actorUsername))
+    if (role === 'administrator' && !(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
-    data.users.push({
+      
+    const newUser = this.userRepo.create({
       username,
-      password_hash: hashPassword(body.password || ''),
+      passwordHash: hashPassword(body.password || ''),
       role,
       tabs: this.cleanTabs(body.tabs ?? this.defaultTabsForRole(role), role),
-      instance_ids: body.instance_ids,
+      instanceIds: body.instance_ids,
       enabled: body.enabled !== false,
     });
-    this.save(data);
+    
+    await this.userRepo.save(newUser);
     return { ok: true };
   }
 
-  updateUser(
+  async updateUser(
     username: string,
     body: Partial<{
       password: string;
@@ -188,12 +185,12 @@ export class UsersService {
       enabled: boolean;
     }>,
     actorUsername: string,
-  ): { ok: boolean; error?: string } {
-    if (!this.actorIsEnabledAdmin(actorUsername))
+  ): Promise<{ ok: boolean; error?: string }> {
+    if (!(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
 
-    const data = this.load();
-    const u = data.users.find(
+    const users = await this.load();
+    const u = users.find(
       (x) => x.username.toLowerCase() === username.toLowerCase(),
     );
     if (!u) return { ok: false, error: 'not_found' };
@@ -208,48 +205,51 @@ export class UsersService {
     if (
       body.role !== undefined &&
       nextRole === 'administrator' &&
-      !this.actorIsEnabledAdmin(actorUsername)
+      !(await this.actorIsEnabledAdmin(actorUsername))
     ) {
       return { ok: false, error: 'admin_required' };
     }
 
-    if (this.wouldRemoveLastEnabledAdmin(data.users, u, nextRole, nextEnabled))
+    if (this.wouldRemoveLastEnabledAdmin(users, u, nextRole, nextEnabled))
       return { ok: false, error: 'last_admin' };
 
-    if (body.password) u.password_hash = hashPassword(body.password);
+    if (body.password) u.passwordHash = hashPassword(body.password);
     if (body.role) u.role = nextRole;
     if (body.tabs) u.tabs = this.cleanTabs(body.tabs, u.role);
-    if (body.instance_ids) u.instance_ids = body.instance_ids;
+    if (body.instance_ids) u.instanceIds = body.instance_ids;
     if (body.enabled !== undefined) u.enabled = body.enabled;
 
-    if (!this.hasEnabledAdministrator(data.users))
+    // Check again before save
+    const tempUsers = users.map(x => x.id === u.id ? u : x);
+    if (!this.hasEnabledAdministrator(tempUsers))
       return { ok: false, error: 'last_admin' };
 
-    this.save(data);
+    await this.userRepo.save(u);
     return { ok: true };
   }
 
-  deleteUser(
+  async deleteUser(
     username: string,
     actorUsername: string,
-  ): { ok: boolean; error?: string } {
-    if (!this.actorIsEnabledAdmin(actorUsername))
+  ): Promise<{ ok: boolean; error?: string }> {
+    if (!(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
 
-    const data = this.load();
-    const target = data.users.find(
+    const users = await this.load();
+    const target = users.find(
       (u) => u.username.toLowerCase() === username.toLowerCase(),
     );
     if (!target) return { ok: false, error: 'not_found' };
-    if (isEnabledAdmin(target) && data.users.filter(isEnabledAdmin).length <= 1)
+    if (isEnabledAdmin(target) && users.filter(isEnabledAdmin).length <= 1)
       return { ok: false, error: 'last_admin' };
 
-    data.users = data.users.filter(
+    const tempUsers = users.filter(
       (u) => u.username.toLowerCase() !== username.toLowerCase(),
     );
-    if (!this.hasEnabledAdministrator(data.users))
+    if (!this.hasEnabledAdministrator(tempUsers))
       return { ok: false, error: 'last_admin' };
-    this.save(data);
+      
+    await this.userRepo.remove(target);
     return { ok: true };
   }
 }

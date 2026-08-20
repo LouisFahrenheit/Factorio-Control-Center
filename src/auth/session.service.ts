@@ -23,7 +23,27 @@ export class SessionService {
     return token;
   }
 
-  resolve(token: string): SessionUser | null {
+  async createSession(username: string, ip?: string): Promise<string> {
+    const record = await this.users.findUser(username);
+    if (!record || !record.enabled) throw new Error('invalid_credentials');
+    const role = this.users.normalizeRole(record.role);
+    const tabs = this.users.cleanTabs(record.tabs, role);
+    let instance_ids = Array.isArray(record.instanceIds)
+      ? [...record.instanceIds]
+      : [];
+    if (role === 'administrator') instance_ids = ['*'];
+
+    const user: SessionUser = {
+      username: record.username,
+      role,
+      tabs,
+      instance_ids,
+      enabled: true,
+    };
+    return this.createToken(user);
+  }
+
+  async resolve(token: string): Promise<SessionUser | null> {
     const s = this.sessions.get(token);
     if (!s) return null;
     if (s.exp < Date.now() / 1000) {
@@ -31,7 +51,7 @@ export class SessionService {
       return null;
     }
 
-    const record = this.users.findUser(s.username);
+    const record = await this.users.findUser(s.username);
     if (!record || record.enabled === false) {
       this.sessions.delete(token);
       return null;
@@ -39,8 +59,8 @@ export class SessionService {
 
     const role = this.users.normalizeRole(record.role);
     const tabs = this.users.cleanTabs(record.tabs, role);
-    let instance_ids = Array.isArray(record.instance_ids)
-      ? [...record.instance_ids]
+    let instance_ids = Array.isArray(record.instanceIds)
+      ? [...record.instanceIds]
       : [];
     if (role === 'administrator') instance_ids = ['*'];
 
@@ -73,28 +93,5 @@ export class SessionService {
     if (!s || s.exp < Date.now() / 1000) return false;
     s.selectedInstanceId = String(instanceId || '').trim();
     return true;
-  }
-
-  login(
-    username: string,
-    password: string,
-    users: UsersService,
-  ): SessionUser | null {
-    const u = users.findUser(username);
-    if (!u || !u.enabled) return null;
-    const { verifyPassword } =
-      require('./password.util') as typeof import('./password.util');
-    if (!verifyPassword(password, u.password_hash)) return null;
-    const role = users.normalizeRole(u.role);
-    const tabs = users.cleanTabs(u.tabs, role);
-    let instance_ids = Array.isArray(u.instance_ids) ? [...u.instance_ids] : [];
-    if (role === 'administrator') instance_ids = ['*'];
-    return {
-      username: u.username,
-      role,
-      tabs,
-      instance_ids,
-      enabled: true,
-    };
   }
 }

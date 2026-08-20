@@ -142,18 +142,16 @@ export class InstanceSummaryService {
     return out;
   }
 
-  private countEnabledMods(serverPath: string): number {
+  private countEnabledMods(enabledMods: string[]): number {
     let n = 0;
-    for (const name of this.enabledModNames(serverPath)) {
+    for (const name of enabledMods) {
       if (!isBuiltinModName(name)) n++;
     }
     return n;
   }
 
-  private publicModNames(serverPath: string): string[] {
-    return this.enabledModNames(serverPath).filter(
-      (name) => !isBuiltinModName(name),
-    );
+  private publicModNames(enabledMods: string[]): string[] {
+    return enabledMods.filter((name) => !isBuiltinModName(name));
   }
 
   private readServerSettingsCached(serverPath: string) {
@@ -203,8 +201,8 @@ export class InstanceSummaryService {
     }
   }
 
-  private publicModsList(serverPath: string): { name: string; title: string; version?: string }[] {
-    const names = this.publicModNames(serverPath);
+  private publicModsList(serverPath: string, enabledMods: string[]): { name: string; title: string; version?: string }[] {
+    const names = this.publicModNames(enabledMods);
     if (!names.length) return [];
     const modsDir = join(serverPath, 'mods');
     return names.map((name) => {
@@ -264,6 +262,8 @@ export class InstanceSummaryService {
     }
 
     const settings = this.readServerSettingsCached(sp);
+    const enabledMods = this.enabledModNames(sp);
+
     return {
       id: item.id,
       name: item.name,
@@ -274,9 +274,9 @@ export class InstanceSummaryService {
       rconPassword: String(item.rconPassword || ''),
       gameVersion: gv,
       hasSpaceAge: hasSpaceAge(sp),
-      modBadges: detectServerListModBadges(this.enabledModNames(sp)),
+      modBadges: detectServerListModBadges(enabledMods),
       onlineCount,
-      modsCount: this.countEnabledMods(sp),
+      modsCount: this.countEnabledMods(enabledMods),
       uptimeSeconds,
       autostartServer: !!item.autostartServer,
       autoEnterPanel: !!item.autoEnterPanel,
@@ -293,7 +293,7 @@ export class InstanceSummaryService {
       isPublic: !!item.isPublic,
       publicDescription: String(item.publicDescription || ''),
       publicConnectionAddress: String(item.publicConnectionAddress || ''),
-      publicMods: this.publicModsList(sp),
+      publicMods: this.publicModsList(sp, enabledMods),
       publicPlayers,
       serverSettingsName: settings.name,
       serverSettingsDesc: settings.description,

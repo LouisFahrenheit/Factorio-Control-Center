@@ -75,19 +75,19 @@ export class LogRotationService implements OnModuleInit {
   }
 
   logWriteInstanceEnabled(): boolean {
-    return this.logWriteInstance;
+    return this.config.webPanel.log_write_instance;
   }
 
   logWriteWebEnabled(): boolean {
-    return this.logWriteWeb;
+    return this.config.webPanel.log_write_web;
   }
 
   logWriteMaintenanceEnabled(): boolean {
-    return this.logWriteMaintenance;
+    return this.config.webPanel.log_write_maintenance;
   }
 
   logWriteAuditEnabled(): boolean {
-    return this.logWriteAudit;
+    return this.config.webPanel.log_write_audit;
   }
 
   /** Append one line; size is checked for rotation at most once per interval per file. */

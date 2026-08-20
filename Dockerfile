@@ -44,8 +44,8 @@ ENV NODE_ENV=production
 # Default web panel port
 EXPOSE 80
 
-# Expose default factorio UDP port (for documentation/convenience)
-EXPOSE 34197/udp
+# Expose default factorio UDP port range
+EXPOSE 34197-34207/udp
 
 # Volumes for persistent data
 VOLUME ["/app/data", "/app/logs"]

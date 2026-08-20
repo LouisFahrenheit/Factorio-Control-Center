@@ -176,7 +176,7 @@ export class ApiController {
   }
 
   @Get('locale-bootstrap')
-  localeBootstrap(@Query('lang') lang?: string) {
+  async localeBootstrap(@Query('lang') lang?: string) {
     const loc = this.locale.getLocale(lang);
     const w = this.config.webPanel;
     return {
@@ -185,7 +185,7 @@ export class ApiController {
       strings: loc.strings,
       theme: this.config.sharedTheme,
       web_disable_effects: w.web_disable_effects,
-      default_web_credentials: this.users.defaultAdminPasswordActive(),
+      default_web_credentials: await this.users.defaultAdminPasswordActive(),
       available_languages: this.locale.listAvailableLanguages(),
       default_toast_duration_sec: w.toast_duration_sec,
       panel_default_language: this.config.langCode,
@@ -337,8 +337,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('instances')
-  instancesAdd(@Body() body: Record<string, unknown>) {
-    return this.bridge.submit('instances_add', body);
+  instancesAdd(@Body() body: Record<string, unknown>, @Req() req: Request) {
+    return this.bridge.submit('instances_add', {
+      ...body,
+      web_actor: this.bridge.webActor(this.me(req)),
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -382,14 +385,20 @@ export class ApiController {
   instancesClone(
     @Param('id') id: string,
     @Body() body: Record<string, unknown>,
+    @Req() req: Request,
   ) {
-    return this.bridge.submit('instances_clone', { id, ...body });
+    return this.bridge.submit('instances_clone', {
+      id,
+      ...body,
+      web_actor: this.bridge.webActor(this.me(req)),
+    });
   }
 
   @UseGuards(AuthGuard)
   @Delete('instances/:id')
   instancesRemove(
     @Param('id') id: string,
+    @Req() req: Request,
     @Query('deleteFromDisk') deleteFromDisk?: string,
     @Query('deleteData') deleteData?: string,
   ) {
@@ -397,6 +406,7 @@ export class ApiController {
       id,
       deleteFromDisk: deleteFromDisk === '1' || deleteFromDisk === 'true',
       deleteData: deleteData === '1' || deleteData === 'true',
+      web_actor: this.bridge.webActor(this.me(req)),
     });
   }
 

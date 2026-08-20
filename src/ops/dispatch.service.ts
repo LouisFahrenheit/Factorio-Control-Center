@@ -122,7 +122,7 @@ export class DispatchService {
         );
       case 'instances_remove': {
         const id = String(kwargs.id || '');
-        const result = this.instances.remove(id, {
+        const result = await this.instances.remove(id, {
           deleteFromDisk: !!kwargs.deleteFromDisk,
           deleteData: !!kwargs.deleteData,
         });
@@ -636,9 +636,9 @@ export class DispatchService {
     }
   }
 
-  private instanceMaintenanceLock(
+  private async instanceMaintenanceLock(
     kwargs: Record<string, unknown>,
-  ): Record<string, unknown> {
+  ): Promise<Record<string, unknown>> {
     if (!kwargs._maintenance_internal) return { ok: false, error: 'forbidden' };
     const id = String(
       kwargs.instance_id || kwargs.id || this.instances.getSelectedId() || '',
@@ -649,7 +649,7 @@ export class DispatchService {
     const patch = { ...item, maintenanceLock: locked };
     if (locked) patch.autoEnterPanel = false;
     else delete (patch as { maintenanceLock?: boolean }).maintenanceLock;
-    this.instances.update(id, patch);
+    await this.instances.update(id, patch);
     return { ok: true };
   }
 }

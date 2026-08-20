@@ -63,6 +63,8 @@ export class WebPanelListenerService implements OnModuleDestroy {
       .trim()
       .toLowerCase();
 
+    this.log.debug(`Starting web listener: host=${host}, port=${port}, mode=${mode}`);
+
     if (customBindPortRequiresElevation(wp, port)) {
       this.lastError = 'web_panel_privileged_port_unix';
       throw new Error(this.lastError);
@@ -85,6 +87,9 @@ export class WebPanelListenerService implements OnModuleDestroy {
       };
       const pw = String(wp.tls_key_password || '').trim();
       if (pw) tlsOptions.passphrase = pw;
+      this.log.debug(`Loaded TLS certificates from: ${certPath}`);
+    } else {
+      this.log.debug(`TLS is disabled. Starting plain HTTP server.`);
     }
 
     const server = tlsOptions
@@ -99,7 +104,10 @@ export class WebPanelListenerService implements OnModuleDestroy {
             : err.message || 'web_panel_failed_to_start';
         reject(new Error(this.lastError));
       });
-      server.listen(port, host, () => resolvePromise());
+      server.listen(port, host, () => {
+        this.log.debug(`HTTP(S) Server successfully bound to ${host}:${port}`);
+        resolvePromise();
+      });
     });
 
     this.server = server;

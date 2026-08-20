@@ -8,6 +8,8 @@ import {
   platformFirewallSupported,
 } from './platform-firewall.util';
 
+import { existsSync } from 'fs';
+
 @Injectable()
 export class FirewallService {
   constructor(
@@ -17,6 +19,7 @@ export class FirewallService {
   ) {}
 
   logStartupNotice(): void {
+    if (existsSync('/.dockerenv')) return;
     if (!platformFirewallSupported()) return;
     const key = platformFirewallIsElevated()
       ? 'firewall_web_startup_elevated'
@@ -27,13 +30,14 @@ export class FirewallService {
   async tryApplyOnGameStart(factorioExe: string, port: number): Promise<void> {
     if (!platformFirewallSupported()) return;
     if (!platformFirewallIsElevated()) return;
-    if (this.config.firewallUdpRuleDone) return;
     if (port < 1 || port > 65535) return;
 
-    const { ok, detail } = await platformFirewallAddUdpAllow(factorioExe, port);
+    const { ok, detail, created } = await platformFirewallAddUdpAllow(factorioExe, port);
     if (ok) {
-      this.config.setFirewallUdpRuleDone(true);
-      this.logHeadless('firewall_rule_ok_log', port, factorioExe);
+      // Only log if the rule was actually newly created
+      if (created) {
+        this.logHeadless('firewall_rule_ok_log', port, factorioExe);
+      }
     } else {
       this.logHeadless('firewall_rule_failed_log', detail || 'unknown');
     }

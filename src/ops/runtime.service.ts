@@ -136,6 +136,8 @@ export class RuntimeService implements OnModuleDestroy {
     const iid = item.id;
     if (this.isRunning(iid)) return { ok: false, error: 'already_busy' };
 
+    this.log.log(`Starting instance ${iid}`);
+
     const pm = new PathManager(item.serverPath);
     if (!existsSync(pm.serverSettings)) {
       const ensured = ensureServerSettingsFile(
@@ -151,11 +153,12 @@ export class RuntimeService implements OnModuleDestroy {
     let saveName = (item.launchSave || '').trim();
     if (!saveName || saveName === 'latest') saveName = pm.latestSave() || '';
     if (!saveName) return { ok: false, error: 'no_saves' };
-    const savePath = joinSafe(pm.savesDir, saveName);
+    const savePath = join(pm.savesDir, saveName);
     if (!existsSync(savePath)) return { ok: false, error: 'save_not_found' };
 
     const exe = pm.findFactorioExe();
     if (!exe) return { ok: false, error: 'no_factorio_exe' };
+    this.log.debug(`[${iid}] Selected executable: ${exe}`);
 
     const ip = (item.ip || '0.0.0.0').trim();
     const port = String(item.port || '34197').trim();
@@ -305,6 +308,7 @@ export class RuntimeService implements OnModuleDestroy {
   async stop(
     instanceId: string,
   ): Promise<{ ok: boolean; error?: string; forced_kill?: boolean }> {
+    this.log.log(`Stopping instance ${instanceId}`);
     const rt = this.runtimes.get(instanceId);
     const ep = this.rconEndpoint(instanceId);
     if (!ep) {

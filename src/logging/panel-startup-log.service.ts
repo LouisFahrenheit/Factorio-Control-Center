@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { existsSync } from 'fs';
 import { UsersService } from '../auth/users.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { PathsService } from '../config/paths.service';
@@ -34,7 +35,7 @@ export class PanelStartupLogService {
     private readonly firewall: FirewallService,
   ) {}
 
-  logReady(): void {
+  async logReady(): Promise<void> {
     const build = resolveAppBuild();
     const versionLine = `v${APP_VERSION}  build ${build}`;
     const banner = `${FCC_ASCII_LOGO}\n${versionLine}`;
@@ -47,7 +48,7 @@ export class PanelStartupLogService {
     this.webLog.appendFileBlock(centeredBanner);
     this.blankFile();
 
-    this.logSummary();
+    await this.logSummary();
 
     console.log('');
     this.blankFile();
@@ -65,25 +66,31 @@ export class PanelStartupLogService {
         : `:${urlPort}`;
     const panelUrl = `${scheme}://${urlHost}${portSuffix}/`;
 
-    this.line('panel_startup_url', panelUrl);
-    this.line('panel_startup_url_local', scheme, urlPort);
+    const isDocker = existsSync('/.dockerenv');
 
-    if (bindHost === '127.0.0.1' || bindHost === '::1') {
-      this.line('panel_startup_lan_blocked');
-    } else if (bindHost === '0.0.0.0' || bindHost === '::') {
-      for (const ip of listLanIPv4()) {
-        this.line('panel_startup_lan_url', `${scheme}://${ip}${portSuffix}/`);
-      }
-      for (const ip of listPublicIPv4()) {
-        this.line(
-          'panel_startup_public_url',
-          `${scheme}://${ip}${portSuffix}/`,
-        );
+    this.line('panel_startup_url', panelUrl);
+    if (isDocker) {
+      this.line('panel_startup_docker_port_notice', urlPort);
+    } else {
+      this.line('panel_startup_url_local', scheme, urlPort);
+
+      if (bindHost === '127.0.0.1' || bindHost === '::1') {
+        this.line('panel_startup_lan_blocked');
+      } else if (bindHost === '0.0.0.0' || bindHost === '::') {
+        for (const ip of listLanIPv4()) {
+          this.line('panel_startup_lan_url', `${scheme}://${ip}${portSuffix}/`);
+        }
+        for (const ip of listPublicIPv4()) {
+          this.line(
+            'panel_startup_public_url',
+            `${scheme}://${ip}${portSuffix}/`,
+          );
+        }
       }
     }
-    this.line('panel_startup_config', this.paths.settingsPath);
+    this.line('panel_startup_config', this.paths.envFilePath);
 
-    if (this.users.defaultAdminPasswordActive()) {
+    if (await this.users.defaultAdminPasswordActive()) {
       console.log('');
       this.blankFile();
       this.line('panel_startup_default_password_warning');
@@ -96,11 +103,14 @@ export class PanelStartupLogService {
     console.log('');
   }
 
-  private logSummary(): void {
+  private async logSummary(): Promise<void> {
     const serverCount = this.instances.load().items.length;
-    const userCount = this.users.load().users.length;
+    const users = await this.users.load();
+    const userCount = users.length;
     const lang = this.config.langCode || 'en';
     const nodeVersion = process.version;
+    const isDocker = existsSync('/.dockerenv');
+    const nodeVersionStr = isDocker ? `${nodeVersion} (Docker)` : nodeVersion;
     const autostartCount = this.instances.load().items.filter(i => i.autostartServer).length;
     const autostartQueued = autostartCount > 0;
     const { total: maintTotal, active: maintActive } =
@@ -109,7 +119,7 @@ export class PanelStartupLogService {
     const lines = [
       this.summaryHeader(),
       this.formatLocale('panel_startup_summary_line1', serverCount, userCount),
-      this.formatLocale('panel_startup_summary_line2', lang, nodeVersion),
+      this.formatLocale('panel_startup_summary_line2', lang, nodeVersionStr),
     ];
     if (autostartQueued) {
       lines.push(

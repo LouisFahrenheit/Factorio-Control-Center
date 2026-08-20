@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
     private readonly users: UsersService,
   ) {}
 
-  canActivate(ctx: ExecutionContext): boolean {
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest<Request>();
     const path = req.path || '';
     if (
@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate {
     }
     const incoming = extractBearerToken(req.headers.authorization);
     if (!incoming) throw new UnauthorizedException('Missing bearer token');
-    let user = this.sessions.resolve(incoming);
+    let user = await this.sessions.resolve(incoming);
     const expected = (this.config.webPanel.api_token || '').trim();
     if (!user && expected) {
       const a = Buffer.from(incoming);

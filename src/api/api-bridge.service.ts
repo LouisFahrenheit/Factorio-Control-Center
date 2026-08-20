@@ -23,7 +23,6 @@ export class ApiBridgeService {
   }
 
   webActor(user?: { username?: string }): string {
-    const name = String(user?.username || '').trim();
-    return name ? `User: ${name}` : 'System: Panel';
+    return String(user?.username || '').trim();
   }
 }

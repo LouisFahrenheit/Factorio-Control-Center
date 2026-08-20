@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InstancesService } from '../instances/instances.service';
-import { panelActorLogLabel } from '../shared/panel-actor';
-import { WebPanelLogService } from './web-panel-log.service';
+import { AuditLogService } from '../maintenance/audit-log.service';
+import { LogRotationService } from './log-rotation.service';
+import { PathsService } from '../config/paths.service';
 
 const LOGGED_OPS = new Set([
   'instances_add',
   'instances_remove',
-  'instances_select',
   'instances_update',
   'instances_clone',
   'instance_bootstrap_start',
@@ -17,11 +17,9 @@ const LOGGED_OPS = new Set([
   'save_game',
   'backup',
   'rcon_exec',
-  'chat_send_text',
   'set_program_settings',
   'restart_web_panel',
   'upload_web_tls_file',
-  'set_server_ini',
   'maintenance_run_now',
   'maintenance_set',
   'maintenance_clear_manual',
@@ -35,22 +33,7 @@ const LOGGED_OPS = new Set([
   'whitelist_remove',
   'whitelist_clear',
   'sync_bans',
-  'write_server_settings',
-  'write_mod_list',
   'write_admin_list',
-  'mod_settings_write_json',
-  'mods_set_enabled',
-  'mods_remove',
-  'upload_mod_archive',
-  'modpack_activate',
-  'modpack_save_current',
-  'modpack_import_upload',
-  'rename_save',
-  'delete_save',
-  'duplicate_save',
-  'set_launch_save',
-  'upload_save_archive',
-  'create_save',
   'factorio_update',
   'announcements_write',
   'write_commands_catalog',
@@ -66,8 +49,10 @@ const SETTINGS_REDACT = new Set([
 @Injectable()
 export class WebPanelEventLogService {
   constructor(
-    private readonly webLog: WebPanelLogService,
+    private readonly audit: AuditLogService,
     private readonly instances: InstancesService,
+    private readonly logRotation: LogRotationService,
+    private readonly paths: PathsService,
   ) {}
 
   logAuth(
@@ -82,38 +67,24 @@ export class WebPanelEventLogService {
     detail?: string,
   ): void {
     const user = String(username || '').trim() || '?';
-    switch (kind) {
-      case 'login':
-        this.webLog.logEvent(
-          'auth',
-          `Login: ${user}${detail ? ` (${detail})` : ''}`,
-        );
-        break;
-      case 'login_failed':
-        this.webLog.logEvent('auth', `Login failed: ${user}`);
-        break;
-      case 'logout':
-        this.webLog.logEvent('auth', `Logout: ${user}`);
-        break;
-      case 'user_create':
-        this.webLog.logEvent(
-          'users',
-          `${user} created account ${detail || '?'}`,
-        );
-        break;
-      case 'user_update':
-        this.webLog.logEvent(
-          'users',
-          `${user} updated account ${detail || '?'}`,
-        );
-        break;
-      case 'user_delete':
-        this.webLog.logEvent(
-          'users',
-          `${user} deleted account ${detail || '?'}`,
-        );
-        break;
+    let message = '';
+    
+    switch(kind) {
+      case 'login': message = `Logged in`; break;
+      case 'login_failed': message = `Login failed`; break;
+      case 'logout': message = `Logged out`; break;
+      case 'user_create': message = `Created user account for ${detail || '?'}`; break;
+      case 'user_update': message = `Updated user account ${detail || '?'}`; break;
+      case 'user_delete': message = `Deleted user account ${detail || '?'}`; break;
     }
+
+    this.audit.record({
+      event_kind: 'auth',
+      actor: user,
+      trigger: 'manual',
+      success: kind !== 'login_failed',
+      detail: { message },
+    });
   }
 
   logDispatchOp(
@@ -123,191 +94,207 @@ export class WebPanelEventLogService {
   ): void {
     if (!LOGGED_OPS.has(op)) return;
 
-    const actor = this.actorLabel(kwargs);
+    const actor = String(kwargs.actor || kwargs.web_actor || '').trim() || '?';
     const ok = result.ok !== false;
-    const err = ok ? '' : String(result.error || 'error');
-    const suffix = ok ? '' : ` — failed: ${err}`;
-    const inst = this.instanceLabel();
+    const error = ok ? undefined : String(result.error || 'error');
+    const selected = this.instances.getSelected();
+    const instId = String(kwargs.id || result.id || selected?.id || '');
+    let instName = instId;
+    if (instId) {
+      const inst = this.instances.getById(instId);
+      if (inst && inst.name) instName = inst.name;
+    }
+    if (result.name && typeof result.name === 'string') {
+      instName = result.name;
+    }
 
     let message = '';
     switch (op) {
       case 'instances_add':
-        message = `${actor}: added instance ${String(result.id || kwargs.name || '')}${suffix}`;
+        message = `Added new server`;
         break;
-      case 'instances_remove':
-        message = `${actor}: removed instance ${String(kwargs.id || '')}${suffix}`;
+      case 'instances_remove': {
+        const withFiles = kwargs.deleteFromDisk || kwargs.deleteData;
+        message = `Deleted server (files ${withFiles ? 'deleted' : 'kept'})`;
         break;
-      case 'instances_select':
-        message = `${actor}: selected instance ${String(kwargs.id || '')}${suffix}`;
+      }
+      case 'instances_update': {
+        const changesList = Array.isArray(result.changes) ? result.changes : [];
+        const changes = changesList.join(', ');
+        message = `Updated server configuration (${changes || 'no fields'})`;
         break;
-      case 'instances_update':
-        message = `${actor}: updated instance ${String(kwargs.id || '')}${suffix}`;
-        break;
+      }
       case 'instances_clone':
-        message = `${actor}: cloned instance ${String(kwargs.id || '')} → ${String(result.id || kwargs.name || '')}${suffix}`;
+        message = `Cloned server to ${String(result.id || kwargs.name || '?')}`;
         break;
       case 'instance_bootstrap_start':
-        message = `${actor}: instance bootstrap started${suffix}`;
+        message = `Started automatic server setup`;
         break;
       case 'start_server':
-        message = `${actor}: start server [${inst}]${suffix}`;
+        message = `Started server`;
         break;
       case 'stop_server':
-        message = `${actor}: stop server [${inst}]${suffix}`;
+        message = `Stopped server`;
         break;
       case 'restart_server':
-        message = `${actor}: restart server [${inst}]${suffix}`;
+        message = `Restarted server`;
         break;
       case 'kill_server':
-        message = `${actor}: kill server [${inst}]${suffix}`;
+        message = `Force killed server`;
         break;
       case 'save_game':
-        message = `${actor}: save game [${inst}]${suffix}`;
+        message = `Saved game`;
         break;
       case 'backup':
-        message = `${actor}: backup [${inst}]${suffix}`;
+        message = `Created backup`;
         break;
       case 'rcon_exec':
-        message = `${actor}: RCON ${truncate(String(kwargs.command || ''), 160)} [${inst}]${suffix}`;
-        break;
-      case 'chat_send_text':
-        message = `${actor}: chat announcement ${truncate(String(kwargs.message || ''), 120)} [${inst}]${suffix}`;
+        message = `Executed RCON command`;
         break;
       case 'set_program_settings': {
-        const keys = Object.keys(kwargs).filter(
-          (k) => !SETTINGS_REDACT.has(k) && k !== 'actor' && !k.startsWith('_'),
-        );
-        message = `${actor}: program settings changed (${keys.join(', ') || 'no fields'})${suffix}`;
+        const changes = Object.keys(kwargs)
+          .filter(
+            (k) =>
+              !SETTINGS_REDACT.has(k) &&
+              k !== 'actor' &&
+              k !== 'web_actor' &&
+              !k.startsWith('_'),
+          )
+          .map((k) => `${k}=${String(kwargs[k])}`)
+          .join(', ');
+        message = `Changed global panel settings (${changes || 'no fields'})`;
         break;
       }
-      case 'restart_web_panel':
-        message = `${actor}: web panel restart requested${suffix}`;
-        break;
-      case 'upload_web_tls_file':
-        message = `${actor}: TLS ${String(kwargs.kind || 'file')} uploaded${suffix}`;
-        break;
-      case 'set_server_ini':
-        message = `${actor}: server.ini updated [${inst}]${suffix}`;
+      case 'public_page_settings_update':
+        message = `Updated public page settings`;
         break;
       case 'maintenance_run_now':
-        message = `${actor}: maintenance run now [${inst}]${suffix}`;
-        break;
+        this.writeToMaintenanceLog(`${actor}: manually triggered maintenance run [${instId || 'global'}]`);
+        return;
       case 'maintenance_set':
-        message = `${actor}: maintenance tasks updated${suffix}`;
-        break;
+        this.writeToMaintenanceLog(`${actor}: updated maintenance tasks [${instId || 'global'}]`);
+        return;
       case 'maintenance_clear_manual':
-        message = `${actor}: maintenance manual session cleared [${inst}]${suffix}`;
+        this.writeToMaintenanceLog(`${actor}: cleared manual maintenance session [${instId || 'global'}]`);
+        return;
+      case 'restart_web_panel':
+        message = `Restarted web panel`;
+        break;
+      case 'upload_web_tls_file':
+        message = `Uploaded new TLS ${String(kwargs.kind || 'certificate')}`;
+        break;
+      case 'set_server_ini':
+        message = `Updated server.ini`;
         break;
       case 'ban_player':
-        message = `${actor}: ban ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Banned player ${String(kwargs.player || '?')}`;
         break;
       case 'unban_player':
-        message = `${actor}: unban ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Unbanned player ${String(kwargs.player || '?')}`;
         break;
       case 'kick_player':
-        message = `${actor}: kick ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Kicked player ${String(kwargs.player || '?')}`;
         break;
       case 'mute_player':
-        message = `${actor}: mute ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Muted player ${String(kwargs.player || '?')}`;
         break;
       case 'unmute_player':
-        message = `${actor}: unmute ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Unmuted player ${String(kwargs.player || '?')}`;
         break;
       case 'purge_player':
-        message = `${actor}: purge ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Purged player ${String(kwargs.player || '?')}`;
         break;
       case 'whitelist_add':
-        message = `${actor}: whitelist add ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Added ${String(kwargs.player || '?')} to whitelist`;
         break;
       case 'whitelist_remove':
-        message = `${actor}: whitelist remove ${String(kwargs.player || '')} [${inst}]${suffix}`;
+        message = `Removed ${String(kwargs.player || '?')} from whitelist`;
         break;
       case 'whitelist_clear':
-        message = `${actor}: whitelist cleared [${inst}]${suffix}`;
+        message = `Cleared whitelist`;
         break;
       case 'sync_bans':
-        message = `${actor}: sync bans [${inst}]${suffix}`;
+        message = `Synchronized bans across servers`;
         break;
       case 'write_server_settings':
-        message = `${actor}: server-settings.json updated [${inst}]${suffix}`;
+        message = `Updated server-settings.json`;
         break;
       case 'write_mod_list':
-        message = `${actor}: mod-list updated [${inst}]${suffix}`;
+        message = `Updated mod list`;
         break;
       case 'write_admin_list':
-        message = `${actor}: admin list updated [${inst}]${suffix}`;
+        message = `Updated admin list`;
         break;
       case 'mod_settings_write_json':
-        message = `${actor}: mod settings updated [${inst}]${suffix}`;
+        message = `Updated mod settings`;
         break;
-      case 'mods_set_enabled': {
-        const en = kwargs.enabled;
-        const on = en !== false && en !== 'false' && en !== 0 && en !== '0';
-        message = `${actor}: mod ${String(kwargs.name || '')} ${on ? 'enabled' : 'disabled'} [${inst}]${suffix}`;
+      case 'mods_set_enabled':
+        message = `Toggled mod state`;
         break;
-      }
       case 'mods_remove':
-        message = `${actor}: mod removed ${String(kwargs.name || '')} [${inst}]${suffix}`;
+        message = `Removed mod`;
         break;
       case 'upload_mod_archive':
-        message = `${actor}: mod uploaded ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Uploaded mod archive`;
         break;
       case 'modpack_activate':
-        message = `${actor}: modpack activated ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Activated modpack`;
         break;
       case 'modpack_save_current':
-        message = `${actor}: modpack saved ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Saved current mods as modpack`;
         break;
       case 'modpack_import_upload':
-        message = `${actor}: modpack imported ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Imported modpack from archive`;
         break;
       case 'rename_save':
-        message = `${actor}: save renamed ${String(kwargs.name || '')} → ${String(kwargs.new_name || result.new_name || '')} [${inst}]${suffix}`;
+        message = `Renamed save file`;
         break;
       case 'delete_save':
-        message = `${actor}: save deleted ${String(kwargs.name || '')} [${inst}]${suffix}`;
+        message = `Deleted save file`;
         break;
       case 'duplicate_save':
-        message = `${actor}: save duplicated ${String(kwargs.name || '')} [${inst}]${suffix}`;
+        message = `Duplicated save file`;
         break;
       case 'set_launch_save':
-        message = `${actor}: launch save set ${String(kwargs.name || '')} [${inst}]${suffix}`;
+        message = `Changed default launch save`;
         break;
       case 'upload_save_archive':
-        message = `${actor}: save uploaded ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Uploaded save file`;
         break;
       case 'create_save':
-        message = `${actor}: save created ${String(kwargs.name || result.name || '')} [${inst}]${suffix}`;
+        message = `Created new save file`;
         break;
       case 'factorio_update':
-        message = `${actor}: Factorio update started [${inst}]${suffix}`;
+        message = `Updated Factorio server version`;
         break;
       case 'announcements_write':
-        message = `${actor}: announcements updated [${inst}]${suffix}`;
+        message = `Updated server announcements`;
         break;
       case 'write_commands_catalog':
-        message = `${actor}: commands catalog updated [${inst}]${suffix}`;
+        message = `Updated RCON commands catalog`;
         break;
       case 'mods_job_start':
-        message = `${actor}: mods job started (${String(kwargs.mode || '')}) [${inst}]${suffix}`;
-        break;
-      default:
-        message = `${actor}: ${op} [${inst}]${suffix}`;
+        message = `Started background mods job`;
         break;
     }
 
-    this.webLog.logEvent('panel', message);
-  }
+    if (!message) return;
 
-  private actorLabel(kwargs: Record<string, unknown>): string {
-    return panelActorLogLabel(String(kwargs.actor || kwargs.web_actor || ''));
+    this.audit.record({
+      event_kind: 'web_panel',
+      actor,
+      instance_id: instId || undefined,
+      instance_name: instName || undefined,
+      trigger: 'manual',
+      success: ok,
+      error,
+      detail: { message },
+    });
   }
-
-  private instanceLabel(): string {
-    const inst = this.instances.getSelected();
-    if (!inst) return 'no instance';
-    const name = String(inst.name || inst.id || '').trim();
-    return name ? `${name} (${inst.id})` : String(inst.id || '?');
+  private writeToMaintenanceLog(msg: string): void {
+    if (!this.logRotation.logWriteMaintenanceEnabled()) return;
+    const line = `${new Date().toISOString()} [Maintenance] ${msg}`;
+    this.logRotation.appendLine(this.paths.maintenanceSchedulerLogPath(), line);
   }
 }
 
@@ -318,3 +305,4 @@ function truncate(text: string, max: number): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max - 1)}…`;
 }
+

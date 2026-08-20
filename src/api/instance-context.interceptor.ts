@@ -36,6 +36,7 @@ export class InstanceContextInterceptor implements NestInterceptor {
     if (!token) return next.handle();
     const instanceId = this.sessions.getSelectedInstanceId(token);
     if (!instanceId) return next.handle();
+    if (!this.instances.getById(instanceId)) return next.handle();
     return from(
       this.instances.withInstance(instanceId, () =>
         lastValueFrom(next.handle()),

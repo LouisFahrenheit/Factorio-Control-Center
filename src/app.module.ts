@@ -2,6 +2,15 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join, resolve } from 'path';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+
+// Entities
+import { User } from './auth/user.entity';
+import { SystemPreference } from './config/system-preference.entity';
+import { GameInstance } from './instances/game-instance.entity';
+import { MaintenanceSchedule } from './maintenance/maintenance-schedule.entity';
+
 import { trimPath } from './common/trim.util';
 import { ApiController } from './api/api.controller';
 import { ApiFullController } from './api/api-full.controller';
@@ -52,6 +61,7 @@ import { PanelStartupLogService } from './logging/panel-startup-log.service';
 import { WebPanelListenerService } from './http/web-panel-listener.service';
 import { FirewallService } from './ops/firewall/firewall.service';
 import { EventsGateway } from './ws/events.gateway';
+import { LegacyMigrationService } from './config/legacy-migration.service';
 
 const fccRoot = resolve(trimPath(process.env.FCC_ROOT_DIR) || process.cwd());
 const publicAssets = join(fccRoot, 'public', 'assets');
@@ -60,6 +70,17 @@ const clientDist = join(fccRoot, 'client', 'dist');
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: join(fccRoot, '.env'),
+    }),
+    TypeOrmModule.forRoot({
+      type: 'better-sqlite3' as any,
+      database: join(fccRoot, 'data', 'fcc_database.sqlite'),
+      entities: [User, SystemPreference, GameInstance, MaintenanceSchedule],
+      synchronize: true, // Auto-create tables (good for this use-case, but use migrations in prod ideally)
+    }),
+    TypeOrmModule.forFeature([User, SystemPreference, GameInstance, MaintenanceSchedule]),
     // Static images (map-gen, server-list, …) at /assets/*
     ServeStaticModule.forRoot({
       rootPath: publicAssets,
@@ -140,6 +161,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     WebPanelListenerService,
     AuthGuard,
     EventsGateway,
+    LegacyMigrationService,
     {
       provide: APP_INTERCEPTOR,
       useClass: InstanceContextInterceptor,

@@ -41,7 +41,6 @@ export class AuditLogService {
 
   record(opts: AuditRecordOptions): void {
     const instId = String(opts.instance_id || '').trim();
-    if (!instId) return;
 
     const finished =
       String(opts.finished_at || this.nowIso()).trim() || this.nowIso();
@@ -317,27 +316,41 @@ export class AuditLogService {
 
   private appendAuditFile(opts: AuditRecordOptions, finishedAt: string): void {
     if (!this.logRotation.logWriteAuditEnabled()) return;
-    const actor = panelActorLogLabel(String(opts.actor || ''), 'system');
-    const inst =
-      String(opts.instance_name || opts.instance_id || '?').trim() || '?';
-    const kind = String(opts.event_kind || 'event').trim() || 'event';
-    const status = opts.success !== false ? 'ok' : 'failed';
-    const err =
-      opts.success === false && opts.error ? ` — ${String(opts.error)}` : '';
-    const detail = this.auditFileDetail(opts.detail);
-    const line = `[${finishedAt}] [${kind}] ${actor} @ ${inst}: ${status}${err}${detail}`;
+    
+    let actor = String(opts.actor || '').trim();
+    if (!actor || actor === '?' || actor === 'system') actor = 'System';
+
+    const inst = String(opts.instance_name || opts.instance_id || '').trim();
+    const instPart = (inst && inst !== '?' && inst !== 'global') ? ` on ${inst}` : '';
+
+    let kind = String(opts.event_kind || 'event').trim();
+    if (kind === 'web_panel') kind = 'Action';
+    else if (kind === 'auth') kind = 'Auth';
+    else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+
+    const statusPart = opts.success === false ? ' [FAILED]' : '';
+    const err = opts.success === false && opts.error ? ` — Error: ${String(opts.error)}` : '';
+    
+    let detail = this.auditFileDetail(opts.detail);
+    if (detail.startsWith(' (') && detail.endsWith(')')) {
+      detail = detail.slice(2, -1);
+    }
+    const msg = detail ? `: ${detail}` : '';
+
+    const line = `[${finishedAt}] [${kind}] ${actor}${instPart}${statusPart}${msg}${err}`;
     this.logRotation.appendLine(this.paths.auditLogPath(), line);
   }
 
   private auditFileDetail(detail?: Record<string, unknown>): string {
     if (!detail || !Object.keys(detail).length) return '';
     const parts: string[] = [];
+    if (detail.message) parts.push(String(detail.message));
     const name = detail.name != null ? String(detail.name) : '';
     const newName = detail.new_name != null ? String(detail.new_name) : '';
     const modName = detail.name != null ? String(detail.name) : '';
     if (name && newName) parts.push(`${name} → ${newName}`);
-    else if (name) parts.push(name);
-    else if (modName && detail.enabled != null)
+    else if (name && !detail.message) parts.push(name);
+    else if (modName && detail.enabled != null && !detail.message)
       parts.push(`${modName}=${detail.enabled ? 'on' : 'off'}`);
     const changes = detail.changes;
     if (Array.isArray(changes) && changes.length) {

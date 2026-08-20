@@ -6,7 +6,9 @@ import {
   OnModuleInit,
   forwardRef,
 } from '@nestjs/common';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { existsSync, rmSync } from 'fs';
 import { randomUUID } from 'crypto';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
 import { PathsService } from '../config/paths.service';
@@ -27,6 +29,8 @@ import {
   taskTargetInstanceIds,
   validateIanaZone,
 } from './maintenance-time.util';
+import { MaintenanceSchedule } from './maintenance-schedule.entity';
+import { SystemPreference } from '../config/system-preference.entity';
 
 export const MAINTENANCE_PANEL_ACTOR = 'System: Panel';
 
@@ -46,7 +50,7 @@ const WARN_FALLBACKS: Record<string, string> = {
     'Maintenance started. Server will be stopped in 1 minute.',
 };
 
-interface MaintenanceTask {
+export interface MaintenanceTask {
   id: string;
   active: boolean;
   time_hhmm: string;
@@ -79,6 +83,10 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   private warnByTask = new Map<string, WarnState>();
 
   constructor(
+    @InjectRepository(MaintenanceSchedule)
+    private readonly repo: Repository<MaintenanceSchedule>,
+    @InjectRepository(SystemPreference)
+    private readonly prefs: Repository<SystemPreference>,
     private readonly paths: PathsService,
     private readonly instances: InstancesService,
     private readonly config: FccConfigService,
@@ -89,11 +97,9 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     private readonly auditLog: AuditLogService,
   ) {}
 
-  onModuleInit(): void {
-    this.loadDoc();
-    this.maintLog(
-      `scheduler_started tz=${effectiveSchedulerTz(this.loadDoc().scheduler_tz) || 'local'}`,
-    );
+  async onModuleInit(): Promise<void> {
+    const tz = await this.getSchedulerTz();
+    this.maintLog(`scheduler_started tz=${effectiveSchedulerTz(tz) || 'local'}`);
     this.timer = setInterval(() => void this.schedulerTick(), 10_000);
   }
 
@@ -101,16 +107,64 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     if (this.timer) clearInterval(this.timer);
   }
 
-  get(): Record<string, unknown> {
-    const doc = this.loadDoc();
-    let tasks = doc.tasks || [];
+  private async getSchedulerTz(): Promise<string> {
+    const pref = await this.prefs.findOneBy({ key: 'maintenance.scheduler_tz' });
+    return pref?.value || '';
+  }
+
+  private async setSchedulerTz(tz: string): Promise<void> {
+    let pref = await this.prefs.findOneBy({ key: 'maintenance.scheduler_tz' });
+    if (!pref) {
+      pref = this.prefs.create({ key: 'maintenance.scheduler_tz', value: tz });
+    } else {
+      pref.value = tz;
+    }
+    await this.prefs.save(pref);
+  }
+
+  private mapToTask(s: MaintenanceSchedule): MaintenanceTask {
+    return {
+      id: s.id,
+      active: s.active,
+      time_hhmm: s.timeHhmm,
+      weekdays: Array.isArray(s.weekdays) ? s.weekdays : [],
+      repeat_weekly: s.repeatWeekly,
+      manual_only: s.manualOnly,
+      timezone: s.timezone || undefined,
+      instance_ids: Array.isArray(s.instanceIds) ? s.instanceIds : [],
+      options: s.options || {},
+      last_run_key: s.lastRunKey || undefined,
+    };
+  }
+
+  private mapFromTask(t: MaintenanceTask): MaintenanceSchedule {
+    const s = this.repo.create({
+      id: t.id,
+      active: t.active,
+      timeHhmm: t.time_hhmm,
+      weekdays: t.weekdays,
+      repeatWeekly: t.repeat_weekly,
+      manualOnly: t.manual_only,
+      timezone: t.timezone || '',
+      instanceIds: t.instance_ids,
+      options: t.options,
+      lastRunKey: t.last_run_key || '',
+    });
+    return s;
+  }
+
+  async get(): Promise<Record<string, unknown>> {
+    const entities = await this.repo.find();
+    let tasks = entities.map((s) => this.mapToTask(s));
+    
     const rec = this.reconcileTasksWithInstances(tasks);
     if (rec.changed) {
-      writeJsonFile(this.paths.maintenancePath, { ...doc, tasks: rec.tasks });
+      await this.saveTasks(rec.tasks);
       tasks = rec.tasks;
     }
+    const schedulerTz = await this.getSchedulerTz();
     const outTasks = tasks.map((t) => {
-      const tz = effectiveTaskTz(t, doc.scheduler_tz || '');
+      const tz = effectiveTaskTz(t, schedulerTz);
       const nfMs = nextFireUtcMs(t, tz);
       return { ...t, next_fire_iso: nfMs != null ? fireIsoFromMs(nfMs) : null };
     });
@@ -118,11 +172,16 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
       ok: true,
       tasks: outTasks,
       job_running: this.jobRunning,
-      scheduler_tz: doc.scheduler_tz || '',
+      scheduler_tz: schedulerTz,
     };
   }
 
-  set(kwargs: Record<string, unknown>): Record<string, unknown> {
+  private async saveTasks(tasks: MaintenanceTask[]): Promise<void> {
+    const entities = tasks.map((t) => this.mapFromTask(t));
+    await this.repo.save(entities);
+  }
+
+  async set(kwargs: Record<string, unknown>): Promise<Record<string, unknown>> {
     const raw = kwargs.tasks;
     if (!Array.isArray(raw)) return { ok: false, error: 'tasks_required' };
 
@@ -145,16 +204,23 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     }
 
     const rec = this.reconcileTasksWithInstances(tasks);
-    const doc = this.loadDoc();
-    const save: Record<string, unknown> = { ...doc, tasks: rec.tasks };
+    
+    // Clear old tasks not in the new list
+    const current = await this.repo.find();
+    const newIds = new Set(rec.tasks.map(t => t.id));
+    const toDelete = current.filter(c => !newIds.has(c.id)).map(c => c.id);
+    if (toDelete.length > 0) {
+      await this.repo.delete(toDelete);
+    }
+    await this.saveTasks(rec.tasks);
+
     if ('scheduler_tz' in kwargs) {
       const s =
         kwargs.scheduler_tz == null ? '' : String(kwargs.scheduler_tz).trim();
       if (s && !validateIanaZone(s))
         return { ok: false, error: 'invalid_scheduler_tz' };
-      save.scheduler_tz = s;
+      await this.setSchedulerTz(s);
     }
-    writeJsonFile(this.paths.maintenancePath, save);
     return this.get();
   }
 
@@ -163,12 +229,13 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     return { ok: true, reports, items: reports };
   }
 
-  runNow(kwargs: Record<string, unknown>): Record<string, unknown> {
+  async runNow(kwargs: Record<string, unknown>): Promise<Record<string, unknown>> {
     if (this.jobRunning) return { ok: false, error: 'job_running' };
     const taskId = String(kwargs.task_id || kwargs.id || '').trim();
-    const doc = this.loadDoc();
-    const task = (doc.tasks || []).find((t) => t.id === taskId);
-    if (!task) return { ok: false, error: 'task_not_found' };
+    const current = await this.repo.findOneBy({ id: taskId });
+    if (!current) return { ok: false, error: 'task_not_found' };
+    const task = this.mapToTask(current);
+    
     const runId = `${new Date().toISOString()}-manual`;
     const initiatedBy =
       String(kwargs.actor || kwargs.web_actor || '').trim() || undefined;
@@ -251,18 +318,20 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async schedulerTick(): Promise<void> {
-    const doc = this.loadDoc();
-    let tasks = doc.tasks || [];
+    const entities = await this.repo.find();
+    let tasks = entities.map(e => this.mapToTask(e));
+    
     const rec = this.reconcileTasksWithInstances(tasks);
     if (rec.changed) {
-      writeJsonFile(this.paths.maintenancePath, { ...doc, tasks: rec.tasks });
+      await this.saveTasks(rec.tasks);
       tasks = rec.tasks;
     }
 
+    const schedulerTz = await this.getSchedulerTz();
     const nowMs = Date.now();
     for (const task of tasks) {
       if (!task.active || task.manual_only) continue;
-      const tz = effectiveTaskTz(task, doc.scheduler_tz || '');
+      const tz = effectiveTaskTz(task, schedulerTz);
       const nfMs = nextFireUtcMs(task, tz, new Date(nowMs));
       if (nfMs == null) continue;
       try {
@@ -429,7 +498,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
           );
           allOk = allOk && ok;
         }
-        if (allOk) this.maybeDisableOneshotTask(taskId);
+        if (allOk) await this.maybeDisableOneshotTask(taskId);
         return;
       }
 
@@ -446,7 +515,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
           );
           allOk = allOk && ok;
         }
-        if (allOk) this.maybeDisableOneshotTask(taskId);
+        if (allOk) await this.maybeDisableOneshotTask(taskId);
         return;
       }
 
@@ -556,7 +625,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         });
         report.success = true;
         if (iid) this.pendingSet(iid, reportRunId);
-        if (applyOneshot) this.maybeDisableOneshotTask(taskId);
+        if (applyOneshot) await this.maybeDisableOneshotTask(taskId);
         return true;
       }
 
@@ -657,7 +726,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         report.error = 'start_timeout';
       }
 
-      if (applyOneshot && report.success) this.maybeDisableOneshotTask(taskId);
+      if (applyOneshot && report.success) await this.maybeDisableOneshotTask(taskId);
       return !!report.success;
     } catch (e) {
       report.error = e instanceof Error ? e.message : String(e);
@@ -833,32 +902,66 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     return '';
   }
 
-  private maybeDisableOneshotTask(taskId: string): void {
-    const doc = this.loadDoc();
-    let changed = false;
-    for (const t of doc.tasks || []) {
-      if (t.id !== taskId) continue;
-      if (t.manual_only) break;
-      if (t.repeat_weekly && t.weekdays?.length) break;
-      t.active = false;
-      changed = true;
-      break;
+  private async maybeDisableOneshotTask(taskId: string): Promise<void> {
+    const ent = await this.repo.findOneBy({ id: taskId });
+    if (!ent) return;
+    const task = this.mapToTask(ent);
+    if (task.repeat_weekly || task.manual_only) return;
+    task.active = false;
+    await this.saveTasks([task]);
+    this.maintLog(`disabled_oneshot_task task_id=${taskId}`);
+  }
+
+  private async waitStatus(
+    iid: string,
+    allowed: string[],
+    maxPolls = 200,
+  ): Promise<boolean> {
+    for (let i = 0; i < maxPolls; i += 1) {
+      try {
+        const st = await this.dispatch.dispatchWithInstance(iid, 'status', {
+          _maintenance_internal: true,
+        });
+        if (allowed.includes(String(st.status_kind || ''))) return true;
+      } catch {
+        /* ignore */
+      }
+      await new Promise((r) => setTimeout(r, 3000));
     }
-    if (changed) writeJsonFile(this.paths.maintenancePath, doc);
+    return false;
+  }
+
+  private async poll(
+    iid: string,
+    op: string,
+    maxSec: number,
+    timeoutError: string,
+  ): Promise<Record<string, unknown>> {
+    const end = Date.now() + maxSec * 1000;
+    while (Date.now() < end) {
+      try {
+        const st = await this.dispatch.dispatchWithInstance(iid, op, {
+          _maintenance_internal: true,
+        });
+        if (String(st.phase || '') === 'done' || st.error) return st;
+      } catch {
+        /* ignore */
+      }
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+    return { error: timeoutError };
   }
 
   private emptyTargetReport(
     taskId: string,
-    fireIso: string,
+    runId: string,
     task: MaintenanceTask,
     webActor: string,
   ): Record<string, unknown> {
-    const opts = this.normalizedOptions(task.options);
     const now = new Date().toISOString();
-    const manual = fireIso.endsWith('-manual');
     return {
       task_id: taskId,
-      run_id: fireIso,
+      run_id: runId,
       started_at: now,
       finished_at: now,
       instance_id: '',
@@ -868,7 +971,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
           t: now,
           kind: 'run_initiated',
           detail: {
-            message_key: manual
+            message_key: runId.endsWith('-manual')
               ? 'maintenance_report_run_initiated_manual'
               : 'maintenance_report_run_initiated_scheduled',
             actor: webActor,
@@ -876,110 +979,29 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         },
       ],
       success: false,
-      error: 'no_instance',
-      task_options: opts,
-      run_trigger: manual ? 'manual' : 'scheduled',
+      error: 'no_targets',
+      task_options: task.options,
+      run_trigger: runId.endsWith('-manual') ? 'manual' : 'scheduled',
       web_actor: webActor,
     };
   }
 
-  private async waitStatus(
-    iid: string,
-    wanted: string[],
-    timeoutSec: number,
-  ): Promise<boolean> {
-    const deadline = Date.now() + timeoutSec * 1000;
-    while (Date.now() < deadline) {
-      const st = iid
-        ? await this.dispatch.dispatchWithInstance(iid, 'status', {
-            _maintenance_internal: true,
-          })
-        : await this.dispatch.dispatch('status', {
-            _maintenance_internal: true,
-          });
-      if (wanted.includes(String(st.status_kind || ''))) return true;
-      await new Promise((r) => setTimeout(r, 450));
-    }
-    return false;
-  }
-
-  private async poll(
-    iid: string,
-    op: string,
-    timeoutSec: number,
-    timeoutError: string,
-  ): Promise<Record<string, unknown>> {
-    const deadline = Date.now() + timeoutSec * 1000;
-    let last: Record<string, unknown> = {};
-    while (Date.now() < deadline) {
-      last = iid
-        ? await this.dispatch.dispatchWithInstance(iid, op, {
-            _maintenance_internal: true,
-          })
-        : await this.dispatch.dispatch(op, { _maintenance_internal: true });
-      if (!last.running) return last;
-      await new Promise((r) => setTimeout(r, 1000));
-    }
-    return { phase: 'timeout', error: timeoutError, running: false };
-  }
-
-  private loadDoc(): {
-    version: number;
-    tasks: MaintenanceTask[];
-    scheduler_tz: string;
-  } {
-    return readJsonFile(this.paths.maintenancePath, {
-      version: 1,
-      tasks: [],
-      scheduler_tz: '',
-    });
-  }
-
-  private loadReports(): Record<string, unknown>[] {
-    const p = this.paths.maintenanceReportsPath;
-    if (!existsSync(p)) return [];
-    try {
-      const raw = JSON.parse(readFileSync(p, 'utf-8'));
-      if (Array.isArray(raw)) return raw as Record<string, unknown>[];
-      if (
-        raw &&
-        typeof raw === 'object' &&
-        Array.isArray((raw as { items?: unknown[] }).items)
-      ) {
-        return (raw as { items: Record<string, unknown>[] }).items;
-      }
-    } catch {
-      /* ignore */
-    }
-    return [];
+  private maintLog(msg: string): void {
+    if (!this.logRotation.logWriteMaintenanceEnabled()) return;
+    const line = `${new Date().toISOString()} [Maintenance] ${msg}`;
+    this.logRotation.appendLine(this.paths.maintenanceSchedulerLogPath(), line);
   }
 
   private appendReport(report: Record<string, unknown>): void {
-    if (!report.event_kind && report.task_id)
-      report.event_kind = 'maintenance_task';
     this.auditLog.appendMaintenanceRun(report);
   }
 
   private pendingSet(iid: string, runId: string): void {
-    if (!iid) return;
     const data = readJsonFile<Record<string, unknown>>(
       this.paths.maintenancePendingPath,
       {},
     );
     data[iid] = { run_id: runId };
     writeJsonFile(this.paths.maintenancePendingPath, data);
-    const item = this.instances.getById(iid);
-    this.auditLog.beginManualSession(iid, item?.name || iid, runId);
-  }
-
-  private maintLog(text: string): void {
-    const line = `[maintenance] ${text}`;
-    this.log.log(text);
-    if (!this.logRotation.logWriteMaintenanceEnabled()) return;
-    const stamped = `${new Date().toISOString().slice(0, 19)} ${line}`;
-    this.logRotation.appendLine(
-      this.paths.maintenanceSchedulerLogPath(),
-      stamped,
-    );
   }
 }

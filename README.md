@@ -72,6 +72,7 @@ your PC or VPS - add servers and manage everything from one place.
 **Access and UI**
 
 - Roles: administrator, server engineer, moderator - per-tab and per-server permissions
+- **Public page**: optionally expose a read-only status page showing active servers, players, and mod downloads without requiring login
 - Full desktop UI and a simplified mobile view
 - English and Russian UI
 - Several themes - all dark.
@@ -158,7 +159,7 @@ sudo loginctl enable-linger $USER
 **Panel ports:**
 
 - **Auto** - on Linux without root: **8080** (HTTP) or **8443** (HTTPS); otherwise **80** / **443**
-- **Custom** - your port in settings or `fcc-settings.ini` (`port_mode=custom`, `listen_port=…`)
+- **Custom** - your port in settings or overridden via `.env` file (`PORT=…`)
   *(Note: If using Docker, do not change the port in the panel settings. Instead, change the port mapping in `docker-compose.yml`).*
 
 The start menu shows the URL to open.
@@ -194,4 +195,4 @@ If you want to modify the panel and build your own Docker image:
 
 ## Security
 
-Do not publish or commit `fcc-settings.ini`, `data/`, tokens, or TLS keys.
+Do not publish or commit `.env`, `data/` (including `database.sqlite`), tokens, or TLS keys.
