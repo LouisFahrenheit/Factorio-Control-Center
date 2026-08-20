@@ -89,8 +89,13 @@
     "test-exclude": "^8.0.0",
     "multer": "^2.2.0",
     "js-yaml": "^4.2.0",
-    "minimatch": {
-      "brace-expansion": "^1.1.18 || ^5.0.9"
+    "eslint": {
+      "minimatch": {
+        "brace-expansion": "^1.1.18"
+      }
+    },
+    "typeorm": {
+      "better-sqlite3": "$better-sqlite3"
     }
   },
   "jest": {
