@@ -21,6 +21,41 @@ if (!existsSync(envPath) && existsSync(envExamplePath)) {
   writeFileSync(envPath, content, 'utf8');
   // Use console.log since Nest Logger isn't initialized yet
   console.log(`[Bootstrap] Created new .env file from .env.example with secure tokens.`);
+} else if (existsSync(envPath)) {
+  let content = readFileSync(envPath, 'utf8');
+  let modified = false;
+
+  const hasValue = (key: string) => {
+    const match = new RegExp(`^\\s*${key}\\s*=\\s*(.*)$`, 'm').exec(content);
+    return match && match[1].trim().length > 0;
+  };
+
+  if (!hasValue('API_TOKEN')) {
+    const apiToken = randomBytes(32).toString('hex');
+    const keyRegex = new RegExp(`^\\s*#?\\s*API_TOKEN\\s*=.*$`, 'm');
+    if (keyRegex.test(content)) {
+      content = content.replace(keyRegex, `API_TOKEN=${apiToken}`);
+    } else {
+      content += `\nAPI_TOKEN=${apiToken}`;
+    }
+    modified = true;
+  }
+
+  if (!hasValue('APP_SECRET')) {
+    const appSecret = randomBytes(32).toString('base64');
+    const keyRegex = new RegExp(`^\\s*#?\\s*APP_SECRET\\s*=.*$`, 'm');
+    if (keyRegex.test(content)) {
+      content = content.replace(keyRegex, `APP_SECRET=${appSecret}`);
+    } else {
+      content += `\nAPP_SECRET=${appSecret}`;
+    }
+    modified = true;
+  }
+
+  if (modified) {
+    writeFileSync(envPath, content, 'utf8');
+    console.log(`[Bootstrap] Generated missing secure tokens in existing .env file.`);
+  }
 }
 
 dotenvConfig({ path: envPath });

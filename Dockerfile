@@ -37,8 +37,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/client/dist ./client/dist
 
-# Copy static assets, package.json and localization
-COPY package.json ./
+# Copy static assets, package.json, env example and localization
+COPY package.json .env.example ./
 COPY locale ./locale
 COPY public ./public
 

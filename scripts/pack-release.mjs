@@ -231,7 +231,7 @@ function stageAppTree(destNest) {
   ]) {
     copyIfExists(join(nestRoot, 'scripts', file), join(destNest, 'scripts', file));
   }
-  for (const file of ['package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'README.md', 'README.ru.md']) {
+  for (const file of ['package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'README.md', 'README.ru.md', '.env.example']) {
     copyIfExists(join(nestRoot, file), join(destNest, file));
   }
 }
