@@ -194,3 +194,13 @@ npm run client:dev     # UI → http://127.0.0.1:5173/login
 ## Безопасность
 
 Не публикуйте и не коммитьте `.env`, `data/` (включая базу данных `database.sqlite`), токены и ключи TLS.
+
+## Документация API
+
+FCC предоставляет полный REST API. Чтобы включить интерактивный интерфейс Swagger, задайте `SWAGGER_ENABLED=true` в файле `.env` и откройте:
+
+```
+http://<your-host>:<port>/api/docs
+```
+
+Аутентифицируйтесь с помощью `API_TOKEN` из `.env` или сессионного токена, полученного через `POST /api/auth/login`.

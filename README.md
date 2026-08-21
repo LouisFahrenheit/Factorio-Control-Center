@@ -196,3 +196,13 @@ If you want to modify the panel and build your own Docker image:
 ## Security
 
 Do not publish or commit `.env`, `data/` (including `database.sqlite`), tokens, or TLS keys.
+
+## API Documentation
+
+FCC exposes a full REST API. To enable the interactive Swagger UI, set `SWAGGER_ENABLED=true` in your `.env` file and open:
+
+```
+http://<your-host>:<port>/api/docs
+```
+
+Authenticate using your `API_TOKEN` from `.env` or a session token obtained via `POST /api/auth/login`.
