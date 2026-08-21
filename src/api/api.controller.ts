@@ -19,6 +19,16 @@ import {
   UnauthorizedException,
   Headers,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+  ApiBody,
+  ApiHeader,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { requestBearerToken } from '../auth/auth.util';
@@ -32,6 +42,7 @@ import { LocaleService } from '../locale/locale.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { UsersService } from '../auth/users.service';
 import { SessionUser } from '../common/types';
+import { RconDto, ChatSendDto, SelectInstanceDto, ServerActionDto, AnnouncementsWriteDto, MaintenanceSetDto } from '../common/dto/api.dto';
 
 const WEB_TLS_CFG_KEYS = [
   'tls_enabled',
@@ -65,6 +76,7 @@ const ADMIN_ONLY_INSTANCE_PANEL_KEYS = [
   'public_page_route',
 ] as const;
 
+@ApiTags('Health')
 @Controller('api')
 export class ApiController {
   private readonly downloadRateLimits = new Map<string, number[]>();
@@ -132,6 +144,8 @@ export class ApiController {
   }
 
   @Get('health')
+  @ApiOperation({ summary: 'Health check', description: 'Returns panel version, OS info and Docker status. No authentication required.' })
+  @ApiResponse({ status: 200, description: 'Panel is healthy' })
   health() {
     const plat = process.platform;
     let is_docker = false;
@@ -176,6 +190,9 @@ export class ApiController {
   }
 
   @Get('locale-bootstrap')
+  @ApiOperation({ summary: 'Bootstrap locale and UI config', description: 'Returns locale strings, theme, panel settings. No authentication required.' })
+  @ApiQuery({ name: 'lang', required: false, description: 'Preferred language code (e.g. en, ru, uk)' })
+  @ApiResponse({ status: 200, description: 'Locale and bootstrap data' })
   async localeBootstrap(@Query('lang') lang?: string) {
     const loc = this.locale.getLocale(lang);
     const w = this.config.webPanel;
@@ -204,17 +221,29 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('locale')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get locale strings for authenticated session' })
+  @ApiQuery({ name: 'lang', required: false, description: 'Language code override' })
+  @ApiResponse({ status: 200, description: 'Locale data' })
   getLocale(@Query('lang') lang?: string) {
     return this.locale.getLocale(lang);
   }
 
   @UseGuards(AuthGuard)
   @Get('status')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get current Factorio server status and all instance states' })
+  @ApiResponse({ status: 200, description: 'Server status data' })
   status() {
     return this.bridge.submit('status');
   }
 
   @Get('public-servers')
+  @ApiTags('Public')
+  @ApiOperation({ summary: 'Get list of public Factorio servers', description: 'Returns servers marked as public. No authentication required. Requires public page to be enabled in settings.' })
+  @ApiHeader({ name: 'x-fcc-ui-lang', required: false, description: 'UI language code for mod title translation' })
+  @ApiResponse({ status: 200, description: 'List of public servers' })
+  @ApiResponse({ status: 403, description: 'Public page is disabled' })
   async publicServers(@Headers('x-fcc-ui-lang') uiLang?: string) {
     if (!this.config.webPanel.public_page_enabled) {
       throw new ForbiddenException('Public servers page is disabled');
@@ -265,6 +294,12 @@ export class ApiController {
   }
 
   @Get('public-servers/:id/download-mods')
+  @ApiTags('Public')
+  @ApiOperation({ summary: 'Download mods archive for a public server', description: 'Rate limited: 3 requests per 15 minutes per IP. Requires public mod downloads to be enabled.' })
+  @ApiParam({ name: 'id', description: 'Public server instance ID' })
+  @ApiResponse({ status: 200, description: 'ZIP file with server mods' })
+  @ApiResponse({ status: 403, description: 'Public page or mod downloads disabled, or rate limit exceeded' })
+  @ApiResponse({ status: 404, description: 'Server not found or not public' })
   async downloadInstanceModsPublic(
     @Param('id') id: string,
     @Res() res: Response,
@@ -311,6 +346,10 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('instances')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'List all accessible Factorio server instances' })
+  @ApiResponse({ status: 200, description: 'List of instances with selected instance ID' })
   async instancesList(@Req() req: Request) {
     const data = await this.bridge.submit('instances_list');
     const user = this.me(req);
@@ -337,6 +376,10 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('instances')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Add a new server instance' })
+  @ApiResponse({ status: 200, description: 'Instance created successfully' })
   instancesAdd(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('instances_add', {
       ...body,
@@ -346,6 +389,12 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('instances/select')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Select an active instance for this session' })
+  @ApiBody({ type: SelectInstanceDto })
+  @ApiResponse({ status: 200, description: 'Instance selected' })
+  @ApiResponse({ status: 400, description: 'Instance not found or forbidden' })
   async instancesSelect(@Req() req: Request, @Body() body: { id?: string }) {
     const iid = String(body.id || '').trim();
     const allowed = this.me(req).instance_ids || [];
@@ -368,6 +417,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Put('instances/:id')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Update instance configuration' })
+  @ApiParam({ name: 'id', description: 'Instance ID' })
+  @ApiResponse({ status: 200, description: 'Instance updated' })
   instancesUpdate(
     @Param('id') id: string,
     @Body() body: Record<string, unknown>,
@@ -382,6 +436,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('instances/:id/clone')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Clone an existing instance' })
+  @ApiParam({ name: 'id', description: 'Source instance ID' })
+  @ApiResponse({ status: 200, description: 'Instance cloned' })
   instancesClone(
     @Param('id') id: string,
     @Body() body: Record<string, unknown>,
@@ -396,6 +455,13 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Delete('instances/:id')
+  @ApiTags('Instances')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Remove an instance' })
+  @ApiParam({ name: 'id', description: 'Instance ID to remove' })
+  @ApiQuery({ name: 'deleteFromDisk', required: false, description: 'Also delete server files from disk (1 or true)' })
+  @ApiQuery({ name: 'deleteData', required: false, description: 'Also delete save/mod data (1 or true)' })
+  @ApiResponse({ status: 200, description: 'Instance removed' })
   instancesRemove(
     @Param('id') id: string,
     @Req() req: Request,
@@ -412,6 +478,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('server/start')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Start the Factorio game server' })
+  @ApiBody({ type: ServerActionDto })
+  @ApiResponse({ status: 200, description: 'Start command dispatched' })
   serverStart(@Req() req: Request, @Body() body?: { instance_id?: string }) {
     const iid = this.explicitInstanceId(body?.instance_id);
     return this.bridge.submit(
@@ -423,6 +494,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('server/stop')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Stop the Factorio game server gracefully' })
+  @ApiBody({ type: ServerActionDto })
+  @ApiResponse({ status: 200, description: 'Stop command dispatched' })
   serverStop(@Req() req: Request, @Body() body?: { instance_id?: string }) {
     const iid = this.explicitInstanceId(body?.instance_id);
     return this.bridge.submit(
@@ -434,6 +510,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('server/restart')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Restart the Factorio game server' })
+  @ApiBody({ type: ServerActionDto })
+  @ApiResponse({ status: 200, description: 'Restart command dispatched' })
   serverRestart(@Req() req: Request, @Body() body?: { instance_id?: string }) {
     const iid = this.explicitInstanceId(body?.instance_id);
     return this.bridge.submit(
@@ -445,6 +526,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('server/kill')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Force-kill the Factorio game server process' })
+  @ApiBody({ type: ServerActionDto })
+  @ApiResponse({ status: 200, description: 'Kill signal sent' })
   serverKill(@Req() req: Request, @Body() body?: { instance_id?: string }) {
     const iid = this.explicitInstanceId(body?.instance_id);
     return this.bridge.submit(
@@ -456,6 +542,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('rcon')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Execute an RCON command on the server' })
+  @ApiBody({ type: RconDto })
+  @ApiResponse({ status: 200, description: 'RCON response from server' })
   rcon(
     @Req() req: Request,
     @Body()
@@ -477,6 +568,12 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('logs')
+  @ApiTags('Logs')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get recent Factorio server log tail' })
+  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines to return (default: 400)' })
+  @ApiQuery({ name: 'instance_id', required: false, description: 'Instance ID override' })
+  @ApiResponse({ status: 200, description: 'Log lines array' })
   logs(
     @Query('tail') tail?: string,
     @Query('instance_id') instanceId?: string,
@@ -489,6 +586,10 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('config/program')
+  @ApiTags('Config')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get program settings', description: 'Non-admin users receive a filtered view without TLS and admin-only settings.' })
+  @ApiResponse({ status: 200, description: 'Program settings object' })
   async programConfig(@Req() req: Request) {
     const data = await this.bridge.submit('get_program_settings');
     if (data && typeof data === 'object' && !Array.isArray(data)) {
@@ -499,6 +600,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('config/program/factorio-credentials-verify')
+  @ApiTags('Config')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Verify Factorio credentials (admin only)' })
+  @ApiResponse({ status: 200, description: 'Credential verification result' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
   async programFactorioCredentialsVerify(@Req() req: Request) {
     if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
     return this.bridge.submit('verify_factorio_credentials');
@@ -506,6 +612,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Put('config/program')
+  @ApiTags('Config')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Update program settings', description: 'Non-admins cannot change TLS, credentials or log rotation settings.' })
+  @ApiResponse({ status: 200, description: 'Settings updated' })
+  @ApiResponse({ status: 403, description: 'Attempted to change admin-only settings' })
   programConfigSet(@Req() req: Request, @Body() body: Record<string, unknown>) {
     const payload = this.sanitizeProgramSettingsPayload(
       body,
@@ -519,6 +630,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('config/server')
+  @ApiTags('Config')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get server.ini configuration' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'server.ini key-value pairs' })
   serverConfigGet(@Query('instance_id') instanceId?: string) {
     const iid = this.explicitInstanceId(instanceId);
     return this.bridge.submit('get_server_ini', {}, iid);
@@ -526,6 +642,10 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Put('config/server')
+  @ApiTags('Config')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Update server.ini configuration' })
+  @ApiResponse({ status: 200, description: 'Config saved' })
   serverConfigSet(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('set_server_ini', {
       ...body,
@@ -535,6 +655,11 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('saves')
+  @ApiTags('Saves')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'List available save files' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'List of save files' })
   saves(@Query('instance_id') instanceId?: string) {
     const iid = this.explicitInstanceId(instanceId);
     return this.bridge.submit('list_saves', {}, iid);
@@ -542,12 +667,20 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('files/server-settings')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Read server-settings.json' })
+  @ApiResponse({ status: 200, description: 'Server settings JSON' })
   serverSettings() {
     return this.bridge.submit('read_server_settings');
   }
 
   @UseGuards(AuthGuard)
   @Put('files/server-settings')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Write server-settings.json' })
+  @ApiResponse({ status: 200, description: 'Settings saved' })
   serverSettingsWrite(@Body() body: unknown, @Req() req: Request) {
     return this.bridge.submit('write_server_settings', {
       data: body,
@@ -557,12 +690,20 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('files/mod-list')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Read mod-list.json' })
+  @ApiResponse({ status: 200, description: 'Mod list JSON' })
   modList() {
     return this.bridge.submit('read_mod_list');
   }
 
   @UseGuards(AuthGuard)
   @Put('files/mod-list')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Write mod-list.json' })
+  @ApiResponse({ status: 200, description: 'Mod list saved' })
   modListWrite(@Body() body: unknown, @Req() req: Request) {
     return this.bridge.submit('write_mod_list', {
       data: body,
@@ -572,18 +713,30 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('files/admin-list')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Read admins.txt admin list' })
+  @ApiResponse({ status: 200, description: 'Admin list' })
   adminList() {
     return this.bridge.submit('read_admin_list');
   }
 
   @UseGuards(AuthGuard)
   @Get('files/ban-list')
+  @ApiTags('Files')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Read ban-list.json' })
+  @ApiResponse({ status: 200, description: 'Ban list' })
   banList() {
     return this.bridge.submit('read_ban_list');
   }
 
   @UseGuards(AuthGuard)
   @Get('mods')
+  @ApiTags('Mods')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get list of installed mods with details' })
+  @ApiResponse({ status: 200, description: 'Mods list with metadata' })
   mods(@Req() req: Request) {
     return this.bridge.submit('mods_list', {
       ui_lang: req.headers['x-fcc-ui-lang'],
@@ -592,36 +745,62 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('players/summary')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get summary of online and recent players' })
+  @ApiResponse({ status: 200, description: 'Players summary' })
   playersSummary() {
     return this.bridge.submit('players_summary');
   }
 
   @UseGuards(AuthGuard)
   @Get('maintenance')
+  @ApiTags('Maintenance')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get maintenance schedule configuration' })
+  @ApiResponse({ status: 200, description: 'Maintenance config' })
   maintenanceGet() {
     return this.bridge.submit('maintenance_get');
   }
 
   @UseGuards(AuthGuard)
   @Put('maintenance')
+  @ApiTags('Maintenance')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Update maintenance schedule configuration' })
+  @ApiBody({ type: MaintenanceSetDto })
+  @ApiResponse({ status: 200, description: 'Maintenance config saved' })
   maintenanceSet(@Body() body: Record<string, unknown>) {
     return this.bridge.submit('maintenance_set', body);
   }
 
   @UseGuards(AuthGuard)
   @Get('maintenance/reports')
+  @ApiTags('Maintenance')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get maintenance task execution reports' })
+  @ApiResponse({ status: 200, description: 'Maintenance reports list' })
   maintenanceReports() {
     return this.bridge.submit('maintenance_reports');
   }
 
   @UseGuards(AuthGuard)
   @Get('announcements')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Read server announcements' })
+  @ApiResponse({ status: 200, description: 'Announcements data' })
   announcements() {
     return this.bridge.submit('announcements_read');
   }
 
   @UseGuards(AuthGuard)
   @Put('announcements')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Write server announcements' })
+  @ApiBody({ type: AnnouncementsWriteDto })
+  @ApiResponse({ status: 200, description: 'Announcements saved' })
   announcementsWrite(@Body() body: { data?: unknown }) {
     return this.bridge.submit('announcements_write', {
       data: body.data ?? body,
@@ -630,6 +809,10 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Get('commands/catalog')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get RCON commands catalog' })
+  @ApiResponse({ status: 200, description: 'Commands catalog' })
   commandsCatalog(@Req() req: Request) {
     const lang = String(req.headers['x-fcc-ui-lang'] || '').slice(0, 12);
     return this.bridge.submit('read_commands_catalog', { ui_lang: lang });
@@ -637,6 +820,12 @@ export class ApiController {
 
   @UseGuards(AuthGuard)
   @Post('chat/send')
+  @ApiTags('Server')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Send a message to the in-game chat' })
+  @ApiBody({ type: ChatSendDto })
+  @ApiResponse({ status: 200, description: 'Message sent' })
+  @ApiResponse({ status: 400, description: 'Empty message' })
   chatSend(@Body() body: { message?: string }) {
     const msg = String(body.message || '').trim();
     if (!msg) throw new BadRequestException('empty_message');

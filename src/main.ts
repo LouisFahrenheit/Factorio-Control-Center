@@ -70,6 +70,7 @@ import { InstanceAutostartService } from './instances/instance-autostart.service
 import { PanelStartupLogService } from './logging/panel-startup-log.service';
 import { FccWsAdapter } from './ws/ws-adapter';
 import { APP_NAME, APP_VERSION } from './constants/fcc.constants';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 process.title = `${APP_NAME} v${APP_VERSION}`;
 
@@ -91,6 +92,39 @@ async function bootstrap() {
 
   app.setGlobalPrefix('');
   app.enableShutdownHooks();
+
+  // Swagger/OpenAPI documentation (enabled via SWAGGER_ENABLED=true in .env)
+  const swaggerEnabled = String(process.env.SWAGGER_ENABLED).toLowerCase() === 'true';
+  if (swaggerEnabled) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Factorio Control Center API')
+      .setDescription(
+        'REST API for managing dedicated Factorio game servers.\n\n' +
+        '## Authentication\n' +
+        'Most endpoints require a Bearer token. You can authenticate with:\n' +
+        '- **Session token** — obtained via `POST /api/auth/login`\n' +
+        '- **API token** — the `API_TOKEN` value from your `.env` file\n\n' +
+        'Click the **Authorize** button and enter: `<your_token>`'
+      )
+      .setVersion(APP_VERSION)
+      .setContact('Louis Fahrenheit', 'https://github.com/LouisFahrenheit/Factorio-Control-Center', '')
+      .addBearerAuth(
+        { type: 'http', scheme: 'bearer', bearerFormat: 'Token', description: 'Session token or API_TOKEN from .env' },
+        'bearer',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+      },
+      customSiteTitle: 'FCC API Docs',
+    });
+    rootLogger.log('Swagger UI is enabled at /api/docs');
+  }
 
   app.get(PathsService);
   app.get(UsersService).load();

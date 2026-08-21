@@ -13,6 +13,16 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+  ApiBody,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
 import { existsSync } from 'fs';
@@ -32,7 +42,10 @@ import type {
   MapGenSettingsJson,
   MapSettingsJson,
 } from '../ops/map-gen/map-gen-presets';
+import { CreateSaveDto, BanPlayerDto, PlayerActionDto } from '../common/dto/api.dto';
 
+@ApiTags('Server')
+@ApiBearerAuth('bearer')
 @Controller('api')
 @UseGuards(AuthGuard)
 export class ApiFullController {
@@ -54,6 +67,8 @@ export class ApiFullController {
   }
 
   @Post('server/save')
+  @ApiOperation({ summary: 'Save the current game to disk' })
+  @ApiResponse({ status: 200, description: 'Save command dispatched' })
   serverSave(@Req() req: Request) {
     return this.bridge.submit('save_game', {
       web_actor: this.bridge.webActor(this.user(req)),
@@ -61,6 +76,8 @@ export class ApiFullController {
   }
 
   @Post('server/backup')
+  @ApiOperation({ summary: 'Create a backup of the current save' })
+  @ApiResponse({ status: 200, description: 'Backup command dispatched' })
   serverBackup(@Req() req: Request) {
     return this.bridge.submit('backup', {
       web_actor: this.bridge.webActor(this.user(req)),
@@ -68,6 +85,8 @@ export class ApiFullController {
   }
 
   @Post('server/restart')
+  @ApiOperation({ summary: 'Restart the Factorio server (full controller variant)' })
+  @ApiResponse({ status: 200, description: 'Restart command dispatched' })
   serverRestart(@Req() req: Request) {
     return this.bridge.submit('restart_server', {
       web_actor: this.bridge.webActor(this.user(req)),
@@ -75,6 +94,10 @@ export class ApiFullController {
   }
 
   @Post('server/create-save')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Generate a new Factorio save file' })
+  @ApiBody({ type: CreateSaveDto })
+  @ApiResponse({ status: 200, description: 'Save creation started' })
   serverCreateSave(
     @Req() req: Request,
     @Body()
@@ -101,11 +124,17 @@ export class ApiFullController {
   }
 
   @Get('server/map-gen/schema')
+  @ApiTags('Map')
+  @ApiOperation({ summary: 'Get map generation JSON schema' })
+  @ApiResponse({ status: 200, description: 'Map gen schema' })
   mapGenSchema() {
     return this.mapGen.getSchema();
   }
 
   @Post('server/map-gen/parse-exchange')
+  @ApiTags('Map')
+  @ApiOperation({ summary: 'Parse a Factorio map exchange string' })
+  @ApiResponse({ status: 200, description: 'Parsed map gen and map settings' })
   mapGenParseExchange(@Body() body: { map_exchange_string?: string }) {
     return this.mapGen.parseExchangeString(
       String(body.map_exchange_string || ''),
@@ -113,6 +142,9 @@ export class ApiFullController {
   }
 
   @Post('server/map-gen/export-exchange')
+  @ApiTags('Map')
+  @ApiOperation({ summary: 'Export map settings as a Factorio map exchange string' })
+  @ApiResponse({ status: 200, description: 'Map exchange string' })
   mapGenExportExchange(
     @Body()
     body: {
@@ -129,6 +161,9 @@ export class ApiFullController {
   }
 
   @Post('server/map-gen/preview-stream')
+  @ApiTags('Map')
+  @ApiOperation({ summary: 'Stream map preview frames as NDJSON', description: 'Returns a streaming NDJSON response with progressive map preview frames.' })
+  @ApiResponse({ status: 200, description: 'NDJSON stream of preview frames' })
   async mapGenPreviewStream(
     @Body()
     body: {
@@ -179,6 +214,9 @@ export class ApiFullController {
   }
 
   @Post('server/map-gen/preview')
+  @ApiTags('Map')
+  @ApiOperation({ summary: 'Generate a static map preview image' })
+  @ApiResponse({ status: 200, description: 'Preview image data' })
   mapGenPreview(
     @Body()
     body: {
@@ -203,21 +241,33 @@ export class ApiFullController {
   }
 
   @Get('factorio/update/check')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Check for Factorio updates for the current instance' })
+  @ApiResponse({ status: 200, description: 'Update availability info' })
   factorioCheck() {
     return this.bridge.submit('factorio_update_check');
   }
 
   @Get('factorio/update/check-all')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Check for Factorio updates across all instances' })
+  @ApiResponse({ status: 200, description: 'Update availability info for all instances' })
   factorioCheckAll() {
     return this.bridge.submit('factorio_update_check_all');
   }
 
   @Get('factorio/releases')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Get list of available Factorio releases' })
+  @ApiResponse({ status: 200, description: 'Factorio releases list' })
   factorioReleases() {
     return this.bridge.submit('factorio_releases');
   }
 
   @Post('factorio/update')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Start Factorio update process' })
+  @ApiResponse({ status: 200, description: 'Update started' })
   factorioUpdate(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('factorio_update', {
       ...body,
@@ -226,11 +276,17 @@ export class ApiFullController {
   }
 
   @Get('factorio/update/status')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Get Factorio update process status' })
+  @ApiResponse({ status: 200, description: 'Update status' })
   factorioUpdateStatus() {
     return this.bridge.submit('factorio_update_status');
   }
 
   @Post('factorio/update/stop')
+  @ApiTags('Factorio')
+  @ApiOperation({ summary: 'Stop the Factorio update process' })
+  @ApiResponse({ status: 200, description: 'Update stopped' })
   factorioUpdateStop() {
     return this.bridge.submit('factorio_update_stop');
   }
@@ -249,11 +305,27 @@ export class ApiFullController {
   }
 
   @Post('config/web/restart')
+  @ApiTags('Config')
+  @ApiOperation({ summary: 'Restart the FCC web panel process' })
+  @ApiResponse({ status: 200, description: 'Restart initiated' })
   webRestart() {
     return this.bridge.submit('restart_web_panel');
   }
 
   @Post('config/web-tls/upload')
+  @ApiTags('Config')
+  @ApiOperation({ summary: 'Upload TLS certificate or key file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        kind: { type: 'string', enum: ['cert', 'key'], description: 'File type' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'TLS file uploaded' })
   @UseInterceptors(FileInterceptor('file'))
   async webTlsUpload(
     @UploadedFile() file: Express.Multer.File,
@@ -288,6 +360,11 @@ export class ApiFullController {
   }
 
   @Get('saves/:name/download')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Download a save file' })
+  @ApiParam({ name: 'name', description: 'Save file name (without .zip extension)' })
+  @ApiResponse({ status: 200, description: 'ZIP file download' })
+  @ApiResponse({ status: 404, description: 'Save not found' })
   async saveDownload(@Param('name') name: string, @Res() res: Response) {
     const data = await this.bridge.submit('get_save_download_path', { name });
     const path = String(data.path || '');
@@ -297,12 +374,20 @@ export class ApiFullController {
   }
 
   @Get('saves/:name/inspect')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Inspect a save file for metadata and mod list' })
+  @ApiParam({ name: 'name', description: 'Save file name' })
+  @ApiResponse({ status: 200, description: 'Save metadata including mods and version' })
   saveInspect(@Param('name') name: string, @Req() req: Request) {
     const lang = String(req.headers['x-fcc-ui-lang'] || '').slice(0, 12);
     return this.bridge.submit('inspect_save', { name, ui_lang: lang });
   }
 
   @Post('saves/:name/rename')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Rename a save file' })
+  @ApiParam({ name: 'name', description: 'Current save file name' })
+  @ApiResponse({ status: 200, description: 'Save renamed' })
   saveRename(
     @Param('name') name: string,
     @Body() body: { new_name?: string },
@@ -316,6 +401,10 @@ export class ApiFullController {
   }
 
   @Delete('saves/:name')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Delete a save file' })
+  @ApiParam({ name: 'name', description: 'Save file name to delete' })
+  @ApiResponse({ status: 200, description: 'Save deleted' })
   saveDelete(@Param('name') name: string, @Req() req: Request) {
     return this.bridge.submit('delete_save', {
       name,
@@ -324,6 +413,10 @@ export class ApiFullController {
   }
 
   @Post('saves/:name/duplicate')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Duplicate a save file' })
+  @ApiParam({ name: 'name', description: 'Save file name to duplicate' })
+  @ApiResponse({ status: 200, description: 'Save duplicated' })
   saveDuplicate(@Param('name') name: string, @Req() req: Request) {
     return this.bridge.submit('duplicate_save', {
       name,
@@ -332,6 +425,9 @@ export class ApiFullController {
   }
 
   @Post('saves/set-launch')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Set which save file to launch on server start' })
+  @ApiResponse({ status: 200, description: 'Launch save set' })
   saveSetLaunch(@Body() body: { name?: string }, @Req() req: Request) {
     return this.bridge.submit('set_launch_save', {
       name: body.name || '',
@@ -340,6 +436,19 @@ export class ApiFullController {
   }
 
   @Post('saves/upload')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Upload a save file (.zip)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Save .zip file' },
+        filename: { type: 'string', description: 'Override file name' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Save uploaded' })
   @UseInterceptors(FileInterceptor('file'))
   async saveUpload(
     @UploadedFile() file: Express.Multer.File,
@@ -369,6 +478,9 @@ export class ApiFullController {
   }
 
   @Post('files/server-settings/create-from-example')
+  @ApiTags('Files')
+  @ApiOperation({ summary: 'Create server-settings.json from the Factorio example template' })
+  @ApiResponse({ status: 200, description: 'server-settings.json created' })
   serverSettingsExample(@Req() req: Request) {
     return this.bridge.submit('create_server_settings_from_example', {
       actor: this.bridge.webActor(this.user(req)),
@@ -376,11 +488,17 @@ export class ApiFullController {
   }
 
   @Put('files/admin-list')
+  @ApiTags('Files')
+  @ApiOperation({ summary: 'Write the admin-list (admins.txt)' })
+  @ApiResponse({ status: 200, description: 'Admin list saved' })
   adminListPut(@Body() body: unknown) {
     return this.bridge.submit('write_admin_list', { data: body });
   }
 
   @Put('mods/prefs')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Set mod manager preferences (e.g. remove old zips)' })
+  @ApiResponse({ status: 200, description: 'Preferences saved' })
   modsPrefs(@Req() req: Request, @Body() body: { remove_old_zips?: boolean }) {
     return this.bridge.submit('mods_set_prefs', {
       ...body,
@@ -389,16 +507,25 @@ export class ApiFullController {
   }
 
   @Post('mods/check-updates')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Start checking for mod updates' })
+  @ApiResponse({ status: 200, description: 'Update check started' })
   modsCheckUpdates(@Body() body: Record<string, unknown>) {
     return this.bridge.submit('mods_check_updates_start', body);
   }
 
   @Get('mods/check-updates')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get mod update check status' })
+  @ApiResponse({ status: 200, description: 'Update check status' })
   modsCheckUpdatesStatus() {
     return this.bridge.submit('mods_check_updates_status');
   }
 
   @Post('mods/toggle')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Enable or disable a specific mod' })
+  @ApiResponse({ status: 200, description: 'Mod enabled/disabled' })
   modsToggle(
     @Body() body: { name?: string; enabled?: boolean },
     @Req() req: Request,
@@ -410,6 +537,9 @@ export class ApiFullController {
   }
 
   @Post('mods/toggle-all')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Enable or disable all mods at once' })
+  @ApiResponse({ status: 200, description: 'All mods toggled' })
   modsToggleAll(@Body() body: { enabled?: boolean }, @Req() req: Request) {
     return this.bridge.submit('mods_set_all_enabled', {
       enabled: body?.enabled,
@@ -418,6 +548,9 @@ export class ApiFullController {
   }
 
   @Post('mods/disable-conflicts')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Disable mods that conflict with each other' })
+  @ApiResponse({ status: 200, description: 'Conflicting mods disabled' })
   modsDisableConflicts(
     @Body() body: { names?: string[] },
     @Req() req: Request,
@@ -429,11 +562,18 @@ export class ApiFullController {
   }
 
   @Get('mods/changelog')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get changelog for a specific mod' })
+  @ApiQuery({ name: 'name', description: 'Mod internal name' })
+  @ApiResponse({ status: 200, description: 'Mod changelog text' })
   modsChangelog(@Query('name') name: string) {
     return this.bridge.submit('mods_get_changelog', { name });
   }
 
   @Post('mods/version')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Switch to a specific version of a mod' })
+  @ApiResponse({ status: 200, description: 'Mod version switched' })
   modsVersion(
     @Body() body: { name?: string; version?: string },
     @Req() req: Request,
@@ -445,6 +585,9 @@ export class ApiFullController {
   }
 
   @Post('mods/remove')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Remove one or more mods' })
+  @ApiResponse({ status: 200, description: 'Mods removed' })
   modsRemove(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('mods_remove', {
       ...body,
@@ -453,6 +596,19 @@ export class ApiFullController {
   }
 
   @Post('mods/upload')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Upload a mod .zip or mod-settings.dat file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Mod .zip or mod-settings.dat file' },
+        confirm_replace: { type: 'string', description: 'Set to "1" to replace existing mod' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Mod uploaded' })
   @UseInterceptors(FileInterceptor('file'))
   async modsUpload(
     @UploadedFile() file: Express.Multer.File,
@@ -502,6 +658,18 @@ export class ApiFullController {
   }
 
   @Post('mods/import-save/preview')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Preview which mods are used in a save file (upload to inspect)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Factorio save .zip file' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Mod list from the save file' })
   @UseInterceptors(FileInterceptor('file'))
   async modsImportSavePreview(
     @UploadedFile() file: Express.Multer.File,
@@ -529,6 +697,10 @@ export class ApiFullController {
   }
 
   @Get('mods/download-all')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Download all mods as a ZIP archive' })
+  @ApiResponse({ status: 200, description: 'ZIP archive with all mods' })
+  @ApiResponse({ status: 404, description: 'Archive could not be built' })
   async modsDownloadAll(@Res() res: Response) {
     const data = await this.bridge.submit('build_mods_archive');
     const path = String(data.path || '');
@@ -538,6 +710,11 @@ export class ApiFullController {
   }
 
   @Get('mods/:name/download')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Download a single mod .zip file' })
+  @ApiParam({ name: 'name', description: 'Mod internal name' })
+  @ApiResponse({ status: 200, description: 'Mod .zip file' })
+  @ApiResponse({ status: 404, description: 'Mod not found' })
   async modDownload(@Param('name') name: string, @Res() res: Response) {
     const data = await this.bridge.submit('get_mod_download_path', { name });
     const path = String(data.path || '');
@@ -547,21 +724,33 @@ export class ApiFullController {
   }
 
   @Post('mods/install-plan')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get install plan for a single mod (dependencies, conflicts)' })
+  @ApiResponse({ status: 200, description: 'Install plan' })
   modsInstallPlan(@Body() body: { mod?: string }) {
     return this.bridge.submit('mods_install_plan', { mod: body.mod });
   }
 
   @Post('mods/install-plan-batch')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get install plan for multiple mods at once' })
+  @ApiResponse({ status: 200, description: 'Batch install plan' })
   modsInstallPlanBatch(@Body() body: { mods?: unknown }) {
     return this.bridge.submit('mods_install_plan_batch', { mods: body.mods });
   }
 
   @Get('mods/update-all-plan')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get update plan for all installed mods' })
+  @ApiResponse({ status: 200, description: 'Update plan for all mods' })
   modsUpdateAllPlan() {
     return this.bridge.submit('mods_update_all_plan');
   }
 
   @Post('mods/job/start-install')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Start a mod install job' })
+  @ApiResponse({ status: 200, description: 'Install job started' })
   modsJobInstall(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('mods_job_start', {
       mode: 'install',
@@ -571,6 +760,9 @@ export class ApiFullController {
   }
 
   @Post('mods/job/start-install-save')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Start a mod install-many job (from save mod list)' })
+  @ApiResponse({ status: 200, description: 'Install-save job started' })
   modsJobInstallSave(
     @Body() body: Record<string, unknown>,
     @Req() req: Request,
@@ -583,6 +775,9 @@ export class ApiFullController {
   }
 
   @Post('mods/job/start-update')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Start an update job for a single mod' })
+  @ApiResponse({ status: 200, description: 'Update job started' })
   modsJobUpdate(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('mods_job_start', {
       mode: 'update_one',
@@ -592,6 +787,9 @@ export class ApiFullController {
   }
 
   @Post('mods/job/start-update-all')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Start an update-all job for all outdated mods' })
+  @ApiResponse({ status: 200, description: 'Update-all job started' })
   modsJobUpdateAll(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('mods_job_start', {
       mode: 'update_all',
@@ -601,21 +799,34 @@ export class ApiFullController {
   }
 
   @Get('mods/job/status')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get current mod job status' })
+  @ApiResponse({ status: 200, description: 'Job status (running, done, error, idle)' })
   modsJobStatus() {
     return this.bridge.submit('mods_job_status');
   }
 
   @Post('mods/job/stop')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Stop the current mod job' })
+  @ApiResponse({ status: 200, description: 'Job stopped' })
   modsJobStop() {
     return this.bridge.submit('mods_job_stop');
   }
 
   @Post('bans/sync')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Sync ban list across all instances' })
+  @ApiResponse({ status: 200, description: 'Bans synced' })
   bansSync() {
     return this.bridge.submit('sync_bans');
   }
 
   @Post('bans/ban')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Ban a player' })
+  @ApiBody({ type: BanPlayerDto })
+  @ApiResponse({ status: 200, description: 'Player banned' })
   ban(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('ban_player', {
       ...body,
@@ -624,6 +835,10 @@ export class ApiFullController {
   }
 
   @Post('bans/unban')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Unban a player' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player unbanned' })
   unban(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('unban_player', {
       ...body,
@@ -632,6 +847,10 @@ export class ApiFullController {
   }
 
   @Post('moderation/mute')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Mute a player (suppress in-game chat)' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player muted' })
   mute(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('mute_player', {
       ...body,
@@ -640,6 +859,10 @@ export class ApiFullController {
   }
 
   @Post('moderation/unmute')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Unmute a player' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player unmuted' })
   unmute(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('unmute_player', {
       ...body,
@@ -648,6 +871,10 @@ export class ApiFullController {
   }
 
   @Post('moderation/kick')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Kick a player from the server' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player kicked' })
   kick(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('kick_player', {
       ...body,
@@ -656,6 +883,10 @@ export class ApiFullController {
   }
 
   @Post('moderation/purge')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Purge all chat messages by a player' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player messages purged' })
   purge(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('purge_player', {
       ...body,
@@ -664,6 +895,10 @@ export class ApiFullController {
   }
 
   @Post('whitelist/add')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Add a player to the whitelist' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player added to whitelist' })
   wlAdd(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('whitelist_add', {
       ...body,
@@ -672,6 +907,10 @@ export class ApiFullController {
   }
 
   @Post('whitelist/remove')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Remove a player from the whitelist' })
+  @ApiBody({ type: PlayerActionDto })
+  @ApiResponse({ status: 200, description: 'Player removed from whitelist' })
   wlRemove(@Body() body: Record<string, unknown>, @Req() req: Request) {
     return this.bridge.submit('whitelist_remove', {
       ...body,
@@ -680,6 +919,9 @@ export class ApiFullController {
   }
 
   @Post('whitelist/clear')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Clear the entire whitelist' })
+  @ApiResponse({ status: 200, description: 'Whitelist cleared' })
   wlClear(@Req() req: Request) {
     return this.bridge.submit('whitelist_clear', {
       actor: this.bridge.webActor(this.user(req)),
@@ -687,6 +929,9 @@ export class ApiFullController {
   }
 
   @Put('commands/catalog')
+  @ApiTags('Server')
+  @ApiOperation({ summary: 'Save the RCON commands catalog' })
+  @ApiResponse({ status: 200, description: 'Catalog saved' })
   commandsPut(@Body() body: unknown, @Req() req: Request) {
     const lang = String(req.headers['x-fcc-ui-lang'] || '').slice(0, 12);
     return this.bridge.submit('write_commands_catalog', {
@@ -697,6 +942,12 @@ export class ApiFullController {
   }
 
   @Get('logs/history')
+  @ApiTags('Logs')
+  @ApiOperation({ summary: 'Get historical Factorio server log from file' })
+  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines (default varies)' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiQuery({ name: 'full', required: false, description: 'Return full log (1 or true)' })
+  @ApiResponse({ status: 200, description: 'Log history lines' })
   logsHistory(
     @Query('tail') tail?: string,
     @Query('instance_id') instanceId?: string,
@@ -710,6 +961,12 @@ export class ApiFullController {
   }
 
   @Get('logs/program')
+  @ApiTags('Logs')
+  @ApiOperation({ summary: 'Get FCC panel program log (web, audit, maintenance)' })
+  @ApiQuery({ name: 'kind', required: false, description: 'Log kind: web, audit, maintenance' })
+  @ApiQuery({ name: 'tail', required: false })
+  @ApiQuery({ name: 'full', required: false, description: 'Return full log (1 or true)' })
+  @ApiResponse({ status: 200, description: 'Panel log lines' })
   logsProgram(
     @Query('kind') kind?: string,
     @Query('tail') tail?: string,
@@ -723,6 +980,10 @@ export class ApiFullController {
   }
 
   @Get('chat-log')
+  @ApiTags('Logs')
+  @ApiOperation({ summary: 'Get recent in-game chat log' })
+  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines (default: 500)' })
+  @ApiResponse({ status: 200, description: 'Chat log lines' })
   chatLog(@Query('tail') tail?: string) {
     return this.bridge.submit('chat_log_tail', {
       tail: parseInt(tail || '500', 10),
@@ -730,6 +991,9 @@ export class ApiFullController {
   }
 
   @Post('chat/send-announcement')
+  @ApiTags('Server')
+  @ApiOperation({ summary: 'Send an announcement message to in-game chat' })
+  @ApiResponse({ status: 200, description: 'Announcement sent' })
   chatAnnouncement(@Body() body: { message?: string }) {
     return this.bridge.submit('chat_send_text', { message: body.message });
   }

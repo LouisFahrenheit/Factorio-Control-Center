@@ -40,6 +40,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.29",
     "@nestjs/serve-static": "^5.0.5",
+    "@nestjs/swagger": "^11.4.7",
     "@nestjs/typeorm": "^11.0.3",
     "@nestjs/websockets": "^11.1.29",
     "adm-zip": "^0.6.0",
@@ -52,6 +53,7 @@
     "node-stream-zip": "^1.15.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.20",
     "uuid": "^14.0.0"
   },

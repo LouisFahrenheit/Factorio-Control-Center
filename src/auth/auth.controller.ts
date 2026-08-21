@@ -12,13 +12,23 @@ import {
   Ip,
   Logger,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { ALL_TABS } from '../constants/fcc.constants';
 import { SessionService } from './session.service';
 import { UsersService } from './users.service';
 import { InstancesService } from '../instances/instances.service';
 import { WebPanelEventLogService } from '../logging/web-panel-event-log.service';
 import { verifyPassword } from './password.util';
+import { LoginDto, CreateUserDto, UpdateUserDto } from '../common/dto/auth.dto';
 
+@ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
   private readonly log = new Logger(AuthController.name);
@@ -31,6 +41,10 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @ApiOperation({ summary: 'Login with username and password', description: 'Returns a session token on success.' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'Login successful — returns token and user info' })
+  @ApiResponse({ status: 200, description: 'Login failed — returns { ok: false, error: "invalid_credentials" }' })
   async login(@Body() body: unknown, @Ip() ip: string) {
     const { username, password } = body as Record<string, string>;
     this.log.debug(`Login attempt for username: ${username} from IP: ${ip}`);
@@ -54,6 +68,9 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Logout and invalidate current session token' })
+  @ApiResponse({ status: 200, description: 'Session invalidated successfully' })
   async logout(@Headers('authorization') auth?: string) {
     const token = this.bearer(auth);
     if (!token) return { ok: true };
@@ -67,6 +84,10 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Get current authenticated user info' })
+  @ApiResponse({ status: 200, description: 'Returns current user object' })
+  @ApiResponse({ status: 403, description: 'Invalid or missing token' })
   async me(@Headers('authorization') auth?: string) {
     const token = this.bearer(auth);
     const user = token ? await this.sessions.resolve(token) : null;
@@ -75,6 +96,10 @@ export class AuthController {
   }
 
   @Get('users')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'List all users (admin only)' })
+  @ApiResponse({ status: 200, description: 'Returns list of users, available tabs and instances' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
   async listUsers(@Headers('authorization') auth?: string) {
     await this.requireAdmin(auth);
     return {
@@ -89,6 +114,11 @@ export class AuthController {
   }
 
   @Post('users')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Create a new user (admin only)' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({ status: 200, description: 'User created successfully' })
+  @ApiResponse({ status: 403, description: 'Admin role required or validation error' })
   async createUser(
     @Headers('authorization') auth: string | undefined,
     @Body() body: Record<string, unknown>,
@@ -101,6 +131,12 @@ export class AuthController {
   }
 
   @Put('users/:username')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Update an existing user (admin only)' })
+  @ApiParam({ name: 'username', description: 'Username to update' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
   async updateUser(
     @Headers('authorization') auth: string | undefined,
     @Param('username') username: string,
@@ -155,6 +191,11 @@ export class AuthController {
   }
 
   @Delete('users/:username')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Delete a user (admin only)' })
+  @ApiParam({ name: 'username', description: 'Username to delete' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Admin role required or cannot delete self' })
   async deleteUser(
     @Headers('authorization') auth: string | undefined,
     @Param('username') username: string,
