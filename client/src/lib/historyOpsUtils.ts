@@ -159,10 +159,12 @@ function formatCommandsDetail(detail: Record<string, unknown> | undefined, t: (k
     parts.push(`${t('history_detail_command_template')}: ${String(detail.command)}`);
   }
   if (detail.source) {
-    const source =
-      detail.source === 'commands_tab'
-        ? t('history_detail_source_commands_tab')
-        : t('history_detail_source_console');
+    let source = t('history_detail_source_console');
+    if (detail.source === 'commands_tab') {
+      source = t('history_detail_source_commands_tab');
+    } else if (detail.source === 'in_game') {
+      source = t('history_detail_source_in_game');
+    }
     parts.push(`${t('history_detail_source')}: ${source}`);
   }
   const removed = Array.isArray(detail.commands) ? detail.commands.filter(Boolean) : [];
@@ -264,7 +266,12 @@ export function formatCommandsHistoryRow(
   const actionLabel = resolveActionLabel(action, COMMANDS_ACTION_KEYS, t);
   const actionDate = formatPanelDateTime(String(ev.date || '').replace(/^\[(.+)\]$/, '$1'), '');
   let detailVal = formatCommandsDetail(ev.detail, t);
-  if (!detailVal && ev.error) detailVal = String(ev.error);
+  if (ev.error) {
+    const errorSlug = String(ev.error).toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+    const errKey = `history_error_${errorSlug}`;
+    const errMsg = t(errKey) !== errKey ? t(errKey) : ev.error;
+    detailVal = detailVal ? `${detailVal}; ${errMsg}` : errMsg;
+  }
   return {
     actionLabel,
     actionVariant: opsHistoryActionVariant(action),

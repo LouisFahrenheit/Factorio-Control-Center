@@ -84,6 +84,24 @@ export class InstanceHistoryService {
     return this.readTail(serverPath, 'commands_history');
   }
 
+  recordInGameCommand(
+    serverPath: string,
+    actor: string,
+    command: string,
+    success = true,
+    error?: string,
+  ): void {
+    this.append(serverPath, 'commands_history', {
+      action: 'execute',
+      date: panelTimestamp(),
+      actor,
+      success,
+      error,
+      target: command,
+      detail: { source: 'in_game' },
+    });
+  }
+
   recordStartupError(
     serverPath: string,
     detail: { exit_code?: number; missing_deps?: string[] },

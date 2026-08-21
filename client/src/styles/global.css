@@ -1403,3 +1403,13 @@ body {
       0 0 14px rgba(var(--accent-rgb), 0.42);
   }
 }
+
+/* Failed history rows styling */
+.history-row--failed td:not(.history-col-date):not(.history-col-actor) {
+  color: var(--error) !important;
+}
+
+.history-row--failed:hover {
+  background-color: color-mix(in srgb, var(--error) 8%, var(--bg-data, #3a3a3a)) !important;
+}
+

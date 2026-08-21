@@ -851,6 +851,8 @@
   "history_detail_source": "Источник",
   "history_detail_source_commands_tab": "Вкладка «Команды»",
   "history_detail_source_console": "Консоль управления",
+  "history_detail_source_in_game": "В игре",
+  "history_error_command_not_allowed": "Выполнение команды запрещено (нет прав)",
   "history_detail_removed_commands": "Удалённые команды",
   "history_view_details": "Просмотр",
   "history_detail_modal_title": "Подробности события",

@@ -851,6 +851,8 @@
   "history_detail_source": "Source",
   "history_detail_source_commands_tab": "Commands tab",
   "history_detail_source_console": "Control console",
+  "history_detail_source_in_game": "In-game",
+  "history_error_command_not_allowed": "Command not allowed (permission denied)",
   "history_detail_removed_commands": "Removed commands",
   "history_view_details": "View details",
   "history_detail_modal_title": "Event details",
