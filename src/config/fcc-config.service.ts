@@ -78,6 +78,20 @@ export class FccConfigService implements OnModuleInit {
     this.log.debug(`Loaded ${all.length} preferences from database.`);
   }
 
+  async updatePreferences(changes: Record<string, string>): Promise<void> {
+    const appSecret = this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
+
+    for (const [key, value] of Object.entries(changes)) {
+      let finalValue = value;
+      if (key === 'web_panel.global_token' && value) {
+        finalValue = encryptString(value, appSecret);
+      }
+      await this.sysPrefs.save({ key, value: finalValue });
+    }
+
+    await this.reload();
+  }
+
   section(name: string): Record<string, string> {
     const out: Record<string, string> = {};
     const prefix = `${name}.`;

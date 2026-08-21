@@ -48,7 +48,7 @@ const KNOWN_THEMES = [
   'cryogenics',
 ];
 
-type IniData = Record<string, Record<string, string>>;
+
 
 const TLS_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
 
@@ -70,12 +70,12 @@ export class ProgramOpsService {
   ) {}
 
   get(): OpResult {
-    const ini = this.loadIni();
-    const shared = ini.shared || {};
+    const shared = this.config.section('shared');
+    const languageSection = this.config.section('language');
     const wp = this.config.webPanel;
     const langs = this.availableLanguages();
     const theme = this.normalizeTheme(shared.theme);
-    const language = this.normalizeLang(ini.language?.code, langs);
+    const language = this.normalizeLang(languageSection.code, langs);
 
     return {
       ok: true,
@@ -156,24 +156,19 @@ export class ProgramOpsService {
       RUNTIME_TOUCH_KEYS.has(k),
     );
 
-    const ini = this.loadIni();
-    ini.shared = ini.shared || {};
-    const wpBackup = { ...(ini.web_panel || {}) };
-    ini.web_panel = ini.web_panel || {};
-    ini.language = ini.language || {};
+    const wp = this.config.webPanel;
+    const shared = this.config.section('shared');
+    const changes: Record<string, string> = {};
     const settingsChanges: { key: string; from: string; to: string }[] = [];
 
     if ('global_username' in kwargs || 'global_token' in kwargs) {
-      const wp = this.config.webPanel;
       const username = String(
         kwargs.global_username ??
-          ini.web_panel.global_username ??
           wp.global_username ??
           '',
       ).trim();
       const token = String(
         kwargs.global_token ??
-          ini.web_panel.global_token ??
           wp.global_token ??
           '',
       ).trim();
@@ -187,15 +182,13 @@ export class ProgramOpsService {
       this.portal.clearVerifyCache();
     }
 
-
-
     if ('translate_mod_names' in kwargs) {
-      ini.shared.translate_mod_names = this.bool(kwargs.translate_mod_names)
+      changes['shared.translate_mod_names'] = this.bool(kwargs.translate_mod_names)
         ? 'true'
         : 'false';
     }
     if ('modpack_activate_use_symlinks' in kwargs) {
-      const prev = this.bool(ini.shared.modpack_activate_use_symlinks, true);
+      const prev = this.bool(shared.modpack_activate_use_symlinks, true);
       const next = this.bool(kwargs.modpack_activate_use_symlinks, true);
       if (prev !== next) {
         settingsChanges.push({
@@ -204,13 +197,13 @@ export class ProgramOpsService {
           to: next ? 'true' : 'false',
         });
       }
-      ini.shared.modpack_activate_use_symlinks = next ? 'true' : 'false';
+      changes['shared.modpack_activate_use_symlinks'] = next ? 'true' : 'false';
     }
     if ('theme' in kwargs) {
-      ini.shared.theme = this.normalizeTheme(kwargs.theme);
+      changes['shared.theme'] = this.normalizeTheme(kwargs.theme);
     }
     if ('language' in kwargs) {
-      ini.language.code = this.normalizeLang(
+      changes['language.code'] = this.normalizeLang(
         kwargs.language,
         this.availableLanguages(),
       );
@@ -258,6 +251,8 @@ export class ProgramOpsService {
     for (const key of wpKeys) {
       if (!(key in kwargs)) continue;
       const raw = kwargs[key];
+      const changesKey = `web_panel.${key}`;
+
       if (
         key === 'web_disable_effects' ||
         key.startsWith('sync_') ||
@@ -273,7 +268,7 @@ export class ProgramOpsService {
         key === 'public_page_hide_subtitle' ||
         key === 'public_page_show_players'
       ) {
-        ini.web_panel[key] =
+        changes[changesKey] =
           typeof raw === 'boolean'
             ? raw
               ? 'true'
@@ -283,7 +278,7 @@ export class ProgramOpsService {
               : 'false';
       } else if (key === 'toast_duration_sec') {
         const n = parseInt(String(raw ?? '5'), 10);
-        ini.web_panel[key] = String(
+        changes[changesKey] = String(
           Math.max(1, Math.min(20, Number.isFinite(n) ? n : 5)),
         );
       } else if (
@@ -293,25 +288,25 @@ export class ProgramOpsService {
       ) {
         const n = parseInt(String(raw ?? ''), 10);
         if (key === 'log_rotation_max_mb') {
-          ini.web_panel[key] = String(
+          changes[changesKey] = String(
             Math.max(1, Math.min(2048, Number.isFinite(n) ? n : 50)),
           );
         } else if (key === 'log_rotation_interval_hours') {
-          ini.web_panel[key] = String(
+          changes[changesKey] = String(
             Math.max(1, Math.min(8760, Number.isFinite(n) ? n : 24)),
           );
         } else {
-          ini.web_panel[key] = String(
+          changes[changesKey] = String(
             Math.max(1, Math.min(20, Number.isFinite(n) ? n : 3)),
           );
         }
       } else if (key === 'listen_port') {
         const n = parseInt(String(raw ?? '8080'), 10);
-        ini.web_panel[key] = String(
+        changes[changesKey] = String(
           Math.max(1, Math.min(65535, Number.isFinite(n) ? n : 8080)),
         );
       } else {
-        ini.web_panel[key] = String(raw ?? '').trim();
+        changes[changesKey] = String(raw ?? '').trim();
       }
     }
 
@@ -320,37 +315,52 @@ export class ProgramOpsService {
       'listen_host' in kwargs ||
       'listen_port' in kwargs
     ) {
-      ini.web_panel.port_mode = 'custom';
+      changes['web_panel.port_mode'] = 'custom';
     }
 
-    const prevTls = this.bool(wpBackup.tls_enabled);
-    const nextTls = this.bool(ini.web_panel.tls_enabled);
-    const listenPort = parseInt(
-      String(ini.web_panel.listen_port || '8080'),
-      10,
-    );
-    if (Number.isFinite(listenPort) && prevTls !== nextTls) {
+    const prevTls = wp.tls_enabled;
+    const nextTls = changes['web_panel.tls_enabled'] !== undefined
+      ? this.bool(changes['web_panel.tls_enabled'])
+      : wp.tls_enabled;
+
+    const listenPortRaw = changes['web_panel.listen_port'] !== undefined
+      ? changes['web_panel.listen_port']
+      : String(wp.listen_port || '8080');
+
+    let listenPort = parseInt(listenPortRaw, 10);
+    if (!Number.isFinite(listenPort)) listenPort = 8080;
+
+    if (prevTls !== nextTls) {
       if (nextTls) {
-        if (listenPort === 80) ini.web_panel.listen_port = '443';
-        else if (listenPort === 8080) ini.web_panel.listen_port = '8443';
+        if (listenPort === 80) changes['web_panel.listen_port'] = '443';
+        else if (listenPort === 8080) changes['web_panel.listen_port'] = '8443';
       } else {
-        if (listenPort === 443) ini.web_panel.listen_port = '80';
-        else if (listenPort === 8443) ini.web_panel.listen_port = '8080';
+        if (listenPort === 443) changes['web_panel.listen_port'] = '80';
+        else if (listenPort === 8443) changes['web_panel.listen_port'] = '8080';
       }
     }
 
-    const tlsEnabled = this.bool(ini.web_panel.tls_enabled);
+    const tlsEnabled = changes['web_panel.tls_enabled'] !== undefined
+      ? this.bool(changes['web_panel.tls_enabled'])
+      : wp.tls_enabled;
+
     if (tlsEnabled) {
-      const cert = String(ini.web_panel.tls_certfile || '').trim();
-      const key = String(ini.web_panel.tls_keyfile || '').trim();
+      const cert = (changes['web_panel.tls_certfile'] !== undefined
+        ? changes['web_panel.tls_certfile']
+        : wp.tls_certfile || '').trim();
+      const key = (changes['web_panel.tls_keyfile'] !== undefined
+        ? changes['web_panel.tls_keyfile']
+        : wp.tls_keyfile || '').trim();
+
       if (!tlsFilesExist(cert, key, this.paths.rootDir)) {
-        ini.web_panel = wpBackup;
         return { ok: false, error: 'tls_cert_or_key_missing' };
       }
     }
 
-    delete ini.program;
-    await this.saveIni(ini);
+    if (Object.keys(changes).length > 0) {
+      await this.config.updatePreferences(changes);
+    }
+
     this.logRotation.syncFromConfig();
 
     if (runtimeTouch) {
@@ -484,8 +494,8 @@ export class ProgramOpsService {
   }
 
   modpackActivateUseSymlinks(): boolean {
-    const ini = this.loadIni();
-    return this.bool(ini.shared?.modpack_activate_use_symlinks, true);
+    const shared = this.config.section('shared');
+    return this.bool(shared.modpack_activate_use_symlinks, true);
   }
 
   async setServerIni(kwargs: Record<string, unknown>): Promise<OpResult> {
@@ -536,30 +546,6 @@ export class ProgramOpsService {
     return { ok: true, settings_changes: changes };
   }
 
-  private loadIni(): IniData {
-    const out: IniData = {};
-    for (const sec of ['shared', 'web_panel', 'language']) {
-      const kv = this.config.section(sec);
-      if (Object.keys(kv).length > 0) {
-        out[sec] = kv;
-      }
-    }
-    return out;
-  }
-
-  private async saveIni(data: IniData): Promise<void> {
-    const appSecret = process.env.APP_SECRET || '';
-    for (const [sec, kv] of Object.entries(data)) {
-      for (const [k, v] of Object.entries(kv)) {
-        let value = String(v);
-        if (k === 'global_token') {
-          value = encryptString(value, appSecret);
-        }
-        await this.sysPrefs.save({ key: `${sec}.${k}`, value });
-      }
-    }
-    await this.config.reload();
-  }
 
   private availableLanguages(): string[] {
     const codes = new Set<string>();
