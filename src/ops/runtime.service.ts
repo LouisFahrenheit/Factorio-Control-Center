@@ -101,13 +101,63 @@ export class RuntimeService implements OnModuleDestroy {
     private readonly eventsGateway: EventsGateway,
   ) {}
 
-  onModuleDestroy(): void {
-    for (const [, rt] of this.runtimes) {
-      try {
-        rt.proc?.kill('SIGTERM');
-      } catch {
-        /* ignore */
-      }
+  async onModuleDestroy(): Promise<void> {
+    const running = [...this.runtimes.values()].filter(
+      (rt) => rt.proc && rt.proc.exitCode === null,
+    );
+    if (!running.length) return;
+
+    this.log.log(
+      `Panel shutting down — sending graceful stop to ${running.length} instance(s)...`,
+    );
+
+    // Send RCON /quit to all running instances in parallel (same as Stop button)
+    await Promise.allSettled(
+      running.map(async (rt) => {
+        const ep = this.rconEndpoint(rt.instanceId);
+        if (!ep) {
+          // No RCON credentials — fall back to SIGTERM
+          try {
+            rt.proc?.kill('SIGTERM');
+          } catch {
+            /* ignore */
+          }
+          return;
+        }
+        try {
+          rt.stopping = true;
+          rt.inGame = false;
+          await this.rcon.run(ep.host, ep.port, ep.password, '/quit', 10000);
+          this.log.log(`[${rt.instanceId}] Graceful /quit sent`);
+        } catch {
+          // RCON failed or server already closing — fall back to SIGTERM
+          try {
+            rt.proc?.kill('SIGTERM');
+          } catch {
+            /* ignore */
+          }
+        }
+      }),
+    );
+
+    // Wait up to 35s for all processes to exit, then force-kill stragglers
+    const SHUTDOWN_WAIT_MS = 35_000;
+    const deadline = Date.now() + SHUTDOWN_WAIT_MS;
+    const stillRunning = () =>
+      running.filter((rt) => rt.proc && rt.proc.exitCode === null);
+
+    while (Date.now() < deadline && stillRunning().length > 0) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+
+    const stuck = stillRunning();
+    if (stuck.length > 0) {
+      this.log.warn(
+        `${stuck.length} instance(s) did not stop in time — force killing`,
+      );
+      await Promise.allSettled(stuck.map((rt) => this.forceKillProc(rt)));
+    } else {
+      this.log.log('All instances stopped gracefully');
     }
   }
 
