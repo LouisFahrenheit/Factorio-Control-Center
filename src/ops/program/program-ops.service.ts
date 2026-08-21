@@ -306,9 +306,9 @@ export class ProgramOpsService {
           );
         }
       } else if (key === 'listen_port') {
-        const n = parseInt(String(raw ?? '80'), 10);
+        const n = parseInt(String(raw ?? '8080'), 10);
         ini.web_panel[key] = String(
-          Math.max(1, Math.min(65535, Number.isFinite(n) ? n : 80)),
+          Math.max(1, Math.min(65535, Number.isFinite(n) ? n : 8080)),
         );
       } else {
         ini.web_panel[key] = String(raw ?? '').trim();

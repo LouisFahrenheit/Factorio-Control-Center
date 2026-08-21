@@ -46,16 +46,9 @@ function bool(v, d = false) {
   return ['1', 'true', 'yes', 'on'].includes(String(v).toLowerCase());
 }
 
-function unixNonRootNoPrivilegedBind() {
-  if (process.platform === 'win32') return false;
-  const uid = process.getuid?.();
-  return uid !== undefined && uid !== 0;
-}
-
 function resolveAutoPort(tls) {
-  const hi = unixNonRootNoPrivilegedBind();
-  if (tls) return hi ? 8443 : 443;
-  return hi ? 8080 : 80;
+  if (tls) return 8443;
+  return 8080;
 }
 
 function main() {
@@ -85,8 +78,8 @@ function main() {
     console.log(String(resolveAutoPort(tls)));
     return;
   }
-  const n = parseInt(String(wp.listen_port || '80'), 10);
-  console.log(String(Number.isFinite(n) && n >= 1 && n <= 65535 ? n : 80));
+  const n = parseInt(String(wp.listen_port || '8080'), 10);
+  console.log(String(Number.isFinite(n) && n >= 1 && n <= 65535 ? n : 8080));
 }
 
 main();

@@ -158,7 +158,7 @@ sudo loginctl enable-linger $USER
 
 **Panel ports:**
 
-- **Auto** - on Linux without root: **8080** (HTTP) or **8443** (HTTPS); otherwise **80** / **443**
+- **Auto** - **8080** (HTTP) or **8443** (HTTPS)
 - **Custom** - your port in settings or overridden via `.env` file (`PORT=…`)
   *(Note: If using Docker, do not change the port in the panel settings. Instead, change the port mapping in `docker-compose.yml`).*
 

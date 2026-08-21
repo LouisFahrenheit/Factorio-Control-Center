@@ -127,7 +127,7 @@ export class FccConfigService implements OnModuleInit {
 
       // Network / infrastructure — DB wins; non-empty .env forces override
       listen_host: overrideStr('listen_host', 'HOST', '0.0.0.0'),
-      listen_port: overrideNum('listen_port', 'PORT', 80),
+      listen_port: overrideNum('listen_port', 'PORT', 8080),
       port_mode: overrideStr('port_mode', 'PORT_MODE', 'auto'),
       tls_enabled: overrideBool('tls_enabled', 'TLS_ENABLED'),
       tls_certfile: overrideStr('tls_certfile', 'TLS_CERTFILE', ''),

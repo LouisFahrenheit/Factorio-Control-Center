@@ -23,9 +23,8 @@ export function webPanelTlsEffective(wp: WebPanelIni): boolean {
 }
 
 export function resolveAutoListenPort(wp: WebPanelIni): number {
-  const useHigh = unixNonRootNoPrivilegedBind();
-  if (webPanelTlsEffective(wp)) return useHigh ? 8443 : 443;
-  return useHigh ? 8080 : 80;
+  if (webPanelTlsEffective(wp)) return 8443;
+  return 8080;
 }
 
 /** Effective TCP bind port from [web_panel] (port_mode auto vs custom). */

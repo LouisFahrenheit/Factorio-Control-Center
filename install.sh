@@ -38,13 +38,19 @@ if [ "$NODE_NEED_INSTALL" -eq 1 ]; then
     exit 1
   fi
 fi
-echo "Configure web panel port..."
+echo
+echo "================================================="
+echo " Configure Web Panel Port"
+echo "================================================="
+echo "Note: Privileged ports (<1024, e.g. 80) require running the panel as root."
 read -r -p "Choose port for web panel [1-65535] (default 8080): " PANEL_PORT
 PANEL_PORT=${PANEL_PORT:-8080}
 if ! [[ "$PANEL_PORT" =~ ^[0-9]+$ ]] || [ "$PANEL_PORT" -lt 1 ] || [ "$PANEL_PORT" -gt 65535 ]; then
   echo "Invalid port. Using default 8080."
   PANEL_PORT=8080
 fi
+echo "Using port: $PANEL_PORT"
+echo "================================================="
 echo
 
 echo "1. Downloading latest release..."
