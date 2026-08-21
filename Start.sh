@@ -107,7 +107,13 @@ if [[ ! -f "$FCC_DIR/package.json" ]]; then
 fi
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "ERROR: Node.js not found. Install from https://nodejs.org/"
+  echo "ERROR: Node.js not found. Install Node.js 24 or higher."
+  exit 1
+fi
+
+NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
+if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" -lt 24 ]; then
+  echo "ERROR: Node.js version 24 or higher is required. Found version: $NODE_VERSION"
   exit 1
 fi
 

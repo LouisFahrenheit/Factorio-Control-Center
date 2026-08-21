@@ -12,8 +12,18 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+NODE_NEED_INSTALL=0
 if ! command -v node >/dev/null 2>&1; then
-  echo "Node.js not found. Installing Node.js 24..."
+  NODE_NEED_INSTALL=1
+else
+  NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
+  if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" -lt 24 ]; then
+    NODE_NEED_INSTALL=1
+  fi
+fi
+
+if [ "$NODE_NEED_INSTALL" -eq 1 ]; then
+  echo "Node.js is missing or version is less than 24. Installing Node.js 24..."
   if command -v apt-get >/dev/null 2>&1; then
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
     apt-get install -y nodejs
