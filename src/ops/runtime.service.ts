@@ -240,6 +240,9 @@ export class RuntimeService implements OnModuleDestroy {
 
     await this.firewall.tryApplyOnGameStart(exe, pInt);
 
+    // Clean up any orphan Factorio process left from a previous panel crash
+    await this.cleanupOrphanOnPorts(iid, pInt, rconPort);
+
     let proc: ChildProcessWithoutNullStreams;
     try {
       proc = spawn(exe, args, {
@@ -512,23 +515,99 @@ export class RuntimeService implements OnModuleDestroy {
   }
 
   private async findListeningPid(port: number): Promise<number | null> {
-    if (process.platform !== 'win32' || port < 1) return null;
+    if (port < 1) return null;
+
+    if (process.platform === 'win32') {
+      try {
+        const { stdout } = await execFileAsync('netstat', ['-ano'], {
+          encoding: 'utf8',
+          windowsHide: true,
+        });
+        const needle = `:${port}`;
+        for (const line of stdout.split(/\r?\n/)) {
+          if (!line.includes('LISTENING') || !line.includes(needle)) continue;
+          const parts = line.trim().split(/\s+/);
+          const pid = parseInt(parts[parts.length - 1] || '', 10);
+          if (pid > 0) return pid;
+        }
+      } catch {
+        /* ignore */
+      }
+      return null;
+    }
+
+    // Linux: try `ss` first, fall back to `netstat`
     try {
-      const { stdout } = await execFileAsync('netstat', ['-ano'], {
-        encoding: 'utf8',
-        windowsHide: true,
-      });
+      const { stdout } = await execFileAsync(
+        'ss',
+        ['-Htnlp', `sport`, `= :${port}`],
+        { encoding: 'utf8' },
+      );
+      const match = /pid=(\d+)/.exec(stdout);
+      if (match) return parseInt(match[1], 10);
+    } catch {
+      /* ss not available */
+    }
+    try {
+      const { stdout } = await execFileAsync(
+        'netstat',
+        ['-tlnp'],
+        { encoding: 'utf8' },
+      );
       const needle = `:${port}`;
       for (const line of stdout.split(/\r?\n/)) {
-        if (!line.includes('LISTENING') || !line.includes(needle)) continue;
-        const parts = line.trim().split(/\s+/);
-        const pid = parseInt(parts[parts.length - 1] || '', 10);
-        if (pid > 0) return pid;
+        if (!line.includes('LISTEN') || !line.includes(needle)) continue;
+        // netstat -tlnp format: ... LISTEN <pid>/<name>
+        const pidMatch = /(\d+)\//.exec(line.split(/\s+/).pop() || '');
+        if (pidMatch) return parseInt(pidMatch[1], 10);
       }
     } catch {
       /* ignore */
     }
     return null;
+  }
+
+  /**
+   * Before spawning a new instance, check if its ports are already occupied
+   * by an orphan Factorio process (left from a panel crash). Kill it if found.
+   */
+  private async cleanupOrphanOnPorts(
+    instanceId: string,
+    gamePort: number,
+    rconPort: number,
+  ): Promise<void> {
+    const pids = new Set<number>();
+
+    // RCON port (TCP) is the most reliable indicator — if it's held, Factorio is running
+    const rconPid = await this.findListeningPid(rconPort);
+    if (rconPid) pids.add(rconPid);
+
+    const gamePid = await this.findListeningPid(gamePort);
+    if (gamePid) pids.add(gamePid);
+
+    if (!pids.size) return;
+
+    this.log.warn(
+      `[${instanceId}] Orphan process detected on ports ${gamePort}/${rconPort}` +
+        ` (PID ${[...pids].join(', ')}) — cleaning up before start`,
+    );
+
+    for (const pid of pids) {
+      try {
+        if (process.platform === 'win32') {
+          await execFileAsync('taskkill', ['/PID', String(pid), '/T', '/F'], {
+            windowsHide: true,
+          });
+        } else {
+          process.kill(pid, 'SIGTERM');
+        }
+      } catch {
+        /* ignore — process may have already exited */
+      }
+    }
+
+    // Give the OS a moment to free the ports before we spawn
+    await new Promise((r) => setTimeout(r, 600));
   }
 
   private async forceKillProc(rt: InstanceRuntime): Promise<void> {
