@@ -111,7 +111,9 @@ export class PanelStartupLogService {
     const nodeVersion = process.version;
     const isDocker = existsSync('/.dockerenv');
     const nodeVersionStr = isDocker ? `${nodeVersion} (Docker)` : nodeVersion;
-    const autostartCount = this.instances.load().items.filter(i => i.autostartServer).length;
+    const autostartCount = this.instances
+      .load()
+      .items.filter((i) => i.autostartServer).length;
     const autostartQueued = autostartCount > 0;
     const { total: maintTotal, active: maintActive } =
       this.countMaintenanceTasks();

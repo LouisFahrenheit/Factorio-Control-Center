@@ -9,6 +9,7 @@ export const ALL_TABS = [
   'commands',
   'players',
   'history',
+  'monitoring',
 ] as const;
 
 export type FccTab = (typeof ALL_TABS)[number];
@@ -19,6 +20,7 @@ export const ENGINEER_TABS: readonly FccTab[] = [
   'maintenance',
   'mods',
   'modpacks',
+  'monitoring',
 ];
 
 export const MODERATOR_TABS: readonly FccTab[] = ['players', 'history'];
@@ -33,4 +35,5 @@ export const WEB_USER_TAB_I18N: Record<FccTab, string> = {
   commands: 'commands_btn',
   players: 'players_btn',
   history: 'players_tab_history',
+  monitoring: 'web_tab_monitoring',
 };

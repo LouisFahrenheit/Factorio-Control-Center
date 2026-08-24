@@ -84,7 +84,8 @@ const LEAVE_RE = /\[LEAVE\]\s+([^\s]+)\s+left the game/i;
 const KICK_RE = /\[KICK\]\s+([^\s]+)\s+was kicked by/i;
 const BAN_RE = /\[BAN\]\s+([^\s]+)\s+was banned by/i;
 const COMMAND_RE = /\[COMMAND\]\s*([^\s:]+)(?:\s+\(command\))?:\s+(.*)/i;
-const COMMAND_FAILED_RE = /\[COMMAND\]\s*([^\s]+)\s+tried to run a command, which isn't allowed for them:\s+(.*)/i;
+const COMMAND_FAILED_RE =
+  /\[COMMAND\]\s*([^\s]+)\s+tried to run a command, which isn't allowed for them:\s+(.*)/i;
 const SAVE_PROGRESS_100_RE = /100%/i;
 
 @Injectable()
@@ -551,11 +552,9 @@ export class RuntimeService implements OnModuleDestroy {
       /* ss not available */
     }
     try {
-      const { stdout } = await execFileAsync(
-        'netstat',
-        ['-tlnp'],
-        { encoding: 'utf8' },
-      );
+      const { stdout } = await execFileAsync('netstat', ['-tlnp'], {
+        encoding: 'utf8',
+      });
       const needle = `:${port}`;
       for (const line of stdout.split(/\r?\n/)) {
         if (!line.includes('LISTEN') || !line.includes(needle)) continue;
@@ -696,13 +695,19 @@ export class RuntimeService implements OnModuleDestroy {
         /* ignore WS errors */
       }
     }
-    
+
     const commandFailedMatch = COMMAND_FAILED_RE.exec(line);
     if (commandFailedMatch?.[1] && commandFailedMatch?.[2]) {
       const actor = commandFailedMatch[1];
       const command = commandFailedMatch[2];
       if (actor !== '<system>' && actor !== 'system') {
-        this.instanceHistory.recordInGameCommand(rt.serverPath, actor, command, false, 'command_not_allowed');
+        this.instanceHistory.recordInGameCommand(
+          rt.serverPath,
+          actor,
+          command,
+          false,
+          'command_not_allowed',
+        );
         // Force the client to update history panel
         try {
           this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
@@ -716,10 +721,18 @@ export class RuntimeService implements OnModuleDestroy {
         const actor = commandMatch[1];
         const command = commandMatch[2];
         if (actor !== '<system>' && actor !== 'system') {
-          this.instanceHistory.recordInGameCommand(rt.serverPath, actor, command, true);
+          this.instanceHistory.recordInGameCommand(
+            rt.serverPath,
+            actor,
+            command,
+            true,
+          );
           // Force the client to update history panel
           try {
-            this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
+            this.eventsGateway.emitPlayersUpdate(
+              rt.instanceId,
+              rt.onlinePlayers,
+            );
           } catch {
             /* ignore WS errors */
           }

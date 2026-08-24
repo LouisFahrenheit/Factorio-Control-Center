@@ -41,14 +41,24 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Login with username and password', description: 'Returns a session token on success.' })
+  @ApiOperation({
+    summary: 'Login with username and password',
+    description: 'Returns a session token on success.',
+  })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Login successful — returns token and user info' })
-  @ApiResponse({ status: 200, description: 'Login failed — returns { ok: false, error: "invalid_credentials" }' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful — returns token and user info',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Login failed — returns { ok: false, error: "invalid_credentials" }',
+  })
   async login(@Body() body: unknown, @Ip() ip: string) {
     const { username, password } = body as Record<string, string>;
     this.log.debug(`Login attempt for username: ${username} from IP: ${ip}`);
-    
+
     const record = await this.users.findUser(username);
     if (!record || !record.enabled) {
       this.log.debug(`Login failed: user '${username}' not found or disabled.`);
@@ -62,7 +72,9 @@ export class AuthController {
     }
 
     const token = await this.sessions.createSession(record.username, ip);
-    this.log.debug(`Login successful: user '${username}', role '${record.role}'. Session created.`);
+    this.log.debug(
+      `Login successful: user '${username}', role '${record.role}'. Session created.`,
+    );
     this.eventLog.logAuth('login', username, record.role);
     return { ok: true, token, user: this.users.publicView(record) };
   }
@@ -98,7 +110,10 @@ export class AuthController {
   @Get('users')
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'List all users (admin only)' })
-  @ApiResponse({ status: 200, description: 'Returns list of users, available tabs and instances' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns list of users, available tabs and instances',
+  })
   @ApiResponse({ status: 403, description: 'Admin role required' })
   async listUsers(@Headers('authorization') auth?: string) {
     await this.requireAdmin(auth);
@@ -118,7 +133,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Create a new user (admin only)' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 200, description: 'User created successfully' })
-  @ApiResponse({ status: 403, description: 'Admin role required or validation error' })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin role required or validation error',
+  })
   async createUser(
     @Headers('authorization') auth: string | undefined,
     @Body() body: Record<string, unknown>,
@@ -169,7 +187,8 @@ export class AuthController {
       }
       if (
         body.instance_ids !== undefined &&
-        JSON.stringify(body.instance_ids) !== JSON.stringify(before.instance_ids)
+        JSON.stringify(body.instance_ids) !==
+          JSON.stringify(before.instance_ids)
       ) {
         const ids = body.instance_ids as string[];
         if (ids.includes('*')) {
@@ -195,7 +214,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Delete a user (admin only)' })
   @ApiParam({ name: 'username', description: 'Username to delete' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 403, description: 'Admin role required or cannot delete self' })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin role required or cannot delete self',
+  })
   async deleteUser(
     @Headers('authorization') auth: string | undefined,
     @Param('username') username: string,

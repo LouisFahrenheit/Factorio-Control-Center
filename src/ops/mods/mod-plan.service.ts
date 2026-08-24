@@ -254,7 +254,11 @@ export class ModPlanService {
         const d = String(dep || '').trim();
         if (!d || this.portal.isBuiltin(d)) continue;
         const isInstalled = installedModVersions(pm.modsDir, d).length > 0;
-        if (!isInstalled && !seen.has(d) && !installTree.has(normalizeModListName(d))) {
+        if (
+          !isInstalled &&
+          !seen.has(d) &&
+          !installTree.has(normalizeModListName(d))
+        ) {
           recommendedMods.add(d);
         }
       }

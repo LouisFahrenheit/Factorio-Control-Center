@@ -1413,3 +1413,18 @@ body {
   background-color: color-mix(in srgb, var(--error) 8%, var(--bg-data, #3a3a3a)) !important;
 }
 
+.monitoring-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .monitoring-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .monitoring-grid > *:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+}
+

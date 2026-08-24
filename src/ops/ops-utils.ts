@@ -212,7 +212,9 @@ export interface ServerSettingsDetails {
   afk_autokick_interval: number;
 }
 
-export function readServerSettingsDetails(serverPath: string): ServerSettingsDetails {
+export function readServerSettingsDetails(
+  serverPath: string,
+): ServerSettingsDetails {
   const settingsPath = join(serverPath, 'server-settings.json');
   const defaults: ServerSettingsDetails = {
     name: '',
@@ -234,7 +236,10 @@ export function readServerSettingsDetails(serverPath: string): ServerSettingsDet
       description: typeof data.description === 'string' ? data.description : '',
       auto_pause: data.auto_pause !== false,
       max_players: typeof data.max_players === 'number' ? data.max_players : 0,
-      afk_autokick_interval: typeof data.afk_autokick_interval === 'number' ? data.afk_autokick_interval : 0,
+      afk_autokick_interval:
+        typeof data.afk_autokick_interval === 'number'
+          ? data.afk_autokick_interval
+          : 0,
     };
   } catch {
     return defaults;

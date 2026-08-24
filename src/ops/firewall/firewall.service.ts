@@ -32,7 +32,10 @@ export class FirewallService {
     if (!platformFirewallIsElevated()) return;
     if (port < 1 || port > 65535) return;
 
-    const { ok, detail, created } = await platformFirewallAddUdpAllow(factorioExe, port);
+    const { ok, detail, created } = await platformFirewallAddUdpAllow(
+      factorioExe,
+      port,
+    );
     if (ok) {
       // Only log if the rule was actually newly created
       if (created) {

@@ -37,6 +37,7 @@ import { InstancePublicTab } from './InstancePublicTab';
 import { InstanceTable } from './InstanceTable';
 import { InstanceServersBar } from './InstanceServersBar';
 import { InstanceServersEmpty, InstanceServersNoResults } from './InstanceServersEmpty';
+import { InstanceMonitoringTab } from './InstanceMonitoringTab';
 import {
   filterInstanceRows,
   instanceSortDefaultAsc,
@@ -46,7 +47,7 @@ import {
 
 type InstancesApi = ReturnType<typeof useInstances>;
 
-type InstanceTabKey = 'servers' | 'maintenance' | 'settings' | 'access' | 'public';
+type InstanceTabKey = 'servers' | 'monitoring' | 'maintenance' | 'settings' | 'access' | 'public';
 
 interface InstanceScreenProps {
   user: AuthUser | null;
@@ -94,6 +95,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
     (key: InstanceTabKey) => {
       if (key === 'settings' || key === 'access' || key === 'public') return isAdmin(user);
       if (key === 'maintenance') return userHasTab(user, 'maintenance');
+      if (key === 'monitoring') return userHasTab(user, 'monitoring') || isAdmin(user);
       return true;
     },
     [user],
@@ -298,6 +300,25 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
               {t('instances_tab_servers')}
             </span>
           </button>
+          {tabAllowed('monitoring') && (
+            <button
+              type="button"
+              className={
+                'sub-tabs__tab btn--with-icon' + (activeTab === 'monitoring' ? ' sub-tabs__tab--active' : '')
+              }
+              id="instanceTabMonitoringBtn"
+              role="tab"
+              aria-selected={activeTab === 'monitoring'}
+              {...{ [TAB_INDICATOR_ID_ATTR]: 'monitoring' }}
+              onClick={() => activateTab('monitoring')}
+              data-i18n="instances_tab_monitoring"
+            >
+              <span className="sub-tabs__tab-inner">
+                <AppIcon name="monitoring" size={18} />
+                {t('instances_tab_monitoring')}
+              </span>
+            </button>
+          )}
           {tabAllowed('maintenance') && (
             <button
               type="button"
@@ -581,6 +602,10 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
                 </>
               )}
             </div>
+          )}
+
+          {activeTab === 'monitoring' && (
+            <InstanceMonitoringTab instances={rows} t={t} />
           )}
 
           {activeTab === 'maintenance' && (

@@ -88,7 +88,10 @@ export class InstancesService implements OnModuleInit {
     await this.repo.save(this.cache);
     let pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
     if (!pref) {
-      pref = this.prefs.create({ key: 'instances.selected_id', value: this.selectedId });
+      pref = this.prefs.create({
+        key: 'instances.selected_id',
+        value: this.selectedId,
+      });
     } else {
       pref.value = this.selectedId;
     }
@@ -182,7 +185,7 @@ export class InstancesService implements OnModuleInit {
       blockUpdates: !!body.blockUpdates,
       experimentalUpdates: !!body.experimentalUpdates,
     });
-    
+
     if (this.config.webPanel.require_unique_instance_game_ports) {
       const port = item.port;
       if (st.items.some((x) => x.port === port)) {
@@ -220,7 +223,10 @@ export class InstancesService implements OnModuleInit {
     }
   }
 
-  async update(id: string, patch: Partial<InstanceItem>): Promise<InstanceOpResult> {
+  async update(
+    id: string,
+    patch: Partial<InstanceItem>,
+  ): Promise<InstanceOpResult> {
     const st = this.load();
     const item = st.items.find((i) => i.id === id);
     if (!item) return { ok: false, error: 'not_found' };
@@ -241,7 +247,13 @@ export class InstancesService implements OnModuleInit {
     }
     const changes: string[] = [];
     for (const key of Object.keys(patch)) {
-      if (key === 'id' || key === 'web_actor' || key === 'actor' || key.startsWith('_')) continue;
+      if (
+        key === 'id' ||
+        key === 'web_actor' ||
+        key === 'actor' ||
+        key.startsWith('_')
+      )
+        continue;
       const oldVal = (item as any)[key];
       const newVal = (patch as any)[key];
       if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
@@ -270,10 +282,10 @@ export class InstancesService implements OnModuleInit {
     const st = this.load();
     const item = st.items.find((i) => i.id === id);
     if (!item) return { ok: false, error: 'not_found' };
-    
+
     st.items = st.items.filter((i) => i.id !== id);
     if (st.selectedId === id) st.selectedId = st.items[0]?.id || '';
-    
+
     // Remove from DB and update cache
     await this.repo.delete(id);
     this.cache = st.items as GameInstance[];
@@ -282,7 +294,10 @@ export class InstancesService implements OnModuleInit {
     // Update only the selected_id preference (no need to re-save all items)
     let pref = await this.prefs.findOneBy({ key: 'instances.selected_id' });
     if (!pref) {
-      pref = this.prefs.create({ key: 'instances.selected_id', value: this.selectedId });
+      pref = this.prefs.create({
+        key: 'instances.selected_id',
+        value: this.selectedId,
+      });
     } else {
       pref.value = this.selectedId;
     }
@@ -329,7 +344,9 @@ export class InstancesService implements OnModuleInit {
     await this.stripInstanceFromMaintenanceTasks(iid);
   }
 
-  private async stripInstanceFromMaintenanceTasks(instanceId: string): Promise<void> {
+  private async stripInstanceFromMaintenanceTasks(
+    instanceId: string,
+  ): Promise<void> {
     const tasks = await this.maintenanceRepo.find();
     let changed = false;
     for (const td of tasks) {

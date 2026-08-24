@@ -29,7 +29,7 @@ export class InstanceAutostartService {
   }
 
   private async runAutostarts(): Promise<void> {
-    const items = this.instances.load().items.filter(i => i.autostartServer);
+    const items = this.instances.load().items.filter((i) => i.autostartServer);
     for (const item of items) {
       await this.maybeAutostart(item.id, 0);
     }
@@ -96,7 +96,10 @@ export class InstanceAutostartService {
           result.error === 'missing_server_settings' &&
           attempt + 1 < MAX_ATTEMPTS
         ) {
-          setTimeout(() => void this.maybeAutostart(instanceId, attempt + 1), RETRY_MS);
+          setTimeout(
+            () => void this.maybeAutostart(instanceId, attempt + 1),
+            RETRY_MS,
+          );
           return;
         }
         this.logLine(

@@ -36,29 +36,34 @@ export class LegacyMigrationService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     this.reportLines = [];
-    
+
     await this.migrateUsers();
     await this.migrateInstances();
     await this.migrateMaintenance();
     await this.migrateSettings();
-    
+
     if (this.reportLines.length > 0) {
       this.log.log(
         `\n\n` +
-        `======================================================\n` +
-        `LEGACY DATABASE MIGRATION REPORT\n` +
-        `======================================================\n` +
-        this.reportLines.join('\n') + `\n` +
-        `======================================================\n`
+          `======================================================\n` +
+          `LEGACY DATABASE MIGRATION REPORT\n` +
+          `======================================================\n` +
+          this.reportLines.join('\n') +
+          `\n` +
+          `======================================================\n`,
       );
 
       // Reload caches for services that might have started with empty DB
       try {
-        const instancesSvc = this.moduleRef.get(InstancesService, { strict: false });
+        const instancesSvc = this.moduleRef.get(InstancesService, {
+          strict: false,
+        });
         if (instancesSvc) await instancesSvc.reloadCache();
       } catch {}
       try {
-        const configSvc = this.moduleRef.get(FccConfigService, { strict: false });
+        const configSvc = this.moduleRef.get(FccConfigService, {
+          strict: false,
+        });
         if (configSvc) await configSvc.reload();
       } catch {}
     } else {
@@ -72,29 +77,38 @@ export class LegacyMigrationService implements OnModuleInit {
 
     const data = readJsonFile<{ users?: any[] }>(path, {});
     const users = Array.isArray(data.users) ? data.users : [];
-    
+
     if (users.length > 0) {
       const existing = await this.usersRepo.count();
-      if (existing <= 1) { // 1 means UsersService already seeded 'admin'
+      if (existing <= 1) {
+        // 1 means UsersService already seeded 'admin'
         if (existing === 1) await this.usersRepo.clear();
-        
+
         for (const u of users) {
           const perms = Array.isArray(u.permissions) ? u.permissions : [];
-          let role: 'administrator' | 'server_engineer' | 'moderator' = 'moderator';
+          let role: 'administrator' | 'server_engineer' | 'moderator' =
+            'moderator';
           if (perms.includes('manage_users') || perms.includes('sys_admin')) {
             role = 'administrator';
-          } else if (perms.includes('manage_server_global') || u.role === 'server_engineer') {
+          } else if (
+            perms.includes('manage_server_global') ||
+            u.role === 'server_engineer'
+          ) {
             role = 'server_engineer';
           }
           if (u.role === 'administrator') role = 'administrator';
-          
+
           const userEnt = this.usersRepo.create({
             username: u.username,
             passwordHash: u.password_hash || u.passwordHash,
             role: u.role || role,
             enabled: u.enabled !== false,
             tabs: Array.isArray(u.tabs) ? u.tabs : [],
-            instanceIds: Array.isArray(u.instance_ids) ? u.instance_ids : Array.isArray(u.instanceIds) ? u.instanceIds : [],
+            instanceIds: Array.isArray(u.instance_ids)
+              ? u.instance_ids
+              : Array.isArray(u.instanceIds)
+                ? u.instanceIds
+                : [],
           });
           await this.usersRepo.save(userEnt);
         }
@@ -108,9 +122,12 @@ export class LegacyMigrationService implements OnModuleInit {
     const path = this.paths.instancesPath;
     if (!existsSync(path)) return;
 
-    const data = readJsonFile<{ items?: any[]; selected_id?: string }>(path, {});
+    const data = readJsonFile<{ items?: any[]; selected_id?: string }>(
+      path,
+      {},
+    );
     const items = Array.isArray(data.items) ? data.items : [];
-    
+
     if (items.length > 0) {
       const existing = await this.instancesRepo.count();
       if (existing === 0) {
@@ -127,7 +144,9 @@ export class LegacyMigrationService implements OnModuleInit {
             autostartServer: !!(i.autostartServer || i.autostart_server),
             autoEnterPanel: !!(i.autoEnterPanel || i.auto_enter_panel),
             blockUpdates: !!(i.blockUpdates || i.block_updates),
-            experimentalUpdates: !!(i.experimentalUpdates || i.experimental_updates),
+            experimentalUpdates: !!(
+              i.experimentalUpdates || i.experimental_updates
+            ),
             isPublic: !!i.isPublic,
             publicDescription: i.publicDescription || '',
             publicConnectionAddress: i.publicConnectionAddress || '',
@@ -138,11 +157,16 @@ export class LegacyMigrationService implements OnModuleInit {
         this.backupFile(path);
       }
     }
-    
+
     if (data.selected_id) {
-      let pref = await this.prefsRepo.findOneBy({ key: 'instances.selected_id' });
+      let pref = await this.prefsRepo.findOneBy({
+        key: 'instances.selected_id',
+      });
       if (!pref) {
-        pref = this.prefsRepo.create({ key: 'instances.selected_id', value: String(data.selected_id) });
+        pref = this.prefsRepo.create({
+          key: 'instances.selected_id',
+          value: String(data.selected_id),
+        });
         await this.prefsRepo.save(pref);
       }
     }
@@ -152,9 +176,12 @@ export class LegacyMigrationService implements OnModuleInit {
     const path = this.paths.maintenancePath;
     if (!existsSync(path)) return;
 
-    const data = readJsonFile<{ tasks?: any[]; scheduler_tz?: string }>(path, {});
+    const data = readJsonFile<{ tasks?: any[]; scheduler_tz?: string }>(
+      path,
+      {},
+    );
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
-    
+
     if (tasks.length > 0) {
       const existing = await this.maintenanceRepo.count();
       if (existing === 0) {
@@ -173,15 +200,22 @@ export class LegacyMigrationService implements OnModuleInit {
           });
           await this.maintenanceRepo.save(taskEnt);
         }
-        this.reportLines.push(` -> Migrated ${tasks.length} maintenance task(s) to DB`);
+        this.reportLines.push(
+          ` -> Migrated ${tasks.length} maintenance task(s) to DB`,
+        );
         this.backupFile(path);
       }
     }
 
     if (data.scheduler_tz) {
-      let pref = await this.prefsRepo.findOneBy({ key: 'maintenance.scheduler_tz' });
+      let pref = await this.prefsRepo.findOneBy({
+        key: 'maintenance.scheduler_tz',
+      });
       if (!pref) {
-        pref = this.prefsRepo.create({ key: 'maintenance.scheduler_tz', value: String(data.scheduler_tz) });
+        pref = this.prefsRepo.create({
+          key: 'maintenance.scheduler_tz',
+          value: String(data.scheduler_tz),
+        });
         await this.prefsRepo.save(pref);
       }
     }
@@ -206,11 +240,12 @@ export class LegacyMigrationService implements OnModuleInit {
 
     // Collect values for env template
     const w = parsed.web_panel || {};
-    
-    // Check if APP_SECRET exists in environment, otherwise generate a secure one
-    const appSecret = process.env.APP_SECRET || randomBytes(32).toString('base64');
 
-const envTemplate = `# Factorio Control Center - Environment Configuration
+    // Check if APP_SECRET exists in environment, otherwise generate a secure one
+    const appSecret =
+      process.env.APP_SECRET || randomBytes(32).toString('base64');
+
+    const envTemplate = `# Factorio Control Center - Environment Configuration
 # ===================================================
 # IMPORTANT: By default, most of these settings are managed in the database via the UI.
 # Setting a value here acts as a strict OVERRIDE, disabling changes via the UI.
@@ -290,10 +325,7 @@ PANEL_THEME=
 DEBUG_LOGS=${w.debug_logs ?? 'false'}
 `;
 
-
-    const envKeys = [
-      'api_token', 'debug_logs', 'app_secret'
-    ];
+    const envKeys = ['api_token', 'debug_logs', 'app_secret'];
 
     for (const [section, values] of Object.entries(parsed)) {
       if (typeof values !== 'object' || values === null) continue;
@@ -308,12 +340,13 @@ DEBUG_LOGS=${w.debug_logs ?? 'false'}
         } else {
           // DB preference
           const key = `${section}.${k}`;
-          let value = typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v);
-          
+          let value =
+            typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v);
+
           if (k === 'global_token') {
-             value = encryptString(value, appSecret);
+            value = encryptString(value, appSecret);
           }
-          
+
           const prefEnt = this.prefsRepo.create({ key, value });
           await this.prefsRepo.save(prefEnt);
           dbCount++;
@@ -340,7 +373,9 @@ DEBUG_LOGS=${w.debug_logs ?? 'false'}
       const backupPath = `${originalPath}.bak`;
       if (existsSync(originalPath)) {
         renameSync(originalPath, backupPath);
-        this.reportLines.push(`    (Renamed ${originalPath.split(/[\\/]/).pop()} to .bak)`);
+        this.reportLines.push(
+          `    (Renamed ${originalPath.split(/[\\/]/).pop()} to .bak)`,
+        );
       }
     } catch (e) {
       // Ignored

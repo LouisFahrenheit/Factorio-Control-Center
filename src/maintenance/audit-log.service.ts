@@ -316,12 +316,13 @@ export class AuditLogService {
 
   private appendAuditFile(opts: AuditRecordOptions, finishedAt: string): void {
     if (!this.logRotation.logWriteAuditEnabled()) return;
-    
+
     let actor = String(opts.actor || '').trim();
     if (!actor || actor === '?' || actor === 'system') actor = 'System';
 
     const inst = String(opts.instance_name || opts.instance_id || '').trim();
-    const instPart = (inst && inst !== '?' && inst !== 'global') ? ` on ${inst}` : '';
+    const instPart =
+      inst && inst !== '?' && inst !== 'global' ? ` on ${inst}` : '';
 
     let kind = String(opts.event_kind || 'event').trim();
     if (kind === 'web_panel') kind = 'Action';
@@ -329,8 +330,11 @@ export class AuditLogService {
     else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
 
     const statusPart = opts.success === false ? ' [FAILED]' : '';
-    const err = opts.success === false && opts.error ? ` — Error: ${String(opts.error)}` : '';
-    
+    const err =
+      opts.success === false && opts.error
+        ? ` — Error: ${String(opts.error)}`
+        : '';
+
     let detail = this.auditFileDetail(opts.detail);
     if (detail.startsWith(' (') && detail.endsWith(')')) {
       detail = detail.slice(2, -1);

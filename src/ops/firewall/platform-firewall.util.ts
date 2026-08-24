@@ -25,5 +25,9 @@ export async function platformFirewallAddUdpAllow(
     return windowsAddFactorioUdpRule(programExe, port);
   if (process.platform === 'linux')
     return linuxAddFactorioUdpRule(programExe, port);
-  return { ok: false, detail: 'firewall auto-rule not supported on this OS', created: false };
+  return {
+    ok: false,
+    detail: 'firewall auto-rule not supported on this OS',
+    created: false,
+  };
 }

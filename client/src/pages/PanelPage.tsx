@@ -20,6 +20,7 @@ import { TabPanelsTransition } from '../components/TabPanelsTransition';
 import { SavesTab } from '../components/panel/SavesTab';
 import { ServerSettingsTab } from '../components/panel/ServerSettingsTab';
 import { StatsTab } from '../components/panel/StatsTab';
+import { MonitoringTab } from '../components/panel/MonitoringTab';
 import { isAdmin, useAuth, userHasTab } from '../hooks/useAuth';
 import { useAppShellReveal } from '../hooks/useAppShellReveal';
 import { useAnnouncements } from '../hooks/useAnnouncements';
@@ -244,6 +245,13 @@ export default function PanelPage() {
               />
             )}
             {activeTab === 'history' && <HistoryTab players={players} t={t} />}
+            {activeTab === 'monitoring' && (
+              <MonitoringTab
+                instanceId={selectedId}
+                serverRunning={serverRunning}
+                t={t}
+              />
+            )}
             </TabPanelsTransition>
           </div>
         </main>

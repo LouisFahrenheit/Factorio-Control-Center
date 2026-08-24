@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import { getModDetailsCached, modPackagePathsForInternalName } from '../ops/mod-display-titles.util';
+import {
+  getModDetailsCached,
+  modPackagePathsForInternalName,
+} from '../ops/mod-display-titles.util';
 import {
   Body,
   Controller,
@@ -42,7 +45,14 @@ import { LocaleService } from '../locale/locale.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { UsersService } from '../auth/users.service';
 import { SessionUser } from '../common/types';
-import { RconDto, ChatSendDto, SelectInstanceDto, ServerActionDto, AnnouncementsWriteDto, MaintenanceSetDto } from '../common/dto/api.dto';
+import {
+  RconDto,
+  ChatSendDto,
+  SelectInstanceDto,
+  ServerActionDto,
+  AnnouncementsWriteDto,
+  MaintenanceSetDto,
+} from '../common/dto/api.dto';
 
 const WEB_TLS_CFG_KEYS = [
   'tls_enabled',
@@ -144,7 +154,11 @@ export class ApiController {
   }
 
   @Get('health')
-  @ApiOperation({ summary: 'Health check', description: 'Returns panel version, OS info and Docker status. No authentication required.' })
+  @ApiOperation({
+    summary: 'Health check',
+    description:
+      'Returns panel version, OS info and Docker status. No authentication required.',
+  })
   @ApiResponse({ status: 200, description: 'Panel is healthy' })
   health() {
     const plat = process.platform;
@@ -156,7 +170,15 @@ export class ApiController {
         if (fs.existsSync('/.dockerenv')) {
           is_docker = true;
           const mounts = fs.readFileSync('/proc/mounts', 'utf8');
-          const ignorePrefixes = ['/proc', '/sys', '/dev', '/etc', '/run', '/tmp', '/var/lib/docker'];
+          const ignorePrefixes = [
+            '/proc',
+            '/sys',
+            '/dev',
+            '/etc',
+            '/run',
+            '/tmp',
+            '/var/lib/docker',
+          ];
           const lines = mounts.split('\n');
           for (const line of lines) {
             const parts = line.split(' ');
@@ -190,8 +212,16 @@ export class ApiController {
   }
 
   @Get('locale-bootstrap')
-  @ApiOperation({ summary: 'Bootstrap locale and UI config', description: 'Returns locale strings, theme, panel settings. No authentication required.' })
-  @ApiQuery({ name: 'lang', required: false, description: 'Preferred language code (e.g. en, ru, uk)' })
+  @ApiOperation({
+    summary: 'Bootstrap locale and UI config',
+    description:
+      'Returns locale strings, theme, panel settings. No authentication required.',
+  })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    description: 'Preferred language code (e.g. en, ru, uk)',
+  })
   @ApiResponse({ status: 200, description: 'Locale and bootstrap data' })
   async localeBootstrap(@Query('lang') lang?: string) {
     const loc = this.locale.getLocale(lang);
@@ -223,7 +253,11 @@ export class ApiController {
   @Get('locale')
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Get locale strings for authenticated session' })
-  @ApiQuery({ name: 'lang', required: false, description: 'Language code override' })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    description: 'Language code override',
+  })
   @ApiResponse({ status: 200, description: 'Locale data' })
   getLocale(@Query('lang') lang?: string) {
     return this.locale.getLocale(lang);
@@ -232,7 +266,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @Get('status')
   @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'Get current Factorio server status and all instance states' })
+  @ApiOperation({
+    summary: 'Get current Factorio server status and all instance states',
+  })
   @ApiResponse({ status: 200, description: 'Server status data' })
   status() {
     return this.bridge.submit('status');
@@ -240,15 +276,26 @@ export class ApiController {
 
   @Get('public-servers')
   @ApiTags('Public')
-  @ApiOperation({ summary: 'Get list of public Factorio servers', description: 'Returns servers marked as public. No authentication required. Requires public page to be enabled in settings.' })
-  @ApiHeader({ name: 'x-fcc-ui-lang', required: false, description: 'UI language code for mod title translation' })
+  @ApiOperation({
+    summary: 'Get list of public Factorio servers',
+    description:
+      'Returns servers marked as public. No authentication required. Requires public page to be enabled in settings.',
+  })
+  @ApiHeader({
+    name: 'x-fcc-ui-lang',
+    required: false,
+    description: 'UI language code for mod title translation',
+  })
   @ApiResponse({ status: 200, description: 'List of public servers' })
   @ApiResponse({ status: 403, description: 'Public page is disabled' })
   async publicServers(@Headers('x-fcc-ui-lang') uiLang?: string) {
     if (!this.config.webPanel.public_page_enabled) {
       throw new ForbiddenException('Public servers page is disabled');
     }
-    const data = (await this.bridge.submit('instances_list')) as { ok: boolean; items?: Record<string, unknown>[] };
+    const data = (await this.bridge.submit('instances_list')) as {
+      ok: boolean;
+      items?: Record<string, unknown>[];
+    };
     if (!data.ok || !Array.isArray(data.items)) {
       return { ok: false, items: [] };
     }
@@ -257,20 +304,35 @@ export class ApiController {
       .filter((it) => it.isPublic)
       .map((it) => {
         const publicMods = Array.isArray(it.publicMods)
-          ? it.publicMods.map((m: { name: string; title: string; version?: string }) => {
-              const sp = String(it.serverPath || '');
-              if (!sp) return m;
-              const modsDir = join(sp, 'mods');
-              const packages = modPackagePathsForInternalName(modsDir, m.name);
-              const details = packages.length > 0 ? getModDetailsCached(packages[0], lang) : { title: m.title, version: m.version };
-              return { name: m.name, title: details.title, version: details.version };
-            })
+          ? it.publicMods.map(
+              (m: { name: string; title: string; version?: string }) => {
+                const sp = String(it.serverPath || '');
+                if (!sp) return m;
+                const modsDir = join(sp, 'mods');
+                const packages = modPackagePathsForInternalName(
+                  modsDir,
+                  m.name,
+                );
+                const details =
+                  packages.length > 0
+                    ? getModDetailsCached(packages[0], lang)
+                    : { title: m.title, version: m.version };
+                return {
+                  name: m.name,
+                  title: details.title,
+                  version: details.version,
+                };
+              },
+            )
           : [];
         return {
           id: it.id,
           name: it.name,
           publicDescription: it.publicDescription,
-          publicConnectionAddress: it.publicConnectionAddress || this.config.webPanel.public_host || '',
+          publicConnectionAddress:
+            it.publicConnectionAddress ||
+            this.config.webPanel.public_host ||
+            '',
           status: it.status,
           ip: it.ip,
           port: it.port,
@@ -280,7 +342,9 @@ export class ApiController {
           modsCount: it.modsCount,
           publicMods,
           onlineCount: it.onlineCount,
-          publicPlayers: this.config.webPanel.public_page_show_players ? it.publicPlayers : [],
+          publicPlayers: this.config.webPanel.public_page_show_players
+            ? it.publicPlayers
+            : [],
           uptimeSeconds: it.uptimeSeconds,
           requireUserVerification: it.requireUserVerification,
           serverSettingsName: it.serverSettingsName,
@@ -295,10 +359,18 @@ export class ApiController {
 
   @Get('public-servers/:id/download-mods')
   @ApiTags('Public')
-  @ApiOperation({ summary: 'Download mods archive for a public server', description: 'Rate limited: 3 requests per 15 minutes per IP. Requires public mod downloads to be enabled.' })
+  @ApiOperation({
+    summary: 'Download mods archive for a public server',
+    description:
+      'Rate limited: 3 requests per 15 minutes per IP. Requires public mod downloads to be enabled.',
+  })
   @ApiParam({ name: 'id', description: 'Public server instance ID' })
   @ApiResponse({ status: 200, description: 'ZIP file with server mods' })
-  @ApiResponse({ status: 403, description: 'Public page or mod downloads disabled, or rate limit exceeded' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Public page or mod downloads disabled, or rate limit exceeded',
+  })
   @ApiResponse({ status: 404, description: 'Server not found or not public' })
   async downloadInstanceModsPublic(
     @Param('id') id: string,
@@ -349,7 +421,10 @@ export class ApiController {
   @ApiTags('Instances')
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'List all accessible Factorio server instances' })
-  @ApiResponse({ status: 200, description: 'List of instances with selected instance ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of instances with selected instance ID',
+  })
   async instancesList(@Req() req: Request) {
     const data = await this.bridge.submit('instances_list');
     const user = this.me(req);
@@ -459,8 +534,16 @@ export class ApiController {
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Remove an instance' })
   @ApiParam({ name: 'id', description: 'Instance ID to remove' })
-  @ApiQuery({ name: 'deleteFromDisk', required: false, description: 'Also delete server files from disk (1 or true)' })
-  @ApiQuery({ name: 'deleteData', required: false, description: 'Also delete save/mod data (1 or true)' })
+  @ApiQuery({
+    name: 'deleteFromDisk',
+    required: false,
+    description: 'Also delete server files from disk (1 or true)',
+  })
+  @ApiQuery({
+    name: 'deleteData',
+    required: false,
+    description: 'Also delete save/mod data (1 or true)',
+  })
   @ApiResponse({ status: 200, description: 'Instance removed' })
   instancesRemove(
     @Param('id') id: string,
@@ -571,8 +654,16 @@ export class ApiController {
   @ApiTags('Logs')
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Get recent Factorio server log tail' })
-  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines to return (default: 400)' })
-  @ApiQuery({ name: 'instance_id', required: false, description: 'Instance ID override' })
+  @ApiQuery({
+    name: 'tail',
+    required: false,
+    description: 'Number of lines to return (default: 400)',
+  })
+  @ApiQuery({
+    name: 'instance_id',
+    required: false,
+    description: 'Instance ID override',
+  })
   @ApiResponse({ status: 200, description: 'Log lines array' })
   logs(
     @Query('tail') tail?: string,
@@ -588,7 +679,11 @@ export class ApiController {
   @Get('config/program')
   @ApiTags('Config')
   @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'Get program settings', description: 'Non-admin users receive a filtered view without TLS and admin-only settings.' })
+  @ApiOperation({
+    summary: 'Get program settings',
+    description:
+      'Non-admin users receive a filtered view without TLS and admin-only settings.',
+  })
   @ApiResponse({ status: 200, description: 'Program settings object' })
   async programConfig(@Req() req: Request) {
     const data = await this.bridge.submit('get_program_settings');
@@ -614,9 +709,16 @@ export class ApiController {
   @Put('config/program')
   @ApiTags('Config')
   @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'Update program settings', description: 'Non-admins cannot change TLS, credentials or log rotation settings.' })
+  @ApiOperation({
+    summary: 'Update program settings',
+    description:
+      'Non-admins cannot change TLS, credentials or log rotation settings.',
+  })
   @ApiResponse({ status: 200, description: 'Settings updated' })
-  @ApiResponse({ status: 403, description: 'Attempted to change admin-only settings' })
+  @ApiResponse({
+    status: 403,
+    description: 'Attempted to change admin-only settings',
+  })
   programConfigSet(@Req() req: Request, @Body() body: Record<string, unknown>) {
     const payload = this.sanitizeProgramSettingsPayload(
       body,

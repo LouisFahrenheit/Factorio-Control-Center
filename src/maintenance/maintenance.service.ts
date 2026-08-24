@@ -99,7 +99,9 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     const tz = await this.getSchedulerTz();
-    this.maintLog(`scheduler_started tz=${effectiveSchedulerTz(tz) || 'local'}`);
+    this.maintLog(
+      `scheduler_started tz=${effectiveSchedulerTz(tz) || 'local'}`,
+    );
     this.timer = setInterval(() => void this.schedulerTick(), 10_000);
   }
 
@@ -108,7 +110,9 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async getSchedulerTz(): Promise<string> {
-    const pref = await this.prefs.findOneBy({ key: 'maintenance.scheduler_tz' });
+    const pref = await this.prefs.findOneBy({
+      key: 'maintenance.scheduler_tz',
+    });
     return pref?.value || '';
   }
 
@@ -156,7 +160,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   async get(): Promise<Record<string, unknown>> {
     const entities = await this.repo.find();
     let tasks = entities.map((s) => this.mapToTask(s));
-    
+
     const rec = this.reconcileTasksWithInstances(tasks);
     if (rec.changed) {
       await this.saveTasks(rec.tasks);
@@ -204,11 +208,11 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     }
 
     const rec = this.reconcileTasksWithInstances(tasks);
-    
+
     // Clear old tasks not in the new list
     const current = await this.repo.find();
-    const newIds = new Set(rec.tasks.map(t => t.id));
-    const toDelete = current.filter(c => !newIds.has(c.id)).map(c => c.id);
+    const newIds = new Set(rec.tasks.map((t) => t.id));
+    const toDelete = current.filter((c) => !newIds.has(c.id)).map((c) => c.id);
     if (toDelete.length > 0) {
       await this.repo.delete(toDelete);
     }
@@ -229,13 +233,15 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     return { ok: true, reports, items: reports };
   }
 
-  async runNow(kwargs: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async runNow(
+    kwargs: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     if (this.jobRunning) return { ok: false, error: 'job_running' };
     const taskId = String(kwargs.task_id || kwargs.id || '').trim();
     const current = await this.repo.findOneBy({ id: taskId });
     if (!current) return { ok: false, error: 'task_not_found' };
     const task = this.mapToTask(current);
-    
+
     const runId = `${new Date().toISOString()}-manual`;
     const initiatedBy =
       String(kwargs.actor || kwargs.web_actor || '').trim() || undefined;
@@ -319,8 +325,8 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
 
   private async schedulerTick(): Promise<void> {
     const entities = await this.repo.find();
-    let tasks = entities.map(e => this.mapToTask(e));
-    
+    let tasks = entities.map((e) => this.mapToTask(e));
+
     const rec = this.reconcileTasksWithInstances(tasks);
     if (rec.changed) {
       await this.saveTasks(rec.tasks);
@@ -726,7 +732,8 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         report.error = 'start_timeout';
       }
 
-      if (applyOneshot && report.success) await this.maybeDisableOneshotTask(taskId);
+      if (applyOneshot && report.success)
+        await this.maybeDisableOneshotTask(taskId);
       return !!report.success;
     } catch (e) {
       report.error = e instanceof Error ? e.message : String(e);

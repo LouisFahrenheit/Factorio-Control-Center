@@ -24,6 +24,7 @@ export const APP_ICON_URLS = {
   /** Force-kill server process (Material power_off) — not delete/close. */
   kill: '/assets/icons/kill.svg',
   lan: '/assets/icons/lan.svg',
+  monitoring: '/assets/icons/monitoring.svg',
   list: '/assets/icons/list.svg',
   logout: '/assets/icons/logout.svg',
   maintenance: '/assets/icons/maintenance.svg',

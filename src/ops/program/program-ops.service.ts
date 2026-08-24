@@ -48,8 +48,6 @@ const KNOWN_THEMES = [
   'cryogenics',
 ];
 
-
-
 const TLS_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -163,15 +161,9 @@ export class ProgramOpsService {
 
     if ('global_username' in kwargs || 'global_token' in kwargs) {
       const username = String(
-        kwargs.global_username ??
-          wp.global_username ??
-          '',
+        kwargs.global_username ?? wp.global_username ?? '',
       ).trim();
-      const token = String(
-        kwargs.global_token ??
-          wp.global_token ??
-          '',
-      ).trim();
+      const token = String(kwargs.global_token ?? wp.global_token ?? '').trim();
       if (!username || !token) {
         return { ok: false, error: 'factorio_credentials_incomplete' };
       }
@@ -183,7 +175,9 @@ export class ProgramOpsService {
     }
 
     if ('translate_mod_names' in kwargs) {
-      changes['shared.translate_mod_names'] = this.bool(kwargs.translate_mod_names)
+      changes['shared.translate_mod_names'] = this.bool(
+        kwargs.translate_mod_names,
+      )
         ? 'true'
         : 'false';
     }
@@ -319,13 +313,15 @@ export class ProgramOpsService {
     }
 
     const prevTls = wp.tls_enabled;
-    const nextTls = changes['web_panel.tls_enabled'] !== undefined
-      ? this.bool(changes['web_panel.tls_enabled'])
-      : wp.tls_enabled;
+    const nextTls =
+      changes['web_panel.tls_enabled'] !== undefined
+        ? this.bool(changes['web_panel.tls_enabled'])
+        : wp.tls_enabled;
 
-    const listenPortRaw = changes['web_panel.listen_port'] !== undefined
-      ? changes['web_panel.listen_port']
-      : String(wp.listen_port || '8080');
+    const listenPortRaw =
+      changes['web_panel.listen_port'] !== undefined
+        ? changes['web_panel.listen_port']
+        : String(wp.listen_port || '8080');
 
     let listenPort = parseInt(listenPortRaw, 10);
     if (!Number.isFinite(listenPort)) listenPort = 8080;
@@ -340,17 +336,22 @@ export class ProgramOpsService {
       }
     }
 
-    const tlsEnabled = changes['web_panel.tls_enabled'] !== undefined
-      ? this.bool(changes['web_panel.tls_enabled'])
-      : wp.tls_enabled;
+    const tlsEnabled =
+      changes['web_panel.tls_enabled'] !== undefined
+        ? this.bool(changes['web_panel.tls_enabled'])
+        : wp.tls_enabled;
 
     if (tlsEnabled) {
-      const cert = (changes['web_panel.tls_certfile'] !== undefined
-        ? changes['web_panel.tls_certfile']
-        : wp.tls_certfile || '').trim();
-      const key = (changes['web_panel.tls_keyfile'] !== undefined
-        ? changes['web_panel.tls_keyfile']
-        : wp.tls_keyfile || '').trim();
+      const cert = (
+        changes['web_panel.tls_certfile'] !== undefined
+          ? changes['web_panel.tls_certfile']
+          : wp.tls_certfile || ''
+      ).trim();
+      const key = (
+        changes['web_panel.tls_keyfile'] !== undefined
+          ? changes['web_panel.tls_keyfile']
+          : wp.tls_keyfile || ''
+      ).trim();
 
       if (!tlsFilesExist(cert, key, this.paths.rootDir)) {
         return { ok: false, error: 'tls_cert_or_key_missing' };
@@ -545,7 +546,6 @@ export class ProgramOpsService {
     if (updated.ok === false) return updated;
     return { ok: true, settings_changes: changes };
   }
-
 
   private availableLanguages(): string[] {
     const codes = new Set<string>();

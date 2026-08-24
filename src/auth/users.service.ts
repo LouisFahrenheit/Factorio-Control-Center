@@ -152,16 +152,15 @@ export class UsersService implements OnModuleInit {
     const users = await this.load();
     const username = String(body.username || '').trim();
     if (!username) return { ok: false, error: 'invalid_username' };
-    if (
-      users.some(
-        (u) => u.username.toLowerCase() === username.toLowerCase(),
-      )
-    )
+    if (users.some((u) => u.username.toLowerCase() === username.toLowerCase()))
       return { ok: false, error: 'user_exists' };
     const role = this.normalizeRole(body.role || 'moderator');
-    if (role === 'administrator' && !(await this.actorIsEnabledAdmin(actorUsername)))
+    if (
+      role === 'administrator' &&
+      !(await this.actorIsEnabledAdmin(actorUsername))
+    )
       return { ok: false, error: 'admin_required' };
-      
+
     const newUser = this.userRepo.create({
       username,
       passwordHash: hashPassword(body.password || ''),
@@ -170,7 +169,7 @@ export class UsersService implements OnModuleInit {
       instanceIds: body.instance_ids,
       enabled: body.enabled !== false,
     });
-    
+
     await this.userRepo.save(newUser);
     return { ok: true };
   }
@@ -220,7 +219,7 @@ export class UsersService implements OnModuleInit {
     if (body.enabled !== undefined) u.enabled = body.enabled;
 
     // Check again before save
-    const tempUsers = users.map(x => x.id === u.id ? u : x);
+    const tempUsers = users.map((x) => (x.id === u.id ? u : x));
     if (!this.hasEnabledAdministrator(tempUsers))
       return { ok: false, error: 'last_admin' };
 
@@ -248,7 +247,7 @@ export class UsersService implements OnModuleInit {
     );
     if (!this.hasEnabledAdministrator(tempUsers))
       return { ok: false, error: 'last_admin' };
-      
+
     await this.userRepo.remove(target);
     return { ok: true };
   }

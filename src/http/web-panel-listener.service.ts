@@ -63,7 +63,9 @@ export class WebPanelListenerService implements OnModuleDestroy {
       .trim()
       .toLowerCase();
 
-    this.log.debug(`Starting web listener: host=${host}, port=${port}, mode=${mode}`);
+    this.log.debug(
+      `Starting web listener: host=${host}, port=${port}, mode=${mode}`,
+    );
 
     if (customBindPortRequiresElevation(wp, port)) {
       this.lastError = 'web_panel_privileged_port_unix';

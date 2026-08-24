@@ -42,7 +42,11 @@ import type {
   MapGenSettingsJson,
   MapSettingsJson,
 } from '../ops/map-gen/map-gen-presets';
-import { CreateSaveDto, BanPlayerDto, PlayerActionDto } from '../common/dto/api.dto';
+import {
+  CreateSaveDto,
+  BanPlayerDto,
+  PlayerActionDto,
+} from '../common/dto/api.dto';
 
 @ApiTags('Server')
 @ApiBearerAuth('bearer')
@@ -85,7 +89,9 @@ export class ApiFullController {
   }
 
   @Post('server/restart')
-  @ApiOperation({ summary: 'Restart the Factorio server (full controller variant)' })
+  @ApiOperation({
+    summary: 'Restart the Factorio server (full controller variant)',
+  })
   @ApiResponse({ status: 200, description: 'Restart command dispatched' })
   serverRestart(@Req() req: Request) {
     return this.bridge.submit('restart_server', {
@@ -143,7 +149,9 @@ export class ApiFullController {
 
   @Post('server/map-gen/export-exchange')
   @ApiTags('Map')
-  @ApiOperation({ summary: 'Export map settings as a Factorio map exchange string' })
+  @ApiOperation({
+    summary: 'Export map settings as a Factorio map exchange string',
+  })
   @ApiResponse({ status: 200, description: 'Map exchange string' })
   mapGenExportExchange(
     @Body()
@@ -162,7 +170,11 @@ export class ApiFullController {
 
   @Post('server/map-gen/preview-stream')
   @ApiTags('Map')
-  @ApiOperation({ summary: 'Stream map preview frames as NDJSON', description: 'Returns a streaming NDJSON response with progressive map preview frames.' })
+  @ApiOperation({
+    summary: 'Stream map preview frames as NDJSON',
+    description:
+      'Returns a streaming NDJSON response with progressive map preview frames.',
+  })
   @ApiResponse({ status: 200, description: 'NDJSON stream of preview frames' })
   async mapGenPreviewStream(
     @Body()
@@ -242,7 +254,9 @@ export class ApiFullController {
 
   @Get('factorio/update/check')
   @ApiTags('Factorio')
-  @ApiOperation({ summary: 'Check for Factorio updates for the current instance' })
+  @ApiOperation({
+    summary: 'Check for Factorio updates for the current instance',
+  })
   @ApiResponse({ status: 200, description: 'Update availability info' })
   factorioCheck() {
     return this.bridge.submit('factorio_update_check');
@@ -251,7 +265,10 @@ export class ApiFullController {
   @Get('factorio/update/check-all')
   @ApiTags('Factorio')
   @ApiOperation({ summary: 'Check for Factorio updates across all instances' })
-  @ApiResponse({ status: 200, description: 'Update availability info for all instances' })
+  @ApiResponse({
+    status: 200,
+    description: 'Update availability info for all instances',
+  })
   factorioCheckAll() {
     return this.bridge.submit('factorio_update_check_all');
   }
@@ -321,7 +338,11 @@ export class ApiFullController {
       type: 'object',
       properties: {
         file: { type: 'string', format: 'binary' },
-        kind: { type: 'string', enum: ['cert', 'key'], description: 'File type' },
+        kind: {
+          type: 'string',
+          enum: ['cert', 'key'],
+          description: 'File type',
+        },
       },
     },
   })
@@ -362,7 +383,10 @@ export class ApiFullController {
   @Get('saves/:name/download')
   @ApiTags('Saves')
   @ApiOperation({ summary: 'Download a save file' })
-  @ApiParam({ name: 'name', description: 'Save file name (without .zip extension)' })
+  @ApiParam({
+    name: 'name',
+    description: 'Save file name (without .zip extension)',
+  })
   @ApiResponse({ status: 200, description: 'ZIP file download' })
   @ApiResponse({ status: 404, description: 'Save not found' })
   async saveDownload(@Param('name') name: string, @Res() res: Response) {
@@ -377,7 +401,10 @@ export class ApiFullController {
   @ApiTags('Saves')
   @ApiOperation({ summary: 'Inspect a save file for metadata and mod list' })
   @ApiParam({ name: 'name', description: 'Save file name' })
-  @ApiResponse({ status: 200, description: 'Save metadata including mods and version' })
+  @ApiResponse({
+    status: 200,
+    description: 'Save metadata including mods and version',
+  })
   saveInspect(@Param('name') name: string, @Req() req: Request) {
     const lang = String(req.headers['x-fcc-ui-lang'] || '').slice(0, 12);
     return this.bridge.submit('inspect_save', { name, ui_lang: lang });
@@ -443,7 +470,11 @@ export class ApiFullController {
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary', description: 'Save .zip file' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Save .zip file',
+        },
         filename: { type: 'string', description: 'Override file name' },
       },
     },
@@ -479,7 +510,9 @@ export class ApiFullController {
 
   @Post('files/server-settings/create-from-example')
   @ApiTags('Files')
-  @ApiOperation({ summary: 'Create server-settings.json from the Factorio example template' })
+  @ApiOperation({
+    summary: 'Create server-settings.json from the Factorio example template',
+  })
   @ApiResponse({ status: 200, description: 'server-settings.json created' })
   serverSettingsExample(@Req() req: Request) {
     return this.bridge.submit('create_server_settings_from_example', {
@@ -497,7 +530,9 @@ export class ApiFullController {
 
   @Put('mods/prefs')
   @ApiTags('Mods')
-  @ApiOperation({ summary: 'Set mod manager preferences (e.g. remove old zips)' })
+  @ApiOperation({
+    summary: 'Set mod manager preferences (e.g. remove old zips)',
+  })
   @ApiResponse({ status: 200, description: 'Preferences saved' })
   modsPrefs(@Req() req: Request, @Body() body: { remove_old_zips?: boolean }) {
     return this.bridge.submit('mods_set_prefs', {
@@ -603,8 +638,15 @@ export class ApiFullController {
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary', description: 'Mod .zip or mod-settings.dat file' },
-        confirm_replace: { type: 'string', description: 'Set to "1" to replace existing mod' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Mod .zip or mod-settings.dat file',
+        },
+        confirm_replace: {
+          type: 'string',
+          description: 'Set to "1" to replace existing mod',
+        },
       },
     },
   })
@@ -659,13 +701,19 @@ export class ApiFullController {
 
   @Post('mods/import-save/preview')
   @ApiTags('Mods')
-  @ApiOperation({ summary: 'Preview which mods are used in a save file (upload to inspect)' })
+  @ApiOperation({
+    summary: 'Preview which mods are used in a save file (upload to inspect)',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary', description: 'Factorio save .zip file' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Factorio save .zip file',
+        },
       },
     },
   })
@@ -725,7 +773,9 @@ export class ApiFullController {
 
   @Post('mods/install-plan')
   @ApiTags('Mods')
-  @ApiOperation({ summary: 'Get install plan for a single mod (dependencies, conflicts)' })
+  @ApiOperation({
+    summary: 'Get install plan for a single mod (dependencies, conflicts)',
+  })
   @ApiResponse({ status: 200, description: 'Install plan' })
   modsInstallPlan(@Body() body: { mod?: string }) {
     return this.bridge.submit('mods_install_plan', { mod: body.mod });
@@ -761,7 +811,9 @@ export class ApiFullController {
 
   @Post('mods/job/start-install-save')
   @ApiTags('Mods')
-  @ApiOperation({ summary: 'Start a mod install-many job (from save mod list)' })
+  @ApiOperation({
+    summary: 'Start a mod install-many job (from save mod list)',
+  })
   @ApiResponse({ status: 200, description: 'Install-save job started' })
   modsJobInstallSave(
     @Body() body: Record<string, unknown>,
@@ -801,7 +853,10 @@ export class ApiFullController {
   @Get('mods/job/status')
   @ApiTags('Mods')
   @ApiOperation({ summary: 'Get current mod job status' })
-  @ApiResponse({ status: 200, description: 'Job status (running, done, error, idle)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Job status (running, done, error, idle)',
+  })
   modsJobStatus() {
     return this.bridge.submit('mods_job_status');
   }
@@ -944,9 +999,17 @@ export class ApiFullController {
   @Get('logs/history')
   @ApiTags('Logs')
   @ApiOperation({ summary: 'Get historical Factorio server log from file' })
-  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines (default varies)' })
+  @ApiQuery({
+    name: 'tail',
+    required: false,
+    description: 'Number of lines (default varies)',
+  })
   @ApiQuery({ name: 'instance_id', required: false })
-  @ApiQuery({ name: 'full', required: false, description: 'Return full log (1 or true)' })
+  @ApiQuery({
+    name: 'full',
+    required: false,
+    description: 'Return full log (1 or true)',
+  })
   @ApiResponse({ status: 200, description: 'Log history lines' })
   logsHistory(
     @Query('tail') tail?: string,
@@ -962,10 +1025,20 @@ export class ApiFullController {
 
   @Get('logs/program')
   @ApiTags('Logs')
-  @ApiOperation({ summary: 'Get FCC panel program log (web, audit, maintenance)' })
-  @ApiQuery({ name: 'kind', required: false, description: 'Log kind: web, audit, maintenance' })
+  @ApiOperation({
+    summary: 'Get FCC panel program log (web, audit, maintenance)',
+  })
+  @ApiQuery({
+    name: 'kind',
+    required: false,
+    description: 'Log kind: web, audit, maintenance',
+  })
   @ApiQuery({ name: 'tail', required: false })
-  @ApiQuery({ name: 'full', required: false, description: 'Return full log (1 or true)' })
+  @ApiQuery({
+    name: 'full',
+    required: false,
+    description: 'Return full log (1 or true)',
+  })
   @ApiResponse({ status: 200, description: 'Panel log lines' })
   logsProgram(
     @Query('kind') kind?: string,
@@ -982,7 +1055,11 @@ export class ApiFullController {
   @Get('chat-log')
   @ApiTags('Logs')
   @ApiOperation({ summary: 'Get recent in-game chat log' })
-  @ApiQuery({ name: 'tail', required: false, description: 'Number of lines (default: 500)' })
+  @ApiQuery({
+    name: 'tail',
+    required: false,
+    description: 'Number of lines (default: 500)',
+  })
   @ApiResponse({ status: 200, description: 'Chat log lines' })
   chatLog(@Query('tail') tail?: string) {
     return this.bridge.submit('chat_log_tail', {

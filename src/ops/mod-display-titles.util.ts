@@ -73,20 +73,23 @@ function listCfgFilesRecursive(dir: string): string[] {
   return out.sort();
 }
 
-const modsDirCache = new Map<string, { mtime: number; entries: { name: string; isDir: boolean }[] }>();
+const modsDirCache = new Map<
+  string,
+  { mtime: number; entries: { name: string; isDir: boolean }[] }
+>();
 
 export function modPackagePathsForInternalName(
   modsDir: string,
   modInternal: string,
 ): string[] {
   if (!existsSync(modsDir)) return [];
-  
+
   const stat = statSync(modsDir);
   let cached = modsDirCache.get(modsDir);
   if (!cached || cached.mtime !== stat.mtimeMs) {
-    const entries = readdirSync(modsDir, { withFileTypes: true }).map(e => ({
+    const entries = readdirSync(modsDir, { withFileTypes: true }).map((e) => ({
       name: e.name,
-      isDir: e.isDirectory()
+      isDir: e.isDirectory(),
     }));
     cached = { mtime: stat.mtimeMs, entries };
     modsDirCache.set(modsDir, cached);
@@ -113,7 +116,7 @@ function mergeDataPacksLocalePass(
 ): void {
   const key = `${dataDir}::${lc}`;
   let cached = dataPacksLocaleCache.get(key);
-  
+
   if (!cached) {
     cached = {};
     if (existsSync(dataDir)) {
@@ -151,7 +154,7 @@ function mergeDataPacksLocalePass(
   }
 }
 
-const admZipCache = new Map<string, { mtime: number, zip: AdmZip }>();
+const admZipCache = new Map<string, { mtime: number; zip: AdmZip }>();
 
 function getAdmZipCached(zipPath: string): AdmZip | null {
   try {
@@ -316,7 +319,7 @@ function loadModListLocales(
       .toLowerCase() || 'en';
   mergeDataPacksLocalePass(dataDir, 'en', active);
   for (const mod of modNames) mergeLocaleOneMod(modsDir, mod, 'en', active);
-  
+
   const en: LocaleSections = {};
   for (const [k, v] of Object.entries(active)) {
     const proto = Object.getPrototypeOf(v);
@@ -324,7 +327,7 @@ function loadModListLocales(
     Object.assign(clone, v);
     en[k] = clone;
   }
-  
+
   if (lang !== 'en') {
     mergeDataPacksLocalePass(dataDir, lang, active);
     for (const mod of modNames) mergeLocaleOneMod(modsDir, mod, lang, active);
@@ -469,16 +472,24 @@ function getVersionFromInfo(pkgPath: string): string {
   return idx >= 0 ? base.slice(idx + 1) : '';
 }
 
-const modDetailsLangCache = new Map<string, Map<string, { mtime: number; title: string; version: string }>>();
+const modDetailsLangCache = new Map<
+  string,
+  Map<string, { mtime: number; title: string; version: string }>
+>();
 
-export function getModDetailsCached(pkgPath: string, lang: string): { title: string; version: string } {
-  const lc = String(lang || 'en').trim().toLowerCase();
+export function getModDetailsCached(
+  pkgPath: string,
+  lang: string,
+): { title: string; version: string } {
+  const lc = String(lang || 'en')
+    .trim()
+    .toLowerCase();
   let langMap = modDetailsLangCache.get(lc);
   if (!langMap) {
     langMap = new Map();
     modDetailsLangCache.set(lc, langMap);
   }
-  
+
   try {
     const stat = statSync(pkgPath);
     const mtime = stat.mtimeMs;
@@ -486,27 +497,18 @@ export function getModDetailsCached(pkgPath: string, lang: string): { title: str
     if (cached && cached.mtime === mtime) {
       return { title: cached.title, version: cached.version };
     }
-    
+
     const folder = dirname(pkgPath);
-    const name = basename(pkgPath).replace(/\.zip$/i, '').split('_')[0];
+    const name = basename(pkgPath)
+      .replace(/\.zip$/i, '')
+      .split('_')[0];
     const dataDir = join(dirname(folder), 'data');
-    
-    const { active, en } = loadModListLocales(
-      folder,
-      dataDir,
-      [name],
-      lc,
-    );
+
+    const { active, en } = loadModListLocales(folder, dataDir, [name], lc);
     const sections = lc !== 'en' ? active : en;
     const cache = new Map<string, string>();
-    const title = resolveModRowTitle(
-      name,
-      folder,
-      dataDir,
-      sections,
-      cache,
-    );
-    
+    const title = resolveModRowTitle(name, folder, dataDir, sections, cache);
+
     const version = getVersionFromInfo(pkgPath);
     const finalTitle = title || name;
     langMap.set(pkgPath, { mtime, title: finalTitle, version });

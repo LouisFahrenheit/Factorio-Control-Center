@@ -24,7 +24,8 @@ export type PanelTabKey =
   | 'modpacks'
   | 'commands'
   | 'stats'
-  | 'history';
+  | 'history'
+  | 'monitoring';
 
 export const PANEL_TABS: { key: PanelTabKey; perm: string; i18n: string; btnId: string; panelId: string }[] = [
   { key: 'main', perm: 'control', i18n: 'web_tab_main', btnId: 'tabBtnMain', panelId: 'tabPanelMain' },
@@ -52,6 +53,13 @@ export const PANEL_TABS: { key: PanelTabKey; perm: string; i18n: string; btnId: 
     i18n: 'players_tab_history',
     btnId: 'tabBtnHistory',
     panelId: 'tabPanelHistory',
+  },
+  {
+    key: 'monitoring',
+    perm: 'monitoring',
+    i18n: 'web_tab_monitoring',
+    btnId: 'tabBtnMonitoring',
+    panelId: 'tabPanelMonitoring',
   },
 ];
 

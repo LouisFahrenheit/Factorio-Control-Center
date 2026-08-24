@@ -42,7 +42,8 @@ export async function windowsAddFactorioUdpRule(
   port: number,
 ): Promise<{ ok: boolean; detail: string; created: boolean }> {
   const prog = resolve(String(programExe || '').trim());
-  if (port < 1 || port > 65535) return { ok: false, detail: 'invalid port', created: false };
+  if (port < 1 || port > 65535)
+    return { ok: false, detail: 'invalid port', created: false };
 
   const ruleName = `FCC-Server-UDP-${port}`;
   if (await windowsAdvfirewallRuleExists(ruleName))
@@ -78,7 +79,8 @@ export async function windowsAddFactorioUdpRule(
     if (await windowsAdvfirewallRuleExists(ruleName))
       return { ok: true, detail: '', created: true };
     const msg = e instanceof Error ? e.message : String(e);
-    if (/timeout/i.test(msg)) return { ok: false, detail: 'timeout', created: false };
+    if (/timeout/i.test(msg))
+      return { ok: false, detail: 'timeout', created: false };
     return { ok: false, detail: msg, created: false };
   }
 }

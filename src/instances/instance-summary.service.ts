@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { getModDetailsCached, modPackagePathsForInternalName } from '../ops/mod-display-titles.util';
+import {
+  getModDetailsCached,
+  modPackagePathsForInternalName,
+} from '../ops/mod-display-titles.util';
 import { readJsonFile } from '../common/json-store';
 import { InstanceItem } from '../common/types';
 import { PathsService } from '../config/paths.service';
@@ -183,9 +186,11 @@ export class InstanceSummaryService {
       const vis = (data.visibility as Record<string, unknown>) || {};
       const details = {
         name: typeof data.name === 'string' ? data.name : '',
-        description: typeof data.description === 'string' ? data.description : '',
+        description:
+          typeof data.description === 'string' ? data.description : '',
         auto_pause: data.auto_pause !== false,
-        max_players: typeof data.max_players === 'number' ? data.max_players : 0,
+        max_players:
+          typeof data.max_players === 'number' ? data.max_players : 0,
         afk_autokick_interval:
           typeof data.afk_autokick_interval === 'number'
             ? data.afk_autokick_interval
@@ -201,7 +206,10 @@ export class InstanceSummaryService {
     }
   }
 
-  private publicModsList(serverPath: string, enabledMods: string[]): { name: string; title: string; version?: string }[] {
+  private publicModsList(
+    serverPath: string,
+    enabledMods: string[],
+  ): { name: string; title: string; version?: string }[] {
     const names = this.publicModNames(enabledMods);
     if (!names.length) return [];
     const modsDir = join(serverPath, 'mods');

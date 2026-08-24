@@ -63,6 +63,12 @@ import { FirewallService } from './ops/firewall/firewall.service';
 import { EventsGateway } from './ws/events.gateway';
 import { LegacyMigrationService } from './config/legacy-migration.service';
 
+// Metrics
+import { InstanceRawMetric } from './metrics/entities/instance-raw-metric.entity';
+import { InstanceHourlyMetric } from './metrics/entities/instance-hourly-metric.entity';
+import { MetricsCollectorService } from './metrics/metrics-collector.service';
+import { MetricsController } from './metrics/metrics.controller';
+
 const fccRoot = resolve(trimPath(process.env.FCC_ROOT_DIR) || process.cwd());
 const publicAssets = join(fccRoot, 'public', 'assets');
 const reactAssets = join(fccRoot, 'client', 'dist', 'vite-assets');
@@ -75,12 +81,28 @@ const clientDist = join(fccRoot, 'client', 'dist');
       envFilePath: join(fccRoot, '.env'),
     }),
     TypeOrmModule.forRoot({
-      type: 'better-sqlite3' as any,
+      type: 'better-sqlite3',
       database: join(fccRoot, 'data', 'fcc_database.sqlite'),
       entities: [User, SystemPreference, GameInstance, MaintenanceSchedule],
       synchronize: true, // Auto-create tables (good for this use-case, but use migrations in prod ideally)
     }),
-    TypeOrmModule.forFeature([User, SystemPreference, GameInstance, MaintenanceSchedule]),
+    TypeOrmModule.forRoot({
+      name: 'metricsConnection',
+      type: 'better-sqlite3',
+      database: join(fccRoot, 'data', 'fcc_metrics.sqlite'),
+      entities: [InstanceRawMetric, InstanceHourlyMetric],
+      synchronize: true,
+    }),
+    TypeOrmModule.forFeature([
+      User,
+      SystemPreference,
+      GameInstance,
+      MaintenanceSchedule,
+    ]),
+    TypeOrmModule.forFeature(
+      [InstanceRawMetric, InstanceHourlyMetric],
+      'metricsConnection',
+    ),
     // Static images (map-gen, server-list, …) at /assets/*
     ServeStaticModule.forRoot({
       rootPath: publicAssets,
@@ -116,6 +138,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     ApiFullController,
     AuthController,
     FallbackController,
+    MetricsController,
   ],
   providers: [
     PathsService,
@@ -162,6 +185,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     AuthGuard,
     EventsGateway,
     LegacyMigrationService,
+    MetricsCollectorService,
     {
       provide: APP_INTERCEPTOR,
       useClass: InstanceContextInterceptor,

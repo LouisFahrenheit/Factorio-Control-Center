@@ -1,4 +1,9 @@
-import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'crypto';
+import {
+  randomBytes,
+  createCipheriv,
+  createDecipheriv,
+  scryptSync,
+} from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // GCM recommended
@@ -23,11 +28,11 @@ export function encryptString(plaintext: string, secret: string): string {
   const key = deriveKey(secret);
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, key, iv);
-  
+
   let encrypted = cipher.update(plaintext, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   const authTag = cipher.getAuthTag().toString('hex');
-  
+
   return `enc:${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
 
@@ -50,13 +55,13 @@ export function decryptString(encryptedText: string, secret: string): string {
     const key = deriveKey(secret);
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
-    
+
     const decipher = createDecipheriv(ALGORITHM, key, iv);
     decipher.setAuthTag(authTag);
-    
+
     let decrypted = decipher.update(ciphertextHex, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   } catch (error) {
     // Return empty string on decryption failure to avoid crashing the application

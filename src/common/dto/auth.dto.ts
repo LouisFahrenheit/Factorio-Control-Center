@@ -21,10 +21,19 @@ export class CreateUserDto {
   @ApiProperty({ example: true })
   enabled: boolean;
 
-  @ApiProperty({ example: ['servers', 'saves'], required: false, type: [String] })
+  @ApiProperty({
+    example: ['servers', 'saves'],
+    required: false,
+    type: [String],
+  })
   tabs?: string[];
 
-  @ApiProperty({ example: ['*'], required: false, type: [String], description: 'Instance IDs the user can access. Use ["*"] for all.' })
+  @ApiProperty({
+    example: ['*'],
+    required: false,
+    type: [String],
+    description: 'Instance IDs the user can access. Use ["*"] for all.',
+  })
   instance_ids?: string[];
 }
 

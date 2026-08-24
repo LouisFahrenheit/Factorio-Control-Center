@@ -19,6 +19,7 @@ const PANEL_TAB_ICONS: Record<PanelTabKey, AppIconName> = {
   commands: 'terminal',
   stats: 'users',
   history: 'history',
+  monitoring: 'monitoring',
 };
 
 interface PanelTabBarProps {

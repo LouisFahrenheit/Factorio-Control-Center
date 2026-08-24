@@ -22,9 +22,7 @@ function instanceRoom(instanceId: string): string {
   cors: { origin: '*' },
   // Path is the default `/socket.io`
 })
-export class EventsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly log = new Logger(EventsGateway.name);
 
   @WebSocketServer()

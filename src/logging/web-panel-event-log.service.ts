@@ -68,14 +68,26 @@ export class WebPanelEventLogService {
   ): void {
     const user = String(username || '').trim() || '?';
     let message = '';
-    
-    switch(kind) {
-      case 'login': message = `Logged in`; break;
-      case 'login_failed': message = `Login failed`; break;
-      case 'logout': message = `Logged out`; break;
-      case 'user_create': message = `Created user account for ${detail || '?'}`; break;
-      case 'user_update': message = `Updated user account ${detail || '?'}`; break;
-      case 'user_delete': message = `Deleted user account ${detail || '?'}`; break;
+
+    switch (kind) {
+      case 'login':
+        message = `Logged in`;
+        break;
+      case 'login_failed':
+        message = `Login failed`;
+        break;
+      case 'logout':
+        message = `Logged out`;
+        break;
+      case 'user_create':
+        message = `Created user account for ${detail || '?'}`;
+        break;
+      case 'user_update':
+        message = `Updated user account ${detail || '?'}`;
+        break;
+      case 'user_delete':
+        message = `Deleted user account ${detail || '?'}`;
+        break;
     }
 
     this.audit.record({
@@ -169,13 +181,19 @@ export class WebPanelEventLogService {
         message = `Updated public page settings`;
         break;
       case 'maintenance_run_now':
-        this.writeToMaintenanceLog(`${actor}: manually triggered maintenance run [${instId || 'global'}]`);
+        this.writeToMaintenanceLog(
+          `${actor}: manually triggered maintenance run [${instId || 'global'}]`,
+        );
         return;
       case 'maintenance_set':
-        this.writeToMaintenanceLog(`${actor}: updated maintenance tasks [${instId || 'global'}]`);
+        this.writeToMaintenanceLog(
+          `${actor}: updated maintenance tasks [${instId || 'global'}]`,
+        );
         return;
       case 'maintenance_clear_manual':
-        this.writeToMaintenanceLog(`${actor}: cleared manual maintenance session [${instId || 'global'}]`);
+        this.writeToMaintenanceLog(
+          `${actor}: cleared manual maintenance session [${instId || 'global'}]`,
+        );
         return;
       case 'restart_web_panel':
         message = `Restarted web panel`;
@@ -305,4 +323,3 @@ function truncate(text: string, max: number): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max - 1)}…`;
 }
-
