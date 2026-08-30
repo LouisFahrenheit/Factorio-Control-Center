@@ -59,7 +59,6 @@ const WEB_TLS_CFG_KEYS = [
   'tls_certfile',
   'tls_keyfile',
   'tls_key_password',
-  'port_mode',
   'public_host',
   'public_port',
 ] as const;

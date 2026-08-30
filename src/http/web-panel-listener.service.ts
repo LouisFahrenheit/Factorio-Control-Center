@@ -59,12 +59,9 @@ export class WebPanelListenerService implements OnModuleDestroy {
     const wp = this.config.webPanel;
     const host = trimHost(wp.listen_host);
     const port = resolveBindPort(wp);
-    const mode = String(wp.port_mode || 'custom')
-      .trim()
-      .toLowerCase();
 
     this.log.debug(
-      `Starting web listener: host=${host}, port=${port}, mode=${mode}`,
+      `Starting web listener: host=${host}, port=${port}`,
     );
 
     if (customBindPortRequiresElevation(wp, port)) {
@@ -118,7 +115,7 @@ export class WebPanelListenerService implements OnModuleDestroy {
     const scheme = tlsOptions ? 'https' : 'http';
     const urlHost = resolveDisplayHost(wp);
     const urlPort = resolveDisplayPort(wp, port);
-    const started = `Web panel listening on ${scheme}://${urlHost}:${urlPort}/ (bind ${host}:${port}, mode=${mode})`;
+    const started = `Web panel listening on ${scheme}://${urlHost}:${urlPort}/ (bind ${host}:${port})`;
     this.log.log(started);
     this.webLog.logEvent('web_panel', started);
   }

@@ -8,7 +8,6 @@ export interface WebPanelRuntimeSnapshot {
   tlsCertfile: string;
   tlsKeyfile: string;
   tlsKeyPassword: string;
-  portMode: string;
 }
 
 /** Unix non-root cannot bind ports below 1024 without capabilities. */
@@ -22,17 +21,8 @@ export function webPanelTlsEffective(wp: WebPanelIni): boolean {
   return !!wp.tls_enabled;
 }
 
-export function resolveAutoListenPort(wp: WebPanelIni): number {
-  if (webPanelTlsEffective(wp)) return 8443;
-  return 8080;
-}
-
-/** Effective TCP bind port from [web_panel] (port_mode auto vs custom). */
+/** Effective TCP bind port from [web_panel]. */
 export function resolveBindPort(wp: WebPanelIni): number {
-  const mode = String(wp.port_mode || 'custom')
-    .trim()
-    .toLowerCase();
-  if (mode === 'auto') return resolveAutoListenPort(wp);
   return trimPort(wp.listen_port, 8080);
 }
 
@@ -62,9 +52,6 @@ export function captureRuntimeSnapshot(
     tlsCertfile: String(wp.tls_certfile || '').trim(),
     tlsKeyfile: String(wp.tls_keyfile || '').trim(),
     tlsKeyPassword: String(wp.tls_key_password || ''),
-    portMode: String(wp.port_mode || 'custom')
-      .trim()
-      .toLowerCase(),
   };
 }
 
@@ -79,8 +66,7 @@ export function runtimeNeedsRestart(
     prev.tlsEnabled !== next.tlsEnabled ||
     prev.tlsCertfile !== next.tlsCertfile ||
     prev.tlsKeyfile !== next.tlsKeyfile ||
-    prev.tlsKeyPassword !== next.tlsKeyPassword ||
-    prev.portMode !== next.portMode
+    prev.tlsKeyPassword !== next.tlsKeyPassword
   );
 }
 
@@ -88,8 +74,5 @@ export function customBindPortRequiresElevation(
   wp: WebPanelIni,
   bindPort: number,
 ): boolean {
-  const mode = String(wp.port_mode || 'custom')
-    .trim()
-    .toLowerCase();
-  return mode !== 'auto' && unixNonRootNoPrivilegedBind() && bindPort < 1024;
+  return unixNonRootNoPrivilegedBind() && bindPort < 1024;
 }

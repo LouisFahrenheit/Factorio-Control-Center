@@ -66,20 +66,16 @@ function main() {
   }
 
   // 2. Fall back to fcc-settings.ini (legacy/DB migration)
-  if (!existsSync(iniPath)) {
-    // Match FccConfigService defaults when fcc-settings.ini is missing (port_mode=auto).
-    console.log(String(resolveAutoPort(false)));
-    return;
+  if (existsSync(iniPath)) {
+    const wp = parseIni(readFileSync(iniPath, 'utf-8')).web_panel || {};
+    const n = parseInt(String(wp.listen_port || '8080'), 10);
+    if (Number.isFinite(n) && n >= 1 && n <= 65535) {
+      console.log(String(n));
+      return;
+    }
   }
-  const wp = parseIni(readFileSync(iniPath, 'utf-8')).web_panel || {};
-  const mode = String(wp.port_mode || 'auto').toLowerCase();
-  const tls = bool(wp.tls_enabled);
-  if (mode === 'auto') {
-    console.log(String(resolveAutoPort(tls)));
-    return;
-  }
-  const n = parseInt(String(wp.listen_port || '8080'), 10);
-  console.log(String(Number.isFinite(n) && n >= 1 && n <= 65535 ? n : 8080));
+
+  console.log('8080');
 }
 
 main();

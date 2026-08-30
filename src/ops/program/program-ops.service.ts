@@ -304,14 +304,6 @@ export class ProgramOpsService {
       }
     }
 
-    if (
-      'tls_enabled' in kwargs ||
-      'listen_host' in kwargs ||
-      'listen_port' in kwargs
-    ) {
-      changes['web_panel.port_mode'] = 'custom';
-    }
-
     const prevTls = wp.tls_enabled;
     const nextTls =
       changes['web_panel.tls_enabled'] !== undefined

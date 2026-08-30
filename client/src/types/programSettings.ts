@@ -17,7 +17,6 @@ export interface ProgramSettings {
   tls_certfile?: string;
   tls_keyfile?: string;
   tls_key_password?: string;
-  port_mode?: string;
   listen_host?: string;
   listen_port?: number;
   public_host?: string;
