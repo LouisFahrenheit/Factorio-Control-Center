@@ -264,10 +264,6 @@ HOST=
 # Default: 8080
 PORT=
 
-# Port assignment mode (auto / custom).
-# Default: auto
-PORT_MODE=
-
 # ---------------------------------------------------
 # 2. Public Access
 # ---------------------------------------------------

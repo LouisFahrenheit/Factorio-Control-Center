@@ -1270,7 +1270,7 @@
   "web_panel_tls_key_label": "TLS private key file",
   "web_panel_tls_key_password_label": "Key password",
   "web_panel_tls_files_not_found_msg": "Certificate or key file was not found at the given path.",
-  "web_panel_privileged_port_unix": "[web_panel] Port {} is privileged on Unix/Linux (needs root or CAP_NET_BIND_SERVICE). Use port ≥1024 in Custom mode, or Port mode Auto for 8080/8443.",
+  "web_panel_privileged_port_unix": "[web_panel] Port {} is privileged on Unix/Linux (requires root or CAP_NET_BIND_SERVICE). Please specify a port ≥1024.",
   "web_login_title": "Authorization Required",
   "web_user_label": "User",
   "web_password_label": "Password",

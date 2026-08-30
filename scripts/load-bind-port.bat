@@ -1,5 +1,5 @@
 @echo off
-rem Sets NEST_PORT, PORT_MODE, PANEL_URL, NEST_URL from fcc-settings.ini (via read-bind-port.mjs).
+rem Sets NEST_PORT, PANEL_URL, NEST_URL from fcc-settings.ini (via read-bind-port.mjs).
 set "NEST_PORT=8080"
 if defined FCC_DIR set "FCC_ROOT_DIR=%FCC_DIR%"
 if not defined FCC_ROOT_DIR set "FCC_ROOT_DIR=%~dp0.."

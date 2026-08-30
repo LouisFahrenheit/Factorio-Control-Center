@@ -21,8 +21,7 @@
 
 <p align="center">
   <a href="README.md"><img src="docs/images/badge_en.svg" alt="English"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a> &nbsp;
-  <img src="docs/images/badge_ai_ru.svg" alt="Использован ИИ">
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a>
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
@@ -154,11 +153,10 @@ sudo loginctl enable-linger $USER
 **Firewall:** UDP-порт Factorio открывается автоматически только от admin/root - иначе настройте вручную.
 *(Примечание для Docker: Внутри контейнера эта функция не работает из-за изоляции. Однако Docker автоматически открывает на хосте те порты, которые указаны в блоке `ports` файла `docker-compose.yml`. Просто убедитесь, что ваши серверы используют порты из этого диапазона.)*
 
-**Порты панели:** **Настройки → Режим порта**
-
-- **Авто** - **8080** (HTTP) или **8443** (HTTPS)
-- **Пользовательский** - порт в настройках или переопределен в файле `.env` (`PORT=…`)
-  *(Примечание: при использовании Docker не меняйте порт в настройках панели! Изменяйте маппинг портов в файле `docker-compose.yml`)*
+**Порт панели:**
+- По умолчанию: **8080** (HTTP) или **8443** (HTTPS)
+- Настраивается в настройках панели или переопределяется в файле `.env` (`PORT=…`)
+*(Примечание для Docker: не меняйте порт в настройках панели, вместо этого измените маппинг портов в `docker-compose.yml`).*
 
 Адрес для входа показывается в меню запуска.
 

@@ -1271,7 +1271,7 @@
   "web_panel_tls_key_label": "Файл закрытого ключа TLS",
   "web_panel_tls_key_password_label": "Пароль ключа",
   "web_panel_tls_files_not_found_msg": "Файл сертификата или ключа по указанному пути не найден.",
-  "web_panel_privileged_port_unix": "[web_panel] Порт {} привилегированный в Unix/Linux (нужен root или CAP_NET_BIND_SERVICE). Укажите порт ≥1024 в режиме «Пользовательский» или режим «Авто» для 8080/8443.",
+  "web_panel_privileged_port_unix": "[web_panel] Порт {} является привилегированным в Unix/Linux (требуются права root или CAP_NET_BIND_SERVICE). Укажите порт ≥1024.",
   "web_login_title": "Требуется авторизация",
   "web_user_label": "Пользователь",
   "web_password_label": "Пароль",

@@ -21,8 +21,7 @@ your PC or VPS - add servers and manage everything from one place.
 
 <p align="center">
   <a href="README.ru.md"><img src="docs/images/badge_ru.svg" alt="Русский"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a> &nbsp;
-  <img src="docs/images/badge_ai.svg" alt="AI Assisted">
+  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a>
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
@@ -156,11 +155,10 @@ sudo loginctl enable-linger $USER
 **Firewall:** Factorio's UDP port opens automatically only when running as admin/root - otherwise set it up yourself.
 *(Note for Docker: This built-in function does not work inside containers due to network isolation. However, Docker automatically manages the host firewall and opens the ports specified in the `ports` section of your `docker-compose.yml`. Just ensure your game servers use ports from this mapped range.)*
 
-**Panel ports:**
-
-- **Auto** - **8080** (HTTP) or **8443** (HTTPS)
-- **Custom** - your port in settings or overridden via `.env` file (`PORT=…`)
-  *(Note: If using Docker, do not change the port in the panel settings. Instead, change the port mapping in `docker-compose.yml`).*
+**Panel port:**
+- Default: **8080** (HTTP) or **8443** (HTTPS)
+- Can be changed in panel settings or overridden via `.env` file (`PORT=…`)
+*(Note: If using Docker, do not change the port in the panel settings. Instead, change the port mapping in `docker-compose.yml`).*
 
 The start menu shows the URL to open.
 
