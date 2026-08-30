@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join, resolve } from 'path';
+import { existsSync, mkdirSync, renameSync, copyFileSync, unlinkSync } from 'fs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -62,6 +63,9 @@ import { WebPanelListenerService } from './http/web-panel-listener.service';
 import { FirewallService } from './ops/firewall/firewall.service';
 import { EventsGateway } from './ws/events.gateway';
 import { LegacyMigrationService } from './config/legacy-migration.service';
+import { BackupModule } from './backup/backup.module';
+import { BackupController } from './backup/backup.controller';
+import { BackupSchedulerService } from './backup/backup-scheduler.service';
 
 // Metrics
 import { InstanceRawMetric } from './metrics/entities/instance-raw-metric.entity';
@@ -74,22 +78,49 @@ const publicAssets = join(fccRoot, 'public', 'assets');
 const reactAssets = join(fccRoot, 'client', 'dist', 'vite-assets');
 const clientDist = join(fccRoot, 'client', 'dist');
 
+// Ensure data/db directory exists and migrate legacy files if present
+const dataDir = join(fccRoot, 'data');
+const dbDir = join(dataDir, 'db');
+if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
+
+const migrateOldDb = (oldName: string, newName: string) => {
+  const oldPath = join(dataDir, oldName);
+  const newPath = join(dbDir, newName);
+  if (existsSync(oldPath) && !existsSync(newPath)) {
+    try {
+      renameSync(oldPath, newPath);
+    } catch {
+      try {
+        copyFileSync(oldPath, newPath);
+        unlinkSync(oldPath);
+      } catch { /* ignore */ }
+    }
+  }
+};
+migrateOldDb('fcc_database.sqlite', 'fcc_database.sqlite');
+migrateOldDb('fcc_database.sqlite-shm', 'fcc_database.sqlite-shm');
+migrateOldDb('fcc_database.sqlite-wal', 'fcc_database.sqlite-wal');
+migrateOldDb('fcc_metrics.sqlite', 'fcc_metrics.sqlite');
+migrateOldDb('fcc_metrics.sqlite-shm', 'fcc_metrics.sqlite-shm');
+migrateOldDb('fcc_metrics.sqlite-wal', 'fcc_metrics.sqlite-wal');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: join(fccRoot, '.env'),
     }),
+    BackupModule,
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
-      database: join(fccRoot, 'data', 'fcc_database.sqlite'),
+      database: join(fccRoot, 'data', 'db', 'fcc_database.sqlite'),
       entities: [User, SystemPreference, GameInstance, MaintenanceSchedule],
       synchronize: true, // Auto-create tables (good for this use-case, but use migrations in prod ideally)
     }),
     TypeOrmModule.forRoot({
       name: 'metricsConnection',
       type: 'better-sqlite3',
-      database: join(fccRoot, 'data', 'fcc_metrics.sqlite'),
+      database: join(fccRoot, 'data', 'db', 'fcc_metrics.sqlite'),
       entities: [InstanceRawMetric, InstanceHourlyMetric],
       synchronize: true,
     }),
@@ -139,6 +170,7 @@ const clientDist = join(fccRoot, 'client', 'dist');
     AuthController,
     FallbackController,
     MetricsController,
+    BackupController,
   ],
   providers: [
     PathsService,

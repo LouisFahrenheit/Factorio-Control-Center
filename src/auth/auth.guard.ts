@@ -102,7 +102,8 @@ export class AuthGuard implements CanActivate {
       path === '/api/locale' ||
       path.startsWith('/api/instances') ||
       path === '/api/config/program' ||
-      path.startsWith('/api/config/web-tls/')
+      path.startsWith('/api/config/web-tls/') ||
+      path.startsWith('/api/backup')
     );
   }
 }

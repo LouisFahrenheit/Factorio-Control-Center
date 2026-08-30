@@ -1,6 +1,6 @@
 import { config as dotenvConfig } from 'dotenv';
-import { join, resolve } from 'path';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { join, resolve, dirname } from 'path';
+import { existsSync, readFileSync, writeFileSync, copyFileSync, unlinkSync, renameSync, mkdirSync } from 'fs';
 import { randomBytes } from 'crypto';
 
 const fccRootForEnv = resolve(
@@ -9,6 +9,38 @@ const fccRootForEnv = resolve(
 );
 const envPath = join(fccRootForEnv, '.env');
 const envExamplePath = join(fccRootForEnv, '.env.example');
+
+// Apply pending backup restoration before SQLite database files are locked by TypeORM
+const dataDir = join(fccRootForEnv, 'data');
+const dbDir = join(dataDir, 'db');
+
+const applyPendingDb = (pendingPath: string, targetPath: string, label: string) => {
+  if (existsSync(pendingPath)) {
+    try {
+      const parent = dirname(targetPath);
+      if (!existsSync(parent)) mkdirSync(parent, { recursive: true });
+      if (existsSync(targetPath)) {
+        try { unlinkSync(targetPath); } catch { /* */ }
+      }
+      renameSync(pendingPath, targetPath);
+      console.log(`[Bootstrap] Applied restored ${label} from backup.`);
+    } catch {
+      try {
+        copyFileSync(pendingPath, targetPath);
+        unlinkSync(pendingPath);
+        console.log(`[Bootstrap] Copied restored ${label} from backup.`);
+      } catch (e) {
+        console.error(`[Bootstrap] Failed to apply restored ${label}:`, e);
+      }
+    }
+  }
+};
+
+// Check data/db/ pending restore and fallback legacy data/ pending restore
+applyPendingDb(join(dbDir, 'fcc_database.sqlite.restore'), join(dbDir, 'fcc_database.sqlite'), 'database');
+applyPendingDb(join(dataDir, 'fcc_database.sqlite.restore'), join(dbDir, 'fcc_database.sqlite'), 'database');
+applyPendingDb(join(dbDir, 'fcc_metrics.sqlite.restore'), join(dbDir, 'fcc_metrics.sqlite'), 'metrics database');
+applyPendingDb(join(dataDir, 'fcc_metrics.sqlite.restore'), join(dbDir, 'fcc_metrics.sqlite'), 'metrics database');
 
 if (!existsSync(envPath) && existsSync(envExamplePath)) {
   let content = readFileSync(envExamplePath, 'utf8');

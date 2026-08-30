@@ -54,6 +54,11 @@ export const APP_ICON_URLS = {
   update_disabled: '/assets/icons/update_disabled.svg',
   upload: '/assets/icons/upload.svg',
   users: '/assets/icons/users.svg',
+  backup: '/assets/icons/backup.svg',
+  restore: '/assets/icons/restore.svg',
+  schedule: '/assets/icons/schedule.svg',
+  folder_zip: '/assets/icons/folder_zip.svg',
+  warning: '/assets/icons/warning.svg',
 } as const;
 
 export type AppIconName = keyof typeof APP_ICON_URLS;
