@@ -38,6 +38,22 @@ if [ "$NODE_NEED_INSTALL" -eq 1 ]; then
     exit 1
   fi
 fi
+
+# Ensure C++ build tools are available for native modules (better-sqlite3)
+if ! command -v make >/dev/null 2>&1 || ! command -v g++ >/dev/null 2>&1; then
+  echo "Installing C/C++ build tools for native dependencies..."
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq && apt-get install -y build-essential
+  elif command -v dnf >/dev/null 2>&1; then
+    dnf install -y make gcc-c++
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y make gcc-c++
+  elif command -v pacman >/dev/null 2>&1; then
+    pacman -Sy --noconfirm base-devel
+  elif command -v apk >/dev/null 2>&1; then
+    apk add --no-cache build-base python3
+  fi
+fi
 echo
 echo "================================================="
 echo " Configure Web Panel Port"

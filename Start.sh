@@ -63,6 +63,7 @@ ensure_deps() {
   if [[ -d "$FCC_DIR/node_modules" ]]; then
     return 0
   fi
+  ensure_build_tools
   echo "Installing dependencies..."
   if [[ "$FCC_RELEASE" -eq 1 ]]; then
     npm ci --omit=dev

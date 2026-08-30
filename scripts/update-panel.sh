@@ -138,6 +138,7 @@ done
 shopt -u dotglob
 
 ensure_linux_executables "$FCC_DIR"
+ensure_build_tools
 
 echo "Installing dependencies..."
 (cd "$FCC_DIR" && npm ci --omit=dev)
