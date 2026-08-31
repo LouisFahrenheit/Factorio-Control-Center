@@ -296,40 +296,54 @@ function copyBundle(targetDir, launcher, { omitNodeModules = false } = {}) {
   }
 }
 
-// CI builds on Linux: omit Linux node_modules; Start.bat runs npm ci --omit=dev on Windows.
-copyBundle(winBundleDir, 'Start.bat', { omitNodeModules: process.platform !== 'win32' });
-copyNssmForWindows(winBundleDir);
-copyBundle(linuxBundleDir, 'Start.sh', { omitNodeModules: process.platform !== 'linux' });
+const isWin = process.platform === 'win32';
 
-for (const rel of [
-  'Start.sh',
-  'scripts/run-prod-service.sh',
-  'scripts/install-service.sh',
-  'scripts/stop-panel.sh',
-  'scripts/update-panel.sh',
-  'scripts/show-logs.sh',
-  'scripts/panel-status.sh',
-]) {
-  const p = join(linuxBundleDir, rel);
-  if (existsSync(p)) chmodSync(p, 0o755);
+// On Windows: only build the Windows archive.
+// On Linux/macOS: only build the Linux archive.
+// When run locally without a platform split, build both.
+const buildWin = isWin || process.env.FCC_BUILD_ALL === '1';
+const buildLinux = !isWin || process.env.FCC_BUILD_ALL === '1';
+
+if (buildWin) {
+  copyBundle(winBundleDir, 'Start.bat', { omitNodeModules: false });
+  copyNssmForWindows(winBundleDir);
+}
+
+if (buildLinux) {
+  copyBundle(linuxBundleDir, 'Start.sh', { omitNodeModules: false });
+  for (const rel of [
+    'Start.sh',
+    'scripts/run-prod-service.sh',
+    'scripts/install-service.sh',
+    'scripts/stop-panel.sh',
+    'scripts/update-panel.sh',
+    'scripts/show-logs.sh',
+    'scripts/panel-status.sh',
+  ]) {
+    const p = join(linuxBundleDir, rel);
+    if (existsSync(p)) chmodSync(p, 0o755);
+  }
 }
 
 const releaseDir = join(nestRoot, 'release');
 mkdirSync(releaseDir, { recursive: true });
-const zipPath = join(releaseDir, 'factorio-control-center-win.zip');
-const tarPath = join(releaseDir, 'factorio-control-center-linux.tar.gz');
 
-console.log(`\nCreating ${zipPath} …`);
-zipDir(winBundleDir, zipPath);
+if (buildWin) {
+  const zipPath = join(releaseDir, 'factorio-control-center-win.zip');
+  console.log(`\nCreating ${zipPath} …`);
+  zipDir(winBundleDir, zipPath);
+  console.log(`  Windows: ${zipPath}`);
+}
 
-console.log(`\nCreating ${tarPath} …`);
-tarGzDir(linuxBundleDir, tarPath);
+if (buildLinux) {
+  const tarPath = join(releaseDir, 'factorio-control-center-linux.tar.gz');
+  console.log(`\nCreating ${tarPath} …`);
+  tarGzDir(linuxBundleDir, tarPath);
+  console.log(`  Linux:   ${tarPath}`);
+}
 
 rmSync(stagingRoot, { recursive: true, force: true });
 
-console.log(`\nDone:`);
-console.log(`  Windows: ${zipPath}`);
-console.log(`  Linux:   ${tarPath}`);
 console.log('\nEach archive: factorio-control-center/ with Start.bat / Start.sh, dist, client/dist, public, locale');
-console.log('Archives omit node_modules if packed on a mismatched OS platform (npm ci will run on first start).');
 console.log('Not included: data/, fcc-settings.ini, src/, dev node_modules — created on first run.\n');
+
