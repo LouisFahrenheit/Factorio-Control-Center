@@ -123,12 +123,12 @@ if errorlevel 8 (
 )
 
 pushd "%FCC_DIR%"
-if exist "%FCC_DIR%\node_modules\better-sqlite3\build\Release\better_sqlite3.node" (
+if exist "%FCC_DIR%\node_modules\better-sqlite3\package.json" (
     echo Dependencies already bundled in archive, skipping npm ci.
     set "NPM_ERR=0"
 ) else (
     echo Installing dependencies...
-    call npm ci --omit=dev
+    call npm ci --omit=dev --ignore-scripts
     set "NPM_ERR=!ERRORLEVEL!"
 )
 popd

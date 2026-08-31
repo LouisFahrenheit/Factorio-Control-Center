@@ -152,10 +152,10 @@ if exist "%FCC_DIR%\client\dist\index.html" if not exist "%FCC_DIR%\client\packa
 exit /b 0
 
 :ensure_deps
-if exist "%FCC_DIR%\node_modules\" exit /b 0
+if exist "%FCC_DIR%\node_modules\dotenv\package.json" exit /b 0
 echo Installing dependencies...
 if "%FCC_RELEASE%"=="1" (
-    call npm ci --omit=dev
+    call npm ci --omit=dev --ignore-scripts
 ) else (
     call npm install
 )
