@@ -168,7 +168,9 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
                             fontWeight: 400,
                           }}
                         >
-                          <AppIcon name="info" size={16} style={{ flexShrink: 0, marginTop: '1px', opacity: 0.7 }} />
+                          <span style={{ flexShrink: 0, marginTop: '1px', opacity: 0.7, display: 'flex' }}>
+                            <AppIcon name="info" size={16} />
+                          </span>
                           <span>{t('instances_collect_game_metrics_warning')}</span>
                         </div>
                       ) : null}
