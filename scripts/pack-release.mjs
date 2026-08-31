@@ -156,16 +156,29 @@ function copyIfExists(src, dest) {
   return true;
 }
 
-/** Zip via system tar (-a). Windows 10+. */
+/** Zip via system tar (-a) on Linux/macOS, or PowerShell Compress-Archive on Windows. */
 function zipDir(sourceDir, zipPath) {
-  const parent = dirname(sourceDir);
-  const base = basename(sourceDir);
   rmSync(zipPath, { force: true });
-  execFileSync('tar', ['-a', '-cf', zipPath, '-C', parent, base], {
-    stdio: 'inherit',
-    windowsHide: true,
-    maxBuffer: 64 * 1024 * 1024,
-  });
+  if (process.platform === 'win32') {
+    // tar on Windows misinterprets drive letters (D:) as hostnames; use PowerShell instead.
+    execFileSync(
+      'powershell.exe',
+      [
+        '-NoProfile',
+        '-Command',
+        `Compress-Archive -LiteralPath '${sourceDir.replace(/'/g, "''")}' -DestinationPath '${zipPath.replace(/'/g, "''")}' -Force`,
+      ],
+      { stdio: 'inherit', windowsHide: true },
+    );
+  } else {
+    const parent = dirname(sourceDir);
+    const base = basename(sourceDir);
+    execFileSync('tar', ['-a', '-cf', zipPath, '-C', parent, base], {
+      stdio: 'inherit',
+      windowsHide: true,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  }
 }
 
 /** gzip tar for Linux releases (unpack: tar -xzf …). */
