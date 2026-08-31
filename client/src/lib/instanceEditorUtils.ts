@@ -151,6 +151,7 @@ export interface InstanceEditorForm {
   autoEnterPanel: boolean;
   blockUpdates: boolean;
   experimentalUpdates: boolean;
+  collectGameMetrics: boolean;
   downloadServerPackage: boolean;
   packageBuild: string;
   packageVersion: string;
@@ -171,6 +172,7 @@ export function emptyEditorForm(rows: InstanceItem[]): InstanceEditorForm {
     autoEnterPanel: false,
     blockUpdates: false,
     experimentalUpdates: false,
+    collectGameMetrics: false,
     downloadServerPackage: false,
     packageBuild: 'expansion',
     packageVersion: 'latest',
@@ -191,6 +193,7 @@ export function editorFormFromItem(item: InstanceItem): InstanceEditorForm {
     autoEnterPanel: !!item.autoEnterPanel,
     blockUpdates: !!item.blockUpdates,
     experimentalUpdates: !!item.experimentalUpdates,
+    collectGameMetrics: !!item.collectGameMetrics,
     downloadServerPackage: false,
     packageBuild: 'expansion',
     packageVersion: 'latest',

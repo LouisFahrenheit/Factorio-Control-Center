@@ -49,6 +49,7 @@ export interface InstanceSummaryRow {
   maintenanceManualPending: boolean;
   blockUpdates: boolean;
   experimentalUpdates: boolean;
+  collectGameMetrics: boolean;
   launchSave: string;
   modJobRunning: boolean;
   isPublic: boolean;
@@ -296,6 +297,7 @@ export class InstanceSummaryService {
       maintenanceManualPending: pending.has(iid),
       blockUpdates: !!item.blockUpdates,
       experimentalUpdates: !!item.experimentalUpdates,
+      collectGameMetrics: !!item.collectGameMetrics,
       launchSave: String(item.launchSave || 'latest').trim() || 'latest',
       modJobRunning: this.modJobs.isRunningForInstance(iid),
       isPublic: !!item.isPublic,

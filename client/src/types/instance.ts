@@ -31,6 +31,7 @@ export interface InstanceItem {
   serverPath?: string;
   ip?: string;
   rconPassword?: string;
+  collectGameMetrics?: boolean;
   serverSettingsName?: string;
   serverSettingsDesc?: string;
   serverSettingsAutoPause?: boolean;

@@ -141,6 +141,38 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
                       />
                       <span className="instance-editor-option__hint">{t('instances_experimental_updates_help')}</span>
                     </div>
+                    <div className="instance-editor-option">
+                      <FccSwitch
+                        id="instanceEditorCollectGameMetrics"
+                        className="instance-editor-option__switch"
+                        checked={form.collectGameMetrics}
+                        onChange={(checked) => setForm((f) => ({ ...f, collectGameMetrics: checked }))}
+                        label={t('instances_collect_game_metrics_cb')}
+                      />
+                      <span className="instance-editor-option__hint">{t('instances_collect_game_metrics_help')}</span>
+                      {form.collectGameMetrics ? (
+                        <div
+                          role="note"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '8px',
+                            marginTop: '8px',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(100, 160, 220, 0.25)',
+                            background: 'rgba(80, 140, 200, 0.08)',
+                            color: 'rgba(180, 210, 240, 0.85)',
+                            fontSize: '0.88em',
+                            lineHeight: '1.45',
+                            fontWeight: 400,
+                          }}
+                        >
+                          <AppIcon name="info" size={16} style={{ flexShrink: 0, marginTop: '1px', opacity: 0.7 }} />
+                          <span>{t('instances_collect_game_metrics_warning')}</span>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </section>
               </div>

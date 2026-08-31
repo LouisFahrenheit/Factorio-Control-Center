@@ -56,6 +56,9 @@ export class GameInstance {
   @Column({ default: '' })
   publicConnectionAddress: string;
 
+  @Column({ default: false })
+  collectGameMetrics: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

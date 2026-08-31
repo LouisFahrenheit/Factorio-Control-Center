@@ -326,6 +326,8 @@ export class RuntimeService implements OnModuleDestroy {
       rt.inGame = false;
       rt.stopping = false;
       rt.stopWatchdogActive = false;
+      // Close the persistent RCON socket for this instance
+      this.rcon.close(rt.rconHost, rt.rconPort);
       this.emitServerShutdownLogOnce(rt);
       // Push status change: server process exited
       this.emitRuntimeStatus(rt);

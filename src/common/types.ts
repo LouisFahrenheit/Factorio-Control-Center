@@ -19,6 +19,7 @@ export interface InstanceItem {
   isPublic?: boolean;
   publicDescription?: string;
   publicConnectionAddress?: string;
+  collectGameMetrics?: boolean;
 }
 
 export interface InstancesState {

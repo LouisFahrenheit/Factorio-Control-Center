@@ -184,6 +184,7 @@ export class InstancesService implements OnModuleInit {
       maintenanceLock: false,
       blockUpdates: !!body.blockUpdates,
       experimentalUpdates: !!body.experimentalUpdates,
+      collectGameMetrics: !!body.collectGameMetrics,
     });
 
     if (this.config.webPanel.require_unique_instance_game_ports) {
