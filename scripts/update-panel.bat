@@ -123,9 +123,14 @@ if errorlevel 8 (
 )
 
 pushd "%FCC_DIR%"
-echo Installing dependencies...
-call npm ci --omit=dev
-set "NPM_ERR=!ERRORLEVEL!"
+if exist "%FCC_DIR%\node_modules\better-sqlite3\build\Release\better_sqlite3.node" (
+    echo Dependencies already bundled in archive, skipping npm ci.
+    set "NPM_ERR=0"
+) else (
+    echo Installing dependencies...
+    call npm ci --omit=dev
+    set "NPM_ERR=!ERRORLEVEL!"
+)
 popd
 rmdir /s /q "%STAGING%" 2>nul
 
