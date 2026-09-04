@@ -1,5 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { existsSync, mkdirSync, renameSync, copyFileSync, rmSync, unlinkSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  renameSync,
+  copyFileSync,
+  rmSync,
+  unlinkSync,
+} from 'fs';
 import { join, resolve, dirname } from 'path';
 import { trimPath } from '../common/trim.util';
 
@@ -131,7 +138,9 @@ export class PathsService {
           try {
             copyFileSync(oldPath, newPath);
             unlinkSync(oldPath);
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         }
       }
     };
@@ -147,18 +156,35 @@ export class PathsService {
           try {
             mkdirSync(newDir, { recursive: true });
             // Let it stay or copy if needed
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         }
       }
     };
 
     // Databases: data/fcc_database.sqlite -> data/db/fcc_database.sqlite
     moveIfExists(join(this.dataDir, 'fcc_database.sqlite'), this.databasePath);
-    moveIfExists(join(this.dataDir, 'fcc_database.sqlite-shm'), `${this.databasePath}-shm`);
-    moveIfExists(join(this.dataDir, 'fcc_database.sqlite-wal'), `${this.databasePath}-wal`);
-    moveIfExists(join(this.dataDir, 'fcc_metrics.sqlite'), this.metricsDatabasePath);
-    moveIfExists(join(this.dataDir, 'fcc_metrics.sqlite-shm'), `${this.metricsDatabasePath}-shm`);
-    moveIfExists(join(this.dataDir, 'fcc_metrics.sqlite-wal'), `${this.metricsDatabasePath}-wal`);
+    moveIfExists(
+      join(this.dataDir, 'fcc_database.sqlite-shm'),
+      `${this.databasePath}-shm`,
+    );
+    moveIfExists(
+      join(this.dataDir, 'fcc_database.sqlite-wal'),
+      `${this.databasePath}-wal`,
+    );
+    moveIfExists(
+      join(this.dataDir, 'fcc_metrics.sqlite'),
+      this.metricsDatabasePath,
+    );
+    moveIfExists(
+      join(this.dataDir, 'fcc_metrics.sqlite-shm'),
+      `${this.metricsDatabasePath}-shm`,
+    );
+    moveIfExists(
+      join(this.dataDir, 'fcc_metrics.sqlite-wal'),
+      `${this.metricsDatabasePath}-wal`,
+    );
 
     // Storage: data/modpacks -> data/storage/modpacks
     moveDirIfExists(join(this.dataDir, 'modpacks'), this.modpacksDir);
@@ -182,7 +208,11 @@ export class PathsService {
     ];
     for (const f of legacyFiles) {
       if (existsSync(f)) {
-        try { unlinkSync(f); } catch { /* ignore */ }
+        try {
+          unlinkSync(f);
+        } catch {
+          /* ignore */
+        }
       }
     }
 
@@ -191,7 +221,9 @@ export class PathsService {
     if (existsSync(legacyServersDir)) {
       try {
         rmSync(legacyServersDir, { recursive: true, force: true });
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 

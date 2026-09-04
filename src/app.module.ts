@@ -2,7 +2,13 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join, resolve } from 'path';
-import { existsSync, mkdirSync, renameSync, copyFileSync, unlinkSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  renameSync,
+  copyFileSync,
+  unlinkSync,
+} from 'fs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -93,7 +99,9 @@ const migrateOldDb = (oldName: string, newName: string) => {
       try {
         copyFileSync(oldPath, newPath);
         unlinkSync(oldPath);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 };

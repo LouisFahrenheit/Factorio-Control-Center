@@ -161,12 +161,16 @@ export class RconService implements OnModuleDestroy {
 
     sock.on('error', (err: Error) => {
       if (conn.destroyed) return;
-      this.log.debug(`RCON ${conn.host}:${conn.port} socket error: ${err.message}`);
+      this.log.debug(
+        `RCON ${conn.host}:${conn.port} socket error: ${err.message}`,
+      );
     });
 
     sock.on('close', () => {
       if (conn.destroyed) return;
-      this.log.debug(`RCON ${conn.host}:${conn.port} disconnected — will reconnect`);
+      this.log.debug(
+        `RCON ${conn.host}:${conn.port} disconnected — will reconnect`,
+      );
       conn.authed = false;
       conn.sock = null;
       this.clearKeepalive(conn);
@@ -211,7 +215,9 @@ export class RconService implements OnModuleDestroy {
     while (conn.buf.length >= 4) {
       const size = conn.buf.readInt32LE(0);
       if (size < 10) {
-        this.log.warn(`RCON ${conn.host}:${conn.port} bad packet, dropping connection`);
+        this.log.warn(
+          `RCON ${conn.host}:${conn.port} bad packet, dropping connection`,
+        );
         conn.sock?.destroy();
         return;
       }

@@ -1,10 +1,15 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { SystemPreference } from "../config/system-preference.entity";
-import { BackupService } from "./backup.service";
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SystemPreference } from '../config/system-preference.entity';
+import { BackupService } from './backup.service';
 
-const SECTION = "backup";
+const SECTION = 'backup';
 
 export interface AutoBackupSettings {
   enabled: boolean;
@@ -26,8 +31,8 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
     maxCount: 5,
     includeMetrics: false,
     includeLogs: false,
-    lastRunAt: "",
-    nextRunAt: "",
+    lastRunAt: '',
+    nextRunAt: '',
   };
 
   constructor(
@@ -52,15 +57,19 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
   async saveSettings(patch: Partial<AutoBackupSettings>): Promise<void> {
     Object.assign(this.settings, patch);
     const keys: (keyof AutoBackupSettings)[] = [
-      "enabled", "intervalHours", "maxCount",
-      "includeMetrics", "includeLogs",
-      "lastRunAt", "nextRunAt",
+      'enabled',
+      'intervalHours',
+      'maxCount',
+      'includeMetrics',
+      'includeLogs',
+      'lastRunAt',
+      'nextRunAt',
     ];
     for (const k of keys) {
       const val = (this.settings as any)[k];
       await this.sysPrefs.upsert(
-        { key: `${SECTION}.${k}`, value: String(val ?? "") },
-        ["key"],
+        { key: `${SECTION}.${k}`, value: String(val ?? '') },
+        ['key'],
       );
     }
     this.schedule();
@@ -71,22 +80,25 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
     const section: Record<string, string> = {};
     const prefix = `${SECTION}.`;
     for (const p of all) {
-      if (p.key.startsWith(prefix)) section[p.key.slice(prefix.length)] = p.value ?? "";
+      if (p.key.startsWith(prefix))
+        section[p.key.slice(prefix.length)] = p.value ?? '';
     }
     const bool = (k: string, def = false) =>
-      ["1", "true", "yes", "on"].includes(String(section[k] ?? def).toLowerCase());
+      ['1', 'true', 'yes', 'on'].includes(
+        String(section[k] ?? def).toLowerCase(),
+      );
     const num = (k: string, def: number) => {
-      const n = parseInt(section[k] ?? "", 10);
+      const n = parseInt(section[k] ?? '', 10);
       return Number.isFinite(n) ? n : def;
     };
     this.settings = {
-      enabled: bool("enabled"),
-      intervalHours: num("intervalHours", 24),
-      maxCount: num("maxCount", 5),
-      includeMetrics: bool("includeMetrics"),
-      includeLogs: bool("includeLogs"),
-      lastRunAt: section["lastRunAt"] ?? "",
-      nextRunAt: section["nextRunAt"] ?? "",
+      enabled: bool('enabled'),
+      intervalHours: num('intervalHours', 24),
+      maxCount: num('maxCount', 5),
+      includeMetrics: bool('includeMetrics'),
+      includeLogs: bool('includeLogs'),
+      lastRunAt: section['lastRunAt'] ?? '',
+      nextRunAt: section['nextRunAt'] ?? '',
     };
   }
 
@@ -94,8 +106,11 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
     this.clear();
     if (!this.settings.enabled) return;
 
-    const intervalMs = Math.max(1, this.settings.intervalHours) * 60 * 60 * 1000;
-    const lastRun = this.settings.lastRunAt ? new Date(this.settings.lastRunAt).getTime() : 0;
+    const intervalMs =
+      Math.max(1, this.settings.intervalHours) * 60 * 60 * 1000;
+    const lastRun = this.settings.lastRunAt
+      ? new Date(this.settings.lastRunAt).getTime()
+      : 0;
     const now = Date.now();
     const elapsed = now - lastRun;
     const delay = Math.max(0, intervalMs - elapsed);
@@ -111,19 +126,19 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async run() {
-    this.log.log("Auto-backup: running scheduled backup");
+    this.log.log('Auto-backup: running scheduled backup');
     try {
       await this.backups.createBackup({
         includeMetrics: this.settings.includeMetrics,
         includeLogs: this.settings.includeLogs,
-        type: "auto",
+        type: 'auto',
       });
       await this.backups.pruneOldBackups(this.settings.maxCount);
       this.settings.lastRunAt = new Date().toISOString();
       await this.saveSettings({});
-      this.log.log("Auto-backup: done");
+      this.log.log('Auto-backup: done');
     } catch (err) {
-      this.log.error("Auto-backup failed", err);
+      this.log.error('Auto-backup failed', err);
     }
     this.schedule(); // reschedule next run
   }
