@@ -550,11 +550,22 @@ export function useInstanceEditor({
 
   const openPathBrowser = useCallback(() => {
     setPathBrowserOpen(true);
-    void loadPathBrowser('').catch((e) => {
+    let startPath = form.serverPath?.trim();
+    if (!startPath && isDocker) {
+      startPath =
+        dockerVolumes.find(
+          (v) =>
+            v.toLowerCase().includes('data') ||
+            v.toLowerCase().includes('server'),
+        ) ||
+        dockerVolumes[0] ||
+        '';
+    }
+    void loadPathBrowser(startPath || '').catch((e) => {
       setInstanceMsg(localizeInstanceError(e instanceof Error ? e.message : String(e), t), true);
       setPathBrowserOpen(false);
     });
-  }, [loadPathBrowser, setInstanceMsg, t]);
+  }, [dockerVolumes, form.serverPath, isDocker, loadPathBrowser, setInstanceMsg, t]);
 
   const closePathBrowseCreate = useCallback(() => {
     setPathBrowseCreateOpen(false);
@@ -580,10 +591,19 @@ export function useInstanceEditor({
   }, [loadPathBrowser, pathBrowseParent, setInstanceMsg, t]);
 
   const pathBrowseRoot = useCallback(() => {
-    void loadPathBrowser('').catch((e) => {
+    const rootPath = isDocker
+      ? dockerVolumes.find(
+          (v) =>
+            v.toLowerCase().includes('data') ||
+            v.toLowerCase().includes('server'),
+        ) ||
+        dockerVolumes[0] ||
+        ''
+      : '';
+    void loadPathBrowser(rootPath).catch((e) => {
       setInstanceMsg(localizeInstanceError(e instanceof Error ? e.message : String(e), t), true);
     });
-  }, [loadPathBrowser, setInstanceMsg, t]);
+  }, [dockerVolumes, isDocker, loadPathBrowser, setInstanceMsg, t]);
 
   const pathBrowseEnter = useCallback(
     (path: string) => {

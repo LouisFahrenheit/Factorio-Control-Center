@@ -38,6 +38,11 @@ import { FccConfigService } from '../config/fcc-config.service';
 import { UsersService } from '../auth/users.service';
 import { MapGenOpsService } from '../ops/map-gen/map-gen-ops.service';
 import { hasFactorioExecutable } from '../ops/path-manager';
+import {
+  isDockerContainer,
+  getPrimaryDockerVolume,
+  getDockerVolumes,
+} from '../common/docker.util';
 import type {
   MapGenSettingsJson,
   MapSettingsJson,
@@ -1362,6 +1367,12 @@ export class ApiFullController {
           .map((drive) => ({ name: drive, path: drive, isDir: true }));
         return { ok: true, current: '', parent: '', items };
       }
+      if (isDockerContainer()) {
+        const primaryVolume = getPrimaryDockerVolume();
+        if (primaryVolume && existsSync(primaryVolume)) {
+          return this.fsBrowse(primaryVolume);
+        }
+      }
       return {
         ok: true,
         current: '',
@@ -1370,7 +1381,20 @@ export class ApiFullController {
       };
     }
     let cur = resolve(raw);
-    if (!existsSync(cur)) return { ok: false, error: 'path_not_found' };
+    while (cur && !existsSync(cur)) {
+      const p = dirname(cur);
+      if (p === cur) break;
+      cur = p;
+    }
+    if (!existsSync(cur)) {
+      if (isDockerContainer()) {
+        const primaryVolume = getPrimaryDockerVolume();
+        if (primaryVolume && existsSync(primaryVolume)) {
+          return this.fsBrowse(primaryVolume);
+        }
+      }
+      return { ok: false, error: 'path_not_found' };
+    }
     const st = statSync(cur);
     if (!st.isDirectory()) cur = dirname(cur);
     const parent = resolve(cur, '..') === cur ? '' : dirname(cur);

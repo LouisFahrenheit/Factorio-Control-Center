@@ -36,6 +36,7 @@ import type { Request, Response } from 'express';
 import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { requestBearerToken } from '../auth/auth.util';
 import { SessionService } from '../auth/session.service';
+import { isDockerContainer, getDockerVolumes } from '../common/docker.util';
 import { InstancesService } from '../instances/instances.service';
 import { WebPanelEventLogService } from '../logging/web-panel-event-log.service';
 import { resolveAppBuild } from '../common/app-build.util';
@@ -154,47 +155,14 @@ export class ApiController {
 
   @Get('health')
   @ApiOperation({
-    summary: 'Health check',
-    description:
-      'Returns panel version, OS info and Docker status. No authentication required.',
+    summary: 'Check API and panel health',
+    description: 'Returns status, version, platform and runtime info',
   })
   @ApiResponse({ status: 200, description: 'Panel is healthy' })
   health() {
     const plat = process.platform;
-    let is_docker = false;
-    const docker_volumes: string[] = [];
-
-    if (plat === 'linux') {
-      try {
-        if (fs.existsSync('/.dockerenv')) {
-          is_docker = true;
-          const mounts = fs.readFileSync('/proc/mounts', 'utf8');
-          const ignorePrefixes = [
-            '/proc',
-            '/sys',
-            '/dev',
-            '/etc',
-            '/run',
-            '/tmp',
-            '/var/lib/docker',
-          ];
-          const lines = mounts.split('\n');
-          for (const line of lines) {
-            const parts = line.split(' ');
-            if (parts.length >= 2) {
-              const target = parts[1];
-              if (target === '/') continue;
-              if (ignorePrefixes.some((p) => target.startsWith(p))) continue;
-              if (!docker_volumes.includes(target)) {
-                docker_volumes.push(target);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
+    const is_docker = isDockerContainer();
+    const docker_volumes = is_docker ? getDockerVolumes() : [];
 
     return {
       ok: true,
