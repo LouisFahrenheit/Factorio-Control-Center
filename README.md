@@ -111,6 +111,16 @@ your PC or VPS - add servers and manage everything from one place.
 2. In the menu - **1. Start panel**, open the URL from the output: `http://127.0.0.1/` on your PC, `http://server_IP/` on a VPS (port - shown in the menu).
 3. Log in: `admin` / `admin` - change the password right away.
 
+### Updating FCC (Standalone)
+
+Your server data (`data/`), logs, and configuration files (`fcc-settings.ini` / `.env`) are preserved during updates.
+
+- **Via start menu:** run `./Start.sh` (or `Start.bat` on Windows) and choose **7. Update panel**.
+- **Directly via script (Linux):**
+  ```bash
+  cd /opt/factorio-control-center && sudo ./scripts/update-panel.sh
+  ```
+
 ### Running with Docker
 
 **Quick start:**
@@ -126,7 +136,7 @@ This script will automatically install Docker (if missing), download the `docker
 2. Run: `docker compose up -d`
 3. Open `http://127.0.0.1:8080/` (or your server's IP) and log in with `admin` / `admin`.
 
-**Updating Docker Installation:**
+**Updating FCC (Docker):**
 To update to the latest version without losing any data:
 ```bash
 cd /opt/factorio-control-center

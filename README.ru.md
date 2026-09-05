@@ -109,6 +109,16 @@
 2. В меню - **1. Start panel**, откройте адрес из вывода: `http://127.0.0.1/` на ПК, `http://IP_сервера/` на VPS (порт - в меню).
 3. Вход: `admin` / `admin` - сразу смените пароль.
 
+### Обновление FCC (Standalone)
+
+Все данные серверов (`data/`), логи и настройки (`fcc-settings.ini` / `.env`) сохраняются при обновлении.
+
+- **Через меню запуска:** запустите `./Start.sh` (или `Start.bat` на Windows) и выберите **7. Update panel**.
+- **Напрямую через скрипт (Linux):**
+  ```bash
+  cd /opt/factorio-control-center && sudo ./scripts/update-panel.sh
+  ```
+
 ### Запуск через Docker
 
 **Быстрый старт:**
@@ -124,7 +134,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio
 2. Выполните команду: `docker compose up -d`
 3. Откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и войдите с помощью `admin` / `admin`.
 
-**Обновление панели (Docker):**
+**Обновление FCC (Docker):**
 Чтобы обновиться до последней версии (ваши данные не потеряются):
 ```bash
 cd /opt/factorio-control-center
