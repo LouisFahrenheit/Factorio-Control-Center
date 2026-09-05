@@ -91,8 +91,8 @@ export function modpackIsValidName(name: string): boolean {
 }
 
 function modpackSanitizeBase(base: string): string {
-  let b = String(base || '').replace(/[^\w\- ]/gu, '_');
-  b = b.replace(/^[ _\-]+|[ _\-]+$/g, '') || 'imported';
+  let b = String(base || '').replace(/[^\w -]/gu, '_');
+  b = b.replace(/^[ _-]+|[ _-]+$/g, '') || 'imported';
   return b.slice(0, MODPACK_NAME_MAX_LEN);
 }
 

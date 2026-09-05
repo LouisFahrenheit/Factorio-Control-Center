@@ -74,9 +74,7 @@ export class ModPlanService {
     return !hasSpaceAge(serverPath) && releaseRequiresSpaceAge(release);
   }
 
-  async portalVersionsForMod(
-    name: string,
-  ): Promise<
+  async portalVersionsForMod(name: string): Promise<
     | {
         ok: true;
         version: string;

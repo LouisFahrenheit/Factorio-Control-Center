@@ -27,7 +27,10 @@ type VerifyCacheEntry = {
 @Injectable()
 export class ModPortalService {
   private verifyCache = new Map<string, VerifyCacheEntry>();
-  private fullMetaCache = new Map<string, { time: number; data: Record<string, unknown> }>();
+  private fullMetaCache = new Map<
+    string,
+    { time: number; data: Record<string, unknown> }
+  >();
   isBuiltin(name: string): boolean {
     return BUILTIN.has((name || '').trim().toLowerCase());
   }

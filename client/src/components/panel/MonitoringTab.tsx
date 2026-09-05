@@ -5,6 +5,7 @@ import { api } from '../../api/client';
 import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
 
 interface MetricPoint {
+  [key: string]: string | number | undefined;
   timestamp: string;
   cpu: number;
   cpuMax?: number;
@@ -272,7 +273,7 @@ function ChartCard({
 
   const maxSecondaryValue = useMemo(() => {
     if (!hasSecondary || !secondaryKey) return 0;
-    return Math.max(...metrics.map((m) => ((m as any)[secondaryKey] !== undefined ? Number((m as any)[secondaryKey]) : 0)), 0.1);
+    return Math.max(...metrics.map((m) => (m[secondaryKey] !== undefined ? Number(m[secondaryKey]) : 0)), 0.1);
   }, [metrics, secondaryKey, hasSecondary]);
 
   const yMax = Math.max(yMaxDefault, maxAvgValue, maxSecondaryValue) * 1.15; // Add 15% padding at top
@@ -403,7 +404,7 @@ function ChartCard({
       
       let ySecVal = y;
       if (hasSecondary && secondaryKey) {
-        const mSec = (m as any)[secondaryKey] !== undefined ? Number((m as any)[secondaryKey]) : m[metricKey];
+        const mSec = m[secondaryKey] !== undefined ? Number(m[secondaryKey]) : m[metricKey];
         ySecVal = height - paddingBottom - (mSec / yMax) * chartHeight;
       }
       return { x, y, ySecondary: ySecVal, raw: m };
@@ -689,7 +690,7 @@ function ChartCard({
               </span>
               <span style={{ fontWeight: 600, color }}>
                 {valueFormatter(
-                  Number((activePoint.raw as any)[secondaryKey] || 0)
+                  Number(activePoint.raw[secondaryKey] || 0)
                 )}
               </span>
             </div>

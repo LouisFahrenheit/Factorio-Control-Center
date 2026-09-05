@@ -34,5 +34,6 @@ export function mapPresetRecordFromApi(record: MapGenUserPresetApiRecord): MapGe
 
 export function mapGenUiStateWithoutSeed(state: MapGenUiState): Omit<MapGenUiState, 'seed'> {
   const { seed: _seed, ...rest } = state;
+  void _seed;
   return rest;
 }

@@ -154,7 +154,7 @@ export default function PublicServersPage() {
       window.URL.revokeObjectURL(url);
       
       notifyOk(t('success') || 'Success', t('download_complete') || 'Mods download started!');
-    } catch (err) {
+    } catch {
       notifyErr(t('error') || 'Error', t('api_error_load_failed') || 'Failed to download.');
     } finally {
       setDownloading(false);
@@ -191,7 +191,7 @@ export default function PublicServersPage() {
         style={{
           '--login-portal-max': '1400px',
           height: '90vh'
-        } as any}
+        } as React.CSSProperties}
       >
         <div className="login-portal__fx" aria-hidden="true">
           <span className="login-portal__aura" />
@@ -521,8 +521,8 @@ export default function PublicServersPage() {
                                     />
                                   )}
                                   {server.modBadges?.map((id: string) => {
-                                    const iconUrl = (SERVER_LIST_MOD_BADGE_ICON_URL as any)[id];
-                                    const titleKey = (SERVER_LIST_MOD_BADGE_I18N as any)[id];
+                                    const iconUrl = (SERVER_LIST_MOD_BADGE_ICON_URL as Record<string, string>)[id];
+                                    const titleKey = (SERVER_LIST_MOD_BADGE_I18N as Record<string, string>)[id];
                                     if (iconUrl && isIconAvailable(iconUrl)) {
                                       return (
                                         <img

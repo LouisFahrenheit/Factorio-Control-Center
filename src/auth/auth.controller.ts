@@ -174,10 +174,10 @@ export class AuthController {
 
     if (before) {
       if (body.role !== undefined && body.role !== before.role) {
-        changes.push(`role=${body.role}`);
+        changes.push(`role=${String(body.role)}`);
       }
       if (body.enabled !== undefined && body.enabled !== before.enabled) {
-        changes.push(`enabled=${body.enabled}`);
+        changes.push(`enabled=${String(body.enabled)}`);
       }
       if (
         body.tabs !== undefined &&

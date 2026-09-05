@@ -107,7 +107,7 @@ export function useSocket(
       }
     };
 
-    const onInstancesUpdate = (_data: Record<string, unknown>) => {
+    const onInstancesUpdate = () => {
       void qc.invalidateQueries({ queryKey: ['instances'] });
     };
 

@@ -142,7 +142,10 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
                     ups = Math.min(60.0, Math.max(0.0, tickDiff / timeDiffSec));
                   }
                 }
-                this.lastTicks.set(id, { tick: currentTick, time: currentTime });
+                this.lastTicks.set(id, {
+                  tick: currentTick,
+                  time: currentTime,
+                });
               }
             } else {
               // If RCON command failed, server could be starting, sleeping, or frozen
@@ -159,7 +162,9 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
               saveSize = st.size;
             }
           } catch (err) {
-            this.log.debug(`Failed to get save size for instance ${id}: ${err}`);
+            this.log.debug(
+              `Failed to get save size for instance ${id}: ${err}`,
+            );
           }
 
           const record = this.rawRepo.create({

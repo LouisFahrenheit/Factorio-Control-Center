@@ -250,7 +250,9 @@ export class FilesOpsService {
         try {
           const beforeMs = ModSettings.load(readFileSync(p));
           beforeDoc = JSON.parse(modSettingsToJsonText(beforeMs));
-        } catch {}
+        } catch {
+          // ignore parsing error for previous mod-settings
+        }
       }
 
       const ms = modSettingsFromJson(data);

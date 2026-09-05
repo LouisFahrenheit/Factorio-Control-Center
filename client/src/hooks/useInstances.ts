@@ -89,6 +89,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
 
   const setInstanceMsgTimed = useCallback(
     (text: string, isErr = false, _ttlMs?: number) => {
+      void _ttlMs;
       notifyInstance(text, isErr);
     },
     [notifyInstance],

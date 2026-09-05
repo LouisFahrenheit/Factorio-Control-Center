@@ -177,7 +177,10 @@ export class ServerOpsService {
         deps = filterInstallableMissingDeps(rt.missingStartupDependencies);
       } else {
         deps = filterInstallableMissingDeps(
-          parseMissingStartupDependencies(rt.sessionRawLines, serverHasSpaceAge),
+          parseMissingStartupDependencies(
+            rt.sessionRawLines,
+            serverHasSpaceAge,
+          ),
         );
       }
     } else {

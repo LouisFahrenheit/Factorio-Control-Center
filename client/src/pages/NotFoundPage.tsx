@@ -30,7 +30,7 @@ export default function NotFoundPage() {
           '--login-portal-max': '500px',
           margin: 'auto',
           padding: '2rem',
-        } as any}
+        } as React.CSSProperties}
       >
         <div className="login-portal__fx" aria-hidden="true">
           <span className="login-portal__aura" />

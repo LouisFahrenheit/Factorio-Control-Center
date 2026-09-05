@@ -263,7 +263,9 @@ export class DispatchService {
           String(kwargs.target_instance_id || kwargs.target_server_id || ''),
           {
             mode: kwargs.mode === 'move' ? 'move' : 'copy',
-            target_name: kwargs.target_name ? String(kwargs.target_name) : undefined,
+            target_name: kwargs.target_name
+              ? String(kwargs.target_name)
+              : undefined,
             overwrite:
               kwargs.overwrite === true ||
               kwargs.overwrite === 'true' ||

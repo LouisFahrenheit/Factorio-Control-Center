@@ -20,6 +20,7 @@ export function normalizeSaveZipName(raw: string): string | null {
   if (!n) return null;
   n = n.replace(/\.zip$/i, '');
   if (!n || /^\.+$/.test(n)) return null;
+  // eslint-disable-next-line no-control-regex
   if (/[<>:"/\\|?*\x00-\x1f]/.test(n)) return null;
   return `${n}.zip`;
 }
@@ -60,6 +61,7 @@ export function localizeSaveUploadError(
 /** Strip characters invalid in save file names (Unicode letters kept). */
 function sanitizeSaveStem(stem: string): string {
   return stem
+    // eslint-disable-next-line no-control-regex
     .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
     .replace(/\s+/g, ' ')
     .trim()

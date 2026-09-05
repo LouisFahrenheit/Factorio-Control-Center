@@ -60,7 +60,7 @@ export function useAnnouncements(
       const run = (async () => {
         const r = await api<AnnouncementsLoadResponse>('/api/announcements');
         if (!r || r.ok === false) throw new Error(String(r?.error || 'load_failed'));
-        let next = normalizeAnnounceState(r.data || {});
+        const next = normalizeAnnounceState(r.data || {});
         setState(next);
         setLoadedForInstance(iid);
       })();
@@ -197,7 +197,7 @@ export function useAnnouncements(
       if (!lines.length) continue;
       const hours = Math.max(1, Math.min(99, parseInt(String(item.intervalHours), 10) || 6));
       const ms = hours * 3600000;
-      let last = item.lastAutoSentAt || 0;
+      const last = item.lastAutoSentAt || 0;
       if (last <= 0) {
         item.lastAutoSentAt = now;
         changed = true;

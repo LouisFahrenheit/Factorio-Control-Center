@@ -246,7 +246,7 @@ export function useCommandEditor(
       const loc = findCommandLocation(next, selectedCommandId);
       if (!loc) return;
       const current = next.categories[loc.categoryKey].commands[loc.index];
-      let updated: CommandDef = { ...current, ...patch };
+      const updated: CommandDef = { ...current, ...patch };
 
       if (patch.has_boolean) {
         updated.has_boolean = true;

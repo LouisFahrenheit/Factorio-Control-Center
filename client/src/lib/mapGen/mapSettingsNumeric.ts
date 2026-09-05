@@ -52,7 +52,7 @@ export function normalizeSettlerGroupSizes(
   max: number,
 ): { settlerGroupMin: number; settlerGroupMax: number } {
   let settlerGroupMin = clampNumeric(min, EXPANSION_FIELD_SPECS.settlerGroupMin);
-  let settlerGroupMax = clampNumeric(max, EXPANSION_FIELD_SPECS.settlerGroupMax);
+  const settlerGroupMax = clampNumeric(max, EXPANSION_FIELD_SPECS.settlerGroupMax);
   if (settlerGroupMax < settlerGroupMin) {
     settlerGroupMin = settlerGroupMax;
   }

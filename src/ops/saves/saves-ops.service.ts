@@ -251,7 +251,8 @@ export class SavesOpsService {
     const srcName = safeZipName(name);
     if (!srcName) return { ok: false, error: 'invalid_name' };
     const srcPath = safeJoin(sel.pm.savesDir, srcName);
-    if (!srcPath || !existsSync(srcPath)) return { ok: false, error: 'not_found' };
+    if (!srcPath || !existsSync(srcPath))
+      return { ok: false, error: 'not_found' };
 
     const mode = options?.mode === 'move' ? 'move' : 'copy';
     if (mode === 'move' && this.isActiveSave(sel.item.id, srcName)) {

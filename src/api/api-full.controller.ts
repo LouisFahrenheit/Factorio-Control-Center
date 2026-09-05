@@ -487,7 +487,8 @@ export class ApiFullController {
   ) {
     return this.bridge.submit('transfer_save', {
       name,
-      target_instance_id: body.target_instance_id || body.target_server_id || '',
+      target_instance_id:
+        body.target_instance_id || body.target_server_id || '',
       mode: body.mode || 'copy',
       target_name: body.target_name || '',
       overwrite: !!body.overwrite,

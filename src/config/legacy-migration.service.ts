@@ -59,13 +59,17 @@ export class LegacyMigrationService implements OnModuleInit {
           strict: false,
         });
         if (instancesSvc) await instancesSvc.reloadCache();
-      } catch {}
+      } catch {
+        // ignore if InstancesService is unavailable during migration
+      }
       try {
         const configSvc = this.moduleRef.get(FccConfigService, {
           strict: false,
         });
         if (configSvc) await configSvc.reload();
-      } catch {}
+      } catch {
+        // ignore if FccConfigService is unavailable during migration
+      }
     } else {
       this.log.debug(`No legacy files found. Migration skipped.`);
     }

@@ -68,7 +68,7 @@ export function slugifyCommandId(name: string, fallback = 'command'): string {
 }
 
 export function uniqueCommandId(catalog: CommandsCatalogDoc, base: string): string {
-  let id = slugifyCommandId(base);
+  const id = slugifyCommandId(base);
   const used = new Set<string>();
   Object.values(catalog.categories).forEach((cat) => {
     cat.commands.forEach((cmd) => used.add(cmd.id));
