@@ -125,10 +125,13 @@ export function ControlTab({
                   disabled={control.busy}
                   aria-invalid={showIpError}
                   aria-describedby={showIpError ? 'inpIpError' : undefined}
-                  onBlur={() => setIpTouched(true)}
+                  onBlur={() => {
+                    setIpTouched(true);
+                    void control.saveNetworkConfig();
+                  }}
                   onChange={(e) => {
                     control.setIp(e.target.value);
-                    control.scheduleNetworkSave();
+                    control.scheduleNetworkSave(e.target.value, control.port);
                   }}
                 />
               </label>
@@ -155,10 +158,14 @@ export function ControlTab({
                   disabled={control.busy}
                   aria-invalid={showPortError}
                   aria-describedby={showPortError ? 'inpPortError' : undefined}
-                  onBlur={() => setPortTouched(true)}
+                  onBlur={() => {
+                    setPortTouched(true);
+                    void control.saveNetworkConfig();
+                  }}
                   onChange={(e) => {
-                    control.setPort(e.target.value.replace(/\D/g, ''));
-                    control.scheduleNetworkSave();
+                    const val = e.target.value.replace(/\D/g, '');
+                    control.setPort(val);
+                    control.scheduleNetworkSave(control.ip, val);
                   }}
                 />
               </label>
@@ -169,7 +176,11 @@ export function ControlTab({
                   className="input control-tab__compact-input"
                   value={control.save}
                   disabled={control.busy}
-                  onChange={(e) => control.setSave(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    control.setSave(val);
+                    void control.saveStartupConfig(undefined, undefined, val);
+                  }}
                 >
                   <option value={control.latestLabel}>{t('latest') || control.latestLabel}</option>
                   {control.saves.map((s) => (

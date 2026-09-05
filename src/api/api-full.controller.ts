@@ -314,16 +314,28 @@ export class ApiFullController {
   }
 
   @Get('config/server')
-  configServerGet() {
-    return this.bridge.submit('get_server_ini');
+  configServerGet(@Query('instance_id') instanceId?: string) {
+    const iid =
+      typeof instanceId === 'string' && instanceId.trim()
+        ? instanceId.trim()
+        : undefined;
+    return this.bridge.submit('get_server_ini', {}, iid);
   }
 
   @Put('config/server')
   configServerPut(@Body() body: Record<string, unknown>, @Req() req: Request) {
-    return this.bridge.submit('set_server_ini', {
-      ...body,
-      actor: this.bridge.webActor(this.user(req)),
-    });
+    const iid =
+      typeof body?.instance_id === 'string' && body.instance_id.trim()
+        ? body.instance_id.trim()
+        : undefined;
+    return this.bridge.submit(
+      'set_server_ini',
+      {
+        ...body,
+        actor: this.bridge.webActor(this.user(req)),
+      },
+      iid,
+    );
   }
 
   @Post('config/web/restart')

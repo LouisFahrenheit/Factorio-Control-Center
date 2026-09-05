@@ -716,10 +716,17 @@ export class ApiController {
   @ApiOperation({ summary: 'Update server.ini configuration' })
   @ApiResponse({ status: 200, description: 'Config saved' })
   serverConfigSet(@Body() body: Record<string, unknown>, @Req() req: Request) {
-    return this.bridge.submit('set_server_ini', {
-      ...body,
-      web_actor: this.bridge.webActor(this.me(req)),
-    });
+    const iid = this.explicitInstanceId(
+      typeof body?.instance_id === 'string' ? body.instance_id : undefined,
+    );
+    return this.bridge.submit(
+      'set_server_ini',
+      {
+        ...body,
+        web_actor: this.bridge.webActor(this.me(req)),
+      },
+      iid,
+    );
   }
 
   @UseGuards(AuthGuard)

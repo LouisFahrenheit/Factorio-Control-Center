@@ -38,9 +38,14 @@ export function useServerControl(
   const statusStableSinceRef = useRef(Date.now());
   const prevKindRef = useRef<string>('');
 
+  const lastLoadedIdRef = useRef<string>('');
+
   const configQuery = useQuery({
     queryKey: ['config', 'server', selectedId],
-    queryFn: () => api<{ ip?: string; port?: string; save?: string; latest_label?: string }>('/api/config/server'),
+    queryFn: () => {
+      const qs = selectedId ? `?instance_id=${encodeURIComponent(selectedId)}` : '';
+      return api<{ ip?: string; port?: string; save?: string; latest_label?: string }>(`/api/config/server${qs}`);
+    },
     enabled: enabled && !!selectedId,
   });
 
@@ -48,7 +53,8 @@ export function useServerControl(
     queryKey: ['saves', selectedId],
     queryFn: async () => {
       try {
-        return await api<{ saves?: SaveRow[]; ok?: boolean; error?: string }>('/api/saves');
+        const qs = selectedId ? `?instance_id=${encodeURIComponent(selectedId)}` : '';
+        return await api<{ saves?: SaveRow[]; ok?: boolean; error?: string }>(`/api/saves${qs}`);
       } catch {
         return { saves: [] as SaveRow[] };
       }
@@ -72,15 +78,23 @@ export function useServerControl(
   }, [kind]);
 
   useEffect(() => {
+    if (!selectedId) return;
     const cfg = configQuery.data;
     const inst = instances.find((x) => String(x.id) === selectedId);
-    if (cfg?.ip) setIp(String(cfg.ip).trim() || '0.0.0.0');
-    else if (inst?.ip) setIp(String(inst.ip).trim() || '0.0.0.0');
-    if (cfg?.port) setPort(String(cfg.port).trim() || '34197');
-    else if (inst?.port) setPort(String(inst.port).trim() || '34197');
-    const want = cfg?.save || inst?.launchSave || latestLabel;
-    setSave(String(want || latestLabel));
-  }, [configQuery.data, instances, selectedId, latestLabel]);
+
+    // Re-initialize state only on instance change or initial data load
+    if (lastLoadedIdRef.current !== selectedId || (!ip && !port)) {
+      if (cfg || inst) {
+        lastLoadedIdRef.current = selectedId;
+        const nextIp = cfg?.ip ? String(cfg.ip).trim() : inst?.ip ? String(inst.ip).trim() : '0.0.0.0';
+        const nextPort = cfg?.port ? String(cfg.port).trim() : inst?.port ? String(inst.port).trim() : '34197';
+        const want = cfg?.save || inst?.launchSave || latestLabel;
+        setIp(nextIp || '0.0.0.0');
+        setPort(nextPort || '34197');
+        setSave(String(want || latestLabel));
+      }
+    }
+  }, [configQuery.data, instances, selectedId, latestLabel, ip, port]);
 
   const refreshLogs = useCallback(async () => {
     if (!enabled || !selectedId) return;
@@ -144,29 +158,81 @@ export function useServerControl(
     };
   }, [enabled, kind, refreshLogs]);
 
-  const scheduleNetworkSave = useCallback(() => {
-    if (!isNetworkConfigValid(ip, port)) return;
-    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = window.setTimeout(async () => {
-      saveTimerRef.current = null;
+  const saveNetworkConfig = useCallback(
+    async (targetIp?: string, targetPort?: string) => {
+      const curIp = targetIp !== undefined ? targetIp : ip;
+      const curPort = targetPort !== undefined ? targetPort : port;
+      if (!isNetworkConfigValid(curIp, curPort)) return;
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
       try {
         const j = await api<{ ok?: boolean; error?: string }>('/api/config/server', {
           method: 'PUT',
-          body: JSON.stringify({ ip: resolveGameBindIp(ip), port: port.trim() }),
+          body: JSON.stringify({
+            instance_id: selectedId || undefined,
+            ip: resolveGameBindIp(curIp),
+            port: curPort.trim(),
+          }),
         });
-        if (j?.ok === false) notifyErr(t('save_btn'), localizeInstanceError(j.error || 'error', t));
+        if (j?.ok === false) {
+          notifyErr(t('save_btn'), localizeInstanceError(j.error || 'error', t));
+        } else {
+          await Promise.all([
+            qc.invalidateQueries({ queryKey: ['instances'] }),
+            qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+          ]);
+        }
       } catch (e) {
         notifyApiError(t('save_btn'), e, t);
       }
-    }, 3000);
-  }, [ip, port, t]);
+    },
+    [ip, port, selectedId, qc, t],
+  );
 
-  const saveStartupConfig = useCallback(async () => {
-    return api<{ ok?: boolean; error?: string }>('/api/config/server', {
-      method: 'PUT',
-      body: JSON.stringify({ ip: resolveGameBindIp(ip), port: port.trim(), save }),
-    });
-  }, [ip, port, save]);
+  const scheduleNetworkSave = useCallback(
+    (targetIp?: string, targetPort?: string) => {
+      const curIp = targetIp !== undefined ? targetIp : ip;
+      const curPort = targetPort !== undefined ? targetPort : port;
+      if (!isNetworkConfigValid(curIp, curPort)) return;
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = window.setTimeout(() => {
+        saveTimerRef.current = null;
+        void saveNetworkConfig(curIp, curPort);
+      }, 1000);
+    },
+    [ip, port, saveNetworkConfig],
+  );
+
+  const saveStartupConfig = useCallback(
+    async (targetIp?: string, targetPort?: string, targetSave?: string) => {
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      const curIp = targetIp !== undefined ? targetIp : ip;
+      const curPort = targetPort !== undefined ? targetPort : port;
+      const curSave = targetSave !== undefined ? targetSave : save;
+      const res = await api<{ ok?: boolean; error?: string }>('/api/config/server', {
+        method: 'PUT',
+        body: JSON.stringify({
+          instance_id: selectedId || undefined,
+          ip: resolveGameBindIp(curIp),
+          port: curPort.trim(),
+          save: curSave,
+        }),
+      });
+      if (res?.ok !== false) {
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: ['instances'] }),
+          qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+        ]);
+      }
+      return res;
+    },
+    [ip, port, save, selectedId, qc],
+  );
 
   const getEffectiveStatus = useCallback((item: InstanceItem) => String(item.status || ''), []);
 
@@ -200,27 +266,47 @@ export function useServerControl(
     }
     const cfgResp = await saveStartupConfig();
     if (cfgResp?.ok === false) throw new Error(localizeInstanceError(cfgResp.error || 'save_failed', t));
-    const r = await api<{ ok?: boolean; error?: string }>('/api/server/start', { method: 'POST' });
+    const r = await api<{ ok?: boolean; error?: string }>('/api/server/start', {
+      method: 'POST',
+      body: JSON.stringify({ instance_id: selectedId || undefined }),
+    });
     if (r?.ok === false) throw new Error(String(r.error || 'start_failed'));
     notifyOk(t('start_btn'), t('instances_quick_starting', instanceName || '?'));
-    await qc.invalidateQueries({ queryKey: ['panel', 'status'] });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ['panel', 'status'] }),
+      qc.invalidateQueries({ queryKey: ['instances'] }),
+      qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+    ]);
   }, [instances, selectedId, ip, port, save, latestLabel, saves.length, saveStartupConfig, qc, t, getEffectiveStatus, instanceName, modJobRunning]);
 
   const stop = useCallback(async () => {
-    const r = await api<{ ok?: boolean; error?: string }>('/api/server/stop', { method: 'POST' });
+    const r = await api<{ ok?: boolean; error?: string }>('/api/server/stop', {
+      method: 'POST',
+      body: JSON.stringify({ instance_id: selectedId || undefined }),
+    });
     if (r?.ok === false) throw new Error(String(r.error || 'stop_failed'));
     notifyOk(t('stop_btn'), t('instances_quick_stopping', instanceName || '?'));
-    await qc.invalidateQueries({ queryKey: ['panel', 'status'] });
-    await qc.invalidateQueries({ queryKey: ['config', 'server'] });
-  }, [qc, instanceName, t]);
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ['panel', 'status'] }),
+      qc.invalidateQueries({ queryKey: ['instances'] }),
+      qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+    ]);
+  }, [qc, selectedId, instanceName, t]);
 
   const kill = useCallback(async () => {
     if (!(await modConfirm(t('confirm_kill_msg'), t))) return;
-    const r = await api<{ ok?: boolean; error?: string }>('/api/server/kill', { method: 'POST' });
+    const r = await api<{ ok?: boolean; error?: string }>('/api/server/kill', {
+      method: 'POST',
+      body: JSON.stringify({ instance_id: selectedId || undefined }),
+    });
     if (r?.ok === false) throw new Error(String(r.error || 'kill_failed'));
     notifyOk(t('kill_btn'), t('instances_quick_killing', instanceName || '?'));
-    await qc.invalidateQueries({ queryKey: ['panel', 'status'] });
-  }, [qc, t, instanceName]);
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ['panel', 'status'] }),
+      qc.invalidateQueries({ queryKey: ['instances'] }),
+      qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+    ]);
+  }, [qc, selectedId, t, instanceName]);
 
   const saveGame = useCallback(async () => {
     const r = await api<{ ok?: boolean; error?: string }>('/api/server/save', { method: 'POST' });
@@ -236,14 +322,23 @@ export function useServerControl(
 
   const restart = useCallback(async () => {
     try {
-      const r = await api<{ ok?: boolean; error?: string }>('/api/server/restart', { method: 'POST' });
+      const cfgResp = await saveStartupConfig();
+      if (cfgResp?.ok === false) throw new Error(localizeInstanceError(cfgResp.error || 'save_failed', t));
+      const r = await api<{ ok?: boolean; error?: string }>('/api/server/restart', {
+        method: 'POST',
+        body: JSON.stringify({ instance_id: selectedId || undefined }),
+      });
       if (r?.ok === false) throw new Error(String(r.error || 'restart_failed'));
       notifyOk(t('restart_server_btn'), t('restart_server_done'));
-      await qc.invalidateQueries({ queryKey: ['panel', 'status'] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['panel', 'status'] }),
+        qc.invalidateQueries({ queryKey: ['instances'] }),
+        qc.invalidateQueries({ queryKey: ['config', 'server', selectedId] }),
+      ]);
     } catch (e) {
       notifyApiError(t('restart_server_btn'), e, t);
     }
-  }, [qc, t]);
+  }, [qc, selectedId, saveStartupConfig, t]);
 
   const sendRcon = useCallback(
     async (command: string) => {
@@ -315,6 +410,8 @@ export function useServerControl(
     startStopDisabled,
     logLines,
     scheduleNetworkSave,
+    saveNetworkConfig,
+    saveStartupConfig,
     toggleStartStop,
     kill,
     saveGame,
