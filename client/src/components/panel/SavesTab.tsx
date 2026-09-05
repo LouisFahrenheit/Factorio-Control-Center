@@ -7,6 +7,7 @@ import { filterSaveRows, saveDisplayLabel, type SaveModCompareRow } from '../../
 import { SavesRowMenu } from './SavesRowMenu';
 import { SaveRenameModal } from './SaveRenameModal';
 import { QuickSaveNameModal } from './QuickSaveNameModal';
+import { SaveTransferModal } from './SaveTransferModal';
 
 function saveModStatusKey(nameClass: string): string | null {
   switch (nameClass) {
@@ -400,6 +401,11 @@ export function SavesTab({ saves, t }: SavesTabProps) {
           closeMenu();
           void saves.duplicate(menuItem.name).catch(saves.handleError);
         }}
+        onTransfer={() => {
+          if (!menuItem) return;
+          closeMenu();
+          saves.openTransferDialog(menuItem.name);
+        }}
         onRename={() => {
           if (!menuItem) return;
           closeMenu();
@@ -414,6 +420,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
       />
 
       <SaveRenameModal saves={saves} t={t} />
+      <SaveTransferModal saves={saves} t={t} />
       <QuickSaveNameModal saves={saves} t={t} />
     </div>
   );

@@ -14,6 +14,7 @@ interface SavesRowMenuProps {
   onDownload: () => void;
   onSetLaunch: () => void;
   onDuplicate: () => void;
+  onTransfer: () => void;
   onRename: () => void;
   onDelete: () => void;
   t: (key: string) => string;
@@ -28,6 +29,7 @@ export function SavesRowMenu({
   onDownload,
   onSetLaunch,
   onDuplicate,
+  onTransfer,
   onRename,
   onDelete,
   t,
@@ -64,6 +66,10 @@ export function SavesRowMenu({
       <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onDuplicate}>
         <AppIcon name="file_copy" size={16} />
         {t('saves_manager_duplicate')}
+      </button>
+      <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onTransfer}>
+        <AppIcon name="folder_copy" size={16} />
+        {t('saves_manager_transfer')}
       </button>
       <button
         type="button"

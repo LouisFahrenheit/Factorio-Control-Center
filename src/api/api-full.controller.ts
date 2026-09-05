@@ -456,6 +456,33 @@ export class ApiFullController {
     });
   }
 
+  @Post('saves/:name/transfer')
+  @ApiTags('Saves')
+  @ApiOperation({ summary: 'Copy or move a save file to another server' })
+  @ApiParam({ name: 'name', description: 'Save file name to transfer' })
+  @ApiResponse({ status: 200, description: 'Save transferred' })
+  saveTransfer(
+    @Param('name') name: string,
+    @Body()
+    body: {
+      target_server_id?: string;
+      target_instance_id?: string;
+      mode?: 'copy' | 'move';
+      target_name?: string;
+      overwrite?: boolean;
+    },
+    @Req() req: Request,
+  ) {
+    return this.bridge.submit('transfer_save', {
+      name,
+      target_instance_id: body.target_instance_id || body.target_server_id || '',
+      mode: body.mode || 'copy',
+      target_name: body.target_name || '',
+      overwrite: !!body.overwrite,
+      actor: this.bridge.webActor(this.user(req)),
+    });
+  }
+
   @Post('saves/set-launch')
   @ApiTags('Saves')
   @ApiOperation({ summary: 'Set which save file to launch on server start' })

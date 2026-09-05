@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, rmSync, statSync } from 'fs';
 import { basename, join } from 'path';
 import { InstancesService } from '../../instances/instances.service';
 import { FccConfigService } from '../../config/fcc-config.service';
+import { PathManager } from '../path-manager';
 import {
   SaveInspectService,
   saveFactorioVersionStr,
@@ -223,6 +224,85 @@ export class SavesOpsService {
     }
     copyFileSync(src, dst);
     return { ok: true, name: dstName };
+  }
+
+  transfer(
+    name: string,
+    targetInstanceId: string,
+    options?: {
+      mode?: 'copy' | 'move';
+      target_name?: string;
+      overwrite?: boolean;
+    },
+  ): OpResult {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return sel;
+
+    const targetId = String(targetInstanceId || '').trim();
+    if (!targetId || targetId === sel.item.id) {
+      return { ok: false, error: 'invalid_target_server' };
+    }
+
+    const targetItem = this.instances.getById(targetId);
+    if (!targetItem) {
+      return { ok: false, error: 'target_server_not_found' };
+    }
+
+    const srcName = safeZipName(name);
+    if (!srcName) return { ok: false, error: 'invalid_name' };
+    const srcPath = safeJoin(sel.pm.savesDir, srcName);
+    if (!srcPath || !existsSync(srcPath)) return { ok: false, error: 'not_found' };
+
+    const mode = options?.mode === 'move' ? 'move' : 'copy';
+    if (mode === 'move' && this.isActiveSave(sel.item.id, srcName)) {
+      return { ok: false, error: 'running_active_save' };
+    }
+
+    const targetPm = new PathManager(targetItem.serverPath);
+    mkdirSync(targetPm.savesDir, { recursive: true });
+
+    const rawWanted = options?.target_name
+      ? safeZipName(options.target_name)
+      : srcName;
+    if (!rawWanted) return { ok: false, error: 'invalid_name' };
+
+    let finalName = rawWanted;
+    let targetPath = safeJoin(targetPm.savesDir, finalName);
+    if (!targetPath) return { ok: false, error: 'invalid_target_path' };
+
+    const existsOnTarget = existsSync(targetPath);
+    if (existsOnTarget) {
+      if (options?.overwrite) {
+        if (this.isActiveSave(targetId, finalName)) {
+          return { ok: false, error: 'target_running_active_save' };
+        }
+        copyFileSync(srcPath, targetPath);
+      } else {
+        finalName = copyFileUnique(srcPath, targetPm.savesDir, rawWanted);
+        targetPath = join(targetPm.savesDir, finalName);
+      }
+    } else {
+      copyFileSync(srcPath, targetPath);
+    }
+
+    if (mode === 'move') {
+      rmSync(srcPath, { force: true });
+      if (sel.item.launchSave === srcName) {
+        this.instances.update(sel.item.id, {
+          ...sel.item,
+          launchSave: 'latest',
+        });
+      }
+    }
+
+    return {
+      ok: true,
+      mode,
+      source_name: srcName,
+      target_name: finalName,
+      target_server_id: targetId,
+      target_server_name: targetItem.name || targetId,
+    };
   }
 
   setLaunchSave(name: string): OpResult {

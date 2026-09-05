@@ -50,6 +50,7 @@ const AUDIT_OP_KIND: Record<string, string> = {
   set_launch_save: 'save_launch',
   upload_save_archive: 'save_upload',
   create_save: 'save_create',
+  transfer_save: 'save_transfer',
   set_server_ini: 'server_config',
 };
 
@@ -256,6 +257,20 @@ export class DispatchService {
         return this.saves.duplicate(String(kwargs.name || ''));
       case 'set_launch_save':
         return this.saves.setLaunchSave(String(kwargs.name || ''));
+      case 'transfer_save':
+        return this.saves.transfer(
+          String(kwargs.name || ''),
+          String(kwargs.target_instance_id || kwargs.target_server_id || ''),
+          {
+            mode: kwargs.mode === 'move' ? 'move' : 'copy',
+            target_name: kwargs.target_name ? String(kwargs.target_name) : undefined,
+            overwrite:
+              kwargs.overwrite === true ||
+              kwargs.overwrite === 'true' ||
+              kwargs.overwrite === 1 ||
+              kwargs.overwrite === '1',
+          },
+        );
       case 'upload_save_archive':
         return this.saves.uploadArchive(
           String(kwargs.tmp_path || ''),

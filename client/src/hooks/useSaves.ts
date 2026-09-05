@@ -60,6 +60,14 @@ export function useSaves(
   const [renameNewName, setRenameNewName] = useState('');
   const [renameError, setRenameError] = useState('');
   const [renameSubmitting, setRenameSubmitting] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferSourceName, setTransferSourceName] = useState('');
+  const [transferTargetServerId, setTransferTargetServerId] = useState('');
+  const [transferMode, setTransferMode] = useState<'copy' | 'move'>('copy');
+  const [transferTargetName, setTransferTargetName] = useState('');
+  const [transferOverwrite, setTransferOverwrite] = useState(false);
+  const [transferError, setTransferError] = useState('');
+  const [transferSubmitting, setTransferSubmitting] = useState(false);
   const [quickSaveDialogOpen, setQuickSaveDialogOpen] = useState(false);
   const [quickSaveFileName, setQuickSaveFileName] = useState('');
   const [quickSaveNameError, setQuickSaveNameError] = useState('');
@@ -198,6 +206,106 @@ export function useSaves(
     selectedSave,
     setSavesMsg,
     t,
+  ]);
+
+  const openTransferDialog = useCallback((name: string) => {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) return;
+    setTransferSourceName(trimmed);
+    setTransferTargetName(saveDisplayLabel(trimmed));
+    setTransferTargetServerId('');
+    setTransferMode('copy');
+    setTransferOverwrite(false);
+    setTransferError('');
+    setTransferSubmitting(false);
+    setTransferOpen(true);
+  }, []);
+
+  const closeTransferDialog = useCallback(() => {
+    if (transferSubmitting) return;
+    setTransferOpen(false);
+    setTransferSourceName('');
+    setTransferTargetServerId('');
+    setTransferTargetName('');
+    setTransferError('');
+    setTransferSubmitting(false);
+  }, [transferSubmitting]);
+
+  const submitTransfer = useCallback(async () => {
+    if (transferSubmitting) return;
+    const srcName = transferSourceName.trim();
+    if (!srcName) {
+      closeTransferDialog();
+      return;
+    }
+    if (!transferTargetServerId) {
+      setTransferError(t('saves_manager_transfer_invalid_target'));
+      return;
+    }
+    const nextZip = normalizeSaveZipName(transferTargetName);
+    if (!nextZip) {
+      setTransferError(t('saves_manager_rename_invalid'));
+      return;
+    }
+    setTransferSubmitting(true);
+    setTransferError('');
+    try {
+      const res = await api<{
+        ok?: boolean;
+        error?: string;
+        mode?: 'copy' | 'move';
+        source_name?: string;
+        target_name?: string;
+        target_server_name?: string;
+      }>(`/api/saves/${encodeURIComponent(srcName)}/transfer`, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_server_id: transferTargetServerId,
+          mode: transferMode,
+          target_name: nextZip,
+          overwrite: transferOverwrite,
+        }),
+      });
+      if (!res || res.ok === false) {
+        throw new Error(String(res?.error || 'transfer_failed'));
+      }
+      const targetServerLabel = String(res.target_server_name || transferTargetServerId);
+      const finalTargetName = String(res.target_name || nextZip);
+      closeTransferDialog();
+      await reload();
+      const msgKey =
+        transferMode === 'move'
+          ? 'saves_manager_transfer_success_move'
+          : 'saves_manager_transfer_success_copy';
+      setSavesMsg(t(msgKey, srcName, targetServerLabel, finalTargetName), false);
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : String(e);
+      let text = raw;
+      if (raw === 'running_active_save') {
+        text = t('saves_manager_transfer_mode_move_running_warn');
+      } else if (raw === 'target_running_active_save') {
+        text = t('saves_manager_transfer_target_running_active');
+      } else if (raw === 'invalid_target_server' || raw === 'target_server_not_found') {
+        text = t('saves_manager_transfer_invalid_target');
+      } else {
+        text = localizeSaveRenameError(raw, t, nextZip);
+      }
+      setTransferError(text);
+      setSavesMsg(t('saves_manager_transfer_failed', text), true);
+    } finally {
+      setTransferSubmitting(false);
+    }
+  }, [
+    closeTransferDialog,
+    reload,
+    setSavesMsg,
+    t,
+    transferMode,
+    transferOverwrite,
+    transferSourceName,
+    transferSubmitting,
+    transferTargetName,
+    transferTargetServerId,
   ]);
 
   const remove = useCallback(
@@ -364,6 +472,21 @@ export function useSaves(
     setRenameNewName,
     renameError,
     renameSubmitting,
+    openTransferDialog,
+    closeTransferDialog,
+    submitTransfer,
+    transferOpen,
+    transferSourceName,
+    transferTargetServerId,
+    setTransferTargetServerId,
+    transferMode,
+    setTransferMode,
+    transferTargetName,
+    setTransferTargetName,
+    transferOverwrite,
+    setTransferOverwrite,
+    transferError,
+    transferSubmitting,
     remove,
     duplicate,
     setLaunch,
