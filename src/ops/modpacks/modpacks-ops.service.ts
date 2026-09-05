@@ -7,6 +7,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from 'fs';
@@ -751,16 +752,40 @@ export class ModpacksOpsService {
       ? (JSON.parse(readFileSync(metaPath, 'utf-8')) as Record<string, unknown>)
       : {};
     const modsDir = join(dir, 'mods');
-    const modsCount = existsSync(modsDir)
-      ? readdirSync(modsDir).filter((f) => f.toLowerCase().endsWith('.zip'))
-          .length
-      : 0;
+    let modsCount = 0;
+    let sizeBytes = 0;
+    if (existsSync(modsDir)) {
+      const files = readdirSync(modsDir);
+      for (const f of files) {
+        const lower = f.toLowerCase();
+        if (lower.endsWith('.zip')) {
+          modsCount++;
+          try {
+            const st = statSync(join(modsDir, f));
+            sizeBytes += st.size;
+          } catch {
+            // ignore
+          }
+        } else if (lower === 'mod-settings.dat' || lower === 'mod-list.json') {
+          try {
+            const st = statSync(join(modsDir, f));
+            sizeBytes += st.size;
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
     return {
       name,
       active: active === name,
       mods_count: modsCount,
       requires_space_age: modpackActivateNeedsSpaceAge(dir),
       ...meta,
+      size_bytes:
+        typeof meta.size_bytes === 'number' && meta.size_bytes > 0
+          ? meta.size_bytes
+          : sizeBytes,
     };
   }
 
