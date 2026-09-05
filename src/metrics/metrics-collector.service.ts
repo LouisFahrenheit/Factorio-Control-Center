@@ -51,138 +51,144 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   }
 
   async collect(): Promise<void> {
-    const activeInstances = [...this.runtime.runtimes.entries()].filter(
-      ([_, rt]) => rt.proc && rt.proc.pid && rt.proc.exitCode === null,
-    );
+    try {
+      const activeInstances = [...this.runtime.runtimes.entries()].filter(
+        ([_, rt]) => rt.proc && rt.proc.pid && rt.proc.exitCode === null,
+      );
 
-    if (activeInstances.length === 0) return;
+      if (activeInstances.length === 0) return;
 
-    const timestamp = new Date();
-    const records: InstanceRawMetric[] = [];
+      const timestamp = new Date();
+      const records: InstanceRawMetric[] = [];
 
-    for (const [id, rt] of activeInstances) {
-      if (!rt.proc || !rt.proc.pid) continue;
-      try {
-        const stats = await pidusage(rt.proc.pid);
+      for (const [id, rt] of activeInstances) {
+        const pid = rt.proc?.pid;
+        if (!pid) continue;
 
-        // Calculate game UPS and SPM by checking tick delta and science pack consumption via RCON.
-        // Only runs if the instance has collectGameMetrics enabled (disabled by default to protect achievements).
-        let ups = 60.0;
-        let spm = 0.0;
-        const item = this.instances.getById(id);
-        if (item?.collectGameMetrics) {
-          const luaScript = `
-            local tick = game.tick
-            local max_spm = 0
-            local force = game.forces['player']
-            if force then
-              local packs = {
-                "automation-science-pack",
-                "logistic-science-pack",
-                "military-science-pack",
-                "chemical-science-pack",
-                "production-science-pack",
-                "utility-science-pack",
-                "space-science-pack",
-                "metallurgic-science-pack",
-                "electromagnetic-science-pack",
-                "agricultural-science-pack",
-                "cryogenic-science-pack",
-                "promethium-science-pack"
-              }
-              local item_prototypes = prototypes and prototypes.item or game.item_prototypes
-              for _, p in ipairs(packs) do
-                if item_prototypes and item_prototypes[p] then
-                  local total_count = 0
-                  if type(force.get_item_production_statistics) == "function" then
-                    for _, surface in pairs(game.surfaces) do
-                      local stats = force.get_item_production_statistics(surface)
+        try {
+          const stats = await pidusage(pid);
+
+          // Calculate game UPS and SPM by checking tick delta and science pack consumption via RCON.
+          // Only runs if the instance has collectGameMetrics enabled (disabled by default to protect achievements).
+          let ups = 60.0;
+          let spm = 0.0;
+          const item = this.instances.getById(id);
+          if (item?.collectGameMetrics) {
+            const luaScript = `
+              local tick = game.tick
+              local max_spm = 0
+              local force = game.forces['player']
+              if force then
+                local packs = {
+                  "automation-science-pack",
+                  "logistic-science-pack",
+                  "military-science-pack",
+                  "chemical-science-pack",
+                  "production-science-pack",
+                  "utility-science-pack",
+                  "space-science-pack",
+                  "metallurgic-science-pack",
+                  "electromagnetic-science-pack",
+                  "agricultural-science-pack",
+                  "cryogenic-science-pack",
+                  "promethium-science-pack"
+                }
+                local item_prototypes = prototypes and prototypes.item or game.item_prototypes
+                for _, p in ipairs(packs) do
+                  if item_prototypes and item_prototypes[p] then
+                    local total_count = 0
+                    if type(force.get_item_production_statistics) == "function" then
+                      for _, surface in pairs(game.surfaces) do
+                        local stats = force.get_item_production_statistics(surface)
+                        if stats then
+                          total_count = total_count + (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
+                        end
+                      end
+                    else
+                      local stats = force.item_production_statistics
                       if stats then
-                        total_count = total_count + (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
+                        total_count = (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
                       end
                     end
-                  else
-                    local stats = force.item_production_statistics
-                    if stats then
-                      total_count = (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
+                    if total_count > max_spm then
+                      max_spm = total_count
                     end
-                  end
-                  if total_count > max_spm then
-                    max_spm = total_count
                   end
                 end
               end
-            end
-            rcon.print(tick .. "," .. max_spm)
-          `;
+              rcon.print(tick .. "," .. max_spm)
+            `;
 
-          const res = await this.runtime.rconExec(
-            id,
-            `/silent-command ${luaScript.replace(/\s+/g, ' ').trim()}`,
-            false,
-          );
-          if (res.ok && res.output) {
-            const parts = res.output.trim().split(',');
-            const currentTick = parseInt(parts[0], 10);
-            if (parts[1]) {
-              spm = parseFloat(parts[1]) || 0.0;
-            }
-
-            if (!isNaN(currentTick)) {
-              const last = this.lastTicks.get(id);
-              const currentTime = Date.now();
-              if (last && currentTick >= last.tick) {
-                const tickDiff = currentTick - last.tick;
-                const timeDiffSec = (currentTime - last.time) / 1000;
-                if (timeDiffSec > 0) {
-                  // Calculate UPS = ticks / seconds, max 60.0
-                  ups = Math.min(60.0, Math.max(0.0, tickDiff / timeDiffSec));
-                }
+            const res = await this.runtime.rconExec(
+              id,
+              `/silent-command ${luaScript.replace(/\s+/g, ' ').trim()}`,
+              false,
+            );
+            if (res.ok && res.output) {
+              const parts = res.output.trim().split(',');
+              const currentTick = parseInt(parts[0], 10);
+              if (parts[1]) {
+                spm = parseFloat(parts[1]) || 0.0;
               }
-              this.lastTicks.set(id, { tick: currentTick, time: currentTime });
+
+              if (!isNaN(currentTick)) {
+                const last = this.lastTicks.get(id);
+                const currentTime = Date.now();
+                if (last && currentTick >= last.tick) {
+                  const tickDiff = currentTick - last.tick;
+                  const timeDiffSec = (currentTime - last.time) / 1000;
+                  if (timeDiffSec > 0) {
+                    // Calculate UPS = ticks / seconds, max 60.0
+                    ups = Math.min(60.0, Math.max(0.0, tickDiff / timeDiffSec));
+                  }
+                }
+                this.lastTicks.set(id, { tick: currentTick, time: currentTime });
+              }
+            } else {
+              // If RCON command failed, server could be starting, sleeping, or frozen
+              ups = 0.0;
             }
-          } else {
-            // If RCON command failed, server could be starting, sleeping, or frozen
-            ups = 0.0;
           }
-        }
 
-        // Calculate save size from disk
-        let saveSize = 0;
-        try {
-          const savePath = join(rt.serverPath, 'saves', rt.saveName);
-          if (existsSync(savePath)) {
-            const st = statSync(savePath);
-            saveSize = st.size;
+          // Calculate save size from disk
+          let saveSize = 0;
+          try {
+            const savePath = join(rt.serverPath, 'saves', rt.saveName);
+            if (existsSync(savePath)) {
+              const st = statSync(savePath);
+              saveSize = st.size;
+            }
+          } catch (err) {
+            this.log.debug(`Failed to get save size for instance ${id}: ${err}`);
           }
+
+          const record = this.rawRepo.create({
+            instanceId: id,
+            timestamp,
+            cpuPercent: stats.cpu, // 0 - 100% (or more if multi-core, standard pidusage behavior)
+            memoryBytes: stats.memory, // RAM RSS in bytes
+            onlinePlayers: Object.keys(rt.onlinePlayers || {}).length,
+            ups,
+            saveSize,
+            spm,
+          });
+          records.push(record);
         } catch (err) {
-          this.log.debug(`Failed to get save size for instance ${id}: ${err}`);
+          this.log.debug(
+            `Failed to collect metrics for instance ${id} (PID ${pid}): ${err}`,
+          );
         }
-
-        const record = this.rawRepo.create({
-          instanceId: id,
-          timestamp,
-          cpuPercent: stats.cpu, // 0 - 100% (or more if multi-core, standard pidusage behavior)
-          memoryBytes: stats.memory, // RAM RSS in bytes
-          onlinePlayers: Object.keys(rt.onlinePlayers).length,
-          ups,
-          saveSize,
-          spm,
-        });
-        records.push(record);
-      } catch (err) {
-        this.log.debug(
-          `Failed to collect metrics for instance ${id} (PID ${rt.proc.pid}): ${err}`,
-        );
       }
-    }
 
-    if (records.length > 0) {
-      try {
-        await this.rawRepo.save(records);
-      } catch (err) {
-        this.log.error(`Failed to save raw metrics: ${err}`);
+      if (records.length > 0) {
+        try {
+          await this.rawRepo.save(records);
+        } catch (err) {
+          this.log.error(`Failed to save raw metrics: ${err}`);
+        }
       }
+    } catch (err) {
+      this.log.error(`Error during metrics collection: ${err}`);
     }
   }
 

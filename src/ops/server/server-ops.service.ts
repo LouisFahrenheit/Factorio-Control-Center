@@ -15,6 +15,7 @@ import {
   selectedInstance,
   tailFile,
   readLogFile,
+  installedModVersions,
   LOG_HISTORY_DEFAULT_TAIL,
 } from '../ops-utils';
 import {
@@ -22,6 +23,7 @@ import {
   parseMissingStartupDependencies,
   filterInstallableMissingDeps,
 } from '../mod-deps';
+import { PathManager } from '../path-manager';
 import { readJsonFile } from '../../common/json-store';
 import { sanitizeStdinLine } from '../../common/ban-sanitize';
 import { PathsService } from '../../config/paths.service';
@@ -163,27 +165,36 @@ export class ServerOpsService {
 
   private resolveMissingStartupDependencies(
     instanceId: string,
-    _serverPath: string,
+    serverPath: string,
     rt: ReturnType<RuntimeService['get']>,
     serverHasSpaceAge: boolean,
   ): string[] {
+    const pm = new PathManager(serverPath);
+    let deps: string[] = [];
     if (rt) {
       if (!rt.lastStartFailed) return [];
       if (rt.missingStartupDependencies.length) {
-        return filterInstallableMissingDeps(rt.missingStartupDependencies);
+        deps = filterInstallableMissingDeps(rt.missingStartupDependencies);
+      } else {
+        deps = filterInstallableMissingDeps(
+          parseMissingStartupDependencies(rt.sessionRawLines, serverHasSpaceAge),
+        );
       }
-      return filterInstallableMissingDeps(
-        parseMissingStartupDependencies(rt.sessionRawLines, serverHasSpaceAge),
+    } else {
+      // Nest restarted: inspect only the latest launch in the persisted log file.
+      const logPath = this.paths.instanceLogPath(instanceId);
+      const tail = tailFile(logPath, 5000);
+      if (!logShowsModLoadFailure(tail.lines)) return [];
+      deps = filterInstallableMissingDeps(
+        parseMissingStartupDependencies(tail.lines, serverHasSpaceAge),
       );
     }
 
-    // Nest restarted: inspect only the latest launch in the persisted log file.
-    const logPath = this.paths.instanceLogPath(instanceId);
-    const tail = tailFile(logPath, 5000);
-    if (!logShowsModLoadFailure(tail.lines)) return [];
-    return filterInstallableMissingDeps(
-      parseMissingStartupDependencies(tail.lines, serverHasSpaceAge),
-    );
+    if (!deps.length) return [];
+    return deps.filter((modName) => {
+      const versions = installedModVersions(pm.modsDir, modName);
+      return versions.length === 0;
+    });
   }
 
   start(): Promise<OpResult> {

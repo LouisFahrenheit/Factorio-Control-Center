@@ -50,7 +50,8 @@ export function useMissingStartupDeps(
         }
 
         const conflicts = installConflictsFromPlan(batch);
-        const { confirmed } = await modDepsConfirm(missDeps, 'startup', t, { conflicts });
+        const titles = batch?.titles;
+        const { confirmed } = await modDepsConfirm(missDeps, 'startup', t, { conflicts, titles });
         if (!confirmed) return;
         if (serverBusy) {
           notifyErr(t('mods_btn'), t('server_running_mutate_blocked'));

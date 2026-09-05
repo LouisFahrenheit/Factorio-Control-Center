@@ -38,6 +38,7 @@ export interface ModInstallPlan {
   requires_conflict_confirmation?: boolean;
   install_conflicts?: ModInstallConflictInfo[];
   recommended?: string[];
+  titles?: Record<string, string>;
 }
 
 export interface ModCheckResultEntry {

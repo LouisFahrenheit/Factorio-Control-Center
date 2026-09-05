@@ -10,6 +10,7 @@ export function isNetworkFetchError(err: unknown): boolean {
   return (
     k === 'web_error_failed_fetch' ||
     /^failed to fetch$/i.test(k) ||
+    /^fetch failed$/i.test(k) ||
     /networkerror|load failed|network request failed/i.test(k)
   );
 }
@@ -17,7 +18,7 @@ export function isNetworkFetchError(err: unknown): boolean {
 function networkErrorMessageKey(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err);
   const k = String(raw || '').trim();
-  if (k === 'web_error_failed_fetch' || /^failed to fetch$/i.test(k)) return 'web_error_failed_fetch';
+  if (k === 'web_error_failed_fetch' || /^failed to fetch$/i.test(k) || /^fetch failed$/i.test(k)) return 'web_error_failed_fetch';
   if (/load failed/i.test(k)) return 'web_error_load_failed';
   if (/networkerror|network request failed/i.test(k)) return 'web_error_network';
   return 'web_error_failed_fetch';

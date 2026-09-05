@@ -1237,15 +1237,29 @@ body {
   width: min(780px, 96vw);
 }
 
+.fcc-modal--mod-deps {
+  width: min(920px, 95vw);
+  max-height: min(88vh, 760px);
+}
+
 .fcc-modal--mod-deps.mantine-Modal-content {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  max-height: min(88vh, 760px);
 }
 
 .fcc-modal--mod-deps .mod-deps-confirm__modal-header {
+  flex-shrink: 0;
   padding-bottom: 10px;
 }
 
 .fcc-modal--mod-deps .mod-deps-confirm__modal-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
   padding-top: 0;
 }
 
@@ -1263,36 +1277,70 @@ body {
 .mod-deps-confirm__shell {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+.mod-deps-confirm {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mod-deps-confirm__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mod-deps-confirm__columns--single {
+  grid-template-columns: 1fr;
+}
+
+.mod-deps-confirm__col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .mod-deps-confirm__intro,
 .mod-deps-confirm__outro {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 0.92rem;
+  line-height: 1.4;
 }
 
 .mod-deps-confirm__outro {
-  margin-top: 12px;
-  padding-top: 12px;
+  flex-shrink: 0;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 72%, transparent);
 }
 
 .mod-deps-confirm__meta {
   display: flex;
   align-items: center;
-  margin: 12px 0 10px;
+  margin: 8px 0;
+  flex-shrink: 0;
 }
 
 .mod-deps-confirm__count {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px 4px 8px;
+  padding: 3px 9px 3px 7px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--accent) 88%, #fff 12%);
@@ -1311,16 +1359,17 @@ body {
 }
 
 .mod-deps-confirm__conflicts--split {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 72%, transparent);
 }
 
 .mod-deps-confirm__conflicts-intro {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: color-mix(in srgb, var(--warning, #e3941c) 72%, var(--text-muted) 28%);
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .mod-deps-confirm__list-wrap--conflict {
@@ -1403,10 +1452,13 @@ body {
 }
 
 .mod-deps-confirm__list-wrap {
-  max-height: min(420px, 52vh);
-  overflow: auto;
-  padding: 2px;
-  margin: 0 -2px;
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: min(440px, 52vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  margin: 0;
   border-radius: 10px;
   background: color-mix(in srgb, var(--bg-main) 55%, transparent);
   border: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
@@ -1416,7 +1468,13 @@ body {
 .mod-deps-confirm__list {
   list-style: none;
   margin: 0;
-  padding: 6px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mod-deps-confirm__columns--single .mod-deps-confirm__list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
@@ -1424,7 +1482,7 @@ body {
 
 .mod-deps-confirm__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   min-width: 0;
   padding: 8px 10px;
@@ -1443,6 +1501,53 @@ body {
   transform: translateY(-1px);
 }
 
+.mod-deps-confirm__item--checkbox {
+  cursor: pointer;
+  user-select: none;
+}
+
+.mod-deps-confirm__item--checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  border: 1.5px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 80%, transparent);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  flex-shrink: 0;
+  margin: 0;
+  position: relative;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mod-deps-confirm__item--checkbox input[type="checkbox"]::after {
+  display: none !important;
+  content: none !important;
+}
+
+.mod-deps-confirm__item--checkbox input[type="checkbox"]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: var(--accent);
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.mod-deps-confirm__item--checkbox input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-main) 82%);
+}
+
+.mod-deps-confirm__item--checkbox input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
 .mod-deps-confirm__item-icon {
   display: inline-flex;
   flex-shrink: 0;
@@ -1451,18 +1556,36 @@ body {
   color: var(--accent);
 }
 
-.mod-deps-confirm__name {
+.mod-deps-confirm__name-wrap {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   flex: 1 1 auto;
+  gap: 2px;
+}
+
+.mod-deps-confirm__name {
+  min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
   line-height: 1.35;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.84rem;
+  font-size: 0.86rem;
+  font-weight: 500;
   color: var(--text);
 }
 
+.mod-deps-confirm__technical-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
 .mod-deps-confirm__footer {
+  flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -1476,9 +1599,14 @@ body {
   min-width: 112px;
 }
 
-@media (max-width: 520px) {
-  .mod-deps-confirm__list {
+@media (max-width: 768px) {
+  .mod-deps-confirm__columns {
     grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .mod-deps-confirm__list-wrap {
+    max-height: 220px;
   }
 
   .mod-deps-confirm__footer {

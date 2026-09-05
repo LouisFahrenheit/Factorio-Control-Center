@@ -383,12 +383,14 @@ export function useMods(
       window.setTimeout(() => setInstallBlink(false), 1200);
       return;
     }
+    modJob.openPreparing(t('mod_job_phase_collecting_deps'));
     try {
       const plan = await api<ModInstallPlan>('/api/mods/install-plan', {
         method: 'POST',
         body: JSON.stringify({ mod }),
       });
       if (plan?.ok === false) {
+        modJob.close();
         const code = String(plan.error || 'install_plan_failed');
         if (code === 'requires_space_age') {
           setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
@@ -399,14 +401,17 @@ export function useMods(
       const deps = Array.isArray(plan?.dependencies) ? plan.dependencies : [];
       const conflicts = installConflictsFromPlan(plan);
       const recommended = Array.isArray(plan?.recommended) ? plan.recommended : [];
+      const titles = plan?.titles;
       let checkedRecommended: string[] = [];
       if (deps.length || conflicts.length || recommended.length) {
-        const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended });
+        modJob.close();
+        const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended, titles });
         if (!res.confirmed) return;
         checkedRecommended = res.recommendedToInstall || [];
       }
       let allowRg = false;
       if (plan?.requires_game_update_confirmation) {
+        modJob.close();
         const flow = await openModGameVersionConfirm(t, {
           title: t('mod_install_requires_newer_game_title'),
           gameVersion: String(plan.game_version || '').trim() || '—',
@@ -430,6 +435,7 @@ export function useMods(
         });
       }
     } catch (e) {
+      modJob.close();
       setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
     }
   }, [installInput, modJob, removeOldZips, serverBusy, setModsMsg, t]);
@@ -691,12 +697,14 @@ export function useMods(
         return;
       }
       if (!name) return;
+      modJob.openPreparing(t('mod_job_phase_collecting_deps'));
       try {
         const plan = await api<ModInstallPlan>('/api/mods/install-plan', {
           method: 'POST',
           body: JSON.stringify({ mod: name }),
         });
         if (plan?.ok === false) {
+          modJob.close();
           const code = String(plan.error || 'install_plan_failed');
           if (code === 'requires_space_age') {
             setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
@@ -710,18 +718,24 @@ export function useMods(
           const n = String(x?.name || '').trim();
           return n && n !== rootMod;
         });
+        const titles = plan?.titles;
         if (depsToInstall.length) {
           const depNames = depsToInstall
             .map((x) => String(x?.name || '').trim())
             .filter(Boolean);
           const conflicts = installConflictsFromPlan(plan);
-          if (!(await modDepsConfirm(depNames, 'update', t, { conflicts })).confirmed) return;
+          modJob.close();
+          if (!(await modDepsConfirm(depNames, 'update', t, { conflicts, titles })).confirmed) return;
         } else {
           const conflicts = installConflictsFromPlan(plan);
-          if (conflicts.length && !(await modDepsConfirm([], 'update', t, { conflicts })).confirmed) return;
+          if (conflicts.length) {
+            modJob.close();
+            if (!(await modDepsConfirm([], 'update', t, { conflicts, titles })).confirmed) return;
+          }
         }
         let allowRg = false;
         if (plan?.requires_game_update_confirmation) {
+          modJob.close();
           const flow = await openModGameVersionConfirm(t, {
             title: t('mod_update_requires_newer_game_title'),
             gameVersion: String(plan.game_version || '').trim() || '—',
@@ -736,6 +750,7 @@ export function useMods(
           allow_requires_game_update: allowRg,
         });
       } catch (e) {
+        modJob.close();
         setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
       }
     },

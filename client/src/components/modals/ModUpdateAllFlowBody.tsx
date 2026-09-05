@@ -175,16 +175,17 @@ export function ModUpdateAllFlowBody({ t, fetchPlan, onDone }: ModUpdateAllFlowB
         {step === 'deps' && plan ? (
           <div className="mod-update-all-flow__deps">
             <ModDependenciesConfirmBody
-            intro={t('mod_list_update_all_new_deps_intro')}
-            outro={t('mod_list_update_new_deps_outro')}
-            deps={deps}
-            countLabel={t('mod_deps_confirm_count', deps.length)}
-            conflicts={conflicts}
-            conflictsIntro={t('mod_list_conflicts_intro')}
-            conflictsCountLabel={conflicts.length ? t('mod_list_conflicts_count', conflicts.length) : ''}
-            conflictTagLabel={t('mod_list_conflict_tag')}
-            conflictBuiltinLabel={t('mod_list_conflict_builtin')}
-          />
+              intro={t('mod_list_update_all_new_deps_intro')}
+              outro={t('mod_list_update_new_deps_outro')}
+              deps={deps}
+              countLabel={t('mod_deps_confirm_count', deps.length)}
+              conflicts={conflicts}
+              conflictsIntro={t('mod_list_conflicts_intro')}
+              conflictsCountLabel={conflicts.length ? t('mod_list_conflicts_count', conflicts.length) : ''}
+              conflictTagLabel={t('mod_list_conflict_tag')}
+              conflictBuiltinLabel={t('mod_list_conflict_builtin')}
+              titles={plan.titles}
+            />
           </div>
         ) : null}
 

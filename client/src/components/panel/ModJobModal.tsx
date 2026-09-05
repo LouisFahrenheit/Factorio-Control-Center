@@ -17,7 +17,7 @@ function actionLabel(status: ModJobStatus | null, stopRequested: boolean, t: Mod
   const phase = status.phase || 'idle';
   if (phase === 'download') return t('mod_job_phase_downloading');
   if (phase === 'install') return t('mod_job_phase_install');
-  if (phase === 'preparing') return t('mod_job_phase_preparing');
+  if (phase === 'preparing') return status.current_name || t('mod_job_phase_preparing');
   if (phase === 'done') return t('mod_job_phase_done');
   if (phase === 'cancelled') return t('mod_job_phase_cancelled');
   if (phase === 'error') return mjLocalizeError(status.error_key, status.error_args, status.error, t);
@@ -131,7 +131,6 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
   const logRef = useRef<HTMLDivElement>(null);
   const status = modJob.status;
   const running = !!status?.running;
-  const lockClose = running;
   const logs = Array.isArray(status?.log) ? status.log : [];
   const kind = phaseKind(status);
   const downloadRows = activeDownloadRows(status);
@@ -171,8 +170,8 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
       open
       id="mjModal"
       onClose={modJob.close}
-      closeOnBackdropClick={!lockClose}
-      closeOnEscape={!lockClose}
+      closeOnBackdropClick={false}
+      closeOnEscape={false}
     >
       <div
         className="fu-modal server-update-dialog server-update-dialog--progress server-update-dialog--mod-job"

@@ -27,6 +27,7 @@ type VerifyCacheEntry = {
 @Injectable()
 export class ModPortalService {
   private verifyCache = new Map<string, VerifyCacheEntry>();
+  private fullMetaCache = new Map<string, { time: number; data: Record<string, unknown> }>();
   isBuiltin(name: string): boolean {
     return BUILTIN.has((name || '').trim().toLowerCase());
   }
@@ -71,13 +72,103 @@ export class ModPortalService {
     return !!s && /^[A-Za-z0-9_ \-]+$/.test(s);
   }
 
-  async fetchFull(modName: string): Promise<Record<string, unknown>> {
-    const url = `${BASE}/api/mods/${encodeURIComponent(modName)}/full`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'FactorioControlCenter/2.0' },
+  private inFlightFetch = new Map<string, Promise<Record<string, unknown>>>();
+  private activeFetches = 0;
+  private fetchQueue: (() => void)[] = [];
+
+  private async acquireFetchSlot(): Promise<() => void> {
+    const MAX_CONCURRENT = 5;
+    if (this.activeFetches < MAX_CONCURRENT) {
+      this.activeFetches++;
+      let released = false;
+      return () => {
+        if (!released) {
+          released = true;
+          this.activeFetches--;
+          const next = this.fetchQueue.shift();
+          if (next) next();
+        }
+      };
+    }
+    return new Promise<() => void>((resolve) => {
+      this.fetchQueue.push(() => {
+        this.activeFetches++;
+        let released = false;
+        resolve(() => {
+          if (!released) {
+            released = true;
+            this.activeFetches--;
+            const next = this.fetchQueue.shift();
+            if (next) next();
+          }
+        });
+      });
     });
-    if (!res.ok) throw new Error(`http_${res.status}`);
-    return (await res.json()) as Record<string, unknown>;
+  }
+
+  async fetchFull(modName: string): Promise<Record<string, unknown>> {
+    const raw = String(modName || '').trim();
+    const cleanId = this.modIdFromInput(raw) || raw;
+    const key = cleanId.toLowerCase();
+    if (!key || this.isBuiltin(key)) {
+      throw new Error('builtin');
+    }
+
+    const cached = this.fullMetaCache.get(key);
+    if (cached && Date.now() - cached.time < 300_000) {
+      return cached.data;
+    }
+    const existing = this.inFlightFetch.get(key);
+    if (existing) {
+      return existing;
+    }
+
+    const req = (async () => {
+      let lastErr: unknown;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const releaseSlot = await this.acquireFetchSlot();
+        try {
+          const url = `${BASE}/api/mods/${encodeURIComponent(cleanId)}/full`;
+          const res = await fetch(url, {
+            headers: {
+              'User-Agent': 'FactorioControlCenter/2.0',
+              Accept: 'application/json',
+            },
+            signal: AbortSignal.timeout(12_000),
+          });
+          if (res.status === 404) {
+            throw new Error('http_404');
+          }
+          if (!res.ok) {
+            throw new Error(`http_${res.status}`);
+          }
+          const data = (await res.json()) as Record<string, unknown>;
+          this.fullMetaCache.set(key, { time: Date.now(), data });
+          return data;
+        } catch (e) {
+          lastErr = e;
+          const msg = e instanceof Error ? e.message : String(e);
+          if (msg === 'http_404' || msg === 'builtin') {
+            throw e;
+          }
+          if (attempt < 3) {
+            await new Promise((r) => setTimeout(r, 250 * attempt));
+          }
+        } finally {
+          releaseSlot();
+        }
+      }
+      throw lastErr instanceof Error
+        ? lastErr
+        : new Error(String(lastErr || 'fetch_failed'));
+    })();
+
+    this.inFlightFetch.set(key, req);
+    try {
+      return await req;
+    } finally {
+      this.inFlightFetch.delete(key);
+    }
   }
 
   lastRelease(meta: Record<string, unknown>): Record<string, unknown> | null {

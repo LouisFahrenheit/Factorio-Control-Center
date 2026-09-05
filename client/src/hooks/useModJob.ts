@@ -68,10 +68,10 @@ export function useModJob(
     [],
   );
 
-  const openPreparing = useCallback(() => {
+  const openPreparing = useCallback((label?: string) => {
     clearPoll();
     setOpen(true);
-    setStatus({ running: true, phase: 'preparing' });
+    setStatus({ running: true, phase: 'preparing', current_name: label });
     setStopRequested(false);
     cancelledToastRef.current = false;
     logCountRef.current = 0;

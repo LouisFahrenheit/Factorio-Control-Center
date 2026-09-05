@@ -21,6 +21,7 @@ type ModDepsModalOptions = {
   cancelLabel?: string;
   conflicts?: ModInstallConflictInfo[];
   recommended?: string[];
+  titles?: Record<string, string>;
 };
 
 function normalizeNames(names: string[]): string[] {
@@ -120,6 +121,7 @@ function ModDepsModalWrapper({
   list,
   conflictList,
   recommendedList,
+  titles,
   buttons,
   finish,
   t,
@@ -128,6 +130,7 @@ function ModDepsModalWrapper({
   list: string[];
   conflictList: ModInstallConflictInfo[];
   recommendedList: string[];
+  titles?: Record<string, string>;
   buttons: ModDepsButton[];
   finish: (value: string | null, recommended: string[]) => void;
   t: TFunc;
@@ -161,6 +164,7 @@ function ModDepsModalWrapper({
       onToggleRecommended: toggleRecommended,
       recommendedIntro: t('mod_list_recommended_intro'),
       recommendedCountLabel: recommendedList.length ? t('mod_list_recommended_count', recommendedList.length) : '',
+      titles,
     }),
     createElement(
       'div',
@@ -188,6 +192,7 @@ function openDepsModal(
   variant: ModDepsConfirmVariant,
   t: TFunc,
   buttons: ModDepsButton[],
+  titles?: Record<string, string>,
 ): Promise<{ value: string | null; checkedRecommended: string[] }> {
   const list = normalizeNames(deps);
   const conflictList = normalizeConflicts(conflicts);
@@ -215,7 +220,9 @@ function openDepsModal(
       modals.open({
         title: modalTitle(title, conflictList.length > 0),
         centered: true,
-        size: 'lg',
+        size: 'auto',
+        closeOnClickOutside: false,
+        closeOnEscape: false,
         classNames: {
           content: 'fcc-modal fcc-modal--mod-deps',
           header: 'mod-deps-confirm__modal-header',
@@ -226,6 +233,7 @@ function openDepsModal(
           list,
           conflictList,
           recommendedList,
+          titles,
           buttons,
           finish,
           t,
@@ -251,10 +259,19 @@ export async function modDepsConfirm(
   const cancelLabel = options?.cancelLabel ?? t('cancel');
   const conflicts = options?.conflicts ?? [];
   const recommended = options?.recommended ?? [];
-  const { value, checkedRecommended } = await openDepsModal(deps, conflicts, recommended, variant, t, [
-    { text: cancelLabel, value: 'cancel' },
-    { text: confirmLabel, value: 'confirm', primary: true },
-  ]);
+  const titles = options?.titles;
+  const { value, checkedRecommended } = await openDepsModal(
+    deps,
+    conflicts,
+    recommended,
+    variant,
+    t,
+    [
+      { text: cancelLabel, value: 'cancel' },
+      { text: confirmLabel, value: 'confirm', primary: true },
+    ],
+    titles,
+  );
   return { confirmed: value === 'confirm', recommendedToInstall: checkedRecommended };
 }
 

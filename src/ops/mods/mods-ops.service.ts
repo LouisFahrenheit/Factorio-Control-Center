@@ -489,11 +489,16 @@ export class ModsOpsService {
     const conflictsMerged: string[] = [];
     const installConflictsMerged = new Map<string, ModInstallConflictInfo>();
 
+    const titlesMerged: Record<string, string> = {};
+
     for (const mid of names) {
       const pr = await this.modPlan.installPlanDetail(sel.pm, mid);
       if (pr.ok === false) {
         planErrors.push({ mod: mid, error: String(pr.error || 'plan_failed') });
         continue;
+      }
+      if (pr.titles) {
+        Object.assign(titlesMerged, pr.titles);
       }
       for (const row of pr.mods_needing_game_update) {
         if (!mergedNeed.has(row.name)) {
@@ -531,6 +536,7 @@ export class ModsOpsService {
       conflicts_to_disable: conflictsMerged.sort((a, b) => a.localeCompare(b)),
       requires_conflict_confirmation: conflictsMerged.length > 0,
       install_conflicts: installConflicts,
+      titles: titlesMerged,
     };
     if (planErrors.length) out.plan_errors = planErrors;
     return out;
@@ -570,6 +576,13 @@ export class ModsOpsService {
       sel.pm,
       roots,
     );
+    const titles = resolveModDisplayTitlesBatch({
+      serverPath: sel.item.serverPath,
+      modsDir: sel.pm.modsDir,
+      modNames: [...depsExtra, ...roots],
+      uiLang: 'ru',
+      translateModNames: true,
+    });
     return {
       ok: true,
       dependencies: depsExtra,
@@ -582,6 +595,7 @@ export class ModsOpsService {
       requires_conflict_confirmation:
         conflictMeta.conflicts_to_disable.length > 0,
       install_conflicts: conflictMeta.install_conflicts,
+      titles,
     };
   }
 

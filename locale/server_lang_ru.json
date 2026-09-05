@@ -380,6 +380,7 @@
   "mod_job_modal_title": "Операция с модами",
   "mod_job_modal_running_badge": "Выполняется",
   "mod_job_phase_preparing": "Подготовка…",
+  "mod_job_phase_collecting_deps": "Сбор данных о моде и зависимостях…",
   "mod_job_phase_downloading": "Скачивание…",
   "mod_job_phase_download": "Скачивание {0} v{1}…",
   "mod_job_phase_install": "Обновление mod-list.json…",

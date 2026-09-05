@@ -379,6 +379,7 @@
   "mod_job_modal_title": "Mod operation",
   "mod_job_modal_running_badge": "Running",
   "mod_job_phase_preparing": "Preparing…",
+  "mod_job_phase_collecting_deps": "Collecting mod and dependency data…",
   "mod_job_phase_downloading": "Downloading…",
   "mod_job_phase_download": "Downloading {0} v{1}…",
   "mod_job_phase_install": "Updating mod list…",

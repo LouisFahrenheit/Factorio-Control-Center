@@ -25,6 +25,7 @@ import {
   gameBelowModFactorioReq,
   type ModGameUpgradeHint,
 } from './mod-game-req';
+import { resolveModDisplayTitlesBatch } from '../mod-display-titles.util';
 
 export interface ModPlanItem {
   name: string;
@@ -47,6 +48,7 @@ export interface ModInstallPlanResult {
   requires_conflict_confirmation: boolean;
   install_conflicts: ModInstallConflictInfo[];
   recommended?: string[];
+  titles?: Record<string, string>;
 }
 
 export interface ModPlanLogHooks {
@@ -75,14 +77,28 @@ export class ModPlanService {
   async portalVersionsForMod(
     name: string,
   ): Promise<
-    | { ok: true; version: string; release: Record<string, unknown> }
+    | {
+        ok: true;
+        version: string;
+        release: Record<string, unknown>;
+        title?: string;
+      }
     | { ok: false; error: string }
   > {
     try {
       const meta = await this.portal.fetchFull(name);
       const rel = this.portal.lastRelease(meta);
       if (!rel) return { ok: false, error: 'no_release' };
-      return { ok: true, version: String(rel.version || ''), release: rel };
+      const title =
+        typeof meta.title === 'string' && meta.title.trim()
+          ? meta.title.trim()
+          : undefined;
+      return {
+        ok: true,
+        version: String(rel.version || ''),
+        release: rel,
+        title,
+      };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : String(e) };
     }
@@ -104,6 +120,10 @@ export class ModPlanService {
 
       const pv = await this.portalVersionsForMod(n);
       if (!pv.ok) {
+        const isInstalled = installedModVersions(modsDir, n).length > 0;
+        if (isInstalled && n !== rootModId) {
+          return;
+        }
         const err = new Error(
           String(pv.error || `portal_error:${n}`),
         ) as Error & { errorKey?: string; errorArgs?: unknown[] };
@@ -130,9 +150,11 @@ export class ModPlanService {
         });
       }
 
-      for (const dep of portalDependencyNames(pv.release)) {
-        await walk(dep);
-      }
+      const depList = portalDependencyNames(pv.release)
+        .map((d) => String(d || '').trim())
+        .filter((d) => d && !this.portal.isBuiltin(d));
+
+      await Promise.all(depList.map((dep) => walk(dep)));
     };
 
     await walk(rootModId);
@@ -183,6 +205,7 @@ export class ModPlanService {
     if (this.portal.isBuiltin(id)) return { ok: false, error: 'builtin' };
 
     const seen = new Set<string>();
+    const titlesMap = new Map<string, string>();
     const depsRequired: string[] = [];
     const toInstall: ModInstallPlanResult['to_install'] = [];
     const needGameUpgrade = new Map<string, ModGameUpgradeHint>();
@@ -212,8 +235,16 @@ export class ModPlanService {
       installTree.add(normalizeModListName(n));
 
       const pv = await this.portalVersionsForMod(n);
-      if (!pv.ok)
+      if (!pv.ok) {
+        const isInstalled = installedModVersions(pm.modsDir, n).length > 0;
+        if (isInstalled && n !== id) {
+          return { ok: true };
+        }
         return { ok: false, error: String(pv.error || 'portal_error'), mod: n };
+      }
+      if (pv.title) {
+        titlesMap.set(n, pv.title);
+      }
       if (this.modBlockedWithoutSpaceAge(pm.serverPath, pv.release)) {
         return { ok: false, error: 'requires_space_age', mod: n };
       }
@@ -242,14 +273,20 @@ export class ModPlanService {
         });
       }
 
-      for (const dep of portalDependencyNames(pv.release)) {
-        const d = String(dep || '').trim();
-        if (!d || this.portal.isBuiltin(d)) continue;
+      const depList = portalDependencyNames(pv.release)
+        .map((dep) => String(dep || '').trim())
+        .filter((dep) => dep && !this.portal.isBuiltin(dep));
+
+      for (const d of depList) {
         if (!depsRequired.some((x) => x.toLowerCase() === d.toLowerCase()))
           depsRequired.push(d);
-        const r = await walk(d);
-        if (!r.ok) return r;
       }
+
+      const depResults = await Promise.all(depList.map((dep) => walk(dep)));
+      for (const dr of depResults) {
+        if (!dr.ok) return dr;
+      }
+
       for (const dep of portalRecommendedDependencyNames(pv.release)) {
         const d = String(dep || '').trim();
         if (!d || this.portal.isBuiltin(d)) continue;
@@ -267,6 +304,41 @@ export class ModPlanService {
 
     const r = await walk(id);
     if (!r.ok) return r;
+
+    // Fetch titles for recommended mods
+    await Promise.all(
+      Array.from(recommendedMods).map(async (rMod) => {
+        if (titlesMap.has(rMod)) return;
+        try {
+          const pv = await this.portalVersionsForMod(rMod);
+          if (pv.ok && pv.title) {
+            titlesMap.set(rMod, pv.title);
+          }
+        } catch {
+          /* ignore */
+        }
+      }),
+    );
+
+    // Resolve local display titles for conflicts / local mods
+    const allModNames = [
+      id,
+      ...depsRequired,
+      ...recommendedMods,
+      ...Array.from(conflictTargets.values()).map((c) => c.name),
+    ];
+    const localTitles = resolveModDisplayTitlesBatch({
+      serverPath: pm.serverPath,
+      modsDir: pm.modsDir,
+      modNames: allModNames,
+      uiLang: 'ru',
+      translateModNames: true,
+    });
+    for (const [k, v] of Object.entries(localTitles)) {
+      if (v && v !== k && !titlesMap.has(k)) {
+        titlesMap.set(k, v);
+      }
+    }
 
     const root = toInstall.find((x) => x.name === id);
     const modsNeedGame = [...needGameUpgrade.values()].sort((a, b) =>
@@ -298,6 +370,7 @@ export class ModPlanService {
       recommended: Array.from(recommendedMods).sort((a, b) =>
         a.localeCompare(b, undefined, { sensitivity: 'base' }),
       ),
+      titles: Object.fromEntries(titlesMap),
     };
   }
 
@@ -348,21 +421,25 @@ export class ModPlanService {
         noteConflict(conflict);
       }
 
-      for (const dep of portalDependencyNames(pv.release)) {
-        await walk(dep);
-      }
+      const depList = portalDependencyNames(pv.release)
+        .map((dep) => String(dep || '').trim())
+        .filter((dep) => dep && !this.portal.isBuiltin(dep));
+
+      await Promise.all(depList.map((dep) => walk(dep)));
     };
 
-    for (const root of roots) {
-      const id = this.portal.modIdFromInput(root);
-      if (
-        !id ||
-        this.portal.isBuiltin(id) ||
-        !this.portal.isValidPortalModId(id)
-      )
-        continue;
-      await walk(id);
-    }
+    await Promise.all(
+      roots.map(async (root) => {
+        const id = this.portal.modIdFromInput(root);
+        if (
+          !id ||
+          this.portal.isBuiltin(id) ||
+          !this.portal.isValidPortalModId(id)
+        )
+          return;
+        await walk(id);
+      }),
+    );
 
     const installConflicts = buildInstallConflictInfo(
       readModList(pm),
