@@ -39,7 +39,7 @@ your PC or VPS - add servers and manage everything from one place.
 **Saves**
 
 - Save management: list, upload, download, delete, rename, copy
-- Built-in map generator with all in-game settings (vanila and Space Age)
+- Built-in map generator with all in-game settings (Vanilla and Space Age)
 - `.fcc` presets - save generator settings, export a file, and share it
 
 **Mods**
@@ -74,7 +74,7 @@ your PC or VPS - add servers and manage everything from one place.
 - **Public page**: optionally expose a read-only status page showing active servers, players, and mod downloads without requiring login
 - Full desktop UI and a simplified mobile view
 - English and Russian UI
-- Several themes - all dark.
+- Several themes — all dark
 
 <h2 id="requirements"><img src="docs/images/requirements_banner.svg" alt="FCC Requirements"></h2>
 
