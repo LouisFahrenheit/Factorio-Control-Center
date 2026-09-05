@@ -45,7 +45,7 @@ COPY public ./public
 ENV NODE_ENV=production
 
 # Default web panel port
-EXPOSE 80
+EXPOSE 8080
 
 # Expose default factorio UDP port range
 EXPOSE 34197-34207/udp

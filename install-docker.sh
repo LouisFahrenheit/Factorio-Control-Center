@@ -66,7 +66,7 @@ cd /opt/factorio-control-center
 curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/docker-compose.yml
 
 # Apply the custom port to docker-compose.yml
-sed -i "s/8080:80\/tcp/${PANEL_PORT}:80\/tcp/" docker-compose.yml
+sed -i "s/8080:8080\/tcp/${PANEL_PORT}:8080\/tcp/" docker-compose.yml
 
 echo "2. Starting Docker container..."
 docker compose up -d
