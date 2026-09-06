@@ -71,7 +71,9 @@ import { EventsGateway } from './ws/events.gateway';
 import { LegacyMigrationService } from './config/legacy-migration.service';
 import { BackupModule } from './backup/backup.module';
 import { BackupController } from './backup/backup.controller';
-import { BackupSchedulerService } from './backup/backup-scheduler.service';
+import { NotificationsService } from './notifications/notifications.service';
+import { TelegramService } from './notifications/telegram.service';
+import { WebhookService } from './notifications/webhook.service';
 
 // Metrics
 import { InstanceRawMetric } from './metrics/entities/instance-raw-metric.entity';
@@ -226,6 +228,9 @@ migrateOldDb('fcc_metrics.sqlite-wal', 'fcc_metrics.sqlite-wal');
     EventsGateway,
     LegacyMigrationService,
     MetricsCollectorService,
+    TelegramService,
+    WebhookService,
+    NotificationsService,
     {
       provide: APP_INTERCEPTOR,
       useClass: InstanceContextInterceptor,

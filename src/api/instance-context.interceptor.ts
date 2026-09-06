@@ -16,6 +16,7 @@ const SKIP_PREFIXES = [
   '/api/auth/',
   '/api/instances',
   '/api/config/program',
+  '/api/config/notifications',
   '/api/config/web-tls/',
 ];
 

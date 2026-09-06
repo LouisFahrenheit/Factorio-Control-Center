@@ -59,6 +59,13 @@ export class GameInstance {
   @Column({ default: false })
   collectGameMetrics: boolean;
 
+  /**
+   * Per-instance notification override (JSON-serialized InstanceNotifOverride).
+   * Null = use global notification settings from SystemPreference.
+   */
+  @Column({ type: 'text', nullable: true, default: null })
+  notifOverride: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

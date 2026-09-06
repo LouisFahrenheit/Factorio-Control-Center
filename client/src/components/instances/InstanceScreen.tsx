@@ -639,7 +639,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             />
           )}
           {activeTab === 'settings' && (
-            <InstanceSettingsTab settings={programSettings} t={t} />
+            <InstanceSettingsTab settings={programSettings} instances={rows} t={t} />
           )}
           {activeTab === 'access' && <InstanceAccessTab webUsers={webUsers} t={t} />}
           {activeTab === 'public' && (

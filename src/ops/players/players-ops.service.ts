@@ -18,6 +18,7 @@ import { FilesOpsService } from '../files/files-ops.service';
 import { InstancePropagateService } from '../instance-propagate.service';
 import { InstanceHistoryService } from '../instance-history.service';
 import { OpResult, isErrorResult, selectedInstance } from '../ops-utils';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class PlayersOpsService {
@@ -27,6 +28,7 @@ export class PlayersOpsService {
     private readonly files: FilesOpsService,
     private readonly propagate: InstancePropagateService,
     private readonly instanceHistory: InstanceHistoryService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   summary(): OpResult {
@@ -119,8 +121,16 @@ export class PlayersOpsService {
       action: 'BAN',
     });
     const sel = selectedInstance(this.instances);
-    if (!isErrorResult(sel))
+    if (!isErrorResult(sel)) {
       this.propagate.propagateBanList(sel.item.serverPath);
+      void this.notifications.onModeration(
+        sel.item.id,
+        'ban',
+        v.name!,
+        actor || 'Web',
+        r,
+      );
+    }
 
     if (res.ok) {
       this.repairBanlistFile();
@@ -147,8 +157,15 @@ export class PlayersOpsService {
       action: 'UNBAN',
     });
     const sel = selectedInstance(this.instances);
-    if (!isErrorResult(sel))
+    if (!isErrorResult(sel)) {
       this.propagate.propagateBanList(sel.item.serverPath);
+      void this.notifications.onModeration(
+        sel.item.id,
+        'unban',
+        v.name!,
+        actor || 'Web',
+      );
+    }
 
     if (res.ok) {
       this.repairBanlistFile();
@@ -204,6 +221,12 @@ export class PlayersOpsService {
       actor,
       date: panelTimestamp(),
     });
+    void this.notifications.onModeration(
+      sel.item.id,
+      'whitelist_clear',
+      '*',
+      actor || 'Web',
+    );
     return { ok: true };
   }
 
@@ -233,6 +256,16 @@ export class PlayersOpsService {
       actor: actor || 'Web',
       date: panelTimestamp(),
     });
+    const sel = selectedInstance(this.instances);
+    if (!isErrorResult(sel)) {
+      void this.notifications.onModeration(
+        sel.item.id,
+        action.toLowerCase(),
+        v.name!,
+        actor || 'Web',
+        extra || undefined,
+      );
+    }
     return { ok: true };
   }
 
@@ -264,6 +297,12 @@ export class PlayersOpsService {
       actor,
       date: panelTimestamp(),
     });
+    void this.notifications.onModeration(
+      sel.item.id,
+      add ? 'whitelist_add' : 'whitelist_remove',
+      v.name!,
+      actor || 'Web',
+    );
     return { ok: true };
   }
 

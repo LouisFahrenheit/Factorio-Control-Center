@@ -12,6 +12,7 @@ import { InstanceRawMetric } from './entities/instance-raw-metric.entity';
 import { InstanceHourlyMetric } from './entities/instance-hourly-metric.entity';
 import { RuntimeService } from '../ops/runtime.service';
 import { InstancesService } from '../instances/instances.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import pidusage from 'pidusage';
 
 @Injectable()
@@ -20,6 +21,8 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   private timer: NodeJS.Timeout | null = null;
   private dailyTimer: NodeJS.Timeout | null = null;
   private lastTicks = new Map<string, { tick: number; time: number }>();
+  private lowUpsStreak = new Map<string, number>();
+  private lowUpsAlerted = new Set<string>();
 
   constructor(
     @InjectRepository(InstanceRawMetric, 'metricsConnection')
@@ -28,6 +31,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
     private readonly hourlyRepo: Repository<InstanceHourlyMetric>,
     private readonly runtime: RuntimeService,
     private readonly instances: InstancesService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   onModuleInit() {
@@ -150,6 +154,29 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
             } else {
               // If RCON command failed, server could be starting, sleeping, or frozen
               ups = 0.0;
+            }
+
+            const onlineCount = Object.keys(rt.onlinePlayers || {}).length;
+            const notifCfg = this.notifications.getResolvedInstanceConfig(id);
+            const lowUpsThreshold =
+              notifCfg?.notif_low_ups_threshold ?? 55.0;
+            const isLagging =
+              ups > 0 && ups < lowUpsThreshold && onlineCount > 0;
+
+            if (isLagging) {
+              const streak = (this.lowUpsStreak.get(id) || 0) + 1;
+              this.lowUpsStreak.set(id, streak);
+              if (streak >= 1 && !this.lowUpsAlerted.has(id)) {
+                this.lowUpsAlerted.add(id);
+                void this.notifications.onLowUps(
+                  id,
+                  Number(ups.toFixed(1)),
+                  streak,
+                );
+              }
+            } else if (ups >= lowUpsThreshold) {
+              this.lowUpsStreak.delete(id);
+              this.lowUpsAlerted.delete(id);
             }
           }
 

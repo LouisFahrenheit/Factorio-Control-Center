@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import AdmZip from 'adm-zip';
 import {
   createWriteStream,
@@ -18,6 +24,7 @@ import { AuditLogService } from '../../maintenance/audit-log.service';
 import { InstanceHistoryService } from '../instance-history.service';
 import { markFactorioUpdated } from '../instance-server-data';
 import { RuntimeService } from '../runtime.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import {
   OpResult,
   compareVersions,
@@ -30,8 +37,9 @@ import {
 const execFileAsync = promisify(execFile);
 
 @Injectable()
-export class FactorioUpdateService {
+export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
   private state = this.idle();
+  private updateCheckTimer: NodeJS.Timeout | null = null;
 
   constructor(
     private readonly instances: InstancesService,
@@ -39,7 +47,27 @@ export class FactorioUpdateService {
     private readonly config: FccConfigService,
     private readonly auditLog: AuditLogService,
     private readonly instanceHistory: InstanceHistoryService,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notifications: NotificationsService,
   ) {}
+
+  onModuleInit() {
+    // Initial check after 2 minutes, then every 6 hours
+    setTimeout(() => {
+      void this.checkAll().catch(() => {});
+      this.updateCheckTimer = setInterval(
+        () => void this.checkAll().catch(() => {}),
+        6 * 60 * 60 * 1000,
+      );
+    }, 120_000);
+  }
+
+  onModuleDestroy() {
+    if (this.updateCheckTimer) {
+      clearInterval(this.updateCheckTimer);
+      this.updateCheckTimer = null;
+    }
+  }
 
   async check(): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
@@ -66,6 +94,18 @@ export class FactorioUpdateService {
       prep.ver,
       !!sel.item.experimentalUpdates,
     );
+    if (updates.updates.length > 0) {
+      const targetVersion =
+        updates.updates[updates.updates.length - 1]?.to || '';
+      if (targetVersion && compareVersions(targetVersion, prep.ver) > 0) {
+        void this.notifications.onFactorioUpdateAvailable(
+          prep.ver,
+          targetVersion,
+          sel.item.id,
+          sel.item.name,
+        );
+      }
+    }
     return {
       ok: true,
       current: prep.ver,

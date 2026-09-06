@@ -52,6 +52,7 @@ export const ENDPOINT_TAB_MAP: Record<string, FccTab> = {
   '/api/server/': 'control',
   '/api/config/server': 'control',
   '/api/config/program': 'control',
+  '/api/config/notifications': 'control',
   '/api/config/web-tls/': 'control',
   '/api/factorio/update': 'control',
   '/api/maintenance': 'maintenance',

@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { AppIcon } from '../AppIcon';
 import { FactorioPortalUsername } from '../FactorioPortalUsername';
 import { FccSwitch } from '../FccSwitch';
@@ -7,9 +7,16 @@ import type { ProgramSettingsApi } from '../../hooks/useProgramSettings';
 import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
 import { useProgramLogHistory } from '../../hooks/useProgramLogHistory';
 import { ServerLogHistoryModal } from '../panel/ServerLogHistoryModal';
+import { TabPanelsTransition } from '../TabPanelsTransition';
+import { IntegrationsTab } from './IntegrationsTab';
+import type { InstanceItem } from '../../types/instance';
+
+export type SettingsSubTab = 'general' | 'integrations';
 
 interface InstanceSettingsTabProps {
   settings: ProgramSettingsApi;
+  instances?: InstanceItem[];
+  defaultSubTab?: SettingsSubTab;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
@@ -65,7 +72,13 @@ function SettingsCheckRow({ label, hint, htmlFor, checked, onChange }: SettingsC
   );
 }
 
-export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
+export function InstanceSettingsTab({
+  settings,
+  instances = [],
+  defaultSubTab = 'general',
+  t,
+}: InstanceSettingsTabProps) {
+  const [subTab, setSubTab] = useState<SettingsSubTab>(defaultSubTab);
   const s = settings.settings;
   const langs = settings.languages;
   const programLogHistory = useProgramLogHistory(t);
@@ -95,10 +108,49 @@ export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
       role="tabpanel"
       aria-labelledby="instanceTabSettingsBtn"
     >
-      {initialLoading ? (
-        <TabLoadingPlaceholder variant="form" label={t('tab_data_loading')} />
-      ) : (
-      <div className="instance-settings-tables__layout">
+      <div className="settings-tab__header">
+        <div className="sub-tabs settings-tab__sub-tabs" role="tablist" aria-label={t('instances_tab_settings')}>
+          <button
+            type="button"
+            id="settingsSubTabGeneralBtn"
+            className={'sub-tabs__tab btn--with-icon' + (subTab === 'general' ? ' sub-tabs__tab--active' : '')}
+            role="tab"
+            aria-selected={subTab === 'general'}
+            onClick={() => setSubTab('general')}
+          >
+            <span className="sub-tabs__tab-inner">
+              <AppIcon name="settings" size={16} />
+              {t('settings_subtab_general')}
+            </span>
+          </button>
+          <button
+            type="button"
+            id="settingsSubTabIntegrationsBtn"
+            className={'sub-tabs__tab btn--with-icon' + (subTab === 'integrations' ? ' sub-tabs__tab--active' : '')}
+            role="tab"
+            aria-selected={subTab === 'integrations'}
+            onClick={() => setSubTab('integrations')}
+          >
+            <span className="sub-tabs__tab-inner">
+              <AppIcon name="telegram" size={16} />
+              {t('settings_subtab_integrations')}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <TabPanelsTransition activeKey={subTab} stageClassName="tab-panels__stage">
+        {subTab === 'general' && (
+          initialLoading ? (
+            <TabLoadingPlaceholder variant="form" label={t('tab_data_loading')} />
+          ) : (
+            <div
+              id="settingsGeneralPanel"
+              className="settings-sub-panel"
+              role="tabpanel"
+              aria-labelledby="settingsSubTabGeneralBtn"
+            >
+              <div className="instance-settings-tables__layout">
         <div className="instance-settings-tables__minor">
       <SettingsTable
         title={t('instances_settings_title')}
@@ -683,7 +735,12 @@ export function InstanceSettingsTab({ settings, t }: InstanceSettingsTabProps) {
         </SettingsTable>
         </div>
       </div>
+      </div>
+      ))}
+      {subTab === 'integrations' && (
+        <IntegrationsTab instances={instances} t={t} />
       )}
+      </TabPanelsTransition>
     </div>
   );
 }

@@ -46,6 +46,7 @@ import { LocaleService } from '../locale/locale.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { UsersService } from '../auth/users.service';
 import { SessionUser } from '../common/types';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   RconDto,
   ChatSendDto,
@@ -99,6 +100,7 @@ export class ApiController {
     private readonly sessions: SessionService,
     private readonly instances: InstancesService,
     private readonly eventLog: WebPanelEventLogService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   private me(req: Request): SessionUser {
@@ -906,5 +908,144 @@ export class ApiController {
     const msg = String(body.message || '').trim();
     if (!msg) throw new BadRequestException('empty_message');
     return this.bridge.submit('chat_send_text', { message: msg });
+  }
+
+  // ── Notifications / Integrations ───────────────────────────────────────────
+
+  @UseGuards(AuthGuard)
+  @Get('config/notifications')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: 'Get global notification/integration settings (admin only)',
+  })
+  @ApiResponse({ status: 200, description: 'Global notification config' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
+  getNotificationsConfig(@Req() req: Request) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+    const cfg = this.config.notifications;
+    return {
+      ok: true,
+      ...cfg,
+    };
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('config/notifications')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: 'Save global notification/integration settings (admin only)',
+  })
+  @ApiResponse({ status: 200, description: 'Settings saved' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
+  async setNotificationsConfig(
+    @Req() req: Request,
+    @Body() body: Record<string, unknown>,
+  ) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+
+    // Only allow known keys to be saved
+    const allowedKeys = [
+      'telegram_enabled',
+      'telegram_bot_token',
+      'telegram_chat_id',
+      'webhook_targets',
+      'notif_instances_mode',
+      'notif_selected_instance_ids',
+      'notif_server_started',
+      'notif_server_stopped',
+      'notif_server_crash',
+      'notif_server_start_failed',
+      'notif_player_join',
+      'notif_player_leave',
+      'notif_chat_relay',
+      'notif_maintenance',
+      'notif_factorio_update_available',
+      'notif_low_ups',
+      'notif_low_ups_threshold',
+      'notif_moderation',
+      'notif_silent_events',
+    ] as const;
+
+    const updates: Record<string, unknown> = {};
+    for (const key of allowedKeys) {
+      if (key in body) {
+        // Don't overwrite a token if the masked placeholder was sent back
+        if (key === 'telegram_bot_token' && body[key] === '***') {
+          continue;
+        }
+        updates[key] = body[key];
+      }
+    }
+
+    await this.config.saveNotificationsKeys(updates);
+    return { ok: true };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('config/notifications/instance/:instanceId')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiParam({ name: 'instanceId', required: true })
+  @ApiOperation({
+    summary: 'Get per-instance notification override (admin only)',
+  })
+  getInstanceNotifOverride(
+    @Req() req: Request,
+    @Param('instanceId') instanceId: string,
+  ) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+    const item = this.instances.getById(instanceId);
+    if (!item) throw new NotFoundException('instance_not_found');
+    const raw = (item as unknown as { notifOverride?: string | null })
+      ?.notifOverride;
+    let override = null;
+    try {
+      if (raw) override = JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
+    return { ok: true, override };
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('config/notifications/instance/:instanceId')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiParam({ name: 'instanceId', required: true })
+  @ApiOperation({
+    summary: 'Save per-instance notification override (admin only)',
+  })
+  async setInstanceNotifOverride(
+    @Req() req: Request,
+    @Param('instanceId') instanceId: string,
+    @Body() body: Record<string, unknown>,
+  ) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+    const item = this.instances.getById(instanceId);
+    if (!item) throw new NotFoundException('instance_not_found');
+    const override = body.override !== undefined ? body.override : null;
+    const raw = override !== null ? JSON.stringify(override) : null;
+    await this.instances.update(instanceId, {
+      notifOverride: raw,
+    } as any);
+    return { ok: true };
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('config/notifications/test')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: 'Send a test notification to all configured channels (admin only)',
+  })
+  @ApiResponse({ status: 200, description: 'Test notification result' })
+  async testNotifications(
+    @Req() req: Request,
+    @Body() body: { instanceId?: string },
+  ) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+    return this.notificationsService.sendTest(body?.instanceId);
   }
 }

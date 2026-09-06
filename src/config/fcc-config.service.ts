@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { SystemPreference } from './system-preference.entity';
 import { encryptString, decryptString } from '../common/crypto.util';
+import type { GlobalNotifConfig } from '../notifications/notifications-config';
 
 export interface WebPanelIni {
   listen_host: string;
@@ -331,6 +332,60 @@ export class FccConfigService implements OnModuleInit {
 
   async saveWebPanelKeys(updates: Partial<WebPanelIni>): Promise<void> {
     await this.saveKeys('web_panel', updates);
+  }
+
+  async saveNotificationsKeys(
+    updates: Partial<GlobalNotifConfig>,
+  ): Promise<void> {
+    await this.saveKeys('notifications', updates);
+  }
+
+  get notifications(): GlobalNotifConfig {
+    const n = this.section('notifications');
+
+    // Env overrides for secrets (non-empty env always wins)
+    const envStr = (envKey: string, dbKey: string, d = '') => {
+      const v = this.env.get(envKey);
+      if (v !== undefined && v !== '') return String(v);
+      return String(n[dbKey] ?? d);
+    };
+    const dbBool = (key: string, d = false) =>
+      ['1', 'true', 'yes', 'on'].includes(String(n[key] ?? d).toLowerCase());
+
+    return {
+      telegram_enabled: dbBool('telegram_enabled', false),
+      telegram_bot_token: envStr('TELEGRAM_BOT_TOKEN', 'telegram_bot_token'),
+      telegram_chat_id: envStr('TELEGRAM_CHAT_ID', 'telegram_chat_id'),
+      webhook_targets: String(n.webhook_targets ?? ''),
+      notif_instances_mode:
+        n.notif_instances_mode === 'selected' ? 'selected' : 'all',
+      notif_selected_instance_ids: String(
+        n.notif_selected_instance_ids ?? '[]',
+      ),
+
+      notif_server_started: dbBool('notif_server_started', true),
+      notif_server_stopped: dbBool('notif_server_stopped', true),
+      notif_server_crash: dbBool('notif_server_crash', true),
+      notif_server_start_failed: dbBool('notif_server_start_failed', true),
+      notif_player_join: dbBool('notif_player_join', true),
+      notif_player_leave: dbBool('notif_player_leave', true),
+      notif_chat_relay: dbBool('notif_chat_relay', false),
+      notif_maintenance: dbBool('notif_maintenance', true),
+      notif_factorio_update_available: dbBool(
+        'notif_factorio_update_available',
+        true,
+      ),
+      notif_low_ups: dbBool('notif_low_ups', true),
+      notif_low_ups_threshold:
+        n.notif_low_ups_threshold !== undefined &&
+        !isNaN(Number(n.notif_low_ups_threshold))
+          ? Number(n.notif_low_ups_threshold)
+          : 55,
+      notif_moderation: dbBool('notif_moderation', true),
+      notif_silent_events: String(
+        n.notif_silent_events ?? '["player_join","player_leave"]',
+      ),
+    };
   }
 
   private async saveKeys(

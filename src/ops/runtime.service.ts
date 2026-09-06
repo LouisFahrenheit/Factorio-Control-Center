@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { spawn, execFile, ChildProcessWithoutNullStreams } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, mkdirSync } from 'fs';
@@ -36,6 +42,7 @@ import {
   liveLogTail,
   trimLiveLogRing,
 } from '../shared/factorio-log-timestamps';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export interface InstanceRuntime {
   proc: ChildProcessWithoutNullStreams | null;
@@ -83,6 +90,22 @@ const JOIN_RE = /\[JOIN\]\s+([^\s]+)\s+joined the game/i;
 const LEAVE_RE = /\[LEAVE\]\s+([^\s]+)\s+left the game/i;
 const KICK_RE = /\[KICK\]\s+([^\s]+)\s+was kicked by/i;
 const BAN_RE = /\[BAN\]\s+([^\s]+)\s+was banned by/i;
+const KICK_DETAIL_RE =
+  /\[KICK\]\s+([^\s]+)\s+was kicked by\s+([^\s.]+)(?:\.\s*Reason:\s*(.*))?/i;
+const BAN_DETAIL_RE =
+  /\[BAN\]\s+([^\s]+)\s+was banned by\s+([^\s.]+)(?:\.\s*Reason:\s*(.*))?/i;
+const UNBAN_DETAIL_RE =
+  /(?:\[UNBAN\]\s+([^\s]+)\s+was unbanned by\s+([^\s.]+)|([^\s]+)\s+was unbanned by\s+([^\s.]+))/i;
+const MUTE_MSG_RE = /([^\s]+)\s+was muted by\s+([^\s.]+)/i;
+const UNMUTE_MSG_RE = /([^\s]+)\s+was unmuted by\s+([^\s.]+)/i;
+const PROMOTE_MSG_RE = /([^\s]+)\s+was promoted to admin by\s+([^\s.]+)/i;
+const DEMOTE_MSG_RE = /([^\s]+)\s+was demoted from admin by\s+([^\s.]+)/i;
+const WHITELIST_ADD_MSG_RE =
+  /([^\s]+)\s+was added to the whitelist by\s+([^\s.]+)/i;
+const WHITELIST_REMOVE_MSG_RE =
+  /([^\s]+)\s+was removed from the whitelist by\s+([^\s.]+)/i;
+const WHITELIST_CLEAR_MSG_RE =
+  /(?:Whitelist was cleared by\s+([^\s.]+)|Whitelist has been cleared)/i;
 const COMMAND_RE = /\[COMMAND\]\s*([^\s:]+)(?:\s+\(command\))?:\s+(.*)/i;
 const COMMAND_FAILED_RE =
   /\[COMMAND\]\s*([^\s]+)\s+tried to run a command, which isn't allowed for them:\s+(.*)/i;
@@ -102,6 +125,8 @@ export class RuntimeService implements OnModuleDestroy {
     private readonly firewall: FirewallService,
     private readonly instanceHistory: InstanceHistoryService,
     private readonly eventsGateway: EventsGateway,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notifications: NotificationsService,
   ) {}
 
   async onModuleDestroy(): Promise<void> {
@@ -321,6 +346,14 @@ export class RuntimeService implements OnModuleDestroy {
         } catch {
           /* ignore history failures */
         }
+        // Notify: start failed
+        void this.notifications.onServerStartFailed(rt.instanceId, code ?? 0);
+      } else if (rt.wasEverInGame) {
+        // Notify: server stopped normally
+        void this.notifications.onServerStopped(rt.instanceId);
+      } else if (!graceful && (code ?? 0) !== 0) {
+        // Notify: crash (never reached InGame)
+        void this.notifications.onServerCrash(rt.instanceId, code ?? 0);
       }
       rt.proc = null;
       rt.inGame = false;
@@ -696,6 +729,16 @@ export class RuntimeService implements OnModuleDestroy {
       } catch {
         /* ignore WS errors */
       }
+      // Notify: chat relay — parse author and message from [CHAT] line
+      // Format: "2025-01-01 12:00:00 [CHAT] PlayerName: message text"
+      const chatMatch = /\[CHAT\]\s+([^:]+?):\s+(.+)$/i.exec(line);
+      if (chatMatch?.[1] && chatMatch?.[2]) {
+        void this.notifications.onChatMessage(
+          rt.instanceId,
+          chatMatch[1].trim(),
+          chatMatch[2].trim(),
+        );
+      }
     }
 
     const commandFailedMatch = COMMAND_FAILED_RE.exec(line);
@@ -739,7 +782,218 @@ export class RuntimeService implements OnModuleDestroy {
             /* ignore WS errors */
           }
         }
+
+        // Moderation commands
+        const cmdText = command.trim();
+        const purgeM = /^\/purge\s+([^\s]+)/i.exec(cmdText);
+        if (purgeM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'purge',
+            purgeM[1],
+            actor,
+          );
+        }
+        const muteM = /^\/mute\s+([^\s]+)/i.exec(cmdText);
+        if (muteM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'mute',
+            muteM[1],
+            actor,
+          );
+        }
+        const unmuteM = /^\/unmute\s+([^\s]+)/i.exec(cmdText);
+        if (unmuteM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'unmute',
+            unmuteM[1],
+            actor,
+          );
+        }
+        const unbanM = /^\/unban\s+([^\s]+)/i.exec(cmdText);
+        if (unbanM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'unban',
+            unbanM[1],
+            actor,
+          );
+        }
+        const banM = /^\/ban\s+([^\s]+)(?:\s+(.*))?/i.exec(cmdText);
+        if (banM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'ban',
+            banM[1],
+            actor,
+            banM[2]?.trim(),
+          );
+        }
+        const kickM = /^\/kick\s+([^\s]+)(?:\s+(.*))?/i.exec(cmdText);
+        if (kickM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'kick',
+            kickM[1],
+            actor,
+            kickM[2]?.trim(),
+          );
+        }
+        const promoteCmdM = /^\/promote\s+([^\s]+)/i.exec(cmdText);
+        if (promoteCmdM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'promote',
+            promoteCmdM[1],
+            actor,
+          );
+        }
+        const demoteCmdM = /^\/demote\s+([^\s]+)/i.exec(cmdText);
+        if (demoteCmdM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'demote',
+            demoteCmdM[1],
+            actor,
+          );
+        }
+        const wlAddM = /^\/whitelist\s+add\s+([^\s]+)/i.exec(cmdText);
+        if (wlAddM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'whitelist_add',
+            wlAddM[1],
+            actor,
+          );
+        }
+        const wlRemoveM = /^\/whitelist\s+remove\s+([^\s]+)/i.exec(cmdText);
+        if (wlRemoveM?.[1]) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'whitelist_remove',
+            wlRemoveM[1],
+            actor,
+          );
+        }
+        const wlClearM = /^\/whitelist\s+clear\b/i.exec(cmdText);
+        if (wlClearM) {
+          void this.notifications.onModeration(
+            rt.instanceId,
+            'whitelist_clear',
+            '*',
+            actor,
+          );
+        }
       }
+    }
+
+    // Moderation log message parsing
+    const kickDetail = KICK_DETAIL_RE.exec(line);
+    if (kickDetail?.[1] && kickDetail?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'kick',
+        kickDetail[1],
+        kickDetail[2],
+        kickDetail[3]?.trim(),
+      );
+    }
+
+    const banDetail = BAN_DETAIL_RE.exec(line);
+    if (banDetail?.[1] && banDetail?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'ban',
+        banDetail[1],
+        banDetail[2],
+        banDetail[3]?.trim(),
+      );
+    }
+
+    const unbanDetail = UNBAN_DETAIL_RE.exec(line);
+    if (unbanDetail) {
+      const target = unbanDetail[1] || unbanDetail[3];
+      const actor = unbanDetail[2] || unbanDetail[4] || 'System';
+      if (target) {
+        void this.notifications.onModeration(
+          rt.instanceId,
+          'unban',
+          target,
+          actor,
+        );
+      }
+    }
+
+    const muteMsg = MUTE_MSG_RE.exec(line);
+    if (muteMsg?.[1] && muteMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'mute',
+        muteMsg[1],
+        muteMsg[2],
+      );
+    }
+
+    const unmuteMsg = UNMUTE_MSG_RE.exec(line);
+    if (unmuteMsg?.[1] && unmuteMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'unmute',
+        unmuteMsg[1],
+        unmuteMsg[2],
+      );
+    }
+
+    const promoteMsg = PROMOTE_MSG_RE.exec(line);
+    if (promoteMsg?.[1] && promoteMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'promote',
+        promoteMsg[1],
+        promoteMsg[2],
+      );
+    }
+
+    const demoteMsg = DEMOTE_MSG_RE.exec(line);
+    if (demoteMsg?.[1] && demoteMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'demote',
+        demoteMsg[1],
+        demoteMsg[2],
+      );
+    }
+
+    const wlAddMsg = WHITELIST_ADD_MSG_RE.exec(line);
+    if (wlAddMsg?.[1] && wlAddMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'whitelist_add',
+        wlAddMsg[1],
+        wlAddMsg[2],
+      );
+    }
+
+    const wlRemoveMsg = WHITELIST_REMOVE_MSG_RE.exec(line);
+    if (wlRemoveMsg?.[1] && wlRemoveMsg?.[2]) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'whitelist_remove',
+        wlRemoveMsg[1],
+        wlRemoveMsg[2],
+      );
+    }
+
+    const wlClearMsg = WHITELIST_CLEAR_MSG_RE.exec(line);
+    if (wlClearMsg) {
+      void this.notifications.onModeration(
+        rt.instanceId,
+        'whitelist_clear',
+        '*',
+        wlClearMsg[1] || 'System',
+      );
     }
 
     const joinMatch = JOIN_RE.exec(line);
@@ -752,6 +1006,8 @@ export class RuntimeService implements OnModuleDestroy {
       } catch {
         /* ignore WS errors */
       }
+      // Notify: player joined
+      void this.notifications.onPlayerJoin(rt.instanceId, joinMatch[1]);
       return;
     }
 
@@ -768,6 +1024,8 @@ export class RuntimeService implements OnModuleDestroy {
       } catch {
         /* ignore WS errors */
       }
+      // Notify: player left
+      void this.notifications.onPlayerLeave(rt.instanceId, leaveName);
       return;
     }
 
@@ -782,6 +1040,8 @@ export class RuntimeService implements OnModuleDestroy {
       rt.missingStartupDepsSeen.clear();
       // Push status change: server is now in-game
       this.emitRuntimeStatus(rt);
+      // Notify: server started
+      void this.notifications.onServerStarted(rt.instanceId);
     }
 
     if (!rt.inGame) {
