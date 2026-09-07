@@ -5,6 +5,7 @@ node_modules/
 dist/
 client/dist/
 client/dist-ssr/
+*.tsbuildinfo
 
 # Release staging (pack-release.mjs)
 .release-staging/

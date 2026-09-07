@@ -15,10 +15,6 @@ const nestRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const clientRoot = join(nestRoot, 'client');
 const stagingRoot = join(nestRoot, '.release-staging');
 
-function readConstantsFile() {
-  return join(nestRoot, 'src/constants/fcc.constants.ts');
-}
-
 function readVersion() {
   const pkg = JSON.parse(readFileSync(join(nestRoot, 'package.json'), 'utf8'));
   return String(pkg.version || '0.0.0');
@@ -26,49 +22,31 @@ function readVersion() {
 
 function formatReleaseBuildId(date = new Date()) {
   const pad = (n) => String(n).padStart(2, '0');
-  return (
-    `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}.` +
-    `${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}`
-  );
+  const y = date.getFullYear();
+  const m = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mm = pad(date.getMinutes());
+  return `local · ${y}.${m}.${d} ${hh}:${mm}`;
 }
 
-function readBuildNumber(constantsPath) {
-  const src = readFileSync(constantsPath, 'utf8');
-  const m = /export const APP_BUILD_NUMBER\s*=\s*(\d+)\s*;/.exec(src);
-  return m ? parseInt(m[1], 10) : 0;
-}
-
-function writeBuildNumber(constantsPath, n) {
-  const src = readFileSync(constantsPath, 'utf8');
-  const next = src.replace(
-    /export const APP_BUILD_NUMBER\s*=\s*\d+\s*;/,
-    `export const APP_BUILD_NUMBER = ${n};`,
-  );
-  if (next === src) {
-    throw new Error('APP_BUILD_NUMBER constant not found in fcc.constants.ts');
+function stampCompiledReleaseConstants(distConstantsPath, buildNumber, buildId) {
+  if (!existsSync(distConstantsPath)) {
+    throw new Error(`Compiled constants file not found: ${distConstantsPath}`);
   }
-  writeFileSync(constantsPath, next, 'utf8');
-}
-
-function stampReleaseBuild(constantsPath, buildId) {
-  const src = readFileSync(constantsPath, 'utf8');
-  const next = src.replace(
-    /export const APP_BUILD\s*=\s*['"][^'"]*['"]\s*;/,
-    `export const APP_BUILD = '${buildId}';`,
+  const src = readFileSync(distConstantsPath, 'utf8');
+  let next = src.replace(
+    /exports\.APP_BUILD_NUMBER\s*=\s*\d+\s*;/,
+    `exports.APP_BUILD_NUMBER = ${buildNumber};`,
+  );
+  next = next.replace(
+    /exports\.APP_BUILD\s*=\s*['"][^'"]*['"]\s*;/,
+    `exports.APP_BUILD = '${buildId}';`,
   );
   if (next === src) {
-    throw new Error('APP_BUILD constant not found in fcc.constants.ts');
+    throw new Error('Could not stamp release constants in compiled dist/constants/fcc.constants.js');
   }
-  writeFileSync(constantsPath, next, 'utf8');
-}
-
-function resetDevBuildStamp(constantsPath) {
-  const src = readFileSync(constantsPath, 'utf8');
-  const next = src.replace(/export const APP_BUILD\s*=\s*['"][^'"]*['"]\s*;/, `export const APP_BUILD = 'dev';`);
-  if (next === src) {
-    throw new Error('APP_BUILD constant not found in fcc.constants.ts');
-  }
-  writeFileSync(constantsPath, next, 'utf8');
+  writeFileSync(distConstantsPath, next, 'utf8');
 }
 
 function sleep(ms) {
@@ -251,32 +229,36 @@ function stageAppTree(destNest) {
 
 const version = readVersion();
 const releaseBuildId = process.env.FCC_BUILD_ID || formatReleaseBuildId();
-const constantsPath = readConstantsFile();
 const buildNumber = process.env.FCC_BUILD_NUMBER
   ? parseInt(process.env.FCC_BUILD_NUMBER, 10)
-  : readBuildNumber(constantsPath) + 1;
+  : 0;
 const bundleName = 'factorio-control-center';
 const sharedNest = join(stagingRoot, '_shared', 'factorio-control-center');
 const winBundleDir = join(stagingRoot, 'win', bundleName);
 const linuxBundleDir = join(stagingRoot, 'linux', bundleName);
 
-console.log(
-  `\nFactorio Control Center release pack v${version} (build #${buildNumber} ${releaseBuildId})\n`,
-);
+const buildLabel = buildNumber > 0 ? `#${buildNumber} · ${releaseBuildId}` : releaseBuildId;
+console.log(`\nFactorio Control Center release pack v${version} (${buildLabel})\n`);
 
-writeBuildNumber(constantsPath, buildNumber);
-stampReleaseBuild(constantsPath, releaseBuildId);
-try {
+if (
+  !existsSync(join(nestRoot, 'node_modules')) ||
+  !existsSync(join(clientRoot, 'node_modules')) ||
+  process.env.FCC_ENSURE_DEPS === '1'
+) {
   ensureDependencies(nestRoot, 'Server');
   ensureDependencies(clientRoot, 'Client');
-  run('npm run build:all', nestRoot);
-  assertReleaseArtifacts();
-} finally {
-  resetDevBuildStamp(constantsPath);
 }
 
+run('npm run build:all', nestRoot);
+assertReleaseArtifacts();
+
+const distConstantsPath = join(nestRoot, 'dist/constants/fcc.constants.js');
+stampCompiledReleaseConstants(distConstantsPath, buildNumber, releaseBuildId);
+
 rmSync(stagingRoot, { recursive: true, force: true });
-run('npm run notices', nestRoot);
+if (!existsSync(join(nestRoot, 'THIRD_PARTY_NOTICES.txt')) || process.env.FCC_GENERATE_NOTICES === '1') {
+  run('npm run notices', nestRoot);
+}
 stageAppTree(sharedNest);
 
 console.log('\nInstalling production dependencies into staging…');
