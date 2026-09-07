@@ -108,7 +108,7 @@ your PC or VPS - add servers and manage everything from one place.
      cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh
      ```
 
-2. In the menu - **1. Start panel**, open the URL from the output: `http://127.0.0.1/` on your PC, `http://server_IP/` on a VPS (port - shown in the menu).
+2. In the menu - **1. Start panel**, open the URL from the output: `http://127.0.0.1:8080/` on your PC, `http://server_IP:8080/` on a VPS.
 3. Log in: `admin` / `admin` - change the password right away.
 
 ### Updating FCC (Standalone)
@@ -199,7 +199,7 @@ If you want to modify the panel and build your own Docker image:
 2. In `docker-compose.yml`, replace `image: ghcr.io/louisfahrenheit/factorio-control-center:latest` with `build: .`
 3. Run the following command:
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
 ## Security

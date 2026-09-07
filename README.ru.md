@@ -106,7 +106,8 @@
      ```bash
      cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh
      ```
-2. В меню - **1. Start panel**, откройте адрес из вывода: `http://127.0.0.1/` на ПК, `http://IP_сервера/` на VPS (порт - в меню).
+
+2. В меню - **1. Start panel**, откройте адрес из вывода: `http://127.0.0.1:8080/` на ПК, `http://IP_сервера:8080/` на VPS.
 3. Вход: `admin` / `admin` - сразу смените пароль.
 
 ### Обновление FCC (Standalone)
@@ -197,7 +198,7 @@ npm run client:dev     # UI → http://127.0.0.1:5173/login
 2. В `docker-compose.yml` замените `image: ghcr.io/louisfahrenheit/factorio-control-center:latest` на `build: .`
 3. Выполните команду:
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
 ## Безопасность
