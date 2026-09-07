@@ -190,7 +190,8 @@ npm run start:dev      # API
 npm run client:dev     # UI → http://127.0.0.1:5173/login
 ```
 
-Local release build: `npm run pack:release` → `release/factorio-control-center-win.zip` and `release/factorio-control-center-linux.tar.gz`.
+Local release build: `npm run pack:release` → `release/factorio-control-center-win.zip` (on Windows) or `release/factorio-control-center-linux.tar.gz` (on Linux).
+*(Note: To build a fully pre-bundled Linux release archive with native Linux binaries on Windows, run the command inside WSL or a Node.js Docker container).*
 
 **Building from source (Docker):**
 If you want to modify the panel and build your own Docker image:

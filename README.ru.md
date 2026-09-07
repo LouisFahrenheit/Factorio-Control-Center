@@ -188,7 +188,8 @@ npm run start:dev      # API
 npm run client:dev     # UI → http://127.0.0.1:5173/login
 ```
 
-Локальная сборка: `npm run pack:release` → `release/factorio-control-center-win.zip` и `release/factorio-control-center-linux.tar.gz`.
+Локальная сборка: `npm run pack:release` → `release/factorio-control-center-win.zip` (на Windows) или `release/factorio-control-center-linux.tar.gz` (на Linux).  
+*(Примечание: для сборки готового Linux-архива с нативными бинарниками на машине с Windows запустите сборку через WSL или Docker-контейнер Node.js).*
 
 **Сборка из исходников (Docker):**
 Если вы хотите изменить код панели и собрать свой собственный Docker-образ:
