@@ -898,29 +898,30 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
                       ))}
                     </div>
                   </div>
-                  {annotationTool === 'marker' ? (
-                    <label className="create-save__preview-marker-label-field">
-                      <p className="create-save__preview-hint create-save__preview-hint--above-field">
-                        {t('map_gen_preview_tool_hint_marker')}
+                  <div className="create-save__preview-mode-content">
+                    {annotationTool === 'marker' ? (
+                      <label className="create-save__preview-marker-label-field">
+                        <p className="create-save__preview-hint create-save__preview-hint--above-field">
+                          {t('map_gen_preview_tool_hint_marker')}
+                        </p>
+                        <input
+                          type="text"
+                          className="input create-save__preview-marker-input"
+                          maxLength={48}
+                          value={markerLabel}
+                          placeholder={t('map_gen_preview_marker_label')}
+                          disabled={!cs.previewUrl || previewInteractionLocked}
+                          onChange={(e) => setMarkerLabel(e.target.value)}
+                        />
+                      </label>
+                    ) : (
+                      <p className="create-save__preview-hint">
+                        {annotationTool === 'pan'
+                          ? t('map_gen_preview_controls_hint')
+                          : t(`map_gen_preview_tool_hint_${annotationTool}`)}
                       </p>
-                      <input
-                        type="text"
-                        className="input"
-                        maxLength={48}
-                        value={markerLabel}
-                        placeholder={t('map_gen_preview_marker_label')}
-                        disabled={!cs.previewUrl || previewInteractionLocked}
-                        onChange={(e) => setMarkerLabel(e.target.value)}
-                      />
-                    </label>
-                  ) : null}
-                  {annotationTool !== 'marker' ? (
-                    <p className="create-save__preview-hint">
-                      {annotationTool === 'pan'
-                        ? t('map_gen_preview_controls_hint')
-                        : t(`map_gen_preview_tool_hint_${annotationTool}`)}
-                    </p>
-                  ) : null}
+                    )}
+                  </div>
                 </div>
                 <div className="create-save__preview-viewport-wrap">
                   <div className="create-save__preview-square">

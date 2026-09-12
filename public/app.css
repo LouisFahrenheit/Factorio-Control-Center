@@ -10680,20 +10680,21 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 .create-save__preview-toolbar {
   flex: 0 0 auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 16px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  min-height: 56px;
 }
 
 .create-save__preview-tool-block {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
 }
 
@@ -10719,11 +10720,20 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   color: color-mix(in srgb, var(--danger, #e55) 80%, var(--text) 20%);
 }
 
+.create-save__preview-mode-content {
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .create-save__preview-hint {
   flex: 1 1 auto;
   margin: 0;
   min-width: 0;
-  text-align: center;
+  text-align: left;
   font-size: 0.82em;
   line-height: 1.35;
   color: var(--text-muted);
@@ -11156,7 +11166,7 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 .create-save__preview-colors {
   display: flex;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
 }
 
@@ -11176,17 +11186,28 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 }
 
 .create-save__preview-marker-label-field {
-  display: grid;
-  gap: 4px;
-  margin-top: 8px;
-  width: 70%;
-  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.create-save__preview-marker-input {
+  height: 28px;
+  padding: 2px 8px;
+  font-size: 0.85em;
+  width: 100%;
 }
 
 .create-save__preview-hint--above-field {
   flex: none;
   margin: 0 0 2px;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .create-save__preset-save-dialog {
