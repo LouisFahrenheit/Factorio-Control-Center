@@ -70,6 +70,7 @@ export function useServerSettings(
   const [pendingUpload, setPendingUpload] = useState<Record<string, unknown> | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const kind = resolveStatusKind(status);
   const locked = kind === 'running' || kind === 'starting' || kind === 'stopping' || kind === 'maintenance';
@@ -89,6 +90,7 @@ export function useServerSettings(
     setRawEntries(Object.entries(data));
     setValues(extractEditableValues(data));
     setFileMissing(false);
+    setIsDirty(false);
   }, []);
 
   const loadSettings = useCallback(async () => {
@@ -150,6 +152,7 @@ export function useServerSettings(
 
   const setField = useCallback((key: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    setIsDirty(true);
   }, []);
 
   const checkVisibilityPublic = useCallback((): boolean => {
@@ -180,6 +183,7 @@ export function useServerSettings(
     }
     try {
       await api('/api/files/server-settings', { method: 'PUT', body: JSON.stringify(serialized.data) });
+      setIsDirty(false);
       toast(t('updated_successfully'), false);
       await qc.invalidateQueries({ queryKey: ['status'] });
       await qc.invalidateQueries({ queryKey: ['server-settings'] });
@@ -254,6 +258,7 @@ export function useServerSettings(
     setUploadOpen(false);
     try {
       await api('/api/files/server-settings', { method: 'PUT', body: JSON.stringify(data) });
+      setIsDirty(false);
       await qc.invalidateQueries({ queryKey: ['server-settings'] });
       await qc.invalidateQueries({ queryKey: ['status'] });
       toast(t('server_settings_upload_ok'), false);
@@ -271,6 +276,7 @@ export function useServerSettings(
     loading: query.isLoading,
     locked,
     fileMissing,
+    isDirty,
     formData,
     values,
     strings,

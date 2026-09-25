@@ -83,7 +83,7 @@ export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: Ser
               )}
               <button
                 type="button"
-                className="btn btn--with-icon"
+                className={`btn btn--with-icon${settings.isDirty ? ' btn--update-available' : ''}`}
                 id="btnServerSettingsSave"
                 data-i18n="save_btn"
                 disabled={settings.locked || settings.loading || settings.fileMissing}

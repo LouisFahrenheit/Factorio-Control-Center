@@ -12755,6 +12755,11 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   gap: 8px;
 }
 
+#btnServerSettingsSave.btn--update-available {
+  animation: factorio-update-btn-accent-pulse 1.4s ease-in-out infinite;
+}
+
+
 .server-settings-tab__body {
   flex: 1 1 auto;
   min-height: 0;
