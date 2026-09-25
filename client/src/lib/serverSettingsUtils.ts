@@ -120,7 +120,6 @@ export function settingCategoryKey(fieldKey: string): SettingCategory {
       'minimum_segment_size_peer_count',
       'maximum_segment_size',
       'maximum_segment_size_peer_count',
-      'segment_sizes',
     ].includes(k)
   ) {
     return 'performance';
