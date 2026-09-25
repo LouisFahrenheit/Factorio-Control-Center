@@ -19,6 +19,11 @@ import { InstancePropagateService } from '../instance-propagate.service';
 import { InstanceHistoryService } from '../instance-history.service';
 import { OpResult, isErrorResult, selectedInstance } from '../ops-utils';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { PathsService } from '../../config/paths.service';
+import {
+  buildPlayerStatsFromStore,
+  getPlayerStatsMap,
+} from './player-stats.util';
 
 @Injectable()
 export class PlayersOpsService {
@@ -29,6 +34,7 @@ export class PlayersOpsService {
     private readonly propagate: InstancePropagateService,
     private readonly instanceHistory: InstanceHistoryService,
     private readonly notifications: NotificationsService,
+    private readonly paths: PathsService,
   ) {}
 
   summary(): OpResult {
@@ -62,14 +68,21 @@ export class PlayersOpsService {
           since,
         }))
       : [];
+    const statsMap = getPlayerStatsMap(sel.item.serverPath);
+    const playerStatsRows = buildPlayerStatsFromStore(
+      statsMap,
+      rt?.onlinePlayers || {},
+      rt?.playerLastTick || {},
+    );
+
     return {
       ok: true,
       online,
       history: Array.isArray(hist.history)
         ? hist.history.slice(-200).reverse()
         : [],
-      stats: hist.stats || {},
-      player_stats_rows: [],
+      stats: statsMap,
+      player_stats_rows: playerStatsRows,
       active_bans: Array.isArray(bans) ? bans : [],
       active_bans_available: true,
       ban_history_tail: Array.isArray(hist.ban_history)

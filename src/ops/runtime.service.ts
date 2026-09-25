@@ -43,6 +43,11 @@ import {
   trimLiveLogRing,
 } from '../shared/factorio-log-timestamps';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  recordPlayerJoin,
+  recordPlayerLeave,
+  batchAddPlayerOnlineSeconds,
+} from './players/player-stats-storage';
 
 export interface InstanceRuntime {
   proc: ChildProcessWithoutNullStreams | null;
@@ -58,6 +63,7 @@ export interface InstanceRuntime {
   inGame: boolean;
   wasEverInGame: boolean;
   onlinePlayers: Record<string, string>;
+  playerLastTick: Record<string, number>;
   rconHost: string;
   rconPort: number;
   rconPassword: string;
@@ -116,6 +122,8 @@ export class RuntimeService implements OnModuleDestroy {
   private readonly log = new Logger(RuntimeService.name);
   readonly runtimes = new Map<string, InstanceRuntime>();
 
+  private playerStatsTimer: NodeJS.Timeout | null = null;
+
   constructor(
     private readonly rcon: RconService,
     private readonly paths: PathsService,
@@ -127,9 +135,19 @@ export class RuntimeService implements OnModuleDestroy {
     private readonly eventsGateway: EventsGateway,
     @Inject(forwardRef(() => NotificationsService))
     private readonly notifications: NotificationsService,
-  ) {}
+  ) {
+    this.playerStatsTimer = setInterval(() => {
+      this.flushOnlinePlayersStats();
+    }, 60000);
+  }
 
   async onModuleDestroy(): Promise<void> {
+    if (this.playerStatsTimer) {
+      clearInterval(this.playerStatsTimer);
+      this.playerStatsTimer = null;
+    }
+    this.flushOnlinePlayersStats();
+
     const running = [...this.runtimes.values()].filter(
       (rt) => rt.proc && rt.proc.exitCode === null,
     );
@@ -295,6 +313,7 @@ export class RuntimeService implements OnModuleDestroy {
       inGame: false,
       wasEverInGame: false,
       onlinePlayers: {},
+      playerLastTick: {},
       rconHost: '127.0.0.1',
       rconPort,
       rconPassword,
@@ -354,6 +373,23 @@ export class RuntimeService implements OnModuleDestroy {
       } else if (!graceful && (code ?? 0) !== 0) {
         // Notify: crash (never reached InGame)
         void this.notifications.onServerCrash(rt.instanceId, code ?? 0);
+      }
+      if (Object.keys(rt.onlinePlayers).length > 0) {
+        const now = Date.now();
+        rt.playerLastTick = rt.playerLastTick || {};
+        for (const [name] of Object.entries(rt.onlinePlayers)) {
+          const lastTick = rt.playerLastTick[name] || now;
+          const elapsed = Math.max(0, Math.floor((now - lastTick) / 1000));
+          recordPlayerLeave(rt.serverPath, name, elapsed);
+          this.appendPlayerHistory(rt, name, 'LEAVE');
+        }
+        rt.onlinePlayers = {};
+        rt.playerLastTick = {};
+        try {
+          this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
+        } catch {
+          /* ignore WS errors */
+        }
       }
       rt.proc = null;
       rt.inGame = false;
@@ -998,8 +1034,12 @@ export class RuntimeService implements OnModuleDestroy {
 
     const joinMatch = JOIN_RE.exec(line);
     if (joinMatch?.[1]) {
-      rt.onlinePlayers[joinMatch[1]] = new Date().toISOString();
-      this.appendPlayerHistory(rt, joinMatch[1], 'JOIN');
+      const pName = joinMatch[1].trim();
+      rt.onlinePlayers[pName] = new Date().toISOString();
+      rt.playerLastTick = rt.playerLastTick || {};
+      rt.playerLastTick[pName] = Date.now();
+      recordPlayerJoin(rt.serverPath, pName);
+      this.appendPlayerHistory(rt, pName, 'JOIN');
       // Push players update to WebSocket subscribers
       try {
         this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
@@ -1007,7 +1047,7 @@ export class RuntimeService implements OnModuleDestroy {
         /* ignore WS errors */
       }
       // Notify: player joined
-      void this.notifications.onPlayerJoin(rt.instanceId, joinMatch[1]);
+      void this.notifications.onPlayerJoin(rt.instanceId, pName);
       return;
     }
 
@@ -1016,8 +1056,15 @@ export class RuntimeService implements OnModuleDestroy {
       KICK_RE.exec(line)?.[1] ||
       BAN_RE.exec(line)?.[1];
     if (leaveName) {
-      delete rt.onlinePlayers[leaveName];
-      this.appendPlayerHistory(rt, leaveName, 'LEAVE');
+      const pName = leaveName.trim();
+      const now = Date.now();
+      rt.playerLastTick = rt.playerLastTick || {};
+      const lastTick = rt.playerLastTick[pName] || now;
+      const elapsed = Math.max(0, Math.floor((now - lastTick) / 1000));
+      recordPlayerLeave(rt.serverPath, pName, elapsed);
+      delete rt.playerLastTick[pName];
+      delete rt.onlinePlayers[pName];
+      this.appendPlayerHistory(rt, pName, 'LEAVE');
       // Push players update to WebSocket subscribers
       try {
         this.eventsGateway.emitPlayersUpdate(rt.instanceId, rt.onlinePlayers);
@@ -1025,7 +1072,7 @@ export class RuntimeService implements OnModuleDestroy {
         /* ignore WS errors */
       }
       // Notify: player left
-      void this.notifications.onPlayerLeave(rt.instanceId, leaveName);
+      void this.notifications.onPlayerLeave(rt.instanceId, pName);
       return;
     }
 
@@ -1118,6 +1165,28 @@ export class RuntimeService implements OnModuleDestroy {
       });
     } catch {
       /* ignore WS errors */
+    }
+  }
+
+  private flushOnlinePlayersStats(): void {
+    const now = Date.now();
+    for (const rt of this.runtimes.values()) {
+      if (!rt.proc || rt.proc.exitCode !== null) continue;
+      const names = Object.keys(rt.onlinePlayers || {});
+      if (!names.length) continue;
+      rt.playerLastTick = rt.playerLastTick || {};
+      const deltas: Record<string, number> = {};
+      for (const name of names) {
+        const last = rt.playerLastTick[name] || now;
+        const elapsed = Math.max(0, Math.floor((now - last) / 1000));
+        if (elapsed > 0) {
+          deltas[name] = elapsed;
+          rt.playerLastTick[name] = now;
+        }
+      }
+      if (Object.keys(deltas).length > 0) {
+        batchAddPlayerOnlineSeconds(rt.serverPath, deltas);
+      }
     }
   }
 }

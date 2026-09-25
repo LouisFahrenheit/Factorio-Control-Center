@@ -48,7 +48,8 @@ export class TelegramService implements OnModuleDestroy {
       }
     } catch (e) {
       const cause = (e as { cause?: Error | string })?.cause;
-      const causeMsg = cause instanceof Error ? cause.message : cause ? String(cause) : '';
+      const causeMsg =
+        cause instanceof Error ? cause.message : cause ? String(cause) : '';
       this.log.warn(
         `Telegram sendMessage failed: ${e}${causeMsg ? ` (cause: ${causeMsg})` : ''}`,
       );

@@ -200,15 +200,14 @@ export class ServerOpsService {
     });
   }
 
-  start(): Promise<OpResult> {
+  async start(): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
-    if (isErrorResult(sel)) return Promise.resolve(sel);
+    if (isErrorResult(sel)) return sel;
     if (this.modJobs.isRunningForInstance(sel.item.id)) {
-      return Promise.resolve({ ok: false, error: 'mod_job_running' });
+      return { ok: false, error: 'mod_job_running' };
     }
     if (sel.item.maintenanceLock) {
-      this.instances.update(sel.item.id, {
-        ...sel.item,
+      await this.instances.update(sel.item.id, {
         maintenanceLock: false,
       });
     }

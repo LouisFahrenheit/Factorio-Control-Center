@@ -123,8 +123,9 @@ export function parseSilentEvents(raw: string): NotifEvent[] {
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return (parsed as unknown[]).filter((e): e is NotifEvent =>
-      typeof e === 'string' && (ALL_NOTIF_EVENTS as string[]).includes(e),
+    return (parsed as unknown[]).filter(
+      (e): e is NotifEvent =>
+        typeof e === 'string' && (ALL_NOTIF_EVENTS as string[]).includes(e),
     );
   } catch {
     return [];

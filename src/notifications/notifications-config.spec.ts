@@ -97,7 +97,10 @@ describe('NotificationsConfig', () => {
       expect(merged.notif_chat_relay).toBe(true);
       expect(merged.notif_server_stopped).toBe(false);
       expect(merged.notif_server_started).toBe(true);
-      expect(merged.notif_silent_events).toEqual(['player_join', 'player_leave']);
+      expect(merged.notif_silent_events).toEqual([
+        'player_join',
+        'player_leave',
+      ]);
       // Global token should not be overridable by instance
       expect(merged.telegram_bot_token).toBe('global-tg-token');
     });

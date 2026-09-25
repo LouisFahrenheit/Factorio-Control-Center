@@ -208,7 +208,7 @@ async function bootstrap() {
   }
 
   app.get(PathsService);
-  app.get(UsersService).load();
+  await app.get(UsersService).load();
 
   // Create the WS adapter and register it before app.init()
   const wsAdapter = new FccWsAdapter(app);
@@ -253,4 +253,4 @@ async function bootstrap() {
   app.get(InstanceAutostartService).scheduleAfterPanelStart();
 }
 
-bootstrap();
+void bootstrap();

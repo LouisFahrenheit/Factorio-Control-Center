@@ -338,7 +338,11 @@ export function useSaves(
   const setLaunch = useCallback(
     async (name: string) => {
       await api('/api/saves/set-launch', { method: 'POST', body: JSON.stringify({ name }) });
-      await qc.invalidateQueries({ queryKey: ['players'] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['players'] }),
+        qc.invalidateQueries({ queryKey: ['instances'] }),
+        qc.invalidateQueries({ queryKey: ['config', 'server'] }),
+      ]);
       setSavesMsg(t('saves_manager_launch_set', name), false);
     },
     [qc, setSavesMsg, t],

@@ -226,7 +226,7 @@ export class SavesOpsService {
     return { ok: true, name: dstName };
   }
 
-  transfer(
+  async transfer(
     name: string,
     targetInstanceId: string,
     options?: {
@@ -234,7 +234,7 @@ export class SavesOpsService {
       target_name?: string;
       overwrite?: boolean;
     },
-  ): OpResult {
+  ): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
 
@@ -289,8 +289,7 @@ export class SavesOpsService {
     if (mode === 'move') {
       rmSync(srcPath, { force: true });
       if (sel.item.launchSave === srcName) {
-        this.instances.update(sel.item.id, {
-          ...sel.item,
+        await this.instances.update(sel.item.id, {
           launchSave: 'latest',
         });
       }
@@ -306,21 +305,22 @@ export class SavesOpsService {
     };
   }
 
-  setLaunchSave(name: string): OpResult {
+  async setLaunchSave(name: string): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     const prev = String(sel.item.launchSave || 'latest');
     const raw = String(name || '').trim();
     if (raw === 'latest') {
-      this.instances.update(sel.item.id, { ...sel.item, launchSave: 'latest' });
+      await this.instances.update(sel.item.id, { launchSave: 'latest' });
       const changes =
         prev !== 'latest' ? [{ key: 'save', from: prev, to: 'latest' }] : [];
       return { ok: true, settings_changes: changes };
     }
     const fname = safeZipName(raw);
-    if (!fname || !existsSync(join(sel.pm.savesDir, fname)))
+    if (!fname || !existsSync(join(sel.pm.savesDir, fname))) {
       return { ok: false, error: 'not_in_list' };
-    this.instances.update(sel.item.id, { ...sel.item, launchSave: fname });
+    }
+    await this.instances.update(sel.item.id, { launchSave: fname });
     const changes =
       prev !== fname ? [{ key: 'save', from: prev, to: fname }] : [];
     return { ok: true, settings_changes: changes };

@@ -158,8 +158,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
 
             const onlineCount = Object.keys(rt.onlinePlayers || {}).length;
             const notifCfg = this.notifications.getResolvedInstanceConfig(id);
-            const lowUpsThreshold =
-              notifCfg?.notif_low_ups_threshold ?? 55.0;
+            const lowUpsThreshold = notifCfg?.notif_low_ups_threshold ?? 55.0;
             const isLagging =
               ups > 0 && ups < lowUpsThreshold && onlineCount > 0;
 

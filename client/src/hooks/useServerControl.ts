@@ -77,24 +77,31 @@ export function useServerControl(
     }
   }, [kind]);
 
+  const inst = instances.find((x) => String(x.id) === selectedId);
+  const cfg = configQuery.data;
+
+  // Keep launch save in sync when instances or config query updates
+  const currentLaunchSave = inst?.launchSave || cfg?.save || latestLabel;
+  useEffect(() => {
+    if (currentLaunchSave) {
+      setSave(String(currentLaunchSave));
+    }
+  }, [currentLaunchSave]);
+
   useEffect(() => {
     if (!selectedId) return;
-    const cfg = configQuery.data;
-    const inst = instances.find((x) => String(x.id) === selectedId);
 
-    // Re-initialize state only on instance change or initial data load
+    // Re-initialize network state only on instance change or initial data load
     if (lastLoadedIdRef.current !== selectedId || (!ip && !port)) {
       if (cfg || inst) {
         lastLoadedIdRef.current = selectedId;
         const nextIp = cfg?.ip ? String(cfg.ip).trim() : inst?.ip ? String(inst.ip).trim() : '0.0.0.0';
         const nextPort = cfg?.port ? String(cfg.port).trim() : inst?.port ? String(inst.port).trim() : '34197';
-        const want = cfg?.save || inst?.launchSave || latestLabel;
         setIp(nextIp || '0.0.0.0');
         setPort(nextPort || '34197');
-        setSave(String(want || latestLabel));
       }
     }
-  }, [configQuery.data, instances, selectedId, latestLabel, ip, port]);
+  }, [cfg, inst, selectedId, ip, port]);
 
   const refreshLogs = useCallback(async () => {
     if (!enabled || !selectedId) return;
