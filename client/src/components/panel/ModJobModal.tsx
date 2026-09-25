@@ -172,6 +172,7 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
       onClose={modJob.close}
       closeOnBackdropClick={false}
       closeOnEscape={false}
+      backdropClassName="mod-job-backdrop--top"
     >
       <div
         className="fu-modal server-update-dialog server-update-dialog--progress server-update-dialog--mod-job"

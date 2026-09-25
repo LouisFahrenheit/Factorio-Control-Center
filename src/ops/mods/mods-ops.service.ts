@@ -361,6 +361,23 @@ export class ModsOpsService {
       const zp = join(sel.pm.modsDir, `${name}_${version}.zip`);
       if (!existsSync(zp)) return { ok: false, error: 'zip_not_found' };
       rmSync(zp, { force: true });
+      const remaining = installedModVersions(sel.pm.modsDir, name);
+      if (!remaining.length) {
+        writeModList(
+          sel.pm,
+          rows.filter(
+            (r) => String(r.name || '').toLowerCase() !== name.toLowerCase(),
+          ),
+        );
+      } else {
+        const row = rows.find(
+          (r) => String(r.name || '').toLowerCase() === name.toLowerCase(),
+        );
+        if (row && row.version === version) {
+          row.version = latestVersion(remaining);
+          writeModList(sel.pm, rows);
+        }
+      }
     } else {
       for (const f of readdirSync(sel.pm.modsDir)) {
         if (modNameFromZip(f).toLowerCase() === name.toLowerCase())
@@ -459,10 +476,96 @@ export class ModsOpsService {
     return { ok: true, path: out, name: archiveName };
   }
 
-  async installPlan(mod: string): Promise<OpResult> {
+  async installPlan(mod: string, version?: string): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
-    return this.modPlan.installPlanDetail(sel.pm, mod) as Promise<OpResult>;
+    return this.modPlan.installPlanDetail(
+      sel.pm,
+      mod,
+      version,
+    ) as Promise<OpResult>;
+  }
+
+  async portalReleases(rawName: string): Promise<OpResult> {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return sel;
+    const modId = this.portal.modIdFromInput(rawName);
+    if (!modId || this.portal.isBuiltin(modId)) {
+      return { ok: false, error: 'invalid_mod_id' };
+    }
+    try {
+      const meta = await this.portal.fetchFull(modId);
+      const serverPath = sel.item.serverPath;
+      const gv = gameVersion(serverPath);
+      const releases = this.portal.listReleasesSummary(meta, serverPath);
+      const resolved = this.portal.resolveRelease(meta, {
+        serverPath,
+        gameVersion: gv,
+      });
+      const installedVersions = installedModVersions(sel.pm.modsDir, modId);
+      for (const iv of installedVersions) {
+        if (!releases.some((r) => r.version === iv)) {
+          releases.unshift({
+            version: iv,
+            factorio_version: this.portal.factorioMajorMinor(gv) || gv || '',
+            released_at: '',
+            is_compatible: true,
+          });
+        }
+      }
+      const modList = readModList(sel.pm);
+      const modRow = modList.mods.find(
+        (r) => String(r.name || '').trim().toLowerCase() === modId.toLowerCase(),
+      );
+      const pinned = String(modRow?.version || '').trim();
+      const currentInstalled =
+        (pinned && installedVersions.includes(pinned) ? pinned : '') ||
+        latestVersion(installedVersions) ||
+        '';
+      return {
+        ok: true,
+        name: modId,
+        title: typeof meta.title === 'string' ? meta.title : modId,
+        game_version: gv,
+        factorio_version: this.portal.factorioMajorMinor(gv),
+        recommended_version: resolved ? String(resolved.version || '') : '',
+        installed_version: currentInstalled,
+        available_versions: installedVersions,
+        releases,
+      };
+    } catch (e) {
+      const installedVersions = installedModVersions(sel.pm.modsDir, modId);
+      if (installedVersions.length > 0) {
+        const serverPath = sel.item.serverPath;
+        const gv = gameVersion(serverPath);
+        const modList = readModList(sel.pm);
+        const modRow = modList.mods.find(
+          (r) => String(r.name || '').trim().toLowerCase() === modId.toLowerCase(),
+        );
+        const pinned = String(modRow?.version || '').trim();
+        const currentInstalled =
+          (pinned && installedVersions.includes(pinned) ? pinned : '') ||
+          latestVersion(installedVersions) ||
+          '';
+        return {
+          ok: true,
+          name: modId,
+          title: modId,
+          game_version: gv,
+          factorio_version: this.portal.factorioMajorMinor(gv),
+          recommended_version: '',
+          installed_version: currentInstalled,
+          available_versions: installedVersions,
+          releases: installedVersions.map((v) => ({
+            version: v,
+            factorio_version: this.portal.factorioMajorMinor(gv) || gv || '',
+            released_at: '',
+            is_compatible: true,
+          })),
+        };
+      }
+      return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
   }
 
   async installPlanBatch(mods: unknown): Promise<OpResult> {
@@ -665,7 +768,13 @@ export class ModsOpsService {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
         const meta = await this.portal.fetchFull(modName);
-        const rel = this.portal.lastRelease(meta);
+        const sel = selectedInstance(this.instances);
+        const serverPath =
+          !isErrorResult(sel) ? sel.item.serverPath : undefined;
+        const rel = this.portal.resolveRelease(meta, {
+          serverPath,
+          gameVersion: this.currentGameVersion(),
+        });
         const version = String(rel?.version || '').trim();
         if (!version) {
           const out = { ok: false, version: '', error: 'no_release' };
@@ -743,7 +852,13 @@ export class ModsOpsService {
 
       try {
         const meta = await this.portal.fetchFull(name);
-        const rel = this.portal.lastRelease(meta);
+        const sel = selectedInstance(this.instances);
+        const serverPath =
+          !isErrorResult(sel) ? sel.item.serverPath : undefined;
+        const rel = this.portal.resolveRelease(meta, {
+          serverPath,
+          gameVersion: this.currentGameVersion(),
+        });
         for (const dep of portalDependencyNames(rel)) {
           const depName = this.portal.modIdFromInput(dep);
           if (!depName || this.portal.isBuiltin(depName)) continue;

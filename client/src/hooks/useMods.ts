@@ -7,6 +7,7 @@ import {
   filterModRows,
   maxInstalledModVersion,
   modsDefaultAscForColumn,
+  parseModInput,
   portalVersionNewer,
   sortModRows,
 } from '../lib/modUtils';
@@ -138,11 +139,34 @@ export function useMods(
   const [removeOldZips, setRemoveOldZips] = useState(true);
   const [installInput, setInstallInput] = useState('');
   const [installBlink, setInstallBlink] = useState(false);
+  const [portalVersionsModalOpen, setPortalVersionsModalOpen] = useState(false);
+  const [portalVersionsModalMod, setPortalVersionsModalMod] = useState('');
   const [checkResults, setCheckResults] = useState<Record<string, ModCheckResultEntry>>({});
   const [modsCheckRunning, setModsCheckRunning] = useState(false);
   const [fromSaveState, setFromSaveState] = useState<FromSaveState | null>(null);
   const checkPollRef = useRef<number | null>(null);
   const autoCheckRunningRef = useRef(false);
+
+  const openVersionPicker = useCallback(
+    (modName?: string) => {
+      const target = (modName ?? installInput).trim();
+      const parsed = parseModInput(target);
+      if (!parsed.modName) {
+        setInstallBlink(false);
+        requestAnimationFrame(() => setInstallBlink(true));
+        window.setTimeout(() => setInstallBlink(false), 1200);
+        return;
+      }
+      setPortalVersionsModalMod(parsed.modName);
+      setPortalVersionsModalOpen(true);
+    },
+    [installInput],
+  );
+
+  const closeVersionPicker = useCallback(() => {
+    setPortalVersionsModalOpen(false);
+    setPortalVersionsModalMod('');
+  }, []);
 
   const kind = resolveStatusKind(status);
   const serverProcessBusy = kind === 'running' || kind === 'starting' || kind === 'stopping';
@@ -371,74 +395,81 @@ export function useMods(
     checkUpdates,
   ]);
 
-  const installFromUrl = useCallback(async () => {
-    if (serverBusy) {
-      setModsMsg(t('server_running_mutate_blocked'), true);
-      return;
-    }
-    const mod = installInput.trim();
-    if (!mod) {
-      setInstallBlink(false);
-      requestAnimationFrame(() => setInstallBlink(true));
-      window.setTimeout(() => setInstallBlink(false), 1200);
-      return;
-    }
-    modJob.openPreparing(t('mod_job_phase_collecting_deps'));
-    try {
-      const plan = await api<ModInstallPlan>('/api/mods/install-plan', {
-        method: 'POST',
-        body: JSON.stringify({ mod }),
-      });
-      if (plan?.ok === false) {
-        modJob.close();
-        const code = String(plan.error || 'install_plan_failed');
-        if (code === 'requires_space_age') {
-          setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
-          return;
+  const installFromUrl = useCallback(
+    async (rawModUrl?: string, overrideVersion?: string) => {
+      if (serverBusy) {
+        setModsMsg(t('server_running_mutate_blocked'), true);
+        return;
+      }
+      const raw = (rawModUrl ?? installInput).trim();
+      const parsed = parseModInput(raw);
+      const mod = parsed.modName;
+      const targetVersion = overrideVersion || parsed.version;
+      if (!mod) {
+        setInstallBlink(false);
+        requestAnimationFrame(() => setInstallBlink(true));
+        window.setTimeout(() => setInstallBlink(false), 1200);
+        return;
+      }
+      modJob.openPreparing(t('mod_job_phase_collecting_deps'));
+      try {
+        const plan = await api<ModInstallPlan>('/api/mods/install-plan', {
+          method: 'POST',
+          body: JSON.stringify({ mod, version: targetVersion }),
+        });
+        if (plan?.ok === false) {
+          modJob.close();
+          const code = String(plan.error || 'install_plan_failed');
+          if (code === 'requires_space_age') {
+            setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
+            return;
+          }
+          throw new Error(code);
         }
-        throw new Error(code);
-      }
-      const deps = Array.isArray(plan?.dependencies) ? plan.dependencies : [];
-      const conflicts = installConflictsFromPlan(plan);
-      const recommended = Array.isArray(plan?.recommended) ? plan.recommended : [];
-      const titles = plan?.titles;
-      let checkedRecommended: string[] = [];
-      if (deps.length || conflicts.length || recommended.length) {
+        const deps = Array.isArray(plan?.dependencies) ? plan.dependencies : [];
+        const conflicts = installConflictsFromPlan(plan);
+        const recommended = Array.isArray(plan?.recommended) ? plan.recommended : [];
+        const titles = plan?.titles;
+        let checkedRecommended: string[] = [];
+        if (deps.length || conflicts.length || recommended.length) {
+          modJob.close();
+          const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended, titles });
+          if (!res.confirmed) return;
+          checkedRecommended = res.recommendedToInstall || [];
+        }
+        let allowRg = false;
+        if (plan?.requires_game_update_confirmation) {
+          modJob.close();
+          const flow = await openModGameVersionConfirm(t, {
+            title: t('mod_install_requires_newer_game_title'),
+            gameVersion: String(plan.game_version || '').trim() || '—',
+            modLines: modsNeedingGameLinesFromPlan(plan),
+          });
+          if (!flow.ok) return;
+          allowRg = flow.allow_requires_game_update;
+        }
+        setInstallInput('');
+        if (checkedRecommended.length > 0) {
+          await modJob.start('/api/mods/job/start-install-save', {
+            mods: [targetVersion ? `${mod}@${targetVersion}` : mod, ...checkedRecommended],
+            remove_old_zips: removeOldZips,
+            allow_requires_game_update: allowRg,
+          });
+        } else {
+          await modJob.start('/api/mods/job/start-install', {
+            mod,
+            version: targetVersion,
+            remove_old_zips: removeOldZips,
+            allow_requires_game_update: allowRg,
+          });
+        }
+      } catch (e) {
         modJob.close();
-        const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended, titles });
-        if (!res.confirmed) return;
-        checkedRecommended = res.recommendedToInstall || [];
+        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
       }
-      let allowRg = false;
-      if (plan?.requires_game_update_confirmation) {
-        modJob.close();
-        const flow = await openModGameVersionConfirm(t, {
-          title: t('mod_install_requires_newer_game_title'),
-          gameVersion: String(plan.game_version || '').trim() || '—',
-          modLines: modsNeedingGameLinesFromPlan(plan),
-        });
-        if (!flow.ok) return;
-        allowRg = flow.allow_requires_game_update;
-      }
-      setInstallInput('');
-      if (checkedRecommended.length > 0) {
-        await modJob.start('/api/mods/job/start-install-save', {
-          mods: [mod, ...checkedRecommended],
-          remove_old_zips: removeOldZips,
-          allow_requires_game_update: allowRg,
-        });
-      } else {
-        await modJob.start('/api/mods/job/start-install', {
-          mod,
-          remove_old_zips: removeOldZips,
-          allow_requires_game_update: allowRg,
-        });
-      }
-    } catch (e) {
-      modJob.close();
-      setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
-    }
-  }, [installInput, modJob, removeOldZips, serverBusy, setModsMsg, t]);
+    },
+    [installInput, modJob, removeOldZips, serverBusy, setModsMsg, t],
+  );
 
   const uploadArchives = useCallback(
     async (fileList: FileList | null) => {
@@ -687,7 +718,7 @@ export function useMods(
   }, [closeFromSaveDialog, confirmPortalGameVersion, fromSaveState, modJob, removeOldZips, t]);
 
   const updateSelected = useCallback(
-    async (name: string) => {
+    async (name: string, overrideVersion?: string) => {
       if (serverBusy) {
         setModsMsg(t('server_running_mutate_blocked'), true);
         return;
@@ -701,7 +732,7 @@ export function useMods(
       try {
         const plan = await api<ModInstallPlan>('/api/mods/install-plan', {
           method: 'POST',
-          body: JSON.stringify({ mod: name }),
+          body: JSON.stringify({ mod: name, version: overrideVersion }),
         });
         if (plan?.ok === false) {
           modJob.close();
@@ -746,6 +777,7 @@ export function useMods(
         }
         await modJob.start('/api/mods/job/start-update', {
           name,
+          version: overrideVersion,
           remove_old_zips: removeOldZips,
           allow_requires_game_update: allowRg,
         });
@@ -918,6 +950,11 @@ export function useMods(
         setModsMsg(t('server_running_mutate_blocked'), true);
         return;
       }
+      const versions = (row.available_versions || []).filter(Boolean);
+      if (versions.length > 1) {
+        openVersionPicker(name);
+        return;
+      }
       openFccConfirmModal({
         title: t('mod_list_remove_mod_btn'),
         message: t('mod_list_remove_confirm', row.display_name || row.name || name),
@@ -931,7 +968,7 @@ export function useMods(
         },
       });
     },
-    [rawRows, reload, serverProcessBusy, setModsMsg, t],
+    [rawRows, reload, serverProcessBusy, setModsMsg, t, openVersionPicker],
   );
 
   const showChangelog = useCallback(
@@ -1012,6 +1049,10 @@ export function useMods(
     updateAll,
     checkUpdates,
     modsCheckRunning,
+    portalVersionsModalOpen,
+    portalVersionsModalMod,
+    openVersionPicker,
+    closeVersionPicker,
   };
 }
 

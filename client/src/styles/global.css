@@ -3007,3 +3007,674 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Mod portal versions picker dialog - Modern Rich Style */
+.fu-modal.mod-portal-versions-dialog {
+  width: min(860px, 96vw);
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.mod-portal-versions-dialog__flow {
+  max-height: min(90vh, 790px);
+  display: flex;
+  flex-direction: column;
+}
+
+.mod-portal-versions__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  background: color-mix(in srgb, var(--bg-widget) 95%, var(--bg-main) 5%);
+}
+
+.mod-portal-versions__header-icon {
+  color: var(--accent, #da8216);
+  flex-shrink: 0;
+}
+
+.mod-portal-versions__header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+
+.mod-portal-versions__header-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.mod-portal-versions__link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.73rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.mod-portal-versions__link-pill:hover {
+  color: var(--text-primary, #fff);
+  border-color: var(--accent, #da8216);
+  background: color-mix(in srgb, var(--accent, #da8216) 12%, transparent);
+}
+
+.mod-portal-versions-dialog__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px 20px;
+  overflow: hidden;
+}
+
+.mod-portal-versions__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.mod-portal-versions__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-widget);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.mod-portal-versions__stat-value--server {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--text, #ffffff);
+}
+
+.mod-portal-versions__stat-value--installed {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--text, #ffffff);
+}
+
+.mod-portal-versions__stat-value--rec {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--text, #ffffff);
+}
+
+.mod-portal-versions__stat-value--muted {
+  font-family: var(--font-mono, monospace);
+  font-weight: 500;
+  font-size: 1.15rem;
+  color: var(--text-dim, #8c8c8c);
+}
+
+.mod-portal-versions__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mod-portal-versions__search-box {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+  display: flex;
+  align-items: center;
+}
+
+.mod-portal-versions__search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-dim, #8c8c8c);
+  pointer-events: none;
+}
+
+.mod-portal-versions__search-input {
+  width: 100%;
+  height: 34px;
+  padding-left: 34px !important;
+  padding-right: 28px !important;
+  border-radius: 7px;
+  font-size: 0.9em;
+  background: var(--bg-input, #2a2a2a);
+  border: 1px solid var(--border-dark, #222222);
+}
+
+.mod-portal-versions__search-input:focus {
+  border-color: var(--accent, #da8216);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--accent, #da8216);
+}
+
+.mod-portal-versions__search-clear {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #8c8c8c);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.mod-portal-versions__search-clear:hover {
+  color: var(--text, #ffffff);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mod-portal-versions__toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mod-portal-versions__refresh-btn {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.mod-portal-versions__counter {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted, #aaaaaa);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: var(--bg-widget, #3d3d3d);
+  border: 1px solid var(--border-dark, #222222);
+}
+
+.mod-portal-versions__table-wrap {
+  flex: 1 1 auto;
+  min-height: 200px;
+  max-height: 460px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-dark, #222222);
+  background: var(--bg-data, #3a3a3a);
+}
+
+.mod-portal-versions__table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9em;
+}
+
+.mod-portal-versions__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-widget, #3d3d3d);
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--text-muted, #aaaaaa);
+  border-bottom: 1px solid var(--border-dark, #222222);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mod-portal-versions__th-action {
+  text-align: right;
+  padding-right: 18px !important;
+}
+
+.mod-portal-versions__table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-dark, #222222);
+  vertical-align: middle;
+}
+
+.mod-portal-versions__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mod-portal-versions__row {
+  transition: background-color 0.12s ease;
+}
+
+.mod-portal-versions__row:hover {
+  background: var(--fcc-row-hover-bg, color-mix(in srgb, var(--accent) 7%, var(--bg-data) 93%));
+}
+
+.mod-portal-versions__row--recommended {
+  background: color-mix(in srgb, var(--running, #78c840) 5%, transparent);
+}
+
+.mod-portal-versions__row--installed {
+  background: color-mix(in srgb, var(--accent-selected, #f1be64) 6%, transparent);
+}
+
+.mod-portal-versions__ver-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mod-portal-versions__version-code {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  font-size: 0.96rem;
+  color: var(--text, #ffffff);
+}
+
+.mod-portal-versions__badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mod-portal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  line-height: 1.25;
+}
+
+.mod-portal-pill--icon-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+
+.mod-portal-pill--rec {
+  color: #fbbf24;
+  background: transparent;
+  border: none;
+}
+
+.mod-portal-pill--compat {
+  color: var(--text-muted, #aaaaaa);
+  background: transparent;
+  border: none;
+}
+
+.mod-portal-pill--current {
+  color: var(--running, #78c840);
+  background: transparent;
+  border: none;
+}
+
+.mod-portal-branch-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 5px;
+  letter-spacing: 0.01em;
+}
+
+.mod-portal-branch-badge--match {
+  color: var(--text, #ffffff);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid var(--border, #555555);
+}
+
+.mod-portal-branch-badge--other {
+  color: var(--text-dim, #8c8c8c);
+  background: transparent;
+  border: 1px solid var(--border-dark, #222222);
+}
+
+.mod-portal-versions__td-date {
+  color: var(--text-muted, #aaaaaa);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.mod-portal-versions__td-action {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 18px !important;
+}
+
+.mod-portal-versions__action-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+.mod-portal-versions__action-btn {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  padding: 0 8px !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.mod-portal-versions__installed-tag {
+  color: var(--running, #78c840);
+  background: color-mix(in srgb, var(--running, #78c840) 12%, var(--bg-main) 88%);
+  border: 1px solid color-mix(in srgb, var(--running, #78c840) 28%, transparent);
+  font-weight: 600 !important;
+  cursor: default;
+  user-select: none;
+}
+
+.mod-portal-versions__install-btn {
+  border: 1px solid var(--fcc-btn-border) !important;
+  background: var(--fcc-btn-bg) !important;
+  color: var(--text) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  padding: 0 8px !important;
+  cursor: pointer;
+  transition: all 0.16s var(--fcc-hover-ease);
+}
+
+.mod-portal-versions__install-btn:hover:not(:disabled) {
+  background: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(in srgb, var(--accent, #da8216) 30%, var(--fcc-btn-border) 70%) !important;
+  color: var(--text) !important;
+}
+
+.mod-portal-versions__install-btn:active:not(:disabled) {
+  background: var(--fcc-btn-bg-active) !important;
+}
+
+.mod-portal-versions__install-btn:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+
+.mod-portal-versions__active-mark {
+  width: 29px !important;
+  min-width: 29px !important;
+  max-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  color: var(--running, #78c840);
+  background: color-mix(in srgb, var(--running, #78c840) 14%, var(--bg-main) 86%);
+  border: 1px solid color-mix(in srgb, var(--running, #78c840) 30%, transparent);
+  box-sizing: border-box !important;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.mod-portal-versions__activate-btn {
+  width: 29px !important;
+  min-width: 29px !important;
+  max-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  color: var(--text-dim, #8c8c8c);
+  border: 1px solid var(--fcc-btn-border) !important;
+  background: var(--fcc-btn-bg) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  cursor: pointer;
+  transition: all 0.16s var(--fcc-hover-ease);
+  box-sizing: border-box !important;
+  flex-shrink: 0;
+}
+
+.mod-portal-versions__activate-btn:hover:not(:disabled) {
+  color: var(--accent, #da8216);
+  border-color: color-mix(in srgb, var(--accent, #da8216) 45%, var(--fcc-btn-border) 55%) !important;
+  background: var(--fcc-btn-bg-hover) !important;
+}
+
+.mod-portal-versions__delete-btn {
+  width: 29px !important;
+  min-width: 29px !important;
+  max-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  color: var(--text-dim, #8c8c8c);
+  border: 1px solid var(--fcc-btn-border) !important;
+  background: var(--fcc-btn-bg) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  cursor: pointer;
+  transition: all 0.16s var(--fcc-hover-ease);
+  box-sizing: border-box !important;
+  flex-shrink: 0;
+}
+
+.mod-portal-versions__delete-btn:hover:not(:disabled) {
+  color: #ff5555;
+  border-color: color-mix(in srgb, #ff5555 45%, var(--fcc-btn-border) 55%) !important;
+  background: var(--fcc-btn-bg-hover) !important;
+}
+
+.mod-portal-versions__btn-spacer,
+.mod-portal-versions__delete-spacer {
+  width: 29px !important;
+  min-width: 29px !important;
+  max-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  display: inline-block;
+  flex-shrink: 0;
+  box-sizing: border-box !important;
+}
+
+.mod-portal-versions__loading,
+.mod-portal-versions__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.mod-portal-versions__spinner {
+  animation: mod-portal-spin 1s linear infinite;
+  color: var(--accent, #e67e22);
+}
+
+@keyframes mod-portal-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mod-portal-versions__error-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 16px;
+  color: #f87171;
+}
+
+.mod-portal-versions__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 18px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-widget) 95%, var(--bg-main) 5%);
+}
+
+.mods-toolbar__field-version-btn {
+  flex-shrink: 0;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 6px !important;
+  background: var(--fcc-btn-bg) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  box-sizing: border-box !important;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition:
+    background-color 0.2s var(--fcc-hover-ease),
+    border-color 0.2s var(--fcc-hover-ease),
+    color 0.2s var(--fcc-hover-ease);
+}
+
+.mods-toolbar__field-version-btn:hover:not(:disabled) {
+  background: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(in srgb, var(--accent, #da8216) 30%, var(--fcc-btn-border) 70%) !important;
+  color: var(--text-primary, #fff) !important;
+}
+
+/* Compact & neat active version selector in mods table */
+#tblModsBody td.mods-col-version {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.mods-version-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  max-width: 100%;
+}
+
+#tblModsBody select.mods-version-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  box-sizing: border-box;
+  height: 27px;
+  line-height: 25px;
+  padding: 0 24px 0 8px !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  color: var(--text, #ffffff) !important;
+  background-color: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaaaaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 7px center !important;
+  background-size: 11px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+  min-width: 6.2em !important;
+  max-width: 8.2em !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+#tblModsBody select.mods-version-select:hover:not(:disabled) {
+  border-color: var(--accent, #da8216) !important;
+  background-color: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f1be64' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--accent, #da8216) 25%, transparent);
+}
+
+#tblModsBody select.mods-version-select:focus {
+  border-color: var(--accent, #da8216) !important;
+  box-shadow: 0 0 0 1px var(--accent, #da8216) !important;
+}
+
+#tblModsBody select.mods-version-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#tblModsBody select.mods-version-select option {
+  background: var(--bg-widget, #3d3d3d);
+  color: var(--text, #ffffff);
+  font-family: inherit !important;
+  font-size: inherit !important;
+  padding: 4px 8px;
+}
+
+.mods-version-text {
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+
+body > .fu-modal-backdrop.mod-job-backdrop--top {
+  z-index: 10200;
+}

@@ -212,3 +212,48 @@ export function filterModRows(rows: ModRow[], query: string): ModRow[] {
     return hay.includes(q);
   });
 }
+
+export function parseModInput(raw: string): { modName: string; version?: string } {
+  let s = String(raw || '').trim();
+  if (!s) return { modName: '' };
+
+  let extractedVersion: string | undefined;
+
+  if (s.includes('factorio.com')) {
+    const parsedUrl = s.replace(/\\/g, '/');
+    const verMatch = /[?&]version=([^&#]+)/i.exec(parsedUrl);
+    if (verMatch) {
+      try {
+        extractedVersion = decodeURIComponent(verMatch[1].trim());
+      } catch {
+        extractedVersion = verMatch[1].trim();
+      }
+    }
+    const m = /\/mod\/([^/?#]+)/i.exec(parsedUrl);
+    if (m) {
+      let modId = '';
+      try {
+        modId = decodeURIComponent(m[1].trim());
+      } catch {
+        modId = m[1].trim();
+      }
+      return { modName: modId, version: extractedVersion };
+    }
+  }
+
+  s = s.replace(/^mod\s*=\s*/i, '').trim();
+
+  const sepMatch =
+    /^([A-Za-z0-9_\- ]+?)\s*(?:[@:=]|==|\s+)\s*(\d+(?:\.\d+)*)$/i.exec(s);
+  if (sepMatch) {
+    return { modName: sepMatch[1].trim(), version: sepMatch[2].trim() };
+  }
+
+  const zipMatch =
+    /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
+  if (zipMatch) {
+    return { modName: zipMatch[1].trim(), version: zipMatch[2].trim() };
+  }
+
+  return { modName: s };
+}

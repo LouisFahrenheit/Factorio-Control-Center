@@ -181,12 +181,20 @@ export class ModsJobService {
       let plan: ModPlanItem[] = [];
 
       if (mode === 'install') {
-        const modId = this.portal.modIdFromInput(String(params.mod || ''));
+        const parsed = this.portal.parseModInput(String(params.mod || ''));
+        const modId = parsed.modName;
+        const requestedVer =
+          String(params.version || parsed.version || '').trim() || undefined;
         if (!this.portal.isValidPortalModId(modId))
           throw new Error('invalid_mod_id');
         if (this.portal.isBuiltin(modId)) throw new Error('builtin');
         this.appendLog('info', 'mod_job_log_dependency');
-        plan = await this.plan.planInstall(serverPath, modsDir, modId);
+        plan = await this.plan.planInstall(
+          serverPath,
+          modsDir,
+          modId,
+          requestedVer,
+        );
         this.guardGameVersion(serverPath, plan, allowRequiresGameUpdate, modId);
       } else if (mode === 'install_many' || isImportModpack) {
         const mods = this.parseModNames(params.mods);
@@ -200,15 +208,23 @@ export class ModsJobService {
           mods[0] || '?',
         );
       } else if (mode === 'update_one') {
-        const name = this.portal.modIdFromInput(
+        const parsed = this.portal.parseModInput(
           String(params.name || params.mod || ''),
         );
+        const name = parsed.modName;
+        const requestedVer =
+          String(params.version || parsed.version || '').trim() || undefined;
         if (!name) throw new Error('empty_name');
         if (!this.portal.isValidPortalModId(name))
           throw new Error('invalid_mod_id');
         if (this.portal.isBuiltin(name)) throw new Error('builtin');
 
-        const planAll = await this.plan.planInstall(serverPath, modsDir, name);
+        const planAll = await this.plan.planInstall(
+          serverPath,
+          modsDir,
+          name,
+          requestedVer,
+        );
         this.guardGameVersion(
           serverPath,
           planAll,
@@ -498,10 +514,13 @@ export class ModsJobService {
     for (const x of raw) {
       const rawName = String(x || '').trim();
       if (!rawName || rawName.startsWith('!')) continue;
-      const n = this.portal.modIdFromInput(rawName);
+      const parsed = this.portal.parseModInput(rawName);
+      const n = parsed.modName;
       if (!n || this.portal.isBuiltin(n) || !this.portal.isValidPortalModId(n))
         continue;
-      if (!out.some((v) => v.toLowerCase() === n.toLowerCase())) out.push(n);
+      const key = parsed.version ? `${n}@${parsed.version}` : n;
+      if (!out.some((v) => v.toLowerCase() === key.toLowerCase()))
+        out.push(key);
     }
     return out;
   }

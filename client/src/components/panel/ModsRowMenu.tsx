@@ -14,6 +14,7 @@ interface ModsRowMenuProps {
   blockUpdates: boolean;
   onClose: () => void;
   onUpdate: () => void;
+  onChangeVersion?: () => void;
   onDownload: () => void;
   onChangelog: () => void;
   onRemove: () => void;
@@ -28,6 +29,7 @@ export function ModsRowMenu({
   blockUpdates,
   onClose,
   onUpdate,
+  onChangeVersion,
   onDownload,
   onChangelog,
   onRemove,
@@ -61,6 +63,19 @@ export function ModsRowMenu({
       >
         <AppIcon name="mod_update_" size={16} />
         {t('mod_list_update_selected_btn')}
+      </button>
+      <button
+        type="button"
+        className="btn instance-row-menu__item btn--with-icon"
+        id="btnModsMenuChangeVersion"
+        disabled={isBuiltin || serverBusy}
+        onClick={(ev) => {
+          ev.stopPropagation();
+          onChangeVersion?.();
+        }}
+      >
+        <AppIcon name="history" size={16} />
+        {t('mod_list_change_version_btn')}
       </button>
       <button
         type="button"

@@ -17,6 +17,7 @@ import {
   portalVersionNewer,
 } from '../../lib/modUtils';
 import type { ModRow, ModSortColumn } from '../../types/mods';
+import { ModPortalVersionsModal } from './ModPortalVersionsModal';
 import { ModsFromSaveModal } from './ModsFromSaveModal';
 import { ModsRowMenu } from './ModsRowMenu';
 
@@ -123,6 +124,17 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                   onClick={() => void mods.installFromUrl()}
                 >
                   {t('mod_list_install_from_url_btn')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--toolbar-icon mods-toolbar__field-version-btn"
+                  id="btnModPickVersion"
+                  title={t('mod_list_pick_version_tooltip')}
+                  aria-label={t('mod_list_pick_version_tooltip')}
+                  disabled={mods.serverBusy}
+                  onClick={() => mods.openVersionPicker()}
+                >
+                  <AppIcon name="history" size={16} />
                 </button>
               </div>
               <span className="mods-toolbar__sep" aria-hidden="true" />
@@ -402,28 +414,31 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                           <td className="mods-col-size">{formatModpackSizeBytes(m.zip_size_bytes)}</td>
                           <td className="mods-col-version">
                             {av.length > 1 && !m.is_builtin ? (
-                              <select
-                                className="input mods-version-select"
-                                data-name={m.name}
-                                value={String(m.local_version || av[0] || '')}
-                                disabled={mods.serverProcessBusy || mods.blockUpdates}
-                                onClick={(ev) => ev.stopPropagation()}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  void mods.setVersion(m.name, e.target.value).catch(mods.handleError);
-                                }}
-                              >
-                                {av
-                                  .slice()
-                                  .sort(compareModVersionDesc)
-                                  .map((v) => (
-                                    <option key={v} value={v}>
-                                      {v}
-                                    </option>
-                                  ))}
-                              </select>
+                              <div className="mods-version-select-wrap">
+                                <select
+                                  className="mods-version-select"
+                                  data-name={m.name}
+                                  value={String(m.local_version || av[0] || '')}
+                                  disabled={mods.serverProcessBusy || mods.blockUpdates}
+                                  onClick={(ev) => ev.stopPropagation()}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    void mods.setVersion(m.name, e.target.value).catch(mods.handleError);
+                                  }}
+                                  title={t('mod_list_col_version')}
+                                >
+                                  {av
+                                    .slice()
+                                    .sort(compareModVersionDesc)
+                                    .map((v) => (
+                                      <option key={v} value={v}>
+                                        {v}
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
                             ) : (
-                              m.local_version || '-'
+                              <span className="mods-version-text">{m.local_version || '-'}</span>
                             )}
                           </td>
                           <td className={'mods-col-portal' + (portalNewer ? ' mods-portal-newer' : '')}>
@@ -461,6 +476,11 @@ export function ModsTab({ mods, t }: ModsTabProps) {
           closeMenu();
           void mods.updateSelected(menuItem.name);
         }}
+        onChangeVersion={() => {
+          if (!menuItem) return;
+          closeMenu();
+          mods.openVersionPicker(menuItem.name);
+        }}
         onDownload={() => {
           if (!menuItem) return;
           closeMenu();
@@ -476,6 +496,22 @@ export function ModsTab({ mods, t }: ModsTabProps) {
           closeMenu();
           void mods.removeMod(menuItem.name).catch(mods.handleError);
         }}
+        t={t}
+      />
+
+      <ModPortalVersionsModal
+        open={mods.portalVersionsModalOpen}
+        modName={mods.portalVersionsModalMod}
+        onClose={mods.closeVersionPicker}
+        onInstall={(name, version) => {
+          void mods.installFromUrl(name, version);
+        }}
+        onModListChange={() => {
+          void mods.reload();
+        }}
+        serverBusy={mods.serverBusy}
+        jobRunning={mods.modJob.open || !!mods.modJob.status?.running}
+        refreshTrigger={mods.rawRows}
         t={t}
       />
 

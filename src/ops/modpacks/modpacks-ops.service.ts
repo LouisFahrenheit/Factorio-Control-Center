@@ -472,6 +472,10 @@ export class ModpacksOpsService {
     if (!imp?.mods?.length)
       return { ok: true, dependencies: [], requires_confirmation: false };
 
+    const sel = selectedInstance(this.instances);
+    const serverPath = !isErrorResult(sel) ? sel.item.serverPath : undefined;
+    const gv = serverPath ? gameVersion(serverPath) : undefined;
+
     const planned = new Set(
       imp.mods
         .map((m) =>
@@ -487,7 +491,10 @@ export class ModpacksOpsService {
       if (!id || this.portal.isBuiltin(id.toLowerCase())) continue;
       try {
         const meta = await this.portal.fetchFull(id);
-        const rel = this.portal.lastRelease(meta);
+        const rel = this.portal.resolveRelease(meta, {
+          serverPath,
+          gameVersion: gv,
+        });
         for (const dep of portalDependencyNames(rel)) {
           const depName = this.portal.modIdFromInput(dep);
           const depKey = depName.toLowerCase();

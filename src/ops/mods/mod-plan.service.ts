@@ -7,7 +7,7 @@ import {
   gameVersion,
   writeModList,
 } from '../ops-utils';
-import { ModPortalService } from '../mod-portal/mod-portal.service';
+import { ModPortalService, type ModPortalReleaseItem } from '../mod-portal/mod-portal.service';
 import {
   normalizeModListName,
   portalDependencyNames,
@@ -41,6 +41,8 @@ export interface ModInstallPlanResult {
   to_install: { name: string; local_version: string; portal_version: string }[];
   requires_confirmation: boolean;
   version: string;
+  selected_version?: string;
+  available_portal_versions?: ModPortalReleaseItem[];
   game_version: string;
   mods_needing_game_update: ModGameUpgradeHint[];
   requires_game_update_confirmation: boolean;
@@ -74,18 +76,26 @@ export class ModPlanService {
     return !hasSpaceAge(serverPath) && releaseRequiresSpaceAge(release);
   }
 
-  async portalVersionsForMod(name: string): Promise<
+  async portalVersionsForMod(
+    name: string,
+    options?: {
+      version?: string;
+      serverPath?: string;
+      gameVersion?: string;
+    },
+  ): Promise<
     | {
         ok: true;
         version: string;
         release: Record<string, unknown>;
         title?: string;
+        meta?: Record<string, unknown>;
       }
     | { ok: false; error: string }
   > {
     try {
       const meta = await this.portal.fetchFull(name);
-      const rel = this.portal.lastRelease(meta);
+      const rel = this.portal.resolveRelease(meta, options);
       if (!rel) return { ok: false, error: 'no_release' };
       const title =
         typeof meta.title === 'string' && meta.title.trim()
@@ -96,6 +106,7 @@ export class ModPlanService {
         version: String(rel.version || ''),
         release: rel,
         title,
+        meta,
       };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : String(e) };
@@ -106,17 +117,25 @@ export class ModPlanService {
   async planInstall(
     serverPath: string,
     modsDir: string,
-    rootModId: string,
+    rootModInput: string,
+    rootVersion?: string,
   ): Promise<ModPlanItem[]> {
+    const parsed = this.portal.parseModInput(rootModInput);
+    const rootModId = parsed.modName;
+    const targetVersion = rootVersion || parsed.version;
+
     const seen = new Set<string>();
     const plan: ModPlanItem[] = [];
 
-    const walk = async (name: string): Promise<void> => {
+    const walk = async (name: string, isRoot = false): Promise<void> => {
       const n = String(name || '').trim();
       if (!n || seen.has(n) || this.portal.isBuiltin(n)) return;
       seen.add(n);
 
-      const pv = await this.portalVersionsForMod(n);
+      const pv = await this.portalVersionsForMod(n, {
+        version: isRoot ? targetVersion : undefined,
+        serverPath,
+      });
       if (!pv.ok) {
         const isInstalled = installedModVersions(modsDir, n).length > 0;
         if (isInstalled && n !== rootModId) {
@@ -138,7 +157,10 @@ export class ModPlanService {
       }
 
       const localVer = latestVersion(installedModVersions(modsDir, n)) || '';
-      const need = !localVer || this.portal.versionNewer(pv.version, localVer);
+      const need =
+        isRoot && targetVersion
+          ? localVer !== targetVersion
+          : !localVer || this.portal.versionNewer(pv.version, localVer);
       if (need) {
         plan.push({
           name: n,
@@ -152,10 +174,10 @@ export class ModPlanService {
         .map((d) => String(d || '').trim())
         .filter((d) => d && !this.portal.isBuiltin(d));
 
-      await Promise.all(depList.map((dep) => walk(dep)));
+      await Promise.all(depList.map((dep) => walk(dep, false)));
     };
 
-    await walk(rootModId);
+    await walk(rootModId, true);
     return plan;
   }
 
@@ -180,11 +202,16 @@ export class ModPlanService {
   async planInstallMany(
     serverPath: string,
     modsDir: string,
-    roots: string[],
+    roots: (string | { name: string; version?: string })[],
   ): Promise<ModPlanItem[]> {
     const merged: ModPlanItem[] = [];
     for (const root of roots) {
-      const sub = await this.planInstall(serverPath, modsDir, root);
+      const raw = typeof root === 'string' ? root : root.name;
+      const parsed = this.portal.parseModInput(raw);
+      const modName = parsed.modName;
+      const ver =
+        typeof root === 'object' && root.version ? root.version : parsed.version;
+      const sub = await this.planInstall(serverPath, modsDir, modName, ver);
       merged.push(...sub);
     }
     return this.mergePlanItems(merged);
@@ -194,10 +221,13 @@ export class ModPlanService {
   async installPlanDetail(
     pm: PathManager,
     modId: string,
+    requestedVersion?: string,
   ): Promise<
     ModInstallPlanResult | { ok: false; error: string; mod?: string }
   > {
-    const id = this.portal.modIdFromInput(modId);
+    const parsed = this.portal.parseModInput(modId);
+    const id = parsed.modName;
+    const targetVersion = requestedVersion || parsed.version;
     if (!this.portal.isValidPortalModId(id))
       return { ok: false, error: 'invalid_mod_id' };
     if (this.portal.isBuiltin(id)) return { ok: false, error: 'builtin' };
@@ -213,6 +243,7 @@ export class ModPlanService {
     >();
     const installTree = new Set<string>();
     const recommendedMods = new Set<string>();
+    let rootAvailableReleases: ModPortalReleaseItem[] = [];
 
     const noteConflict = (raw: string): void => {
       const name = String(raw || '').trim();
@@ -226,19 +257,29 @@ export class ModPlanService {
 
     const walk = async (
       name: string,
+      isRoot = false,
     ): Promise<{ ok: true } | { ok: false; error: string; mod?: string }> => {
       const n = String(name || '').trim();
       if (!n || seen.has(n) || this.portal.isBuiltin(n)) return { ok: true };
       seen.add(n);
       installTree.add(normalizeModListName(n));
 
-      const pv = await this.portalVersionsForMod(n);
+      const pv = await this.portalVersionsForMod(n, {
+        version: isRoot ? targetVersion : undefined,
+        serverPath: pm.serverPath,
+      });
       if (!pv.ok) {
         const isInstalled = installedModVersions(pm.modsDir, n).length > 0;
         if (isInstalled && n !== id) {
           return { ok: true };
         }
         return { ok: false, error: String(pv.error || 'portal_error'), mod: n };
+      }
+      if (isRoot && pv.meta) {
+        rootAvailableReleases = this.portal.listReleasesSummary(
+          pv.meta,
+          pm.serverPath,
+        );
       }
       if (pv.title) {
         titlesMap.set(n, pv.title);
@@ -252,7 +293,11 @@ export class ModPlanService {
       }
 
       const localVer = latestVersion(installedModVersions(pm.modsDir, n)) || '';
-      if (!localVer || this.portal.versionNewer(pv.version, localVer)) {
+      const need =
+        isRoot && targetVersion
+          ? localVer !== targetVersion
+          : !localVer || this.portal.versionNewer(pv.version, localVer);
+      if (need) {
         const { below, current, required } = gameBelowModFactorioReq(
           pm.serverPath,
           pv.release,
@@ -280,7 +325,9 @@ export class ModPlanService {
           depsRequired.push(d);
       }
 
-      const depResults = await Promise.all(depList.map((dep) => walk(dep)));
+      const depResults = await Promise.all(
+        depList.map((dep) => walk(dep, false)),
+      );
       for (const dr of depResults) {
         if (!dr.ok) return dr;
       }
@@ -300,7 +347,7 @@ export class ModPlanService {
       return { ok: true };
     };
 
-    const r = await walk(id);
+    const r = await walk(id, true);
     if (!r.ok) return r;
 
     // Fetch titles for recommended mods
@@ -308,7 +355,9 @@ export class ModPlanService {
       Array.from(recommendedMods).map(async (rMod) => {
         if (titlesMap.has(rMod)) return;
         try {
-          const pv = await this.portalVersionsForMod(rMod);
+          const pv = await this.portalVersionsForMod(rMod, {
+            serverPath: pm.serverPath,
+          });
           if (pv.ok && pv.title) {
             titlesMap.set(rMod, pv.title);
           }
@@ -359,6 +408,8 @@ export class ModPlanService {
       requires_confirmation:
         depsRequired.length > 0 || conflictsToDisable.length > 0,
       version: root?.portal_version || '',
+      selected_version: root?.portal_version || targetVersion || '',
+      available_portal_versions: rootAvailableReleases,
       game_version: gameVersion(pm.serverPath),
       mods_needing_game_update: modsNeedGame,
       requires_game_update_confirmation: modsNeedGame.length > 0,
@@ -411,7 +462,9 @@ export class ModPlanService {
       seen.add(n);
       installTree.add(normalizeModListName(n));
 
-      const pv = await this.portalVersionsForMod(n);
+      const pv = await this.portalVersionsForMod(n, {
+        serverPath: pm.serverPath,
+      });
       if (!pv.ok) return;
       if (this.modBlockedWithoutSpaceAge(pm.serverPath, pv.release)) return;
 
@@ -468,7 +521,9 @@ export class ModPlanService {
       if (!name || this.portal.isBuiltin(name)) continue;
       const localVer =
         latestVersion(installedModVersions(pm.modsDir, name)) || '';
-      const pv = await this.portalVersionsForMod(name);
+      const pv = await this.portalVersionsForMod(name, {
+        serverPath: pm.serverPath,
+      });
       if (!pv.ok) continue;
       if (this.portal.versionNewer(pv.version, localVer)) out.push(name);
     }
@@ -493,7 +548,9 @@ export class ModPlanService {
 
       const localVer =
         latestVersion(installedModVersions(pm.modsDir, name)) || '';
-      const pv = await this.portalVersionsForMod(name);
+      const pv = await this.portalVersionsForMod(name, {
+        serverPath: pm.serverPath,
+      });
       if (!pv.ok) {
         if (!quiet) hooks.onFailed?.(name, String(pv.error || 'portal_error'));
         continue;
@@ -555,7 +612,9 @@ export class ModPlanService {
 
       const localVer =
         latestVersion(installedModVersions(pm.modsDir, name)) || '';
-      const pv = await this.portalVersionsForMod(name);
+      const pv = await this.portalVersionsForMod(name, {
+        serverPath: pm.serverPath,
+      });
       if (!pv.ok) continue;
       if (!this.portal.versionNewer(pv.version, localVer)) continue;
 

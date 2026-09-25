@@ -4,6 +4,8 @@ import { createWriteStream, existsSync, readdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
 import { PathManager } from '../path-manager';
+import { gameVersion } from '../ops-utils';
+import { gameBelowModFactorioReq } from '../mods/mod-game-req';
 
 const BASE = 'https://mods.factorio.com';
 const BUILTIN = new Set([
@@ -16,6 +18,15 @@ const BUILTIN = new Set([
 const VERIFY_CACHE_TTL_MS = 5 * 60 * 1000;
 const VERIFY_NETWORK_FAIL_TTL_MS = 30 * 1000;
 const VERIFY_REQUEST_TIMEOUT_MS = 12_000;
+
+export interface ModPortalReleaseItem {
+  version: string;
+  factorio_version: string;
+  released_at?: string;
+  file_name?: string;
+  sha1?: string;
+  is_compatible?: boolean;
+}
 
 type VerifyCacheEntry = {
   ts: number;
@@ -52,22 +63,69 @@ export class ModPortalService {
     return false;
   }
 
-  modIdFromInput(raw: string): string {
-    let s = (raw || '').trim();
-    if (!s) return '';
+  parseModInput(raw: string): { modName: string; version?: string } {
+    let s = String(raw || '').trim();
+    if (!s) return { modName: '' };
+
+    let extractedVersion: string | undefined;
+
     if (s.includes('factorio.com')) {
-      const m = /\/mod\/([^/?#]+)/i.exec(s.replace(/\\/g, '/'));
-      if (m) {
+      const parsedUrl = s.replace(/\\/g, '/');
+      const verMatch = /[?&]version=([^&#]+)/i.exec(parsedUrl);
+      if (verMatch) {
         try {
-          s = decodeURIComponent(m[1].trim());
+          extractedVersion = decodeURIComponent(verMatch[1].trim());
         } catch {
-          s = m[1].trim();
+          extractedVersion = verMatch[1].trim();
         }
-        return this.isValidPortalModId(s) ? s : '';
+      }
+      const m = /\/mod\/([^/?#]+)/i.exec(parsedUrl);
+      if (m) {
+        let modId = '';
+        try {
+          modId = decodeURIComponent(m[1].trim());
+        } catch {
+          modId = m[1].trim();
+        }
+        if (this.isValidPortalModId(modId)) {
+          return { modName: modId, version: extractedVersion };
+        }
       }
     }
+
     s = s.replace(/^mod\s*=\s*/i, '').trim();
-    return this.isValidPortalModId(s) ? s : '';
+
+    // Check for "ModName@1.0.5", "ModName:1.0.5", "ModName==1.0.5", "ModName=1.0.5", "ModName 1.0.5"
+    const sepMatch =
+      /^([A-Za-z0-9_\- ]+?)\s*(?:[@:=]|==|\s+)\s*(\d+(?:\.\d+)*)$/i.exec(s);
+    if (sepMatch) {
+      const candidateName = sepMatch[1].trim();
+      const candidateVer = sepMatch[2].trim();
+      if (this.isValidPortalModId(candidateName)) {
+        return { modName: candidateName, version: candidateVer };
+      }
+    }
+
+    // Check for "ModName_1.0.5.zip" or "ModName_1.0.5"
+    const zipMatch =
+      /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
+    if (zipMatch) {
+      const candidateName = zipMatch[1].trim();
+      const candidateVer = zipMatch[2].trim();
+      if (this.isValidPortalModId(candidateName)) {
+        return { modName: candidateName, version: candidateVer };
+      }
+    }
+
+    if (this.isValidPortalModId(s)) {
+      return { modName: s };
+    }
+
+    return { modName: '' };
+  }
+
+  modIdFromInput(raw: string): string {
+    return this.parseModInput(raw).modName;
   }
 
   isValidPortalModId(mod: string): boolean {
@@ -174,10 +232,172 @@ export class ModPortalService {
     }
   }
 
-  lastRelease(meta: Record<string, unknown>): Record<string, unknown> | null {
+  factorioMajorMinor(ver: string): string {
+    const cleaned = String(ver || '')
+      .trim()
+      .replace(/^(?:>=|<=|=|>|<)/, '')
+      .trim();
+    const parts = cleaned.split('.');
+    if (parts.length >= 2 && parts[0] && parts[1]) {
+      const maj = parseInt(parts[0], 10);
+      const min = parseInt(parts[1], 10);
+      if (Number.isFinite(maj) && Number.isFinite(min)) {
+        return `${maj}.${min}`;
+      }
+    }
+    return '';
+  }
+
+  releaseInfo(
+    release: Record<string, unknown> | null | undefined,
+  ): Record<string, unknown> | null {
+    if (!release) return null;
+    const raw = release.info_json;
+    if (typeof raw === 'string' && raw.trim()) {
+      try {
+        return JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    }
+    if (raw && typeof raw === 'object') {
+      return raw as Record<string, unknown>;
+    }
+    return null;
+  }
+
+  releaseFactorioVersion(release: Record<string, unknown>): string {
+    const info = this.releaseInfo(release);
+    if (!info) return '';
+    const raw = info.factorio_version;
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      return this.factorioMajorMinor(
+        String((raw as Record<string, unknown>).base || ''),
+      );
+    }
+    return this.factorioMajorMinor(String(raw || ''));
+  }
+
+  resolveRelease(
+    meta: Record<string, unknown>,
+    options?: {
+      version?: string;
+      gameVersion?: string;
+      serverPath?: string;
+    },
+  ): Record<string, unknown> | null {
+    const rels = Array.isArray(meta.releases)
+      ? (meta.releases as Record<string, unknown>[])
+      : [];
+    if (!rels.length) return null;
+
+    if (options?.version) {
+      const targetVer = String(options.version).trim();
+      const match = rels.find(
+        (r) => String(r.version || '').trim() === targetVer,
+      );
+      if (match) return match;
+    }
+
+    const gv =
+      options?.gameVersion ||
+      (options?.serverPath ? gameVersion(options.serverPath) : '');
+    const targetFv = this.factorioMajorMinor(gv);
+
+    if (targetFv) {
+      const matchingFv = rels.filter(
+        (r) => this.releaseFactorioVersion(r) === targetFv,
+      );
+      if (matchingFv.length > 0) {
+        if (options?.serverPath) {
+          const compatible = matchingFv.filter(
+            (r) => !gameBelowModFactorioReq(options.serverPath!, r).below,
+          );
+          if (compatible.length > 0) {
+            return compatible.sort((a, b) =>
+              this.versionNewer(
+                String(a.version || ''),
+                String(b.version || ''),
+              )
+                ? -1
+                : 1,
+            )[0];
+          }
+        }
+        return matchingFv.sort((a, b) =>
+          this.versionNewer(
+            String(a.version || ''),
+            String(b.version || ''),
+          )
+            ? -1
+            : 1,
+        )[0];
+      }
+    }
+
+    // Fallback: highest version overall
+    return (
+      rels.slice().sort((a, b) =>
+        this.versionNewer(
+          String(a.version || ''),
+          String(b.version || ''),
+        )
+          ? -1
+          : 1,
+      )[0] || rels[rels.length - 1]
+    );
+  }
+
+  lastRelease(
+    meta: Record<string, unknown>,
+    options?: {
+      version?: string;
+      gameVersion?: string;
+      serverPath?: string;
+    },
+  ): Record<string, unknown> | null {
+    if (options) {
+      return this.resolveRelease(meta, options);
+    }
     const rels = meta.releases;
     if (!Array.isArray(rels) || rels.length === 0) return null;
-    return rels[rels.length - 1] as Record<string, unknown>;
+    return (rels[rels.length - 1] as Record<string, unknown>) || null;
+  }
+
+  listReleasesSummary(
+    meta: Record<string, unknown>,
+    serverPath?: string,
+    gameVersionStr?: string,
+  ): ModPortalReleaseItem[] {
+    const rels = Array.isArray(meta.releases)
+      ? (meta.releases as Record<string, unknown>[])
+      : [];
+    const gv = gameVersionStr || (serverPath ? gameVersion(serverPath) : '');
+    const targetFv = this.factorioMajorMinor(gv);
+
+    const list: ModPortalReleaseItem[] = rels.map((r) => {
+      const ver = String(r.version || '').trim();
+      const fv = this.releaseFactorioVersion(r);
+      let isComp = true;
+      if (targetFv) {
+        isComp = fv === targetFv;
+        if (isComp && serverPath) {
+          isComp = !gameBelowModFactorioReq(serverPath, r).below;
+        }
+      }
+      return {
+        version: ver,
+        factorio_version: fv,
+        released_at: String(r.released_at || ''),
+        file_name: String(r.file_name || ''),
+        sha1: String(r.sha1 || ''),
+        is_compatible: isComp,
+      };
+    });
+
+    return list.sort((a, b) =>
+      this.versionNewer(a.version, b.version) ? -1 : 1,
+    );
   }
 
   listZipVersions(modName: string, modsDir: string): string[] {

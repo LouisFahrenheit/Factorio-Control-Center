@@ -415,7 +415,12 @@ export class DispatchService {
       case 'build_mods_archive':
         return this.mods.buildArchive();
       case 'mods_install_plan':
-        return this.mods.installPlan(String(kwargs.mod || ''));
+        return this.mods.installPlan(
+          String(kwargs.mod || ''),
+          kwargs.version ? String(kwargs.version) : undefined,
+        );
+      case 'get_mod_portal_releases':
+        return this.mods.portalReleases(String(kwargs.name || ''));
       case 'mods_install_plan_batch':
         return this.mods.installPlanBatch(kwargs.mods);
       case 'mods_update_all_plan':

@@ -822,8 +822,19 @@ export class ApiFullController {
     summary: 'Get install plan for a single mod (dependencies, conflicts)',
   })
   @ApiResponse({ status: 200, description: 'Install plan' })
-  modsInstallPlan(@Body() body: { mod?: string }) {
-    return this.bridge.submit('mods_install_plan', { mod: body.mod });
+  modsInstallPlan(@Body() body: { mod?: string; version?: string }) {
+    return this.bridge.submit('mods_install_plan', {
+      mod: body.mod,
+      version: body.version,
+    });
+  }
+
+  @Get('mods/portal-releases/:name')
+  @ApiTags('Mods')
+  @ApiOperation({ summary: 'Get all portal releases for a mod' })
+  @ApiResponse({ status: 200, description: 'Portal releases' })
+  modsPortalReleases(@Param('name') name: string) {
+    return this.bridge.submit('get_mod_portal_releases', { name });
   }
 
   @Post('mods/install-plan-batch')

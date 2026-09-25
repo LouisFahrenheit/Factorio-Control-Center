@@ -25,12 +25,37 @@ export interface ModJobStatus {
 
 import type { ModInstallConflictInfo } from './modConflict';
 
+export interface ModPortalReleaseItem {
+  version: string;
+  factorio_version: string;
+  released_at?: string;
+  file_name?: string;
+  sha1?: string;
+  is_compatible?: boolean;
+}
+
+export interface ModPortalReleasesResponse {
+  ok?: boolean;
+  error?: string;
+  name?: string;
+  title?: string;
+  game_version?: string;
+  factorio_version?: string;
+  recommended_version?: string;
+  installed_version?: string;
+  available_versions?: string[];
+  releases?: ModPortalReleaseItem[];
+}
+
 export interface ModInstallPlan {
   ok?: boolean;
   error?: string;
   mod?: string;
+  version?: string;
+  selected_version?: string;
+  available_portal_versions?: ModPortalReleaseItem[];
   dependencies?: string[];
-  to_install?: { name?: string }[];
+  to_install?: { name?: string; local_version?: string; portal_version?: string }[];
   requires_game_update_confirmation?: boolean;
   game_version?: string;
   mods_needing_game_update?: { name?: string; required_factorio?: string }[];
