@@ -1,6 +1,6 @@
 THIRD-PARTY NOTICES
 Factorio Control Center
-Version 1.1.2
+Version 1.1.3
 
 This file lists third-party software included in or distributed with
 Factorio Control Center. See the LICENSE file for this application.
