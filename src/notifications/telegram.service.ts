@@ -180,18 +180,41 @@ export class TelegramService implements OnModuleDestroy {
   }
 
   fmtFactorioUpdate(
-    currentVersion: string,
     latestVersion: string,
-    instanceName?: string,
+    servers: Array<{ name: string; currentVersion?: string }>,
   ): string {
-    let text = `🚀 <b>Factorio Update Available</b>\n`;
-    if (instanceName) {
-      text += `Server: <b>${this.esc(instanceName)}</b>\n`;
+    if (servers.length === 1 && servers[0].name) {
+      const s = servers[0];
+      const cur = s.currentVersion
+        ? ` (installed: <code>${this.esc(s.currentVersion)}</code>)`
+        : '';
+      return (
+        `🚀 <b>Factorio Update Available</b>\n` +
+        `Server: <b>${this.esc(s.name)}</b>\n` +
+        `A new version of Factorio is available: <code>${this.esc(latestVersion)}</code>${cur}.`
+      );
     }
-    text +=
-      `A new version of Factorio is available: <code>${this.esc(latestVersion)}</code> ` +
-      `(installed: <code>${this.esc(currentVersion)}</code>).`;
-    return text;
+
+    if (servers.length > 1) {
+      let text = `🚀 <b>Factorio Update Available</b>\n`;
+      text += `A new version of Factorio is available: <code>${this.esc(latestVersion)}</code>\n\n`;
+      text += `<b>Servers:</b>\n`;
+      for (const s of servers) {
+        const cur = s.currentVersion
+          ? ` (installed: <code>${this.esc(s.currentVersion)}</code>)`
+          : '';
+        text += `• <b>${this.esc(s.name)}</b>${cur}\n`;
+      }
+      return text.trim();
+    }
+
+    const cur = servers[0]?.currentVersion
+      ? ` (installed: <code>${this.esc(servers[0].currentVersion)}</code>)`
+      : '';
+    return (
+      `🚀 <b>Factorio Update Available</b>\n` +
+      `A new version of Factorio is available: <code>${this.esc(latestVersion)}</code>${cur}.`
+    );
   }
 
   fmtLowUps(

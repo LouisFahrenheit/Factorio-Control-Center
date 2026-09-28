@@ -5,6 +5,7 @@ import { AppIcon } from '../AppIcon';
 import { FccSwitch } from '../FccSwitch';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import type { InstanceItem } from '../../types/instance';
+import { notifyOk, notifyErr } from '../../lib/notify';
 
 const canWebkitDisc =
   typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-text-security', 'disc');
@@ -185,7 +186,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
 
   const [targets, setTargets] = useState<WebhookTarget[]>([]);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
-  const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [testStatus, setTestStatus] = useState<string | null>(null);
   const [showBotToken, setShowBotToken] = useState(false);
 
@@ -193,7 +193,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
   const [overrideServerId, setOverrideServerId] = useState<string>('');
   const [hasOverride, setHasOverride] = useState<boolean>(false);
   const [overrideForm, setOverrideForm] = useState<InstanceNotifOverride>({});
-  const [overrideSaveStatus, setOverrideSaveStatus] = useState<string | null>(null);
 
   // Sync global form when query data arrives
   useEffect(() => {
@@ -300,7 +299,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
         setHasOverride(false);
         setOverrideForm({});
       }
-      setOverrideSaveStatus(null);
     }
   }, [overrideData]);
 
@@ -313,12 +311,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['config', 'notifications'] });
-      setSaveStatus(t('notif_saved_success') || 'Settings saved successfully.');
-      setTimeout(() => setSaveStatus(null), 3500);
+      notifyOk(t('notif_saved_success') || 'Bot settings saved.');
     },
     onError: () => {
-      setSaveStatus(t('notif_save_err') || 'Failed to save settings.');
-      setTimeout(() => setSaveStatus(null), 4000);
+      notifyErr(t('notif_save_err') || 'Failed to save bot settings.');
     },
   });
 
@@ -336,12 +332,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['instance', overrideServerId, 'notifications'] });
-      setOverrideSaveStatus(t('notif_saved_success') || 'Settings saved successfully.');
-      setTimeout(() => setOverrideSaveStatus(null), 3500);
+      notifyOk(t('notif_saved_success') || 'Bot settings saved.');
     },
     onError: () => {
-      setOverrideSaveStatus(t('notif_save_err') || 'Failed to save settings.');
-      setTimeout(() => setOverrideSaveStatus(null), 4000);
+      notifyErr(t('notif_save_err') || 'Failed to save bot settings.');
     },
   });
 
@@ -608,17 +602,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                       : t('notif_test_btn') || 'Test'}
                   </button>
 
-                  {saveStatus && (
-                    <span
-                      className={`integrations-tab__status-msg ${
-                        saveStatus.includes('error') || saveStatus.includes('Не удалось')
-                          ? 'integrations-tab__status-msg--err'
-                          : ''
-                      }`}
-                    >
-                      {saveStatus}
-                    </span>
-                  )}
                   {testStatus && (
                     <span
                       className={`integrations-tab__status-msg ${
@@ -1662,11 +1645,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                             <AppIcon name="reset" size={16} />
                             {t('notif_reset_server_btn') || 'Reset to Global'}
                           </button>
-                          {overrideSaveStatus && (
-                            <span className="integrations-tab__status-msg">
-                              {overrideSaveStatus}
-                            </span>
-                          )}
                         </div>
                       </div>
                     ) : (

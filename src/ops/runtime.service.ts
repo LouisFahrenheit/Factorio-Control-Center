@@ -367,12 +367,12 @@ export class RuntimeService implements OnModuleDestroy {
         }
         // Notify: start failed
         void this.notifications.onServerStartFailed(rt.instanceId, code ?? 0);
-      } else if (rt.wasEverInGame) {
+      } else if (!graceful && (code ?? 0) !== 0) {
+        // Notify: crash (died unexpectedly or killed)
+        void this.notifications.onServerCrash(rt.instanceId, code ?? 0);
+      } else {
         // Notify: server stopped normally
         void this.notifications.onServerStopped(rt.instanceId);
-      } else if (!graceful && (code ?? 0) !== 0) {
-        // Notify: crash (never reached InGame)
-        void this.notifications.onServerCrash(rt.instanceId, code ?? 0);
       }
       if (Object.keys(rt.onlinePlayers).length > 0) {
         const now = Date.now();
@@ -1080,15 +1080,18 @@ export class RuntimeService implements OnModuleDestroy {
       line.includes('changing state from(CreatingGame) to(InGame)') ||
       line.includes('Hosting game')
     ) {
+      const wasInGame = rt.inGame;
       rt.inGame = true;
       rt.wasEverInGame = true;
       rt.lastStartFailed = false;
       rt.missingStartupDependencies = [];
       rt.missingStartupDepsSeen.clear();
-      // Push status change: server is now in-game
-      this.emitRuntimeStatus(rt);
-      // Notify: server started
-      void this.notifications.onServerStarted(rt.instanceId);
+      if (!wasInGame) {
+        // Push status change: server is now in-game
+        this.emitRuntimeStatus(rt);
+        // Notify: server started
+        void this.notifications.onServerStarted(rt.instanceId);
+      }
     }
 
     if (!rt.inGame) {

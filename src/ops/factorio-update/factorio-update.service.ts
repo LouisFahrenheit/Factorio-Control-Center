@@ -69,7 +69,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async check(): Promise<OpResult> {
+  async check(options?: { notify?: boolean }): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     if (sel.item.blockUpdates) {
@@ -94,7 +94,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       prep.ver,
       !!sel.item.experimentalUpdates,
     );
-    if (updates.updates.length > 0) {
+    if (updates.updates.length > 0 && options?.notify !== false) {
       const targetVersion =
         updates.updates[updates.updates.length - 1]?.to || '';
       if (targetVersion && compareVersions(targetVersion, prep.ver) > 0) {
@@ -118,6 +118,12 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     const st = this.instances.load();
     const selectedId = String(st.selectedId || '').trim();
     const out: Record<string, unknown>[] = [];
+    const pendingUpdates: Array<{
+      instanceId: string;
+      instanceName: string;
+      currentVersion: string;
+      targetVersion: string;
+    }> = [];
 
     for (const item of st.items) {
       const iid = String(item.id || '').trim();
@@ -136,7 +142,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         continue;
       }
       const switched = await this.instances.withInstance(iid, async () =>
-        this.check(),
+        this.check({ notify: false }),
       );
       if (switched.ok === false) {
         out.push({
@@ -156,11 +162,25 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
                 '',
             )
           : String(switched.latest_stable || '');
+
+      const hasUpdates = updates.length > 0;
+      if (hasUpdates && latest) {
+        const cur = String(switched.current || '');
+        if (cur && compareVersions(latest, cur) > 0) {
+          pendingUpdates.push({
+            instanceId: iid,
+            instanceName: nm,
+            currentVersion: cur,
+            targetVersion: latest,
+          });
+        }
+      }
+
       out.push({
         id: iid,
         name: nm,
         ok: true,
-        has_updates: updates.length > 0,
+        has_updates: hasUpdates,
         latest_stable: latest,
         updates_count: updates.length,
       });
@@ -172,6 +192,10 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       } catch {
         /* ignore restore errors */
       }
+    }
+
+    if (pendingUpdates.length > 0) {
+      void this.notifications.onFactorioUpdatesBatch(pendingUpdates);
     }
 
     return { ok: true, items: out, selectedId };

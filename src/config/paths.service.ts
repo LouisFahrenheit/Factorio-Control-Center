@@ -49,6 +49,7 @@ export class PathsService {
   readonly maintenanceReportsPath: string;
   readonly maintenancePendingPath: string;
   readonly auditOpenSessionsPath: string;
+  readonly notificationsStatePath: string;
 
   constructor() {
     const rootRaw = trimPath(process.env.FCC_ROOT_DIR) || process.cwd();
@@ -104,6 +105,7 @@ export class PathsService {
       'maintenance_pending_by_instance.json',
     );
     this.auditOpenSessionsPath = join(this.dataDir, 'audit_open_sessions.json');
+    this.notificationsStatePath = join(this.dataDir, 'notifications_state.json');
 
     // 1. Perform auto-migration of old directory layout if needed
     this.migrateLegacyDataStructure();

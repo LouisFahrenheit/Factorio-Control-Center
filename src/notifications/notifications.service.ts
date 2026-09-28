@@ -1,5 +1,6 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { FccConfigService } from '../config/fcc-config.service';
+import { PathsService } from '../config/paths.service';
 import { InstancesService } from '../instances/instances.service';
 import { TelegramService } from './telegram.service';
 import { WebhookService } from './webhook.service';
@@ -7,6 +8,7 @@ import type {
   InstanceNotifOverride,
   ResolvedNotifConfig,
   NotifEvent,
+  WebhookTarget,
 } from './notifications-config';
 import {
   mergeNotifConfig,
@@ -14,11 +16,22 @@ import {
   parseSilentEvents,
 } from './notifications-config';
 import { compareVersions } from '../ops/ops-utils';
+import { readJsonFile, writeJsonFile } from '../common/json-store';
+
+export interface FactorioUpdateCandidate {
+  instanceId?: string;
+  instanceName?: string;
+  currentVersion: string;
+  targetVersion: string;
+}
+
+export interface NotificationsState {
+  notifiedFactorioVersions: Record<string, string>;
+}
 
 @Injectable()
 export class NotificationsService {
   private readonly log = new Logger(NotificationsService.name);
-  private readonly lastNotifiedFactorioVersions = new Set<string>();
 
   constructor(
     private readonly config: FccConfigService,
@@ -26,13 +39,23 @@ export class NotificationsService {
     private readonly instances: InstancesService,
     private readonly telegram: TelegramService,
     private readonly webhooks: WebhookService,
+    private readonly paths: PathsService,
   ) {}
 
   // ── Event hooks (called by RuntimeService) ──────────────────────────────────
 
+  private lastServerStartedMap = new Map<string, number>();
+  private lastServerStoppedMap = new Map<string, number>();
+
   async onServerStarted(instanceId: string): Promise<void> {
     const { cfg, name } = this.resolveInstance(instanceId);
     if (!cfg || !cfg.notif_server_started) return;
+
+    const now = Date.now();
+    const lastTime = this.lastServerStartedMap.get(instanceId) || 0;
+    if (now - lastTime < 5000) return;
+    this.lastServerStartedMap.set(instanceId, now);
+
     const silent = cfg.notif_silent_events.includes('server_started');
     await this.dispatch(cfg, instanceId, name, 'server_started', {
       telegram: () =>
@@ -48,6 +71,12 @@ export class NotificationsService {
   async onServerStopped(instanceId: string): Promise<void> {
     const { cfg, name } = this.resolveInstance(instanceId);
     if (!cfg || !cfg.notif_server_stopped) return;
+
+    const now = Date.now();
+    const lastTime = this.lastServerStoppedMap.get(instanceId) || 0;
+    if (now - lastTime < 5000) return;
+    this.lastServerStoppedMap.set(instanceId, now);
+
     const silent = cfg.notif_silent_events.includes('server_stopped');
     await this.dispatch(cfg, instanceId, name, 'server_stopped', {
       telegram: () =>
@@ -169,92 +198,253 @@ export class NotificationsService {
     });
   }
 
+  private loadState(): NotificationsState {
+    const raw = readJsonFile<NotificationsState>(
+      this.paths.notificationsStatePath,
+      { notifiedFactorioVersions: {} },
+    );
+    if (
+      !raw ||
+      typeof raw !== 'object' ||
+      !raw.notifiedFactorioVersions ||
+      typeof raw.notifiedFactorioVersions !== 'object'
+    ) {
+      return { notifiedFactorioVersions: {} };
+    }
+    return raw;
+  }
+
+  private saveState(state: NotificationsState): void {
+    const entries = Object.entries(state.notifiedFactorioVersions || {});
+    if (entries.length > 200) {
+      entries.sort((a, b) => b[1].localeCompare(a[1]));
+      state.notifiedFactorioVersions = Object.fromEntries(entries.slice(0, 100));
+    }
+    writeJsonFile(this.paths.notificationsStatePath, state);
+  }
+
+  async onFactorioUpdatesBatch(
+    candidates: FactorioUpdateCandidate[],
+  ): Promise<void> {
+    if (!candidates || candidates.length === 0) return;
+
+    // Filter valid update candidates
+    const valid = candidates.filter(
+      (c) =>
+        c.targetVersion &&
+        c.currentVersion &&
+        compareVersions(c.targetVersion, c.currentVersion) > 0,
+    );
+    if (valid.length === 0) return;
+
+    const global = this.config.notifications;
+
+    // Group by targetVersion
+    const byVersion = new Map<
+      string,
+      Array<{
+        instanceId: string;
+        name: string;
+        currentVersion: string;
+        cfg: ResolvedNotifConfig | null;
+        silent: boolean;
+      }>
+    >();
+
+    for (const c of valid) {
+      if (c.instanceId) {
+        const { cfg, name } = this.resolveInstance(c.instanceId);
+        if (!cfg || !cfg.notif_factorio_update_available) continue;
+        const silent = cfg.notif_silent_events.includes(
+          'factorio_update_available',
+        );
+        const list = byVersion.get(c.targetVersion) || [];
+        list.push({
+          instanceId: c.instanceId,
+          name: c.instanceName || name,
+          currentVersion: c.currentVersion,
+          cfg,
+          silent,
+        });
+        byVersion.set(c.targetVersion, list);
+      } else {
+        if (!global.notif_factorio_update_available) continue;
+        const silent = parseSilentEvents(global.notif_silent_events).includes(
+          'factorio_update_available',
+        );
+        const list = byVersion.get(c.targetVersion) || [];
+        list.push({
+          instanceId: '',
+          name: c.instanceName || 'Factorio Control Center',
+          currentVersion: c.currentVersion,
+          cfg: null,
+          silent,
+        });
+        byVersion.set(c.targetVersion, list);
+      }
+    }
+
+    if (byVersion.size === 0) return;
+
+    const promises: Promise<void>[] = [];
+    const state = this.loadState();
+    let stateChanged = false;
+
+    for (const [targetVersion, items] of byVersion.entries()) {
+      // 1. Group by Telegram destination (botToken + chatId)
+      const tgGroups = new Map<
+        string,
+        {
+          botToken: string;
+          chatId: string;
+          silent: boolean;
+          servers: Array<{ name: string; currentVersion: string }>;
+        }
+      >();
+
+      for (const item of items) {
+        const botToken =
+          item.cfg?.telegram_bot_token ||
+          (global.telegram_enabled ? global.telegram_bot_token : '');
+        const chatId =
+          item.cfg?.telegram_chat_id ||
+          (global.telegram_enabled ? global.telegram_chat_id : '');
+        const tgEnabled = item.cfg
+          ? item.cfg.telegram_enabled
+          : global.telegram_enabled;
+
+        if (tgEnabled && botToken && chatId) {
+          const key = `${botToken}:::${chatId}`;
+          const g = tgGroups.get(key) || {
+            botToken,
+            chatId,
+            silent: item.silent,
+            servers: [],
+          };
+          if (!item.silent) g.silent = false;
+          g.servers.push({
+            name: item.name,
+            currentVersion: item.currentVersion,
+          });
+          tgGroups.set(key, g);
+        }
+      }
+
+      // Dispatch Telegram notifications
+      for (const [, grp] of tgGroups.entries()) {
+        const notifKey = `tg:${grp.chatId}:${targetVersion}`;
+        if (state.notifiedFactorioVersions[notifKey]) {
+          continue; // Already notified once for this version to this chat!
+        }
+
+        state.notifiedFactorioVersions[notifKey] = new Date().toISOString();
+        stateChanged = true;
+
+        const message = this.telegram.fmtFactorioUpdate(
+          targetVersion,
+          grp.servers,
+        );
+        promises.push(
+          this.telegram.sendMessage(
+            grp.botToken,
+            grp.chatId,
+            message,
+            grp.silent,
+          ),
+        );
+      }
+
+      // 2. Dispatch Webhook notifications
+      const webhookGroups = new Map<
+        string,
+        {
+          target: WebhookTarget;
+          servers: Array<{ id: string; name: string; currentVersion: string }>;
+        }
+      >();
+
+      for (const item of items) {
+        const targets = item.cfg
+          ? item.cfg.webhook_targets
+          : parseWebhookTargets(global.webhook_targets);
+
+        for (const t of targets) {
+          if (!t.url || t.enabled === false) continue;
+          if (
+            Array.isArray(t.events) &&
+            t.events.length > 0 &&
+            !t.events.includes('factorio_update_available')
+          ) {
+            continue;
+          }
+          const g = webhookGroups.get(t.url) || {
+            target: t,
+            servers: [],
+          };
+          g.servers.push({
+            id: item.instanceId,
+            name: item.name,
+            currentVersion: item.currentVersion,
+          });
+          webhookGroups.set(t.url, g);
+        }
+      }
+
+      for (const [url, grp] of webhookGroups.entries()) {
+        const notifKey = `webhook:${url}:${targetVersion}`;
+        if (state.notifiedFactorioVersions[notifKey]) {
+          continue; // Already notified once for this version to this webhook!
+        }
+
+        state.notifiedFactorioVersions[notifKey] = new Date().toISOString();
+        stateChanged = true;
+
+        promises.push(
+          this.webhooks.dispatch(
+            [grp.target],
+            'factorio_update_available',
+            grp.servers.length === 1 ? grp.servers[0].id : '',
+            grp.servers.length === 1
+              ? grp.servers[0].name
+              : grp.servers.map((s) => s.name).join(', '),
+            {
+              latest_version: targetVersion,
+              current_version:
+                grp.servers.length === 1
+                  ? grp.servers[0].currentVersion
+                  : undefined,
+              servers: grp.servers.map((s) => ({
+                id: s.id,
+                name: s.name,
+                current_version: s.currentVersion,
+              })),
+            },
+          ),
+        );
+      }
+    }
+
+    if (stateChanged) {
+      this.saveState(state);
+    }
+
+    await Promise.allSettled(promises);
+  }
+
   async onFactorioUpdateAvailable(
     currentVersion: string,
     latestVersion: string,
     instanceId?: string,
     instanceName?: string,
   ): Promise<void> {
-    if (
-      !latestVersion ||
-      !currentVersion ||
-      compareVersions(latestVersion, currentVersion) <= 0
-    ) {
-      return;
-    }
-    const key = `${instanceId || 'global'}:${currentVersion}:${latestVersion}`;
-    if (this.lastNotifiedFactorioVersions.has(key)) return;
-    this.lastNotifiedFactorioVersions.add(key);
-
-    if (instanceId) {
-      const { cfg, name } = this.resolveInstance(instanceId);
-      if (!cfg || !cfg.notif_factorio_update_available) return;
-      const finalName = instanceName || name;
-      const silent = cfg.notif_silent_events.includes(
-        'factorio_update_available',
-      );
-      await this.dispatch(
-        cfg,
+    await this.onFactorioUpdatesBatch([
+      {
         instanceId,
-        finalName,
-        'factorio_update_available',
-        {
-          telegram: () =>
-            this.telegram.sendMessage(
-              cfg.telegram_bot_token,
-              cfg.telegram_chat_id,
-              this.telegram.fmtFactorioUpdate(
-                currentVersion,
-                latestVersion,
-                finalName,
-              ),
-              silent,
-            ),
-          extra: {
-            current_version: currentVersion,
-            latest_version: latestVersion,
-          },
-        },
-      );
-      return;
-    }
-
-    const global = this.config.notifications;
-    if (!global.notif_factorio_update_available) return;
-
-    const targets = parseWebhookTargets(global.webhook_targets);
-    const silent = parseSilentEvents(global.notif_silent_events).includes(
-      'factorio_update_available',
-    );
-    const promises: Promise<void>[] = [];
-    if (
-      global.telegram_enabled &&
-      global.telegram_bot_token &&
-      global.telegram_chat_id
-    ) {
-      promises.push(
-        this.telegram.sendMessage(
-          global.telegram_bot_token,
-          global.telegram_chat_id,
-          this.telegram.fmtFactorioUpdate(
-            currentVersion,
-            latestVersion,
-            instanceName,
-          ),
-          silent,
-        ),
-      );
-    }
-    promises.push(
-      this.webhooks.dispatch(
-        targets,
-        'factorio_update_available',
-        '',
-        instanceName || 'Factorio Control Center',
-        { current_version: currentVersion, latest_version: latestVersion },
-      ),
-    );
-    await Promise.allSettled(promises);
+        instanceName,
+        currentVersion,
+        targetVersion: latestVersion,
+      },
+    ]);
   }
 
   getResolvedInstanceConfig(instanceId: string): ResolvedNotifConfig | null {
