@@ -60,6 +60,7 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
                 <thead>
                   <tr>
                     <th className="access-users-table__col-status">{t('web_user_status_label')}</th>
+                    <th className="access-users-table__col-2fa">{t('web_user_2fa_label')}</th>
                     <th className="access-users-table__col-user">{t('web_user_label')}</th>
                     <th className="access-users-table__col-role">{t('web_role_label')}</th>
                     <th className="access-users-table__col-perms">{t('web_access_perms_label')}</th>
@@ -95,6 +96,16 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
                               }
                             >
                               {enabled ? t('web_enabled_label') : t('web_user_status_off')}
+                            </span>
+                          </td>
+                          <td className="access-users-table__col-2fa">
+                            <span
+                              className={
+                                'access-users-status ' +
+                                (u.twoFactorEnabled ? 'access-users-status--on' : 'access-users-status--off')
+                              }
+                            >
+                              {u.twoFactorEnabled ? t('web_2fa_enabled_badge') : t('web_2fa_disabled_badge')}
                             </span>
                           </td>
                           <td className="access-users-table__col-user">
@@ -174,6 +185,11 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
             if (!menuUser) return;
             closeMenu();
             webUsers.openEdit(menuUser);
+          }}
+          onReset2fa={() => {
+            if (!menuUser) return;
+            closeMenu();
+            void webUsers.reset2fa(menuUser.username);
           }}
           onDelete={() => {
             if (!menuUser) return;

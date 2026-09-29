@@ -33,7 +33,8 @@ export class AuthGuard implements CanActivate {
     if (
       path === '/api/health' ||
       path === '/api/locale-bootstrap' ||
-      path.startsWith('/api/auth/login')
+      path.startsWith('/api/auth/login') ||
+      path === '/api/auth/2fa/verify'
     ) {
       return true;
     }

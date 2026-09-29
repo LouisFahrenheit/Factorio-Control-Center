@@ -128,7 +128,36 @@ export class UsersService implements OnModuleInit {
       tabs,
       instance_ids: inst,
       enabled: u.enabled !== false,
+      twoFactorEnabled: !!u.twoFactorEnabled,
     };
+  }
+
+  async setTwoFactor(
+    username: string,
+    enabled: boolean,
+    secret: string | null = null,
+    recoveryCodes: string[] | null = null,
+  ): Promise<boolean> {
+    const user = await this.findUser(username);
+    if (!user) return false;
+    user.twoFactorEnabled = enabled;
+    user.twoFactorSecret = secret;
+    user.twoFactorRecoveryCodes = recoveryCodes;
+    await this.userRepo.save(user);
+    return true;
+  }
+
+  async removeRecoveryCode(
+    username: string,
+    hashedCode: string,
+  ): Promise<boolean> {
+    const user = await this.findUser(username);
+    if (!user || !user.twoFactorRecoveryCodes) return false;
+    user.twoFactorRecoveryCodes = user.twoFactorRecoveryCodes.filter(
+      (c) => c !== hashedCode,
+    );
+    await this.userRepo.save(user);
+    return true;
   }
 
   async listPublic(): Promise<PublicUserView[]> {

@@ -31,6 +31,15 @@ export class User {
   @Column({ default: true })
   enabled: boolean;
 
+  @Column({ default: false })
+  twoFactorEnabled: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  twoFactorSecret: string | null;
+
+  @Column('simple-json', { nullable: true })
+  twoFactorRecoveryCodes: string[] | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

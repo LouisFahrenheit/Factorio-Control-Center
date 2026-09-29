@@ -15,6 +15,7 @@ interface WebUserRowMenuProps {
   onDisable: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onReset2fa?: () => void;
   t: (key: string) => string;
 }
 
@@ -28,6 +29,7 @@ export function WebUserRowMenu({
   onDisable,
   onEdit,
   onDelete,
+  onReset2fa,
   t,
 }: WebUserRowMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -62,6 +64,12 @@ export function WebUserRowMenu({
         <AppIcon name="edit" size={16} />
         {t('maintenance_menu_edit')}
       </button>
+      {user.twoFactorEnabled && onReset2fa && (
+        <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onReset2fa}>
+          <AppIcon name="person_shield" size={16} />
+          {t('web_user_reset_2fa')}
+        </button>
+      )}
       {!lastAdminLocked && (
         <button type="button" className="btn btn--danger instance-row-menu__item btn--with-icon" onClick={onDelete}>
           <AppIcon name="delete" size={16} />

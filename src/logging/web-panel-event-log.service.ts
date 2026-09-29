@@ -62,7 +62,10 @@ export class WebPanelEventLogService {
       | 'logout'
       | 'user_create'
       | 'user_update'
-      | 'user_delete',
+      | 'user_delete'
+      | '2fa_enable'
+      | '2fa_disable'
+      | 'user_reset_2fa',
     username: string,
     detail?: string,
   ): void {
@@ -87,6 +90,15 @@ export class WebPanelEventLogService {
         break;
       case 'user_delete':
         message = `Deleted user account ${detail || '?'}`;
+        break;
+      case '2fa_enable':
+        message = `Enabled two-factor authentication (2FA)`;
+        break;
+      case '2fa_disable':
+        message = `Disabled two-factor authentication (2FA)`;
+        break;
+      case 'user_reset_2fa':
+        message = `Reset two-factor authentication (2FA) for ${detail || '?'}`;
         break;
     }
 

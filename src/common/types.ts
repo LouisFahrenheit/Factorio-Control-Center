@@ -43,6 +43,7 @@ export interface SessionUser {
   tabs: string[];
   instance_ids: string[];
   enabled: boolean;
+  twoFactorEnabled?: boolean;
 }
 
 export interface PublicUserView {
@@ -51,4 +52,5 @@ export interface PublicUserView {
   tabs: string[];
   instance_ids: string[];
   enabled: boolean;
+  twoFactorEnabled?: boolean;
 }

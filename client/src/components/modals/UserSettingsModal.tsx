@@ -12,10 +12,13 @@ import {
 } from '../../theme/themes';
 import { getLocalLanguageOverride, setLocalLanguageOverride } from '../../i18n/locale';
 import { readUserToastDurationSec, readUserShowServerListModBadges, setUserShowServerListModBadges, setUserToastDurationSec, readUserShowServerListSpaceAgeBadge, setUserShowServerListSpaceAgeBadge } from '../../lib/userPrefs';
+import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
 import { AppIcon } from '../AppIcon';
 import { FccSwitch } from '../FccSwitch';
 import { ModalBackdrop } from './ModalBackdrop';
+import { TwoFactorSetupModal } from './TwoFactorSetupModal';
+import { TwoFactorDisableModal } from './TwoFactorDisableModal';
 
 interface UserSettingsModalProps {
   open: boolean;
@@ -25,6 +28,7 @@ interface UserSettingsModalProps {
 
 export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) {
   const qc = useQueryClient();
+  const { user, refetch: refetchUser } = useAuth();
   const { availableLanguages } = useLocale();
   const [theme, setTheme] = useState('');
   const [uiScale, setScale] = useState('auto');
@@ -34,6 +38,8 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
   const [translateModNames, setTranslateModNames] = useState(true);
   const [showModBadges, setShowModBadges] = useState(true);
   const [showSABadge, setShowSABadge] = useState(true);
+  const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
+  const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -110,6 +116,73 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
             <p className="user-settings-modal__intro">{t('web_user_settings_intro')}</p>
           </section>
 
+          <section className="user-settings-modal__section user-settings-modal__section--security">
+            <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_security')}</h3>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))',
+                borderRadius: 6,
+                gap: 12,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 36,
+                    height: 36,
+                    borderRadius: 6,
+                    background: user?.twoFactorEnabled
+                      ? 'rgba(76, 175, 80, 0.15)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: user?.twoFactorEnabled ? 'var(--color-success, #4caf50)' : 'var(--text-dim, #777)',
+                  }}
+                >
+                  <AppIcon name="person_shield" size={20} />
+                </span>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-main)' }}>
+                    {user?.twoFactorEnabled
+                      ? t('web_2fa_status_enabled')
+                      : t('web_2fa_status_disabled')}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-dim, #777)', marginTop: 2 }}>
+                    {t('web_user_settings_security_desc')}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                {user?.twoFactorEnabled ? (
+                  <button
+                    type="button"
+                    className="btn btn--danger btn--with-icon"
+                    onClick={() => setTwoFactorDisableOpen(true)}
+                  >
+                    <AppIcon name="person_shield" size={14} />
+                    {t('web_2fa_disable_btn')}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--with-icon"
+                    onClick={() => setTwoFactorSetupOpen(true)}
+                  >
+                    <AppIcon name="person_shield" size={14} />
+                    {t('web_2fa_enable_btn')}
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+
           <section className="user-settings-modal__section">
             <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_appearance')}</h3>
             <div className="user-settings-grid user-settings-grid--appearance">
@@ -159,7 +232,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
           <section className="user-settings-modal__section user-settings-modal__section--interface">
             <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_interface')}</h3>
             <div className="user-settings-grid user-settings-grid--interface">
-              <label className="user-settings-field user-settings-field--select" htmlFor="inpToastDurationSec">
+              <label className="user-settings-field user-settings-field--select user-settings-field--full" htmlFor="inpToastDurationSec">
                 <span className="user-settings-field__label">{t('program_toast_duration_sec_label')}</span>
                 <input
                   type="number"
@@ -232,6 +305,26 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
           </button>
         </div>
       </div>
+
+      <TwoFactorSetupModal
+        open={twoFactorSetupOpen}
+        onClose={() => setTwoFactorSetupOpen(false)}
+        onSuccess={() => {
+          void refetchUser();
+          void qc.invalidateQueries({ queryKey: ['auth'] });
+        }}
+        t={t}
+      />
+
+      <TwoFactorDisableModal
+        open={twoFactorDisableOpen}
+        onClose={() => setTwoFactorDisableOpen(false)}
+        onSuccess={() => {
+          void refetchUser();
+          void qc.invalidateQueries({ queryKey: ['auth'] });
+        }}
+        t={t}
+      />
     </ModalBackdrop>
   );
 }

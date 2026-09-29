@@ -25,6 +25,7 @@ export interface WebUserEditorState {
   tabs: string[];
   instanceIds: string[];
   allInstances: boolean;
+  twoFactorEnabled?: boolean;
 }
 
 function emptyEditor(): WebUserEditorState {
@@ -36,6 +37,7 @@ function emptyEditor(): WebUserEditorState {
     tabs: resolveUserTabs('moderator'),
     instanceIds: [],
     allInstances: false,
+    twoFactorEnabled: false,
   };
 }
 
@@ -51,6 +53,7 @@ function editorFromUser(user: WebUser, accessInstances: WebAccessInstance[]): We
     tabs: resolveUserTabs(role, user.tabs),
     instanceIds: allInstances ? accessInstances.map((it) => String(it.id || '').trim()).filter(Boolean) : instanceIds,
     allInstances,
+    twoFactorEnabled: !!user.twoFactorEnabled,
   };
 }
 
@@ -223,6 +226,32 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
     [closeEditor, refresh, selectedUser, t, toast],
   );
 
+  const reset2fa = useCallback(
+    async (username: string) => {
+      const uname = String(username || '').trim();
+      if (!uname) return;
+      modals.openConfirmModal({
+        title: t('web_user_reset_2fa_title'),
+        children: t('web_user_reset_2fa_confirm', uname),
+        labels: { confirm: t('web_user_reset_2fa_btn'), cancel: t('cancel') },
+        confirmProps: { className: 'btn btn--danger' },
+        onConfirm: async () => {
+          try {
+            await api('/api/auth/users/' + encodeURIComponent(uname) + '/reset-2fa', { method: 'POST' });
+            if (selectedUser === uname && editorOpen) {
+              setEditor((e) => ({ ...e, twoFactorEnabled: false }));
+            }
+            await refresh();
+            toast(t('web_user_reset_2fa_ok'));
+          } catch (e) {
+            toast(localizeWebUserError(e instanceof Error ? e.message : String(e), t), true);
+          }
+        },
+      });
+    },
+    [editorOpen, refresh, selectedUser, t, toast],
+  );
+
   useEffect(() => {
     if (!editorOpen || editorMode !== 'edit') return;
     const u = users.find((x) => String(x.username) === selectedUser);
@@ -248,6 +277,7 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
     saveEditor,
     setEnabled,
     deleteUser,
+    reset2fa,
   };
 }
 

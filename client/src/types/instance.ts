@@ -51,4 +51,5 @@ export interface AuthUser {
   role?: string;
   tabs?: string[];
   instance_ids?: string[];
+  twoFactorEnabled?: boolean;
 }

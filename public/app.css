@@ -4052,7 +4052,11 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .user-settings-grid--interface {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.user-settings-field--full {
+  grid-column: 1 / -1;
 }
 
 .user-settings-field {
@@ -4116,7 +4120,8 @@ table.data.data--modpacks tbody tr:hover td {
 
 @media (max-width: 520px) {
   .user-settings-grid,
-  .user-settings-grid--appearance {
+  .user-settings-grid--appearance,
+  .user-settings-grid--interface {
     grid-template-columns: 1fr;
   }
 }

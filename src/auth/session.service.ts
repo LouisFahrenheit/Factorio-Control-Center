@@ -39,6 +39,7 @@ export class SessionService {
       tabs,
       instance_ids,
       enabled: true,
+      twoFactorEnabled: !!record.twoFactorEnabled,
     };
     return this.createToken(user);
   }
@@ -68,6 +69,7 @@ export class SessionService {
     s.tabs = tabs;
     s.instance_ids = instance_ids;
     s.enabled = true;
+    s.twoFactorEnabled = !!record.twoFactorEnabled;
 
     return {
       username: record.username,
@@ -75,6 +77,7 @@ export class SessionService {
       tabs,
       instance_ids,
       enabled: true,
+      twoFactorEnabled: !!record.twoFactorEnabled,
     };
   }
 

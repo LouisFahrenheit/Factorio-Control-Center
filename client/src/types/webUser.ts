@@ -6,6 +6,7 @@ export interface WebUser {
   tabs?: string[];
   instance_ids?: string[];
   enabled?: boolean;
+  twoFactorEnabled?: boolean;
 }
 
 export interface WebAccessInstance {

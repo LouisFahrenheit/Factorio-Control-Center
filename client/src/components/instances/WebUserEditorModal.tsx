@@ -47,6 +47,32 @@ export function WebUserEditorModal({ webUsers, t }: WebUserEditorModalProps) {
                 label={t('web_enabled_label')}
               />
             </div>
+            {editorMode === 'edit' && (
+              <div className="access-user-field" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="access-user-field__label" style={{ margin: 0 }}>{t('web_user_2fa_label')}</span>
+                  <span
+                    className={
+                      'access-users-status ' +
+                      (editor.twoFactorEnabled ? 'access-users-status--on' : 'access-users-status--off')
+                    }
+                  >
+                    {editor.twoFactorEnabled ? t('web_2fa_enabled_badge') : t('web_2fa_disabled_badge')}
+                  </span>
+                </div>
+                {editor.twoFactorEnabled && (
+                  <button
+                    type="button"
+                    className="btn btn--subtle btn--with-icon"
+                    onClick={() => void webUsers.reset2fa(editor.username)}
+                    style={{ fontSize: 12, padding: '4px 10px' }}
+                  >
+                    <AppIcon name="person_shield" size={14} />
+                    {t('web_user_reset_2fa')}
+                  </button>
+                )}
+              </div>
+            )}
             <div className="access-user-field">
               <label className="access-user-field__label" htmlFor="webUserNameEdit">
                 {t('web_user_label')}

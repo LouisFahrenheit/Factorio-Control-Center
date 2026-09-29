@@ -26,7 +26,15 @@ import { UsersService } from './users.service';
 import { InstancesService } from '../instances/instances.service';
 import { WebPanelEventLogService } from '../logging/web-panel-event-log.service';
 import { verifyPassword } from './password.util';
-import { LoginDto, CreateUserDto, UpdateUserDto } from '../common/dto/auth.dto';
+import {
+  LoginDto,
+  CreateUserDto,
+  UpdateUserDto,
+  Verify2faDto,
+  Enable2faDto,
+  Disable2faDto,
+} from '../common/dto/auth.dto';
+import { TwoFactorService } from './two-factor.service';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -38,6 +46,7 @@ export class AuthController {
     private readonly users: UsersService,
     private readonly instances: InstancesService,
     private readonly eventLog: WebPanelEventLogService,
+    private readonly twoFactor: TwoFactorService,
   ) {}
 
   @Post('login')
@@ -71,12 +80,115 @@ export class AuthController {
       return { ok: false, error: 'invalid_credentials' };
     }
 
+    if (record.twoFactorEnabled) {
+      const challengeToken = this.twoFactor.createChallenge(record.username);
+      this.log.debug(
+        `Login requires 2FA for user '${username}'. Challenge issued.`,
+      );
+      return { ok: true, requires2fa: true, challengeToken };
+    }
+
     const token = await this.sessions.createSession(record.username, ip);
     this.log.debug(
       `Login successful: user '${username}', role '${record.role}'. Session created.`,
     );
     this.eventLog.logAuth('login', username, record.role);
     return { ok: true, token, user: this.users.publicView(record) };
+  }
+
+  @Post('2fa/verify')
+  @ApiOperation({ summary: 'Verify 2FA TOTP or recovery code during login' })
+  @ApiBody({ type: Verify2faDto })
+  async verify2fa(@Body() body: Verify2faDto, @Ip() ip: string) {
+    const res = await this.twoFactor.verifyLogin(
+      body.challengeToken,
+      body.code,
+    );
+    if (!res.ok) {
+      this.log.debug(`2FA verification failed: ${res.error}`);
+      this.eventLog.logAuth('login_failed', res.username || 'unknown');
+      return { ok: false, error: res.error };
+    }
+
+    const record = await this.users.findUser(res.username!);
+    if (!record || !record.enabled) {
+      return { ok: false, error: 'invalid_credentials' };
+    }
+
+    const token = await this.sessions.createSession(record.username, ip);
+    this.log.debug(
+      `2FA login successful: user '${record.username}'. Session created.`,
+    );
+    this.eventLog.logAuth('login', record.username, record.role);
+    return {
+      ok: true,
+      token,
+      user: this.users.publicView(record),
+      isRecoveryCode: res.isRecoveryCode,
+    };
+  }
+
+  @Post('2fa/setup')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Initiate 2FA setup for current user' })
+  async setup2fa(@Headers('authorization') auth?: string) {
+    const token = this.bearer(auth);
+    const sessionUser = token ? await this.sessions.resolve(token) : null;
+    if (!sessionUser) throw new ForbiddenException('Invalid token');
+
+    const user = await this.users.findUser(sessionUser.username);
+    if (!user) throw new ForbiddenException('User not found');
+    if (user.twoFactorEnabled) {
+      return { ok: false, error: 'already_enabled' };
+    }
+
+    const res = await this.twoFactor.initiateSetup(sessionUser.username);
+    return { ok: true, ...res };
+  }
+
+  @Post('2fa/enable')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Confirm and enable 2FA with TOTP code' })
+  @ApiBody({ type: Enable2faDto })
+  async enable2fa(
+    @Headers('authorization') auth: string | undefined,
+    @Body() body: Enable2faDto,
+  ) {
+    const token = this.bearer(auth);
+    const sessionUser = token ? await this.sessions.resolve(token) : null;
+    if (!sessionUser) throw new ForbiddenException('Invalid token');
+
+    const res = await this.twoFactor.confirmSetup(
+      sessionUser.username,
+      body.code,
+    );
+    if (!res.ok) return { ok: false, error: res.error };
+
+    this.eventLog.logAuth('2fa_enable', sessionUser.username);
+    return { ok: true, recoveryCodes: res.recoveryCodes };
+  }
+
+  @Post('2fa/disable')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Disable 2FA with password or TOTP confirmation' })
+  @ApiBody({ type: Disable2faDto })
+  async disable2fa(
+    @Headers('authorization') auth: string | undefined,
+    @Body() body: Disable2faDto,
+  ) {
+    const token = this.bearer(auth);
+    const sessionUser = token ? await this.sessions.resolve(token) : null;
+    if (!sessionUser) throw new ForbiddenException('Invalid token');
+
+    const res = await this.twoFactor.disable(
+      sessionUser.username,
+      body.password,
+      body.code,
+    );
+    if (!res.ok) return { ok: false, error: res.error };
+
+    this.eventLog.logAuth('2fa_disable', sessionUser.username);
+    return { ok: true };
   }
 
   @Post('logout')
@@ -206,6 +318,23 @@ export class AuthController {
 
     const detail = `${username}${changes.length ? ` (${changes.join(', ')})` : ''}`;
     this.eventLog.logAuth('user_update', actor, detail);
+    return { ok: true };
+  }
+
+  @Post('users/:username/reset-2fa')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Reset 2FA for a user (admin only)' })
+  @ApiParam({ name: 'username', description: 'Username to reset 2FA for' })
+  @ApiResponse({ status: 200, description: '2FA reset successfully' })
+  @ApiResponse({ status: 403, description: 'Admin role required' })
+  async reset2fa(
+    @Headers('authorization') auth: string | undefined,
+    @Param('username') username: string,
+  ) {
+    const actor = await this.requireAdmin(auth);
+    const r = await this.twoFactor.resetForUser(username);
+    if (!r.ok) throw new ForbiddenException(r.error);
+    this.eventLog.logAuth('user_reset_2fa', actor, username);
     return { ok: true };
   }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { IconEye, IconEyeOff, IconLock, IconUser } from '@tabler/icons-react';
+import { IconEye, IconEyeOff, IconLock, IconShieldLock, IconUser } from '@tabler/icons-react';
 import { api, isLoginDeniedError, localizeAuthError, setToken } from '../api/client';
 import { clearLoginBlockers, clearShellAnimations } from '../lib/authUi';
 import { syncThemeBackdrop } from '../theme/themeBackdrop';
@@ -20,6 +20,7 @@ export default function MobileLoginPage() {
   const screenRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
   const passRef = useRef<HTMLInputElement>(null);
+  const twoFactorRef = useRef<HTMLInputElement>(null);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +31,11 @@ export default function MobileLoginPage() {
   const [busy, setBusy] = useState(false);
   const [hudStat, setHudStat] = useState<'awaiting' | 'denied' | 'granted'>('awaiting');
   const [hudVersion, setHudVersion] = useState('—');
+
+  const [step, setStep] = useState<'credentials' | '2fa'>('credentials');
+  const [challengeToken, setChallengeToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [isRecovery, setIsRecovery] = useState(false);
 
   const hudStatText =
     hudStat === 'denied'
@@ -76,6 +82,27 @@ export default function MobileLoginPage() {
     await new Promise((r) => window.setTimeout(r, MOBILE_GRANT_MS));
   }
 
+  async function finalizeLogin(token: string) {
+    setToken(token);
+    qc.removeQueries({ queryKey: ['auth'] });
+    qc.removeQueries({ queryKey: ['instances'] });
+    setPassword('');
+    setTwoFactorCode('');
+    setHudStat('granted');
+    const authReady = qc.fetchQuery({
+      queryKey: ['auth', 'me'],
+      queryFn: async () => {
+        const j = await api<{ user?: { id?: string } | null }>('/api/auth/me');
+        if (!j.user) throw new Error('Invalid token');
+        return j.user;
+      },
+    });
+    await playMobileGrantHold();
+    await authReady.catch(() => undefined);
+    markFreshLogin();
+    nav('/mobile', { replace: true });
+  }
+
   async function doLogin() {
     const u = username.trim();
     const p = password;
@@ -85,30 +112,58 @@ export default function MobileLoginPage() {
     }
     setBusy(true);
     try {
-      const j = await api<{ token?: string }>('/api/auth/login', {
+      const j = await api<{
+        token?: string;
+        requires2fa?: boolean;
+        challengeToken?: string;
+      }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ username: u, password: p }),
         omitBearer: true,
       });
+
+      if (j && j.requires2fa && j.challengeToken) {
+        setChallengeToken(j.challengeToken);
+        setStep('2fa');
+        setTwoFactorCode('');
+        setIsRecovery(false);
+        showAuthMsg('', false);
+        setTimeout(() => twoFactorRef.current?.focus(), 80);
+        return;
+      }
+
       const token = (j && j.token) || '';
       if (!token) throw new Error('auth_failed');
-      setToken(token);
-      qc.removeQueries({ queryKey: ['auth'] });
-      qc.removeQueries({ queryKey: ['instances'] });
-      setPassword('');
-      setHudStat('granted');
-      const authReady = qc.fetchQuery({
-        queryKey: ['auth', 'me'],
-        queryFn: async () => {
-          const j = await api<{ user?: { id?: string } | null }>('/api/auth/me');
-          if (!j.user) throw new Error('Invalid token');
-          return j.user;
-        },
+      await finalizeLogin(token);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (isLoginDeniedError(msg)) {
+        setHudStat('denied');
+        showAuthMsg('', false);
+      } else {
+        showAuthMsg(localizeAuthError(msg, t), true);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doVerify2fa(codeParam?: string) {
+    const code = (codeParam !== undefined ? codeParam : twoFactorCode).trim();
+    if (!code) {
+      showAuthMsg(t('web_auth_required'), true);
+      return;
+    }
+    setBusy(true);
+    try {
+      const j = await api<{ token?: string }>('/api/auth/2fa/verify', {
+        method: 'POST',
+        body: JSON.stringify({ challengeToken, code }),
+        omitBearer: true,
       });
-      await playMobileGrantHold();
-      await authReady.catch(() => undefined);
-      markFreshLogin();
-      nav('/mobile', { replace: true });
+      const token = (j && j.token) || '';
+      if (!token) throw new Error('auth_failed');
+      await finalizeLogin(token);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (isLoginDeniedError(msg)) {
@@ -124,7 +179,11 @@ export default function MobileLoginPage() {
 
   function onSubmit(ev: FormEvent) {
     ev.preventDefault();
-    void doLogin();
+    if (step === '2fa') {
+      void doVerify2fa();
+    } else {
+      void doLogin();
+    }
   }
 
   function togglePass() {
@@ -167,94 +226,190 @@ export default function MobileLoginPage() {
           <span className="mobile-login__corner mobile-login__corner--br" aria-hidden="true" />
           <span className="mobile-login__card-accent" aria-hidden="true" />
 
-          <h2 className="mobile-login__card-title">{t('web_login_title')}</h2>
+          <h2 className="mobile-login__card-title">
+            {step === '2fa' ? t('web_2fa_title') : t('web_login_title')}
+          </h2>
 
-          <form className="mobile-login__form" method="get" action="#" autoComplete="on" noValidate onSubmit={onSubmit}>
-            <label className="mobile-login__field" htmlFor="mobileWebUser">
-              <span className="mobile-login__field-icon" aria-hidden="true">
-                <IconUser size={18} stroke={1.75} />
-              </span>
-              <span className="mobile-login__field-body">
-                <input
-                  type="text"
-                  id="mobileWebUser"
-                  name="username"
-                  className="mobile-login__field-input"
-                  autoComplete="username"
-                  placeholder={t('web_user_label')}
-                  value={username}
-                  disabled={busy}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    if (hudStat === 'denied') setHudStat('awaiting');
-                  }}
-                  onKeyDown={(e) => {
-                    updateCaps(e);
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      void doLogin();
-                    }
-                  }}
-                  onKeyUp={updateCaps}
-                  onBlur={() => setCapsOn(false)}
-                />
-              </span>
-            </label>
+          {step === 'credentials' ? (
+            <form className="mobile-login__form" method="get" action="#" autoComplete="on" noValidate onSubmit={onSubmit}>
+              <label className="mobile-login__field" htmlFor="mobileWebUser">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconUser size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body">
+                  <input
+                    type="text"
+                    id="mobileWebUser"
+                    name="username"
+                    className="mobile-login__field-input"
+                    autoComplete="username"
+                    placeholder={t('web_user_label')}
+                    value={username}
+                    disabled={busy}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (hudStat === 'denied') setHudStat('awaiting');
+                    }}
+                    onKeyDown={(e) => {
+                      updateCaps(e);
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void doLogin();
+                      }
+                    }}
+                    onKeyUp={updateCaps}
+                    onBlur={() => setCapsOn(false)}
+                  />
+                </span>
+              </label>
 
-            <label className="mobile-login__field" htmlFor="mobileWebPass">
-              <span className="mobile-login__field-icon" aria-hidden="true">
-                <IconLock size={18} stroke={1.75} />
-              </span>
-              <span className="mobile-login__field-body mobile-login__field-body--pass">
-                <input
-                  ref={passRef}
-                  type={passVisible ? 'text' : 'password'}
-                  id="mobileWebPass"
-                  name="password"
-                  className="mobile-login__field-input"
-                  autoComplete="current-password"
-                  placeholder={t('web_password_label')}
-                  value={password}
-                  disabled={busy}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (hudStat === 'denied') setHudStat('awaiting');
-                  }}
-                  onKeyDown={(e) => {
-                    updateCaps(e);
-                    if (e.key === 'Enter') {
+              <label className="mobile-login__field" htmlFor="mobileWebPass">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconLock size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body mobile-login__field-body--pass">
+                  <input
+                    ref={passRef}
+                    type={passVisible ? 'text' : 'password'}
+                    id="mobileWebPass"
+                    name="password"
+                    className="mobile-login__field-input"
+                    autoComplete="current-password"
+                    placeholder={t('web_password_label')}
+                    value={password}
+                    disabled={busy}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (hudStat === 'denied') setHudStat('awaiting');
+                    }}
+                    onKeyDown={(e) => {
+                      updateCaps(e);
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void doLogin();
+                      }
+                    }}
+                    onKeyUp={updateCaps}
+                    onBlur={() => setCapsOn(false)}
+                  />
+                  <button
+                    type="button"
+                    className={`mobile-login__field-toggle${passVisible ? ' is-on' : ''}`}
+                    aria-label={t('web_login_pass_toggle')}
+                    onClick={(e) => {
                       e.preventDefault();
-                      void doLogin();
-                    }
-                  }}
-                  onKeyUp={updateCaps}
-                  onBlur={() => setCapsOn(false)}
-                />
+                      togglePass();
+                    }}
+                  >
+                    {passVisible ? (
+                      <IconEyeOff size={18} stroke={1.75} aria-hidden="true" />
+                    ) : (
+                      <IconEye size={18} stroke={1.75} aria-hidden="true" />
+                    )}
+                  </button>
+                </span>
+              </label>
+
+              <button type="submit" className="mobile-login__submit" disabled={busy}>
+                <span className="mobile-login__submit-mark" aria-hidden="true" />
+                <span>{t('web_login_btn')}</span>
+              </button>
+            </form>
+          ) : (
+            <form className="mobile-login__form" noValidate onSubmit={onSubmit}>
+              <div style={{ textAlign: 'center', marginBottom: 10, fontSize: 13, color: 'var(--text-muted)' }}>
+                {isRecovery ? t('web_2fa_recovery_placeholder') : t('web_2fa_prompt')}
+              </div>
+
+              <label className="mobile-login__field" htmlFor="mobileWeb2faCode">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconShieldLock size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body">
+                  <input
+                    ref={twoFactorRef}
+                    type="text"
+                    id="mobileWeb2faCode"
+                    name="twoFactorCode"
+                    className="mobile-login__field-input"
+                    autoComplete="one-time-code"
+                    placeholder={isRecovery ? t('web_2fa_recovery_placeholder') : t('web_2fa_code_placeholder')}
+                    value={twoFactorCode}
+                    disabled={busy}
+                    maxLength={isRecovery ? 12 : 6}
+                    inputMode={isRecovery ? 'text' : 'numeric'}
+                    style={{
+                      textAlign: 'center',
+                      letterSpacing: isRecovery ? '2px' : '5px',
+                      fontSize: 18,
+                      fontWeight: 600,
+                    }}
+                    onChange={(e) => {
+                      const val = isRecovery ? e.target.value : e.target.value.replace(/\D/g, '');
+                      setTwoFactorCode(val);
+                      if (hudStat === 'denied') setHudStat('awaiting');
+                      if (!isRecovery && val.length === 6) {
+                        setTimeout(() => void doVerify2fa(val), 50);
+                      }
+                    }}
+                  />
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                className="mobile-login__submit"
+                disabled={busy || !twoFactorCode.trim()}
+              >
+                <span className="mobile-login__submit-mark" aria-hidden="true" />
+                <span>{t('web_2fa_verify_btn')}</span>
+              </button>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
                 <button
                   type="button"
-                  className={`mobile-login__field-toggle${passVisible ? ' is-on' : ''}`}
-                  aria-label={t('web_login_pass_toggle')}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    togglePass();
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-dim, #888)',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    padding: '4px 0',
+                  }}
+                  onClick={() => {
+                    setIsRecovery(!isRecovery);
+                    setTwoFactorCode('');
+                    setTimeout(() => twoFactorRef.current?.focus(), 50);
                   }}
                 >
-                  {passVisible ? (
-                    <IconEyeOff size={18} stroke={1.75} aria-hidden="true" />
-                  ) : (
-                    <IconEye size={18} stroke={1.75} aria-hidden="true" />
-                  )}
+                  {isRecovery ? t('web_2fa_use_totp') : t('web_2fa_use_recovery')}
                 </button>
-              </span>
-            </label>
 
-            <button type="submit" className="mobile-login__submit" disabled={busy}>
-              <span className="mobile-login__submit-mark" aria-hidden="true" />
-              <span>{t('web_login_btn')}</span>
-            </button>
-          </form>
+                <button
+                  type="button"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-dim, #888)',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    padding: '4px 0',
+                  }}
+                  onClick={() => {
+                    setStep('credentials');
+                    setTwoFactorCode('');
+                    setChallengeToken('');
+                    showAuthMsg('', false);
+                    setTimeout(() => passRef.current?.focus(), 50);
+                  }}
+                >
+                  {t('web_2fa_back_to_login')}
+                </button>
+              </div>
+            </form>
+          )}
 
-          <p className="mobile-login__caps" hidden={!capsOn}>
+          <p className="mobile-login__caps" hidden={!capsOn || step === '2fa'}>
             {t('web_login_caps_warning')}
           </p>
 
