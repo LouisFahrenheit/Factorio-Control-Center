@@ -71,6 +71,8 @@ your PC or VPS - add servers and manage everything from one place.
 **Access and UI**
 
 - Roles: administrator, server engineer, moderator - per-tab and per-server permissions
+- **Two-Factor Authentication (2FA / TOTP)**: secure accounts with authenticator apps (Google Authenticator, Aegis, 1Password, etc.) and emergency recovery codes
+- **Initial Setup Wizard**: guided creation of the administrator account on first launch in the browser, with optional headless configuration via environment variables (`FCC_ADMIN_USER`, `FCC_ADMIN_PASSWORD`)
 - **Public page**: optionally expose a read-only status page showing active servers, players, and mod downloads without requiring login
 - Full desktop UI and a simplified mobile view
 - English and Russian UI
@@ -109,7 +111,7 @@ your PC or VPS - add servers and manage everything from one place.
      ```
 
 2. In the menu - **1. Start panel**, open the URL from the output: `http://127.0.0.1:8080/` on your PC, `http://server_IP:8080/` on a VPS.
-3. Log in: `admin` / `admin` - change the password right away.
+3. Open the URL in your browser and complete the initial setup wizard to create your administrator account.
 
 ### Updating FCC (Standalone)
 
@@ -129,12 +131,13 @@ Your server data (`data/`), logs, and configuration files (`fcc-settings.ini` / 
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
 ```
 
-This script will automatically install Docker (if missing), download the `docker-compose.yml` file, pull the pre-built image, and start the container. Once it's done, open `http://127.0.0.1:8080/` (or your server's IP) and log in with `admin` / `admin`.
+This script will automatically install Docker (if missing), download the `docker-compose.yml` file, pull the pre-built image, and start the container. Once it's done, open `http://127.0.0.1:8080/` (or your server's IP) and create your administrator account via the initial setup wizard.
 
 **Manual Docker Installation:**
 1. Download the `docker-compose.yml` file.
-2. Run: `docker compose up -d`
-3. Open `http://127.0.0.1:8080/` (or your server's IP) and log in with `admin` / `admin`.
+2. (Optional) Set `FCC_ADMIN_USER` and `FCC_ADMIN_PASSWORD` in `docker-compose.yml` to automatically initialize the administrator account on first start without using the web wizard.
+3. Run: `docker compose up -d`
+4. Open `http://127.0.0.1:8080/` (or your server's IP) and log in or complete the initial setup wizard.
 
 **Updating FCC (Docker):**
 To update to the latest version without losing any data:

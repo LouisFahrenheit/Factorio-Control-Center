@@ -11,4 +11,6 @@ services:
       - ./logs:/app/logs
     environment:
       - NODE_ENV=production
+      # - FCC_ADMIN_USER=admin
+      # - FCC_ADMIN_PASSWORD=change_me
 

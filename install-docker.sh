@@ -85,6 +85,6 @@ echo "================================================="
 echo " Installation Complete!"
 echo " The panel is now running in Docker."
 echo " Open http://${SERVER_IP}:${PANEL_PORT}/ in your browser"
-echo " Default login: admin / admin"
+echo " Complete the initial administrator setup in your browser."
 echo "================================================="
 
