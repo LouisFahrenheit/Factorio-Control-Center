@@ -14,6 +14,7 @@ import './styles/login.css';
 import './styles/login-granted.css';
 import './styles/mod-settings.css';
 import './styles/mobile.css';
+import './styles/upload-progress.css';
 
 applyEffectiveTheme();
 initDynamicFavicon();

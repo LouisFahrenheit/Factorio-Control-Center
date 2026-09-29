@@ -21,37 +21,50 @@ export function ModpackImportModal({ modpacks, t }: ModpackImportModalProps) {
           {t('modpack_import_dialog_title')}
         </div>
         <div className="fu-modal__body">
-          <dl className="modpack-import-dialog__info">
-            <dt>{t('modpack_import_dialog_pack_label')}</dt>
-            <dd id="modpackImportDlgName">{String(st.payload.name || '') || '—'}</dd>
-            <dt>{t('modpack_import_dialog_mods_count_label')}</dt>
-            <dd id="modpackImportDlgModsCount">{String(st.userMods?.length ?? 0)}</dd>
-            <dt>{t('modpack_import_dialog_has_settings_label')}</dt>
-            <dd id="modpackImportDlgHasSettings">
-              {st.hasSettings ? t('modpack_import_dialog_has_settings_yes') : t('modpack_import_dialog_has_settings_no')}
-            </dd>
-            <dt>{t('modpack_import_dialog_factorio_version_label')}</dt>
-            <dd id="modpackImportDlgFactorio">{st.factorioLabel || '—'}</dd>
-          </dl>
-          {desc && (
-            <p id="modpackImportDlgDesc" className="modpack-import-dialog__desc">
-              {desc}
-            </p>
+          {st.isZip ? (
+            <dl className="modpack-import-dialog__info">
+              <dt>{t('modpack_import_dialog_file_label')}</dt>
+              <dd id="modpackImportDlgFileName">{st.file.name}</dd>
+              <dt>{t('modpack_import_dialog_size_label')}</dt>
+              <dd id="modpackImportDlgFileSize">{modpacks.formatSize(st.file.size)}</dd>
+              <dt>{t('modpack_import_dialog_type_label')}</dt>
+              <dd id="modpackImportDlgType">{t('modpack_import_dialog_type_zip')}</dd>
+            </dl>
+          ) : (
+            <>
+              <dl className="modpack-import-dialog__info">
+                <dt>{t('modpack_import_dialog_pack_label')}</dt>
+                <dd id="modpackImportDlgName">{String(st.payload.name || '') || '—'}</dd>
+                <dt>{t('modpack_import_dialog_mods_count_label')}</dt>
+                <dd id="modpackImportDlgModsCount">{String(st.userMods?.length ?? 0)}</dd>
+                <dt>{t('modpack_import_dialog_has_settings_label')}</dt>
+                <dd id="modpackImportDlgHasSettings">
+                  {st.hasSettings ? t('modpack_import_dialog_has_settings_yes') : t('modpack_import_dialog_has_settings_no')}
+                </dd>
+                <dt>{t('modpack_import_dialog_factorio_version_label')}</dt>
+                <dd id="modpackImportDlgFactorio">{st.factorioLabel || '—'}</dd>
+              </dl>
+              {desc && (
+                <p id="modpackImportDlgDesc" className="modpack-import-dialog__desc">
+                  {desc}
+                </p>
+              )}
+              <p className="modpack-import-dialog__desc">{t('modpack_import_dialog_latest_versions_hint')}</p>
+              <ul id="modpackImportDlgMods" className="modpack-import-dialog__mods" aria-live="polite">
+                {allMods.map((m) => {
+                  const nm = String(m?.name || '').trim();
+                  if (!nm) return null;
+                  const enabled = m?.enabled !== false;
+                  const ver = String(m?.version || '?');
+                  return (
+                    <li key={nm} className={enabled ? undefined : 'is-disabled'}>
+                      {(enabled ? '✓' : '·') + '  ' + nm + '   v' + ver}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
-          <p className="modpack-import-dialog__desc">{t('modpack_import_dialog_latest_versions_hint')}</p>
-          <ul id="modpackImportDlgMods" className="modpack-import-dialog__mods" aria-live="polite">
-            {allMods.map((m) => {
-              const nm = String(m?.name || '').trim();
-              if (!nm) return null;
-              const enabled = m?.enabled !== false;
-              const ver = String(m?.version || '?');
-              return (
-                <li key={nm} className={enabled ? undefined : 'is-disabled'}>
-                  {(enabled ? '✓' : '·') + '  ' + nm + '   v' + ver}
-                </li>
-              );
-            })}
-          </ul>
           <label className="modpack-import-dialog__field" htmlFor="modpackImportDlgTarget">
             <span>{t('modpack_import_dialog_target_label')}</span>
             <input

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, type ReactNode, type ChangeEvent } from "react";
+import { IconUpload } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { AppIcon } from "../AppIcon";
 import { FccSwitch } from "../FccSwitch";
@@ -59,6 +60,7 @@ function formatDate(iso: string): string {
 export function BackupTab({ backup, t }: BackupTabProps) {
   const reduced = webEffectsReduced();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadDragOver, setIsUploadDragOver] = useState(false);
 
   // Create options state
   const [includeMetrics, setIncludeMetrics] = useState(false);
@@ -330,7 +332,40 @@ export function BackupTab({ backup, t }: BackupTabProps) {
           </div>
 
           {/* Загрузка бэкапа */}
-          <div className="backup-tab__card">
+          <div
+            className={'backup-tab__card fcc-drop-target' + (isUploadDragOver ? ' is-drag-over' : '')}
+            onDragOver={(ev) => {
+              if (ev.dataTransfer.types.includes('Files')) {
+                ev.preventDefault();
+                setIsUploadDragOver(true);
+              }
+            }}
+            onDragEnter={(ev) => {
+              if (ev.dataTransfer.types.includes('Files')) {
+                ev.preventDefault();
+                setIsUploadDragOver(true);
+              }
+            }}
+            onDragLeave={(ev) => {
+              if (!ev.currentTarget.contains(ev.relatedTarget as Node)) {
+                setIsUploadDragOver(false);
+              }
+            }}
+            onDrop={(ev) => {
+              ev.preventDefault();
+              setIsUploadDragOver(false);
+              const f = ev.dataTransfer.files?.[0];
+              if (f) void backup.uploadBackup(f);
+            }}
+          >
+            {isUploadDragOver && (
+              <div className="fcc-drop-overlay">
+                <IconUpload size={28} className="fcc-drop-overlay__icon" />
+                <span className="fcc-drop-overlay__text" style={{ fontSize: '0.9rem' }}>
+                  {t('upload_drop_zone_hint') || 'Перетащите архив бэкапа сюда'}
+                </span>
+              </div>
+            )}
             <div className="backup-tab__card-header">
               <AppIcon name="upload" size={16} />
               <span>{t("backup_upload_title")}</span>

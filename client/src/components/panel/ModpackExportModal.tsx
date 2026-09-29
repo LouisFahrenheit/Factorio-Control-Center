@@ -35,6 +35,70 @@ export function ModpackExportModal({ modpacks, t }: ModpackExportModalProps) {
               {packName}
             </span>
           </div>
+
+          <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>
+              {t('modpack_export_dialog_format_label')}
+            </span>
+            <label
+              className="modpack-export-dialog__option-card"
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                marginBottom: '0.5rem',
+                padding: '0.5rem',
+                border: '1px solid var(--border-color, #444)',
+                borderRadius: '4px',
+                background: modpacks.exportFormat === 'zip' ? 'rgba(255, 170, 0, 0.08)' : 'transparent',
+              }}
+            >
+              <input
+                type="radio"
+                name="modpackExportFormat"
+                value="zip"
+                checked={modpacks.exportFormat === 'zip'}
+                onChange={() => modpacks.setExportFormat('zip')}
+                style={{ marginTop: '0.2rem' }}
+              />
+              <div>
+                <strong style={{ display: 'block' }}>{t('modpack_export_dialog_format_zip')}</strong>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #999)' }}>
+                  {t('modpack_export_dialog_format_zip_desc')}
+                </span>
+              </div>
+            </label>
+            <label
+              className="modpack-export-dialog__option-card"
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                border: '1px solid var(--border-color, #444)',
+                borderRadius: '4px',
+                background: modpacks.exportFormat === 'fcc' ? 'rgba(255, 170, 0, 0.08)' : 'transparent',
+              }}
+            >
+              <input
+                type="radio"
+                name="modpackExportFormat"
+                value="fcc"
+                checked={modpacks.exportFormat === 'fcc'}
+                onChange={() => modpacks.setExportFormat('fcc')}
+                style={{ marginTop: '0.2rem' }}
+              />
+              <div>
+                <strong style={{ display: 'block' }}>{t('modpack_export_dialog_format_fcc')}</strong>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #999)' }}>
+                  {t('modpack_export_dialog_format_fcc_desc')}
+                </span>
+              </div>
+            </label>
+          </div>
+
           {modpacks.exportHasSettings ? (
             <label id="modpackExportDlgSettingsRow" className="modpack-export-dialog__option-card">
               <input
@@ -65,3 +129,4 @@ export function ModpackExportModal({ modpacks, t }: ModpackExportModalProps) {
     </ModalBackdrop>
   );
 }
+

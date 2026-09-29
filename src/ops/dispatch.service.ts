@@ -477,6 +477,7 @@ export class DispatchService {
           String(kwargs.name || ''),
           !!kwargs.include_settings,
           String(kwargs.description || ''),
+          String(kwargs.format || 'zip'),
         );
       case 'modpack_import_upload':
         return this.modpacks.importUpload(

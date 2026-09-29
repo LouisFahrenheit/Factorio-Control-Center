@@ -11,6 +11,8 @@ import { notifyErr, notifyOk } from '../lib/notify';
 import { applyEffectiveTheme, applyTheme, getProgramDefaultTheme } from '../theme/themes';
 import { CryoLoginSnow } from '../theme/CryoLoginSnow';
 import { formatUptime } from '../lib/instanceUtils';
+import { useUploadProgress } from '../context/UploadProgressContext';
+import { downloadWithProgress } from '../api/downloadWithProgress';
 import {
   useServerListIconsProbe,
   SPACE_AGE_LIST_ICON_URL,
@@ -41,6 +43,7 @@ export default function PublicServersPage() {
     publicPageContactLink,
     reload: reloadLocale,
   } = useLocale();
+  const { startDownload } = useUploadProgress();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [modsModal, setModsModal] = useState<{ id: string; name: string; mods: { name: string; title: string; version?: string }[] } | null>(null);
   const [playersModal, setPlayersModal] = useState<{ id: string; name: string; players: string[] } | null>(null);
@@ -117,45 +120,32 @@ export default function PublicServersPage() {
   const handleDownloadMods = async (instanceId: string) => {
     if (downloading) return;
     setDownloading(true);
+    const initialName = `${modsModal?.name || 'server'}-mods.zip`;
+    const title = t('public_servers_download_mods_title') || 'Скачивание модов сервера';
+
     try {
-      const response = await fetch(`/api/public-servers/${instanceId}/download-mods`);
-      if (!response.ok) {
-        let errorMsg = t('download_limit_exceeded') || 'Rate limit exceeded. Please try again in 15 minutes.';
-        try {
-          const errData = await response.json();
-          if (errData && errData.message) {
-            errorMsg = errData.message;
-          }
-        } catch {
-          // ignore
-        }
-        notifyErr(t('error') || 'Error', errorMsg);
-        setDownloading(false);
-        return;
+      const res = await startDownload(
+        title,
+        initialName,
+        async (signal, onProgress) => {
+          const dlRes = await downloadWithProgress(
+            `/api/public-servers/${instanceId}/download-mods`,
+            {
+              signal,
+              onProgress,
+              defaultFilename: initialName,
+            },
+          );
+          return dlRes.filename;
+        },
+      );
+
+      if (!res.cancelled) {
+        notifyOk(t('success') || 'Success', t('download_complete') || 'Mods download started!');
       }
-      
-      const blob = await response.blob();
-      let filename = `${modsModal?.name || 'server'}-mods.zip`;
-      const cd = response.headers.get('Content-Disposition');
-      if (cd) {
-        const match = /filename="?([^"]+)"?/.exec(cd);
-        if (match && match[1]) {
-          filename = match[1];
-        }
-      }
-      
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      
-      notifyOk(t('success') || 'Success', t('download_complete') || 'Mods download started!');
-    } catch {
-      notifyErr(t('error') || 'Error', t('api_error_load_failed') || 'Failed to download.');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      notifyErr(t('error') || 'Error', errorMsg || t('api_error_load_failed') || 'Failed to download.');
     } finally {
       setDownloading(false);
     }

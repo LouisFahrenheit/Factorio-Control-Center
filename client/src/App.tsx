@@ -8,6 +8,8 @@ import { WorkspaceAnimatedRoutes } from './routes/WorkspaceAnimatedRoutes';
 import { ThemeBackdropSync } from './theme/ThemeBackdropSync';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { ThemeVisualEffects } from './theme/ThemeVisualEffects';
+import { UploadProgressProvider } from './context/UploadProgressContext';
+import { UploadProgressModal } from './components/upload/UploadProgressModal';
 
 // Динамический импорт страниц — каждая страница попадает в отдельный JS‑чанк.
 // Это разрезает единый 743 KB "index" на несколько маленьких файлов, которые
@@ -70,12 +72,15 @@ export default function App() {
     <ThemeProvider>
       <LocaleProvider>
         <QueryClientProvider client={qc}>
-          <BrowserRouter>
-            <RouteProgress />
-            <ThemeBackdropSync />
-            <ThemeVisualEffects />
-            <AppRoutes />
-          </BrowserRouter>
+          <UploadProgressProvider>
+            <BrowserRouter>
+              <RouteProgress />
+              <ThemeBackdropSync />
+              <ThemeVisualEffects />
+              <AppRoutes />
+              <UploadProgressModal />
+            </BrowserRouter>
+          </UploadProgressProvider>
         </QueryClientProvider>
       </LocaleProvider>
     </ThemeProvider>

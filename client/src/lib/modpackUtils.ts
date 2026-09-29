@@ -3,7 +3,7 @@ import { FCC_FILE_FORMAT, FCC_FILE_VERSION, unwrapModpackPayload } from './fccFi
 
 export const MODPACK_BUILTIN_NAMES = new Set(['base', 'elevated-rails', 'quality', 'recycler', 'space-age']);
 export const MODPACK_NAME_MAX_LEN = 80;
-const MODPACK_NAME_RE = /^[\p{L}\p{N}_\- ]+$/u;
+const MODPACK_NAME_RE = /^[\p{L}\p{N}_.\-() ]+$/u;
 
 export interface ModpackModEntry {
   name?: string;
@@ -39,6 +39,8 @@ export function localizeModpackError(
   if (k === 'modpack_requires_space_age') return t('modpack_activate_requires_space_age');
   if (k === 'already_active') return t('modpack_activate_already_active');
   if (k === 'reset_failed') return t('modpack_reset_failed');
+  if (k === 'modpack_upload_missing_manifest') return t('modpack_upload_missing_manifest');
+  if (k === 'invalid_zip_archive') return t('modpack_upload_invalid_zip');
   return resolveApiErrorMessage(k, t);
 }
 
@@ -91,8 +93,8 @@ export function modpackIsValidName(name: string): boolean {
 }
 
 function modpackSanitizeBase(base: string): string {
-  let b = String(base || '').replace(/[^\w -]/gu, '_');
-  b = b.replace(/^[ _-]+|[ _-]+$/g, '') || 'imported';
+  let b = String(base || '').replace(/[^\p{L}\p{N}_.\-() ]/gu, '_');
+  b = b.replace(/^[ _.\-()]+|[ _.\-()]+$/g, '') || 'imported';
   return b.slice(0, MODPACK_NAME_MAX_LEN);
 }
 

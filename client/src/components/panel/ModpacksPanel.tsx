@@ -1,4 +1,5 @@
 import { useRef, useState, type MouseEvent } from 'react';
+import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { formatPanelDateOnly } from '../../lib/datetimeUtils';
 import type { ModpacksApi } from '../../hooks/useModpacks';
@@ -40,6 +41,7 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuName, setMenuName] = useState('');
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const packCount = modpacks.rows.length;
   const initialLoading = tabInitialLoad(modpacks.loading, packCount > 0);
@@ -74,7 +76,41 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
   }
 
   return (
-    <div id="modpacksPanelRoot" className="modpacks-panel">
+    <div
+      id="modpacksPanelRoot"
+      className={'modpacks-panel fcc-drop-target' + (isDraggingOver ? ' is-drag-over' : '')}
+      onDragOver={(ev) => {
+        if (ev.dataTransfer.types.includes('Files')) {
+          ev.preventDefault();
+          setIsDraggingOver(true);
+        }
+      }}
+      onDragEnter={(ev) => {
+        if (ev.dataTransfer.types.includes('Files')) {
+          ev.preventDefault();
+          setIsDraggingOver(true);
+        }
+      }}
+      onDragLeave={(ev) => {
+        if (!ev.currentTarget.contains(ev.relatedTarget as Node)) {
+          setIsDraggingOver(false);
+        }
+      }}
+      onDrop={(ev) => {
+        ev.preventDefault();
+        setIsDraggingOver(false);
+        const files = ev.dataTransfer.files;
+        if (files?.length) void modpacks.importPack(files);
+      }}
+    >
+      {isDraggingOver && (
+        <div className="fcc-drop-overlay">
+          <IconUpload size={36} className="fcc-drop-overlay__icon" />
+          <span className="fcc-drop-overlay__text">
+            {t('upload_drop_zone_hint') || 'Перетащите файлы сюда для загрузки'}
+          </span>
+        </div>
+      )}
       <div className="mods-toolbar modpacks-toolbar">
         <div className="mods-toolbar__section mods-toolbar__section--actions">
           <div className="mods-toolbar__btn-group">
@@ -128,7 +164,7 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
               type="file"
               id="inpModpackImport"
               className="input input--file"
-              accept=".fcc,application/json"
+              accept=".fcc,.zip,application/json,application/zip,application/x-zip-compressed"
               style={{ display: 'none' }}
               onChange={(ev) => {
                 void modpacks.importPack(ev.target.files);

@@ -3,6 +3,8 @@ import { modals } from '@mantine/modals';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { feedbackErr } from '../lib/apiFeedback';
+import { useUploadProgress } from '../context/UploadProgressContext';
+import { uploadWithProgress } from '../api/uploadWithProgress';
 import { notifyApiError } from '../lib/networkErrors';
 import { notifyOk } from '../lib/notify';
 import type { ProgramSettings } from '../types/programSettings';
@@ -34,6 +36,7 @@ export function useProgramSettings(
   onLanguageSaved?: () => void,
 ) {
   const qc = useQueryClient();
+  const { startUploadBatch } = useUploadProgress();
   const [draft, setDraft] = useState<ProgramSettings>({});
 
   const query = useQuery({
@@ -498,14 +501,23 @@ export function useProgramSettings(
   const uploadTlsFile = useCallback(
     async (kind: 'cert' | 'key', file: File) => {
       const settingsTitle = t('instances_tab_settings');
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('kind', kind);
+      const uploadTitle = t('upload_progress_title_tls') || 'Загрузка TLS сертификата/ключа';
       try {
-        const r = await api<{ ok?: boolean; path?: string; error?: string }>(
-          '/api/config/web-tls/upload',
-          { method: 'POST', body: fd },
+        const batchRes = await startUploadBatch<{ ok?: boolean; path?: string; error?: string }>(
+          uploadTitle,
+          [file],
+          async (f, signal, onProgress) => {
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('kind', kind);
+            return await uploadWithProgress('/api/config/web-tls/upload', fd, { signal, onProgress });
+          },
         );
+
+        if (batchRes.cancelled || !batchRes.results.length) return;
+        if (batchRes.errors.length) throw batchRes.errors[0].error;
+
+        const r = batchRes.results[0];
         if (r.path) {
           if (kind === 'cert') patchDraft({ tls_certfile: r.path });
           else patchDraft({ tls_keyfile: r.path });
@@ -518,7 +530,7 @@ export function useProgramSettings(
         feedbackErr(settingsTitle, localizeTlsError(raw, t));
       }
     },
-    [patchDraft, t],
+    [patchDraft, startUploadBatch, t],
   );
 
   const saveLogRotationSettings = useCallback(async () => {

@@ -150,7 +150,11 @@ async function bootstrap() {
     : ['log', 'error', 'warn'];
 
   const app = await NestFactory.create(AppModule, {
-    cors: true,
+    cors: {
+      origin: true,
+      credentials: true,
+      exposedHeaders: ['Content-Disposition', 'Content-Length'],
+    },
     logger: loggerLevels,
   });
   const rootLogger = new Logger('Bootstrap');

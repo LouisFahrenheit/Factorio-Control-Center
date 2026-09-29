@@ -19,6 +19,8 @@ import { installConflictsFromPlan, mergeInstallConflicts } from '../lib/modConfl
 import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { feedbackMsg } from '../lib/apiFeedback';
 import { modsArchiveDownloadName, parseContentDispositionFilename } from '../lib/downloadFilename';
+import { useUploadProgress } from '../context/UploadProgressContext';
+import { uploadWithProgress } from '../api/uploadWithProgress';
 import {
   invalidateSpaceAgeDependentQueries,
   modAffectsSpaceAgeMode,
@@ -171,6 +173,7 @@ export function useMods(
   const kind = resolveStatusKind(status);
   const serverProcessBusy = kind === 'running' || kind === 'starting' || kind === 'stopping';
   const serverBusy = serverProcessBusy || kind === 'maintenance';
+  const { startUploadBatch } = useUploadProgress();
 
   const query = useQuery({
     queryKey: ['mods', 'list', instanceId],
@@ -495,29 +498,16 @@ export function useMods(
         return;
       }
 
-      async function sendOne(entry: { f: File; isSettings: boolean }, confirmReplace: boolean) {
+      async function sendOne(
+        entry: { f: File; isSettings: boolean },
+        confirmReplace: boolean,
+        signal: AbortSignal,
+        onProgress: (p: any) => void,
+      ) {
         const fd = new FormData();
         fd.append('file', entry.f, entry.f.name || (entry.isSettings ? 'mod-settings.dat' : 'mod.zip'));
         if (confirmReplace) fd.append('confirm_replace', '1');
-        const h: Record<string, string> = {};
-        const token = getToken();
-        if (token) h.Authorization = `Bearer ${token}`;
-        const r = await fetch('/api/mods/upload', { method: 'POST', headers: h, body: fd });
-        const text = await r.text();
-        let j: ModUploadResponse | null = null;
-        try {
-          j = JSON.parse(text) as ModUploadResponse;
-        } catch {
-          /* ignore */
-        }
-        if (!r.ok || !j?.ok) {
-          const err = String(j?.error || j?.detail || text || r.status);
-          const e = new Error(err) as Error & { code?: string; requiresSpaceAgeMod?: string };
-          e.code = err;
-          if (err === 'requires_space_age' && j?.mod_name) e.requiresSpaceAgeMod = String(j.mod_name).trim();
-          throw e;
-        }
-        return j;
+        return await uploadWithProgress<ModUploadResponse>('/api/mods/upload', fd, { signal, onProgress });
       }
 
       let settingsBatchReplace = false;
@@ -525,49 +515,53 @@ export function useMods(
       const uploadedModNames = new Set<string>();
       const uploadedDeps = new Set<string>();
       const uploadedConflicts = new Map<string, ModInstallConflictInfo>();
-      const failures: { name: string; msg: string }[] = [];
       const multi = prepared.length > 1;
       let lastUploadResult: ModUploadResponse | null = null;
 
+      const title = multi
+        ? t('upload_progress_title_mods_plural') || 'Загрузка модов'
+        : t('upload_progress_title_mods') || 'Загрузка мода';
+
       try {
-        for (let i = 0; i < prepared.length; i++) {
-          const entry = prepared[i];
-          setModsMsg(
-            multi
-              ? t('mod_list_upload_progress', String(i + 1), String(prepared.length), entry.f.name || '')
-              : t('mod_list_uploading'),
-            false,
-          );
-          let j: ModUploadResponse;
-          try {
-            j = await sendOne(entry, !!(entry.isSettings && settingsBatchReplace));
-          } catch (e) {
-            const err = e as Error & { code?: string; requiresSpaceAgeMod?: string };
-            if (err.code === 'mod_settings_exists' && entry.isSettings && !settingsBatchReplace) {
-              if (!(await modConfirm(t('mod_list_upload_settings_replace_confirm'), t))) {
-                return;
+        const batchRes = await startUploadBatch<ModUploadResponse>(
+          title,
+          prepared.map((p) => p.f),
+          async (_file, signal, onProgress, index) => {
+            const entry = prepared[index];
+            let j: ModUploadResponse;
+            try {
+              j = await sendOne(entry, !!(entry.isSettings && settingsBatchReplace), signal, onProgress);
+            } catch (e) {
+              const err = e as Error & { code?: string; requiresSpaceAgeMod?: string };
+              if (err.code === 'mod_settings_exists' && entry.isSettings && !settingsBatchReplace) {
+                if (!(await modConfirm(t('mod_list_upload_settings_replace_confirm'), t))) {
+                  throw err;
+                }
+                settingsBatchReplace = true;
+                j = await sendOne(entry, true, signal, onProgress);
+              } else {
+                throw e;
               }
-              settingsBatchReplace = true;
-              j = await sendOne(entry, true);
-            } else {
-              failures.push({
-                name: entry.f.name || '—',
-                msg: localizeModError(err.message, err.requiresSpaceAgeMod, t),
-              });
-              continue;
             }
-          }
-          lastUploadResult = j;
-          if (j.kind !== 'mod_settings') {
-            anyZipOk = true;
-            const uploadedName = String(j.mod_name || '').trim();
-            if (uploadedName) uploadedModNames.add(uploadedName);
-            for (const dep of j.required_dependencies || []) {
-              const d = String(dep || '').trim();
-              if (d) uploadedDeps.add(d);
+            lastUploadResult = j;
+            if (j.kind !== 'mod_settings') {
+              anyZipOk = true;
+              const uploadedName = String(j.mod_name || '').trim();
+              if (uploadedName) uploadedModNames.add(uploadedName);
+              for (const dep of j.required_dependencies || []) {
+                const d = String(dep || '').trim();
+                if (d) uploadedDeps.add(d);
+              }
+              mergeInstallConflicts(j.install_conflicts, uploadedConflicts);
             }
-            mergeInstallConflicts(j.install_conflicts, uploadedConflicts);
-          }
+            return j;
+          },
+        );
+
+        if (batchRes.cancelled) {
+          setModsMsg(t('upload_progress_cancelled') || 'Загрузка отменена', false);
+          await reload();
+          return;
         }
 
         if (anyZipOk) {
@@ -612,14 +606,19 @@ export function useMods(
         }
 
         const tail = skipped.length ? ' ' + t('mod_list_upload_skipped_warn', skipped.join(', ')) : '';
-        if (failures.length) {
-          const failText = failures.map((x) => x.name + ': ' + x.msg).join('; ');
-          if (failures.length === prepared.length) {
+        if (batchRes.errors.length) {
+          const failText = batchRes.errors
+            .map((x) => {
+              const rawErr = x.error instanceof Error ? x.error.message : String(x.error);
+              return x.file.name + ': ' + localizeModError(rawErr, undefined, t);
+            })
+            .join('; ');
+          if (batchRes.errors.length === prepared.length) {
             setModsMsg(failText + tail, true);
             return;
           }
           setModsMsg(
-            t('mod_list_upload_batch_partial', String(prepared.length - failures.length), String(failures.length)) +
+            t('mod_list_upload_batch_partial', String(prepared.length - batchRes.errors.length), String(batchRes.errors.length)) +
               ' ' +
               failText +
               tail,
@@ -631,10 +630,11 @@ export function useMods(
           setModsMsg(t('mod_list_upload_batch_all_ok', String(prepared.length)) + tail, false);
         } else {
           const only = prepared[0];
-          if (only.isSettings || lastUploadResult?.kind === 'mod_settings') {
+          const uploadRes = lastUploadResult as ModUploadResponse | null;
+          if (only.isSettings || uploadRes?.kind === 'mod_settings') {
             setModsMsg(t('mod_list_upload_settings_ok') + tail, false);
           } else {
-            const disp = lastUploadResult?.name || only.f.name || '';
+            const disp = uploadRes?.name || only.f.name || '';
             setModsMsg(t('mod_list_upload_ok', disp) + tail, false);
           }
         }
@@ -642,34 +642,30 @@ export function useMods(
         setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
       }
     },
-    [confirmPortalGameVersion, modJob, rawRows, reload, removeOldZips, setModsMsg, t],
+    [confirmPortalGameVersion, modJob, rawRows, reload, removeOldZips, setModsMsg, startUploadBatch, t],
   );
 
   const previewFromSave = useCallback(
     async (file: File) => {
-      const fd = new FormData();
-      fd.append('file', file, file.name || 'save.zip');
+      const title = t('upload_progress_title_save_preview') || 'Загрузка сохранения для проверки модов';
       try {
-        setModsMsg(t('mod_list_uploading'), false);
-        const h: Record<string, string> = {};
-        const token = getToken();
-        if (token) h.Authorization = `Bearer ${token}`;
-        const lang = localStorage.getItem('fcc_lang') || '';
-        if (lang) h['X-FCC-UI-Lang'] = lang;
-        const r = await fetch('/api/mods/import-save/preview', { method: 'POST', headers: h, body: fd });
-        const text = await r.text();
-        let j: ModSavePreview | null = null;
-        try {
-          j = JSON.parse(text) as ModSavePreview;
-        } catch {
-          /* ignore */
-        }
-        if (!r.ok || !j?.ok) {
-          const err = String(j?.error || text || r.status);
-          throw new Error(err);
-        }
-        const mods = Array.isArray(j.mods) ? j.mods : [];
-        const fvRaw = String(j.factorio_version || '').trim();
+        const batchRes = await startUploadBatch(
+          title,
+          [file],
+          async (f, signal, onProgress) => {
+            const fd = new FormData();
+            fd.append('file', f, f.name || 'save.zip');
+            return await uploadWithProgress<ModSavePreview>('/api/mods/import-save/preview', fd, {
+              signal,
+              onProgress,
+            });
+          },
+        );
+
+        if (batchRes.cancelled || !batchRes.results.length) return;
+        const j = batchRes.results[0];
+        const mods = Array.isArray(j?.mods) ? j.mods : [];
+        const fvRaw = String(j?.factorio_version || '').trim();
         const fvDisp = normalizeFactorioDisplayVersion(fvRaw);
         setFromSaveState({
           filename: file.name || '',
@@ -683,7 +679,7 @@ export function useMods(
         setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
       }
     },
-    [setModsMsg, t],
+    [setModsMsg, startUploadBatch, t],
   );
 
   const closeFromSaveDialog = useCallback(() => {

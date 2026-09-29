@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
+import { IconUpload } from '@tabler/icons-react';
 import type { SavesApi } from '../../hooks/useSaves';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
@@ -124,9 +125,44 @@ export function SavesTab({ saves, t }: SavesTabProps) {
     }
   }
 
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
   return (
     <div id="tabPanelSaves" className="tab-panel tab-panel--active saves-tab" role="tabpanel" aria-labelledby="tabBtnSaves">
-      <section className="panel saves-tab__panel">
+      <section
+        className={'panel saves-tab__panel fcc-drop-target' + (isDraggingOver ? ' is-drag-over' : '')}
+        onDragOver={(ev) => {
+          if (ev.dataTransfer.types.includes('Files')) {
+            ev.preventDefault();
+            setIsDraggingOver(true);
+          }
+        }}
+        onDragEnter={(ev) => {
+          if (ev.dataTransfer.types.includes('Files')) {
+            ev.preventDefault();
+            setIsDraggingOver(true);
+          }
+        }}
+        onDragLeave={(ev) => {
+          if (!ev.currentTarget.contains(ev.relatedTarget as Node)) {
+            setIsDraggingOver(false);
+          }
+        }}
+        onDrop={(ev) => {
+          ev.preventDefault();
+          setIsDraggingOver(false);
+          const files = ev.dataTransfer.files;
+          if (files?.length) void saves.uploadFiles(files).catch(saves.handleError);
+        }}
+      >
+        {isDraggingOver && (
+          <div className="fcc-drop-overlay">
+            <IconUpload size={36} className="fcc-drop-overlay__icon" />
+            <span className="fcc-drop-overlay__text">
+              {t('upload_drop_zone_hint') || 'Перетащите файлы сюда для загрузки'}
+            </span>
+          </div>
+        )}
         <div className="panel__body saves-tab__body">
           <div className="row row--saves-actions">
             <SearchField

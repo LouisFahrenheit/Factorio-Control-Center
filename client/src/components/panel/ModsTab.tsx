@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { FactorioPortalUsername } from '../FactorioPortalUsername';
 import { FccSwitch } from '../FccSwitch';
@@ -95,9 +96,44 @@ export function ModsTab({ mods, t }: ModsTabProps) {
       .join(' ');
   }
 
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
   return (
     <div id="tabPanelMods" className="tab-panel tab-panel--active mods-tab" role="tabpanel" aria-labelledby="tabBtnMods">
-      <section className="panel mods-tab__panel">
+      <section
+        className={'panel mods-tab__panel fcc-drop-target' + (isDraggingOver ? ' is-drag-over' : '')}
+        onDragOver={(ev) => {
+          if (ev.dataTransfer.types.includes('Files')) {
+            ev.preventDefault();
+            setIsDraggingOver(true);
+          }
+        }}
+        onDragEnter={(ev) => {
+          if (ev.dataTransfer.types.includes('Files')) {
+            ev.preventDefault();
+            setIsDraggingOver(true);
+          }
+        }}
+        onDragLeave={(ev) => {
+          if (!ev.currentTarget.contains(ev.relatedTarget as Node)) {
+            setIsDraggingOver(false);
+          }
+        }}
+        onDrop={(ev) => {
+          ev.preventDefault();
+          setIsDraggingOver(false);
+          const files = ev.dataTransfer.files;
+          if (files?.length) void mods.uploadArchives(files);
+        }}
+      >
+        {isDraggingOver && (
+          <div className="fcc-drop-overlay">
+            <IconUpload size={36} className="fcc-drop-overlay__icon" />
+            <span className="fcc-drop-overlay__text">
+              {t('upload_drop_zone_hint') || 'Перетащите файлы сюда для загрузки'}
+            </span>
+          </div>
+        )}
         <div className="panel__body mods-tab__body">
           <div className="mods-toolbar">
             <div className="mods-toolbar__section mods-toolbar__section--install">

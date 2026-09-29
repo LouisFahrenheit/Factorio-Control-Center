@@ -387,6 +387,7 @@ export class ModpacksOpsService {
     name: string,
     includeSettings = false,
     description = '',
+    format = 'zip',
   ): OpResult {
     const nm = this.validName(name);
     if (!nm || !existsSync(this.dir(nm)))
@@ -423,32 +424,108 @@ export class ModpacksOpsService {
         for (const row of imp.mod_entries) userMods.push(row);
       }
     }
-    if (!userMods.length) return { ok: false, error: 'empty' };
-
-    const payload: Record<string, unknown> = {
-      factorio_version: String(meta.factorio_version || '').trim(),
-      mods: userMods,
-    };
-    const settingsPath = join(modsDir, 'mod-settings.dat');
-    if (includeSettings && existsSync(settingsPath)) {
-      payload.mod_settings_b64 = readFileSync(settingsPath).toString('base64');
+    if (!userMods.length && existsSync(modsDir)) {
+      for (const f of readdirSync(modsDir)) {
+        if (!f.toLowerCase().endsWith('.zip')) continue;
+        const m = /^(.+)_(\d+\.\d+\.\d+)\.zip$/i.exec(f);
+        if (m?.[1] && !BUILTIN_MODS.includes(m[1].toLowerCase())) {
+          userMods.push({
+            name: m[1],
+            enabled: true,
+            version: m[2],
+          });
+        }
+      }
     }
+    if (!userMods.length) return { ok: false, error: 'empty' };
 
     const safeStub =
       nm.replace(/[^A-Za-z0-9_.-]+/g, '_').replace(/^\.+|\.+$/g, '') ||
       'modpack';
-    const localeStrings =
-      this.locale.readLang(this.config.langCode) ||
-      this.locale.readLang('en') ||
-      {};
-    const envelope = buildFccFileEnvelope('modpack', nm, payload, {
+    const settingsPath = join(modsDir, 'mod-settings.dat');
+    const hasSettings = includeSettings && existsSync(settingsPath);
+
+    if (String(format || '').toLowerCase() === 'fcc') {
+      const payload: Record<string, unknown> = {
+        factorio_version: String(meta.factorio_version || '').trim(),
+        mods: userMods,
+      };
+      if (hasSettings) {
+        payload.mod_settings_b64 = readFileSync(settingsPath).toString('base64');
+      }
+
+      const localeStrings =
+        this.locale.readLang(this.config.langCode) ||
+        this.locale.readLang('en') ||
+        {};
+      const envelope = buildFccFileEnvelope('modpack', nm, payload, {
+        description: String(description || meta.description || '').trim(),
+        created_at: panelTimestamp(),
+        contains: fccFileKindContainsLabel('modpack', localeStrings),
+      });
+      const out = join(require('os').tmpdir(), `${safeStub}.fcc`);
+      writeFileSync(out, JSON.stringify(envelope, null, 2) + '\n', 'utf-8');
+      return { ok: true, path: out, name: `${safeStub}.fcc` };
+    }
+
+    // Default: format === 'zip' complete ready-made archive
+    const zip = new AdmZip();
+    const metaPayload: Record<string, unknown> = {
+      name: nm,
       description: String(description || meta.description || '').trim(),
+      factorio_version: String(meta.factorio_version || '').trim(),
       created_at: panelTimestamp(),
-      contains: fccFileKindContainsLabel('modpack', localeStrings),
-    });
-    const out = join(require('os').tmpdir(), `${safeStub}.fcc`);
-    writeFileSync(out, JSON.stringify(envelope, null, 2) + '\n', 'utf-8');
-    return { ok: true, path: out, name: `${safeStub}.fcc` };
+      mods_count: userMods.length,
+      has_mod_settings: hasSettings,
+    };
+    zip.addFile(
+      'metadata.json',
+      Buffer.from(JSON.stringify(metaPayload, null, 2) + '\n', 'utf-8'),
+    );
+
+    const modList = {
+      mods: [
+        { name: 'base', enabled: true },
+        ...userMods.map((m) => ({
+          name: m.name,
+          enabled: m.enabled !== false,
+          ...(m.version ? { version: m.version } : {}),
+        })),
+      ],
+    };
+    const modListBuf = Buffer.from(
+      JSON.stringify(modList, null, 2) + '\n',
+      'utf-8',
+    );
+    zip.addFile('mod-list.json', modListBuf);
+    zip.addFile('mods/mod-list.json', modListBuf);
+
+    if (existsSync(modsDir)) {
+      for (const f of readdirSync(modsDir)) {
+        if (f.toLowerCase().endsWith('.zip')) {
+          zip.addLocalFile(join(modsDir, f), 'mods');
+        }
+      }
+    }
+
+    if (hasSettings) {
+      zip.addLocalFile(settingsPath, 'mods');
+      zip.addLocalFile(settingsPath, '');
+    }
+
+    const impManifest: ImportManifest = {
+      mods: userMods.map((m) => m.name.trim()),
+      mod_entries: userMods,
+      pending_extra_deps: [],
+    };
+    zip.addFile(
+      'import.json',
+      Buffer.from(JSON.stringify(impManifest, null, 2) + '\n', 'utf-8'),
+    );
+
+    const outZip = join(require('os').tmpdir(), `${safeStub}.zip`);
+    zip.writeZip(outZip);
+    return { ok: true, path: outZip, name: `${safeStub}.zip` };
   }
 
   importUpload(tmpPath: string, name: string, applySettings = false): OpResult {
@@ -646,20 +723,203 @@ export class ModpacksOpsService {
   }
 
   private importUploadZip(tmpPath: string, nm: string): OpResult {
-    mkdirSync(this.dir(nm), { recursive: true });
+    let zip: AdmZip;
     try {
-      new AdmZip(tmpPath).extractAllTo(this.dir(nm), true);
+      zip = new AdmZip(tmpPath);
+    } catch {
+      return { ok: false, error: 'invalid_zip_archive' };
+    }
+
+    const entries = zip.getEntries();
+    if (!entries || !entries.length) {
+      return { ok: false, error: 'invalid_zip_archive' };
+    }
+
+    interface FoundManifest {
+      entry: AdmZip.IZipEntry;
+      kind: 'metadata' | 'mod-list' | 'fcc' | 'import' | 'manifest';
+      parsed: Record<string, unknown>;
+    }
+
+    let foundManifest: FoundManifest | null = null;
+
+    for (const entry of entries) {
+      if (entry.isDirectory) continue;
+      const lower = entry.entryName.toLowerCase().replace(/\\/g, '/');
+      const baseName = lower.split('/').pop() || '';
+
+      if (
+        baseName === 'metadata.json' ||
+        baseName === 'mod-list.json' ||
+        baseName === 'import.json' ||
+        baseName === 'manifest.json' ||
+        baseName.endsWith('.fcc')
+      ) {
+        try {
+          const text = zip.readAsText(entry);
+          const parsed = JSON.parse(text) as Record<string, unknown>;
+          if (parsed && typeof parsed === 'object') {
+            if (baseName.endsWith('.fcc')) {
+              if (
+                parsed.format === FCC_FILE_FORMAT ||
+                parsed.kind === 'modpack' ||
+                Array.isArray(parsed.mods)
+              ) {
+                foundManifest = { entry, kind: 'fcc', parsed };
+                break;
+              }
+            } else if (baseName === 'mod-list.json') {
+              if (Array.isArray(parsed.mods)) {
+                foundManifest = { entry, kind: 'mod-list', parsed };
+              }
+            } else if (baseName === 'import.json') {
+              if (
+                Array.isArray(parsed.mods) ||
+                Array.isArray(parsed.mod_entries)
+              ) {
+                foundManifest = { entry, kind: 'import', parsed };
+              }
+            } else if (baseName === 'metadata.json') {
+              if (
+                parsed.name ||
+                parsed.factorio_version ||
+                parsed.mods_count !== undefined ||
+                Array.isArray(parsed.mods)
+              ) {
+                foundManifest = { entry, kind: 'metadata', parsed };
+                break;
+              }
+            } else if (baseName === 'manifest.json') {
+              foundManifest = { entry, kind: 'manifest', parsed };
+            }
+          }
+        } catch {
+          // not valid json, keep looking
+        }
+      }
+    }
+
+    if (!foundManifest) {
+      return { ok: false, error: 'modpack_upload_missing_manifest' };
+    }
+
+    const packDir = this.dir(nm);
+    mkdirSync(packDir, { recursive: true });
+
+    try {
+      zip.extractAllTo(packDir, true);
+
+      // Unwrap if everything was extracted into a single top-level folder
+      const topItems = readdirSync(packDir);
+      if (
+        topItems.length === 1 &&
+        statSync(join(packDir, topItems[0])).isDirectory() &&
+        topItems[0] !== 'mods'
+      ) {
+        const nestedDir = join(packDir, topItems[0]);
+        const nestedItems = readdirSync(nestedDir);
+        for (const item of nestedItems) {
+          require('fs').renameSync(join(nestedDir, item), join(packDir, item));
+        }
+        rmSync(nestedDir, { recursive: true, force: true });
+      }
+
+      const modsDir = join(packDir, 'mods');
+      mkdirSync(modsDir, { recursive: true });
+
+      // Move any .zip mods or mod-settings.dat from root to mods/
+      for (const item of readdirSync(packDir)) {
+        if (item === 'mods') continue;
+        const itemLower = item.toLowerCase();
+        if (
+          itemLower.endsWith('.zip') ||
+          itemLower === 'mod-settings.dat'
+        ) {
+          const src = join(packDir, item);
+          const dst = join(modsDir, item);
+          if (!existsSync(dst)) {
+            require('fs').renameSync(src, dst);
+          } else {
+            rmSync(src, { force: true });
+          }
+        }
+      }
+
+      // Ensure mod-list.json is in mods/
+      const rootModList = join(packDir, 'mod-list.json');
+      const innerModList = join(modsDir, 'mod-list.json');
+      if (existsSync(rootModList) && !existsSync(innerModList)) {
+        copyFileSync(rootModList, innerModList);
+      }
+
+      // Ensure metadata.json exists in packDir
+      const metaPath = join(packDir, 'metadata.json');
+      if (!existsSync(metaPath)) {
+        const desc = String(
+          foundManifest.parsed.description ||
+            foundManifest.parsed.desc ||
+            '',
+        ).trim();
+        const fv = String(
+          foundManifest.parsed.factorio_version || '',
+        ).trim();
+        writeFileSync(
+          metaPath,
+          JSON.stringify(
+            {
+              name: nm,
+              description: desc,
+              factorio_version: fv,
+              created_at: panelTimestamp(),
+              mods_count: 0,
+              has_mod_settings: existsSync(join(modsDir, 'mod-settings.dat')),
+            },
+            null,
+            2,
+          ) + '\n',
+          'utf-8',
+        );
+      }
+
       this.ensureImportManifest(nm);
       const imp = this.readImportManifest(nm);
       const count = imp?.mods?.length || 0;
+
+      let localZipsCount = 0;
+      if (existsSync(modsDir)) {
+        localZipsCount = readdirSync(modsDir).filter((f) =>
+          f.toLowerCase().endsWith('.zip'),
+        ).length;
+      }
+
+      // Update metadata mods_count and settings flag
+      if (existsSync(metaPath)) {
+        try {
+          const currentMeta = JSON.parse(readFileSync(metaPath, 'utf-8'));
+          currentMeta.mods_count = localZipsCount || count;
+          currentMeta.name = nm;
+          if (existsSync(join(modsDir, 'mod-settings.dat'))) {
+            currentMeta.has_mod_settings = true;
+          }
+          writeFileSync(
+            metaPath,
+            JSON.stringify(currentMeta, null, 2) + '\n',
+            'utf-8',
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+
       return {
         ok: true,
         name: nm,
-        user_mods_count: count,
-        applied_settings: false,
+        user_mods_count: localZipsCount || count,
+        applied_settings: existsSync(join(modsDir, 'mod-settings.dat')),
+        has_local_zips: localZipsCount > 0,
       };
     } catch (e) {
-      rmSync(this.dir(nm), { recursive: true, force: true });
+      rmSync(packDir, { recursive: true, force: true });
       return { ok: false, error: e instanceof Error ? e.message : String(e) };
     }
   }
@@ -798,7 +1058,7 @@ export class ModpacksOpsService {
 
   private validName(name: string): string {
     const n = safeName(name);
-    return /^[A-Za-z0-9_. -]+$/.test(n) && n ? n : '';
+    return /^[\p{L}\p{N}_.\-() ]+$/u.test(n) && n ? n : '';
   }
 
   private dir(name: string): string {

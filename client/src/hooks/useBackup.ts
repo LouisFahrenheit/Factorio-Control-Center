@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, getToken } from "../api/client";
 import { notifyOk } from "../lib/notify";
 import { notifyApiError } from "../lib/networkErrors";
+import { useUploadProgress } from "../context/UploadProgressContext";
+import { uploadWithProgress } from "../api/uploadWithProgress";
 
 export interface BackupEntry {
   id: string;
@@ -37,6 +39,7 @@ export function useBackup(
   t: (key: string, ...args: (string | number)[]) => string,
 ) {
   const qc = useQueryClient();
+  const { startUploadBatch } = useUploadProgress();
   const [creating, setCreating] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
@@ -193,22 +196,27 @@ export function useBackup(
   const uploadBackup = useCallback(
     async (file: File) => {
       setUploading(true);
+      const title = t("upload_progress_title_backup") || "Загрузка резервной копии";
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-        const token = getToken();
-        const headers: Record<string, string> = {};
-        if (token) headers.Authorization = `Bearer ${token}`;
+        const batchRes = await startUploadBatch(
+          title,
+          [file],
+          async (f, signal, onProgress) => {
+            const formData = new FormData();
+            formData.append("file", f);
+            return await uploadWithProgress("/api/backup/upload", formData, {
+              signal,
+              onProgress,
+            });
+          },
+        );
 
-        const res = await fetch("/api/backup/upload", {
-          method: "POST",
-          headers,
-          body: formData,
-        });
+        if (batchRes.cancelled) {
+          return;
+        }
 
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || res.statusText);
+        if (batchRes.errors.length) {
+          throw batchRes.errors[0].error;
         }
 
         notifyOk(t("backup_upload_ok"));
@@ -219,7 +227,7 @@ export function useBackup(
         setUploading(false);
       }
     },
-    [reload, t],
+    [reload, startUploadBatch, t],
   );
 
   return {

@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { api, getToken } from '../api/client';
+import { useUploadProgress } from '../context/UploadProgressContext';
+import { uploadWithProgress } from '../api/uploadWithProgress';
+import { downloadWithProgress } from '../api/downloadWithProgress';
 import type { ModJobApi } from './useModJob';
 import { formatModpackFactorioDisplay, formatModpackSizeBytes } from '../lib/modUtils';
 import {
@@ -16,7 +19,6 @@ import {
   type ModpackFccData,
 } from '../lib/modpackUtils';
 import { feedbackMsg } from '../lib/apiFeedback';
-import { parseContentDispositionFilename } from '../lib/downloadFilename';
 import { invalidateSpaceAgeDependentQueries } from '../lib/spaceAgeQuery';
 import type { ModpackGetResponse, ModpackListResponse, ModpackRow } from '../types/modpack';
 import type { ModRow } from '../types/mods';
@@ -50,39 +52,7 @@ interface ImportState {
   hasSettings: boolean;
   factorioLabel: string;
   existingLower: Set<string>;
-}
-
-async function downloadModpackExport(name: string, includeSettings: boolean): Promise<string> {
-  const headers: Record<string, string> = {};
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const url =
-    `/api/modpacks/${encodeURIComponent(name)}/export?include_settings=` + (includeSettings ? '1' : '0');
-  const r = await fetch(url, { headers });
-  if (!r.ok) {
-    const text = await r.text();
-    let parsed: { error?: string; detail?: string } | null = null;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      /* ignore */
-    }
-    const err = String(parsed?.error || parsed?.detail || text || r.status);
-    throw new Error(err);
-  }
-  let outName = `${name}.fcc`;
-  const cd = r.headers.get('Content-Disposition') || '';
-  outName = parseContentDispositionFilename(cd, outName);
-  const blob = await r.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = outName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(blobUrl);
-  return outName;
+  isZip?: boolean;
 }
 
 export function useModpacks(
@@ -95,6 +65,7 @@ export function useModpacks(
   t: (key: string, ...args: (string | number)[]) => string,
 ) {
   const qc = useQueryClient();
+  const { startUploadBatch, startDownload } = useUploadProgress();
   const modsCount = userMods.length;
   const [selected, setSelected] = useState('');
   const modpacksTitle = t('modpack_tab_modpacks');
@@ -127,6 +98,7 @@ export function useModpacks(
   const [exportName, setExportName] = useState('');
   const [exportHasSettings, setExportHasSettings] = useState(false);
   const [exportIncludeSettings, setExportIncludeSettings] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'zip' | 'fcc'>('zip');
 
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameOldName, setRenameOldName] = useState('');
@@ -282,6 +254,31 @@ export function useModpacks(
     async (fileList: FileList | null) => {
       if (!fileList?.length) return;
       const f = fileList[0];
+      const isZip = f.name.toLowerCase().endsWith('.zip');
+
+      if (isZip) {
+        const baseName = f.name.replace(/\.zip$/i, '');
+        const suggested = modpackSuggestName(baseName, existingLower);
+        setImportState({
+          file: f,
+          payload: {
+            name: suggested,
+            description: t('modpack_import_zip_archive_desc'),
+            mods: [],
+          },
+          userMods: [],
+          hasSettings: true,
+          factorioLabel: '—',
+          existingLower: new Set(existingLower),
+          isZip: true,
+        });
+        setImportTargetName(suggested);
+        setImportApplySettings(true);
+        setImportError('');
+        setImportOpen(true);
+        return;
+      }
+
       let parsed: unknown;
       try {
         const text = await readFileAsText(f);
@@ -352,35 +349,50 @@ export function useModpacks(
       return;
     }
     const applySettings = importApplySettings && st.hasSettings;
-    const fd = new FormData();
-    fd.append('file', st.file, st.file.name || 'modpack.fcc');
-    fd.append('name', name);
-    if (applySettings) fd.append('apply_settings', '1');
+    const title = t('upload_progress_title_modpack') || 'Импорт модпака';
 
     setImportSubmitting(true);
     setImportError('');
     closeImportDialog();
-    modJob.openPreparing();
     try {
-      const h: Record<string, string> = {};
-      const token = getToken();
-      if (token) h.Authorization = `Bearer ${token}`;
-      const r = await fetch('/api/modpacks/import-upload', { method: 'POST', headers: h, body: fd });
-      const text = await r.text();
-      let j: { ok?: boolean; error?: string; detail?: string; name?: string; user_mods_count?: number } | null = null;
-      try {
-        j = JSON.parse(text);
-      } catch {
-        /* ignore */
+      const batchRes = await startUploadBatch<{
+        ok?: boolean;
+        error?: string;
+        detail?: string;
+        name?: string;
+        user_mods_count?: number;
+        has_local_zips?: boolean;
+      }>(
+        title,
+        [st.file],
+        async (file, signal, onProgress) => {
+          const fd = new FormData();
+          fd.append('file', file, file.name || (st.isZip ? 'modpack.zip' : 'modpack.fcc'));
+          fd.append('name', name);
+          if (applySettings) fd.append('apply_settings', '1');
+          return await uploadWithProgress('/api/modpacks/import-upload', fd, { signal, onProgress });
+        },
+      );
+
+      if (batchRes.cancelled || !batchRes.results.length) {
+        return;
       }
-      if (!r.ok || !j?.ok) {
-        const err = String(j?.error || j?.detail || text || r.status);
-        throw new Error(err);
+
+      if (batchRes.errors.length) {
+        throw batchRes.errors[0].error;
       }
-      const finalName = String(j.name || name);
-      const modsToDownload = Number(j.user_mods_count || st.userMods?.length || 0);
+
+      const j = batchRes.results[0];
+      const finalName = String(j?.name || name);
+      const modsToDownload = Number(j?.user_mods_count || st.userMods?.length || 0);
       setSelected(finalName);
       await reload();
+
+      if (j?.has_local_zips) {
+        modJob.close();
+        setModpackMsg(t('modpack_import_archive_done', finalName), false);
+        return;
+      }
 
       if (modsToDownload <= 0) {
         modJob.close();
@@ -429,6 +441,7 @@ export function useModpacks(
       setExportName(name);
       setExportHasSettings(hasSettings);
       setExportIncludeSettings(hasSettings);
+      setExportFormat('zip');
       setExportOpen(true);
     },
     [rows],
@@ -443,13 +456,51 @@ export function useModpacks(
     const name = exportName;
     if (!name) return;
     closeExportDialog();
+    const format = exportFormat;
+    const defaultFilename = `${name}.${format}`;
+    const title =
+      format === 'zip'
+        ? t('modpack_export_progress_zip') || 'Экспорт архива модпака'
+        : t('modpack_export_progress_fcc') || 'Экспорт манифеста модпака';
+
     try {
-      const filename = await downloadModpackExport(name, exportIncludeSettings);
-      setModpackMsg(t('modpack_export_done_msg', filename), false);
+      const res = await startDownload(
+        title,
+        defaultFilename,
+        async (signal, onProgress) => {
+          const headers: Record<string, string> = {};
+          const token = getToken();
+          if (token) headers.Authorization = `Bearer ${token}`;
+          const url =
+            `/api/modpacks/${encodeURIComponent(name)}/export?include_settings=` +
+            (exportIncludeSettings ? '1' : '0') +
+            '&format=' +
+            format;
+          const dlRes = await downloadWithProgress(url, {
+            headers,
+            signal,
+            onProgress,
+            defaultFilename,
+          });
+          return dlRes.filename;
+        },
+      );
+
+      if (!res.cancelled) {
+        setModpackMsg(t('modpack_export_done_msg', res.filename), false);
+      }
     } catch (e) {
       setModpackMsg(localizeModpackError(e instanceof Error ? e.message : String(e), t), true);
     }
-  }, [closeExportDialog, exportIncludeSettings, exportName, setModpackMsg, t]);
+  }, [
+    closeExportDialog,
+    exportFormat,
+    exportIncludeSettings,
+    exportName,
+    setModpackMsg,
+    startDownload,
+    t,
+  ]);
 
   const openActivateDialog = useCallback(
     (name: string) => {
@@ -735,6 +786,8 @@ export function useModpacks(
     exportHasSettings,
     exportIncludeSettings,
     setExportIncludeSettings,
+    exportFormat,
+    setExportFormat,
     closeExportDialog,
     submitExport,
   };

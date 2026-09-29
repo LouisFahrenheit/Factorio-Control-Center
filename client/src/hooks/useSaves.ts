@@ -18,6 +18,8 @@ import { randomMapSeed } from '../lib/mapGen/sliderScale';
 import { feedbackMsg } from '../lib/apiFeedback';
 import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { resolveStatusKind, type PanelStatus } from '../types/panel';
+import { useUploadProgress } from '../context/UploadProgressContext';
+import { uploadWithProgress } from '../api/uploadWithProgress';
 
 export function useSaves(
   enabled: boolean,
@@ -28,6 +30,7 @@ export function useSaves(
   const qc = useQueryClient();
   const [selectedSave, setSelectedSave] = useState('');
   const savesTitle = t('saves_manager_btn');
+  const { startUploadBatch } = useUploadProgress();
 
   const kind = resolveStatusKind(status);
   const serverBusy = kind === 'running' || kind === 'starting' || kind === 'stopping';
@@ -419,26 +422,48 @@ export function useSaves(
     async (files: FileList | File[]) => {
       const list = Array.from(files);
       if (!list.length) return;
+      const validFiles: File[] = [];
       for (const file of list) {
         if (!/\.zip$/i.test(String(file.name || ''))) {
           setSavesMsg(t('saves_manager_upload_invalid_archive'), true);
           continue;
         }
-        const fd = new FormData();
-        fd.append('file', file, file.name);
-        fd.append('filename', file.name);
-        try {
-          await api('/api/saves/upload', { method: 'POST', body: fd });
-        } catch (e) {
-          const raw = e instanceof Error ? e.message : String(e);
-          setSavesMsg(localizeSaveUploadError(raw, t), true);
-          return;
-        }
+        validFiles.push(file);
+      }
+      if (!validFiles.length) return;
+
+      const title =
+        validFiles.length === 1
+          ? t('upload_progress_title_saves') || 'Загрузка сохранения'
+          : t('upload_progress_title_saves_plural') || 'Загрузка сохранений';
+
+      const batchResult = await startUploadBatch(
+        title,
+        validFiles,
+        async (file, signal, onProgress) => {
+          const fd = new FormData();
+          fd.append('file', file, file.name);
+          fd.append('filename', file.name);
+          return await uploadWithProgress('/api/saves/upload', fd, { signal, onProgress });
+        },
+      );
+
+      if (batchResult.cancelled) {
+        setSavesMsg(t('upload_progress_cancelled') || 'Загрузка отменена', false);
+        await reload();
+        return;
+      }
+
+      if (batchResult.errors.length > 0) {
+        const firstErr = batchResult.errors[0].error;
+        const raw = firstErr instanceof Error ? firstErr.message : String(firstErr);
+        setSavesMsg(localizeSaveUploadError(raw, t), true);
+      } else {
+        setSavesMsg(t('updated_successfully'), false);
       }
       await reload();
-      setSavesMsg(t('updated_successfully'), false);
     },
-    [reload, setSavesMsg, t],
+    [reload, setSavesMsg, startUploadBatch, t],
   );
 
   const handleError = useCallback(

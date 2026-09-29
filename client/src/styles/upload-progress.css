@@ -1,0 +1,559 @@
+/* ==========================================================================
+   Factorio Control Center — Upload Progress Modal & Widget
+   ========================================================================== */
+
+.upload-modal-backdrop {
+  z-index: 10500 !important;
+}
+
+.upload-modal {
+  width: 100%;
+  max-width: 540px;
+  background: color-mix(in srgb, var(--bg-widget) 92%, black 8%);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border) 65%);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px color-mix(in srgb, var(--accent) 15%, transparent);
+  overflow: hidden;
+  animation: uploadModalAppear 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes uploadModalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.upload-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.upload-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.upload-modal__header-icon {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  flex-shrink: 0;
+}
+
+.upload-modal__header-icon.is-uploading {
+  animation: uploadIconPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes uploadIconPulse {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.upload-modal__header-icon.is-downloading {
+  animation: downloadIconPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes downloadIconPulse {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+.upload-modal__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.upload-modal__head-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.upload-modal__head-btn:hover {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.upload-modal__body {
+  padding: 20px 20px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card containing active file info */
+.upload-modal__file-card {
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upload-modal__file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.upload-modal__file-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.upload-modal__file-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.upload-modal__file-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-modal__percent-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.upload-modal__percent-badge.is-processing-badge {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--starting, #ffaa00);
+  background: color-mix(in srgb, var(--starting, #ffaa00) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--starting, #ffaa00) 32%, transparent);
+  border-radius: 4px;
+  padding: 1px 7px;
+  animation: uploadProcessingBadgePulse 1.8s ease-in-out infinite;
+}
+
+.upload-floating-widget__percent.is-processing {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--starting, #ffaa00);
+}
+
+@keyframes uploadProcessingBadgePulse {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Progress track and fill */
+.upload-modal__track {
+  width: 100%;
+  height: 10px;
+  background: color-mix(in srgb, var(--bg-main) 90%, black 10%);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.upload-modal__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 80%, white 20%) 100%);
+  border-radius: 4px;
+  transition: width 0.18s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-modal__fill.is-active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: uploadProgressShimmer 1.5s infinite;
+}
+
+@keyframes uploadProgressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.upload-modal__fill.is-processing {
+  width: 100% !important;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 70%, var(--starting) 30%) 0%,
+    var(--starting) 50%,
+    color-mix(in srgb, var(--accent) 70%, var(--starting) 30%) 100%
+  );
+  background-size: 200% 100%;
+  animation: uploadProcessingShimmer 1.8s linear infinite;
+}
+
+@keyframes uploadProcessingShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.upload-modal__fill.is-done {
+  background: var(--running);
+}
+
+.upload-modal__fill.is-error {
+  background: var(--error);
+}
+
+/* Stats row */
+.upload-modal__stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.upload-modal__stats-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-modal__stats-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono, monospace);
+}
+
+.upload-modal__stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.upload-modal__processing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--starting);
+  font-weight: 500;
+}
+
+/* Overall progress (when multiple files) */
+.upload-modal__overall {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.upload-modal__overall-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.upload-modal__overall-track {
+  width: 100%;
+  height: 6px;
+  background: color-mix(in srgb, var(--bg-main) 90%, black 10%);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.upload-modal__overall-fill {
+  height: 100%;
+  background: color-mix(in srgb, var(--accent) 85%, white 15%);
+  border-radius: 3px;
+  transition: width 0.15s ease-out;
+}
+
+/* Scrollable multi-file list */
+.upload-modal__file-list {
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.upload-modal__queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--bg-main) 30%, transparent);
+  border: 1px solid transparent;
+}
+
+.upload-modal__queue-item.is-current {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.upload-modal__queue-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.upload-modal__queue-status {
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.upload-modal__queue-status--done {
+  color: var(--running);
+}
+
+.upload-modal__queue-status--uploading {
+  color: var(--accent);
+}
+
+.upload-modal__queue-status--processing {
+  color: var(--starting);
+}
+
+.upload-modal__queue-status--pending {
+  color: var(--text-muted);
+}
+
+.upload-modal__queue-status--error {
+  color: var(--error);
+}
+
+/* Footer */
+.upload-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 16px 20px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+/* Minimized Floating Widget */
+.upload-floating-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10500;
+  width: 330px;
+  background: color-mix(in srgb, var(--bg-widget) 96%, black 4%);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px color-mix(in srgb, var(--accent) 20%, transparent);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: uploadFloatingAppear 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes uploadFloatingAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.upload-floating-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7), 0 0 20px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.upload-floating-widget__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.upload-floating-widget__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.upload-floating-widget__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-floating-widget__percent {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.upload-floating-widget__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.upload-floating-widget__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Drag and Drop Drop-Zone overlay */
+.fcc-drop-target {
+  position: relative;
+}
+
+.fcc-drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--bg-main) 82%, var(--accent) 18%);
+  border: 2px dashed var(--accent);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 50;
+  pointer-events: none;
+  animation: fccDropPulse 1.6s ease-in-out infinite alternate;
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+@keyframes fccDropPulse {
+  0% {
+    border-color: color-mix(in srgb, var(--accent) 60%, white 40%);
+  }
+  100% {
+    border-color: var(--accent);
+  }
+}
+
+.fcc-drop-overlay__icon {
+  color: var(--accent);
+  animation: fccDropBounce 1s ease-in-out infinite;
+}
+
+@keyframes fccDropBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.fcc-drop-overlay__text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}

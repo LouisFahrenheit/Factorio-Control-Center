@@ -1228,9 +1228,12 @@ export class ApiFullController {
     @Body() body: { name?: string; apply_settings?: string },
     @Req() req: Request,
   ) {
+    const ext = file.originalname?.toLowerCase().endsWith('.zip')
+      ? '.zip'
+      : '.fcc';
     const tmp = join(
       tmpdir(),
-      `fcc-modpack-${randomBytes(8).toString('hex')}.fcc`,
+      `fcc-modpack-${randomBytes(8).toString('hex')}${ext}`,
     );
     const { writeFileSync, unlinkSync } = await import('fs');
     writeFileSync(tmp, file.buffer);
@@ -1279,6 +1282,7 @@ export class ApiFullController {
     @Param('name') name: string,
     @Res() res: Response,
     @Query('include_settings') includeSettings = '0',
+    @Query('format') format = 'zip',
   ) {
     const includeFlag =
       ['1', 'true', 'yes', 'on'].includes(
@@ -1286,15 +1290,21 @@ export class ApiFullController {
           .trim()
           .toLowerCase(),
       ) || Number(includeSettings || 0) > 0;
+    const formatStr =
+      String(format || 'zip').toLowerCase() === 'fcc' ? 'fcc' : 'zip';
     const data = await this.bridge.submit('modpack_export_prepare', {
       name,
       include_settings: includeFlag,
       description: '',
+      format: formatStr,
     });
     const path = String(data.path || '');
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || `${name}.fcc`));
+    return res.download(
+      path,
+      String(data.name || `${name}.${formatStr}`),
+    );
   }
 
   @Get('map-presets')
