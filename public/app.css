@@ -15901,7 +15901,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 .fu-modal {
   background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
   border: 1px solid var(--border-dark);
-  border-radius: 8px;
+  border-radius: 10px;
   width: min(680px, 92vw);
   max-height: min(90vh, calc(100dvh / var(--ui-scale) - 2 * max(12px, 2vh) - 8px));
   display: flex;
@@ -16422,16 +16422,22 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 
 .fu-modal.server-update-dialog {
   width: min(560px, 94vw);
-  border-radius: 12px;
+  border: none;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.42),
-    0 0 0 1px color-mix(in srgb, var(--accent) 12%, var(--border-dark) 88%);
+    0 24px 56px rgba(0, 0, 0, 0.48),
+    0 0 0 1px color-mix(in srgb, var(--accent) 18%, var(--border-dark) 82%);
 }
 
 .fu-modal.server-update-dialog--pick {
   width: min(440px, 94vw);
   overflow: visible;
+  border: none;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 56px rgba(0, 0, 0, 0.48),
+    0 0 0 1px color-mix(in srgb, var(--accent) 18%, var(--border-dark) 82%);
 }
 
 .fu-modal.server-update-dialog--progress {
@@ -16556,6 +16562,14 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   overflow: visible;
 }
 
+.fu-modal.server-update-dialog--pick .server-update-dialog__header {
+  border-radius: 14px 14px 0 0;
+}
+
+.fu-modal.server-update-dialog--pick .server-update-dialog__footer {
+  border-radius: 0 0 14px 14px;
+}
+
 .server-update-dialog__pick-card,
 .server-update-dialog__log-card {
   display: flex;
@@ -16630,6 +16644,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   padding: 6px 14px;
   cursor: pointer;
   text-align: left;
+  border-radius: 8px;
 }
 
 .server-update-dialog__version-trigger-text {
@@ -16654,7 +16669,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 
 .server-update-dialog__version-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   z-index: 30;
   min-width: 100%;
@@ -16664,10 +16679,11 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   margin: 0;
   padding: 6px 0;
   list-style: none;
+  border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-dark) 72%);
   background: var(--bg-widget);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.38),
+    0 10px 28px rgba(0, 0, 0, 0.44),
     0 0 0 1px color-mix(in srgb, var(--border-dark) 70%, transparent);
 }
 
@@ -16694,6 +16710,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   background: transparent;
   border: none;
   cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .server-update-dialog__version-option:hover {
