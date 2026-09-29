@@ -50,7 +50,7 @@
     "class-validator": "^0.15.1",
     "dotenv": "^17.4.2",
     "ini": "^7.0.0",
-    "multer": "^2.3.0",
+    "multer": "^2.4.0",
     "node-stream-zip": "^1.15.0",
     "otpauth": "^9.5.2",
     "pidusage": "^4.0.1",
@@ -98,7 +98,7 @@
   "overrides": {
     "glob": "^13.0.6",
     "test-exclude": "^8.0.0",
-    "multer": "^2.3.0",
+    "multer": "^2.4.0",
     "js-yaml": "^4.3.2",
     "eslint": {
       "minimatch": {
