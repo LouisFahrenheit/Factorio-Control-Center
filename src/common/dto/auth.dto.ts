@@ -74,3 +74,12 @@ export class Disable2faDto {
   @ApiProperty({ required: false, description: '6-digit TOTP code for confirmation' })
   code?: string;
 }
+
+export class SetupAdminDto {
+  @ApiProperty({ example: 'admin', description: 'Administrator username' })
+  username: string;
+
+  @ApiProperty({ example: 'password123', description: 'Administrator password' })
+  password: string;
+}
+

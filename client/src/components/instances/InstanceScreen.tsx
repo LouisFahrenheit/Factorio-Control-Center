@@ -60,7 +60,7 @@ interface InstanceScreenProps {
 }
 
 export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 0, t }: InstanceScreenProps) {
-  const { reload: reloadLocale, defaultWebCredentialsActive } = useLocale();
+  const { reload: reloadLocale } = useLocale();
   const reduced = webEffectsReduced();
   const [activeTab, setActiveTab] = useState<InstanceTabKey>('servers');
   const [maintInnerTab, setMaintInnerTab] = useState<'tasks' | 'reports'>('tasks');
@@ -260,10 +260,6 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const mainTabIndicator = useSlidingTabIndicator(mainTabsRef, activeTab);
 
-  const defaultPasswordWarning =
-    defaultWebCredentialsActive && isAdmin(user) && tabAllowed('access');
-  const accessTabBlink = defaultPasswordWarning && activeTab !== 'access';
-
   return (
     <motion.section
       id="instanceScreen"
@@ -272,12 +268,6 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
       initial={reduced ? false : 'hidden'}
       animate={reduced ? undefined : 'show'}
     >
-      {defaultPasswordWarning ? (
-        <div className="instances-default-creds-banner" role="alert">
-          <AppIcon name="person_shield" size={20} />
-          <span data-i18n="instances_default_password_banner">{t('instances_default_password_banner')}</span>
-        </div>
-      ) : null}
       <motion.div className="instance-screen__header" variants={reduced ? undefined : SCREEN_HEADER_VARIANTS}>
         <div
           ref={mainTabsRef}
@@ -364,8 +354,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
               type="button"
               className={
                 'sub-tabs__tab btn--with-icon' +
-                (activeTab === 'access' ? ' sub-tabs__tab--active' : '') +
-                (accessTabBlink ? ' sub-tabs__tab--default-creds-alert' : '')
+                (activeTab === 'access' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabAccessBtn"
               role="tab"

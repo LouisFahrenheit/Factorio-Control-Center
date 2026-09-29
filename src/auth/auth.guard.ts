@@ -34,7 +34,9 @@ export class AuthGuard implements CanActivate {
       path === '/api/health' ||
       path === '/api/locale-bootstrap' ||
       path.startsWith('/api/auth/login') ||
-      path === '/api/auth/2fa/verify'
+      path === '/api/auth/2fa/verify' ||
+      path === '/api/auth/setup-status' ||
+      path === '/api/auth/setup-admin'
     ) {
       return true;
     }

@@ -90,10 +90,10 @@ export class PanelStartupLogService {
     }
     this.line('panel_startup_config', this.paths.envFilePath);
 
-    if (await this.users.defaultAdminPasswordActive()) {
+    if (!(await this.users.hasAnyUser())) {
       console.log('');
       this.blankFile();
-      this.line('panel_startup_default_password_warning');
+      this.line('panel_startup_initial_setup_notice');
     }
 
     console.log('');

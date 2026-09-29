@@ -1,4 +1,10 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -17,7 +23,7 @@ function isEnabledAdmin(u: User): boolean {
 @Injectable()
 export class UsersService implements OnModuleInit {
   private readonly log = new Logger(UsersService.name);
-  private defaultsInstalled = false;
+  private isLoaded = false;
   private cache: User[] = [];
 
   constructor(
@@ -32,35 +38,79 @@ export class UsersService implements OnModuleInit {
   async load(): Promise<User[]> {
     const users = await this.userRepo.find();
     if (users.length === 0) {
-      const admin = this.userRepo.create({
-        username: 'admin',
-        passwordHash: hashPassword('admin'),
-        role: 'administrator',
-        tabs: [...ALL_TABS],
-        instanceIds: ['*'],
-        enabled: true,
-      });
-      await this.userRepo.save(admin);
-      this.log.debug(`No users found. Default 'admin' user created.`);
-      this.defaultsInstalled = true;
-      this.cache = [admin];
+      const envPass = (
+        process.env.FCC_ADMIN_PASSWORD ||
+        process.env.FCC_ADMIN_PASS ||
+        ''
+      ).trim();
+      const envUser = (process.env.FCC_ADMIN_USER || 'admin').trim();
+      if (envPass) {
+        const admin = this.userRepo.create({
+          username: envUser,
+          passwordHash: hashPassword(envPass),
+          role: 'administrator',
+          tabs: [...ALL_TABS],
+          instanceIds: ['*'],
+          enabled: true,
+        });
+        await this.userRepo.save(admin);
+        this.log.log(
+          `No users found. Created initial administrator '${envUser}' from environment variables.`,
+        );
+        this.isLoaded = true;
+        this.cache = [admin];
+        return this.cache;
+      }
+      this.log.log(
+        `No users found in database. Initial administrator setup wizard is awaiting first run.`,
+      );
+      this.isLoaded = true;
+      this.cache = [];
       return this.cache;
     }
     this.log.debug(`Loaded ${users.length} users from database.`);
+    this.isLoaded = true;
     this.cache = users;
     return this.cache;
   }
 
-  async findUser(username: string): Promise<User | undefined> {
-    const needle = username.trim().toLowerCase();
-    if (this.cache.length === 0) await this.load();
-    return this.cache.find((u) => u.username.trim().toLowerCase() === needle);
+  async hasAnyUser(): Promise<boolean> {
+    if (!this.isLoaded) await this.load();
+    return this.cache.length > 0;
   }
 
-  async defaultAdminPasswordActive(): Promise<boolean> {
-    const u = await this.findUser('admin');
-    if (!u?.enabled) return false;
-    return verifyPassword('admin', u.passwordHash);
+  async createInitialAdmin(username: string, password: string): Promise<User> {
+    if (!this.isLoaded) await this.load();
+    const count = await this.userRepo.count();
+    if (count > 0 || this.cache.length > 0) {
+      throw new ForbiddenException('setup_already_completed');
+    }
+    const cleanUser = (username || '').trim();
+    if (!cleanUser || cleanUser.length < 2) {
+      throw new BadRequestException('username_too_short');
+    }
+    if (!password || password.length < 4) {
+      throw new BadRequestException('password_too_short');
+    }
+    const admin = this.userRepo.create({
+      username: cleanUser,
+      passwordHash: hashPassword(password),
+      role: 'administrator',
+      tabs: [...ALL_TABS],
+      instanceIds: ['*'],
+      enabled: true,
+    });
+    await this.userRepo.save(admin);
+    this.cache = [admin];
+    this.isLoaded = true;
+    this.log.log(`Initial administrator '${cleanUser}' created via setup wizard.`);
+    return admin;
+  }
+
+  async findUser(username: string): Promise<User | undefined> {
+    const needle = username.trim().toLowerCase();
+    if (!this.isLoaded) await this.load();
+    return this.cache.find((u) => u.username.trim().toLowerCase() === needle);
   }
 
   normalizeRole(role: string): UserRole {

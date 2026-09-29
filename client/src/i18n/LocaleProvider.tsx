@@ -23,7 +23,7 @@ interface LocaleBootstrapPayload {
   strings?: LocaleStrings;
   theme?: string;
   web_disable_effects?: boolean;
-  default_web_credentials?: boolean;
+  needs_setup?: boolean;
   available_languages?: string[];
   default_toast_duration_sec?: number;
   panel_default_language?: string;
@@ -44,7 +44,7 @@ interface LocaleContextValue {
   strings: LocaleStrings;
   availableLanguages: string[];
   panelDefaultLanguage: string;
-  defaultWebCredentialsActive: boolean;
+  needsSetup: boolean;
   publicPageEnabled: boolean;
   publicPageRoute: string;
   publicPageTitle: string;
@@ -64,7 +64,7 @@ const LocaleContext = createContext<LocaleContextValue>({
   strings: {},
   availableLanguages: [],
   panelDefaultLanguage: 'en',
-  defaultWebCredentialsActive: false,
+  needsSetup: false,
   publicPageEnabled: false,
   publicPageRoute: '/servers',
   publicPageTitle: '',
@@ -105,7 +105,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<LocaleStrings>({});
   const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
   const [panelDefaultLanguage, setPanelDefaultLanguage] = useState('en');
-  const [defaultWebCredentialsActive, setDefaultWebCredentialsActive] = useState(false);
+  const [needsSetup, setNeedsSetup] = useState(false);
   const [publicPageEnabled, setPublicPageEnabled] = useState(false);
   const [publicPageRoute, setPublicPageRoute] = useState('/servers');
   const [publicPageTitle, setPublicPageTitle] = useState('');
@@ -138,7 +138,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       if (typeof j.web_disable_effects === 'boolean') {
         syncWebDisableEffects(j.web_disable_effects);
       }
-      setDefaultWebCredentialsActive(j.default_web_credentials === true);
+      setNeedsSetup(j.needs_setup === true);
       setPublicPageEnabled(j.public_page_enabled === true);
       if (j.public_page_route) setPublicPageRoute(j.public_page_route);
       setPublicPageTitle(j.public_page_title || '');
@@ -186,7 +186,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       strings,
       availableLanguages,
       panelDefaultLanguage,
-      defaultWebCredentialsActive,
+      needsSetup,
       publicPageEnabled,
       publicPageRoute,
       publicPageTitle,
@@ -200,7 +200,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       t,
       reload: load,
     }),
-    [ready, strings, availableLanguages, panelDefaultLanguage, defaultWebCredentialsActive, publicPageEnabled, publicPageRoute, publicPageTitle, publicPageSubtitle, publicPageTheme, publicPageHideTitle, publicPageHideSubtitle, publicPageAllowModDownloads, publicPageShowPlayers, publicPageContactLink, t, load],
+    [ready, strings, availableLanguages, panelDefaultLanguage, needsSetup, publicPageEnabled, publicPageRoute, publicPageTitle, publicPageSubtitle, publicPageTheme, publicPageHideTitle, publicPageHideSubtitle, publicPageAllowModDownloads, publicPageShowPlayers, publicPageContactLink, t, load],
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

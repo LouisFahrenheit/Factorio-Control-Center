@@ -15,7 +15,7 @@ export default function MobileLoginPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const t = useT();
-  const { ready } = useLocale();
+  const { ready, needsSetup } = useLocale();
   const clockRef = useLoginClock(true);
   const screenRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
@@ -24,6 +24,7 @@ export default function MobileLoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passVisible, setPassVisible] = useState(false);
   const [capsOn, setCapsOn] = useState(false);
   const [authMsg, setAuthMsg] = useState('');
@@ -32,10 +33,17 @@ export default function MobileLoginPage() {
   const [hudStat, setHudStat] = useState<'awaiting' | 'denied' | 'granted'>('awaiting');
   const [hudVersion, setHudVersion] = useState('—');
 
-  const [step, setStep] = useState<'credentials' | '2fa'>('credentials');
+  const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [challengeToken, setChallengeToken] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [isRecovery, setIsRecovery] = useState(false);
+
+  useEffect(() => {
+    if (needsSetup) {
+      setStep('setup');
+      setUsername('admin');
+    }
+  }, [needsSetup]);
 
   const hudStatText =
     hudStat === 'denied'
@@ -177,9 +185,48 @@ export default function MobileLoginPage() {
     }
   }
 
+  async function doSetupAdmin() {
+    const u = username.trim();
+    const p = password;
+    const cp = confirmPassword;
+    if (!u || u.length < 2) {
+      showAuthMsg(t('web_setup_username_too_short'), true);
+      return;
+    }
+    if (!p || p.length < 4) {
+      showAuthMsg(t('web_setup_password_too_short'), true);
+      return;
+    }
+    if (p !== cp) {
+      showAuthMsg(t('web_setup_passwords_mismatch'), true);
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const res = await api<{ token?: string; error?: string }>('/api/auth/setup-admin', {
+        method: 'POST',
+        body: JSON.stringify({ username: u, password: p }),
+        omitBearer: true,
+      });
+      if (res && res.token) {
+        await finalizeLogin(res.token);
+      } else {
+        throw new Error(res?.error || 'setup_failed');
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showAuthMsg(localizeAuthError(msg, t), true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function onSubmit(ev: FormEvent) {
     ev.preventDefault();
-    if (step === '2fa') {
+    if (step === 'setup') {
+      void doSetupAdmin();
+    } else if (step === '2fa') {
       void doVerify2fa();
     } else {
       void doLogin();
@@ -227,10 +274,145 @@ export default function MobileLoginPage() {
           <span className="mobile-login__card-accent" aria-hidden="true" />
 
           <h2 className="mobile-login__card-title">
-            {step === '2fa' ? t('web_2fa_title') : t('web_login_title')}
+            {step === 'setup'
+              ? t('web_setup_title')
+              : step === '2fa'
+                ? t('web_2fa_title')
+                : t('web_login_title')}
           </h2>
 
-          {step === 'credentials' ? (
+          {step === 'setup' ? (
+            <form className="mobile-login__form" noValidate onSubmit={onSubmit}>
+              <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 170, 0, 0.12)',
+                    border: '1px solid rgba(255, 170, 0, 0.3)',
+                    color: 'var(--accent, #e5a00d)',
+                    marginBottom: 6,
+                  }}
+                >
+                  <IconShieldLock size={20} stroke={1.8} />
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted, #aaa)', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
+                  {t('web_setup_subtitle')}
+                </div>
+              </div>
+
+              <label className="mobile-login__field" htmlFor="mobileSetupUser">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconUser size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body">
+                  <input
+                    type="text"
+                    id="mobileSetupUser"
+                    name="username"
+                    className="mobile-login__field-input"
+                    autoComplete="username"
+                    placeholder={t('web_setup_username_placeholder')}
+                    value={username}
+                    disabled={busy}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </span>
+              </label>
+
+              <label className="mobile-login__field" htmlFor="mobileSetupPass">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconLock size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body mobile-login__field-body--pass">
+                  <input
+                    ref={passRef}
+                    type={passVisible ? 'text' : 'password'}
+                    id="mobileSetupPass"
+                    name="password"
+                    className="mobile-login__field-input"
+                    autoComplete="new-password"
+                    placeholder={t('web_setup_password_placeholder')}
+                    value={password}
+                    disabled={busy}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={updateCaps}
+                    onKeyUp={updateCaps}
+                    onBlur={() => setCapsOn(false)}
+                  />
+                  <button
+                    type="button"
+                    className={`mobile-login__pass-toggle${passVisible ? ' is-on' : ''}`}
+                    aria-label={t('web_login_pass_toggle')}
+                    title={t('web_login_pass_toggle')}
+                    tabIndex={-1}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      togglePass();
+                    }}
+                  >
+                    {passVisible ? (
+                      <IconEyeOff size={18} stroke={1.75} aria-hidden="true" />
+                    ) : (
+                      <IconEye size={18} stroke={1.75} aria-hidden="true" />
+                    )}
+                  </button>
+                </span>
+              </label>
+
+              <label className="mobile-login__field" htmlFor="mobileSetupConfirmPass">
+                <span className="mobile-login__field-icon" aria-hidden="true">
+                  <IconLock size={18} stroke={1.75} />
+                </span>
+                <span className="mobile-login__field-body">
+                  <input
+                    type={passVisible ? 'text' : 'password'}
+                    id="mobileSetupConfirmPass"
+                    name="confirmPassword"
+                    className="mobile-login__field-input"
+                    autoComplete="new-password"
+                    placeholder={t('web_setup_confirm_placeholder')}
+                    value={confirmPassword}
+                    disabled={busy}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onKeyDown={updateCaps}
+                    onKeyUp={updateCaps}
+                    onBlur={() => setCapsOn(false)}
+                  />
+                </span>
+              </label>
+
+              {capsOn ? (
+                <div className="mobile-login__caps" role="status" aria-live="polite">
+                  {t('web_login_caps_warning')}
+                </div>
+              ) : null}
+
+              {authMsg ? (
+                <div
+                  className={`mobile-login__msg${authErr ? ' mobile-login__msg--err' : ''}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {authMsg}
+                </div>
+              ) : null}
+
+              <button
+                type="submit"
+                className="mobile-login__cta"
+                id="btnMobileSetupAdmin"
+                disabled={busy || !username.trim() || !password}
+              >
+                <span className="mobile-login__cta-aura" aria-hidden="true" />
+                <span className="mobile-login__cta-text">{t('web_setup_submit_btn')}</span>
+              </button>
+            </form>
+          ) : step === 'credentials' ? (
             <form className="mobile-login__form" method="get" action="#" autoComplete="on" noValidate onSubmit={onSubmit}>
               <label className="mobile-login__field" htmlFor="mobileWebUser">
                 <span className="mobile-login__field-icon" aria-hidden="true">

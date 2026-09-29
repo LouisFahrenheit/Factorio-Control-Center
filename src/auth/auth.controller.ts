@@ -33,6 +33,7 @@ import {
   Verify2faDto,
   Enable2faDto,
   Disable2faDto,
+  SetupAdminDto,
 } from '../common/dto/auth.dto';
 import { TwoFactorService } from './two-factor.service';
 
@@ -48,6 +49,55 @@ export class AuthController {
     private readonly eventLog: WebPanelEventLogService,
     private readonly twoFactor: TwoFactorService,
   ) {}
+
+  @Get('setup-status')
+  @ApiOperation({
+    summary: 'Check if initial administrator setup is required',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns whether the initial setup wizard needs to be run.',
+  })
+  async setupStatus() {
+    const hasUsers = await this.users.hasAnyUser();
+    return { ok: true, needsSetup: !hasUsers };
+  }
+
+  @Post('setup-admin')
+  @ApiOperation({
+    summary: 'Create initial administrator account during setup wizard',
+    description:
+      'Creates the first administrator account if no users exist in the database.',
+  })
+  @ApiBody({ type: SetupAdminDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Initial admin created and session established.',
+  })
+  async setupAdmin(@Body() body: SetupAdminDto, @Ip() ip: string) {
+    const username = (body.username || '').trim();
+    const password = body.password || '';
+
+    if (!username || username.length < 2) {
+      return { ok: false, error: 'username_too_short' };
+    }
+    if (!password || password.length < 4) {
+      return { ok: false, error: 'password_too_short' };
+    }
+
+    try {
+      const admin = await this.users.createInitialAdmin(username, password);
+      const token = await this.sessions.createSession(admin.username, ip);
+      this.log.log(
+        `Initial administrator '${admin.username}' created via setup wizard from IP: ${ip}.`,
+      );
+      this.eventLog.logAuth('login', admin.username, admin.role);
+      return { ok: true, token, user: this.users.publicView(admin) };
+    } catch (err: any) {
+      this.log.warn(`Setup admin failed: ${err?.message || err}`);
+      return { ok: false, error: err?.message || 'setup_failed' };
+    }
+  }
 
   @Post('login')
   @ApiOperation({

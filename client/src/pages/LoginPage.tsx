@@ -22,7 +22,7 @@ export default function LoginPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const t = useT();
-  const { ready } = useLocale();
+  const { ready, needsSetup } = useLocale();
   const clockRef = useLoginClock(true);
   const panelRef = useRef<HTMLElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -32,6 +32,7 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passVisible, setPassVisible] = useState(false);
   const [capsOn, setCapsOn] = useState(false);
   const [authMsg, setAuthMsg] = useState('');
@@ -41,10 +42,17 @@ export default function LoginPage() {
   const [hudStat, setHudStat] = useState<'awaiting' | 'denied' | 'granted'>('awaiting');
   const [hudVersion, setHudVersion] = useState('—');
 
-  const [step, setStep] = useState<'credentials' | '2fa'>('credentials');
+  const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [challengeToken, setChallengeToken] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [isRecovery, setIsRecovery] = useState(false);
+
+  useEffect(() => {
+    if (needsSetup) {
+      setStep('setup');
+      setUsername('admin');
+    }
+  }, [needsSetup]);
 
   const hudStatText =
     hudStat === 'denied'
@@ -187,9 +195,48 @@ export default function LoginPage() {
     }
   }
 
+  async function doSetupAdmin() {
+    const u = username.trim();
+    const p = password;
+    const cp = confirmPassword;
+    if (!u || u.length < 2) {
+      showAuthMsg(t('web_setup_username_too_short'), true);
+      return;
+    }
+    if (!p || p.length < 4) {
+      showAuthMsg(t('web_setup_password_too_short'), true);
+      return;
+    }
+    if (p !== cp) {
+      showAuthMsg(t('web_setup_passwords_mismatch'), true);
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const res = await api<{ token?: string; error?: string }>('/api/auth/setup-admin', {
+        method: 'POST',
+        body: JSON.stringify({ username: u, password: p }),
+        omitBearer: true,
+      });
+      if (res && res.token) {
+        await finalizeLogin(res.token);
+      } else {
+        throw new Error(res?.error || 'setup_failed');
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showAuthMsg(localizeAuthError(msg, t), true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function onSubmit(ev: FormEvent) {
     ev.preventDefault();
-    if (step === '2fa') {
+    if (step === 'setup') {
+      void doSetupAdmin();
+    } else if (step === '2fa') {
       void doVerify2fa();
     } else {
       void doLogin();
@@ -248,10 +295,142 @@ export default function LoginPage() {
 
         <section className="panel login-screen__panel login-portal__gate" ref={panelRef}>
           <h2 className="panel__title">
-            {step === '2fa' ? t('web_2fa_title') : t('web_login_title')}
+            {step === 'setup'
+              ? t('web_setup_title')
+              : step === '2fa'
+                ? t('web_2fa_title')
+                : t('web_login_title')}
           </h2>
           <div className="panel__body">
-            {step === 'credentials' ? (
+            {step === 'setup' ? (
+              <form
+                id="fccWebSetupForm"
+                className="login-screen__form"
+                noValidate
+                onSubmit={onSubmit}
+              >
+                <div className="login-screen__fields">
+                  <div style={{ textAlign: 'center', marginBottom: 10 }}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 38,
+                        height: 38,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 170, 0, 0.12)',
+                        border: '1px solid rgba(255, 170, 0, 0.3)',
+                        color: 'var(--accent, #e5a00d)',
+                        marginBottom: 6,
+                      }}
+                    >
+                      <IconShieldLock size={20} stroke={1.8} />
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted, #aaa)', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
+                      {t('web_setup_subtitle')}
+                    </div>
+                  </div>
+
+                  <label className="login-portal__input" htmlFor="setupUser">
+                    <span className="login-portal__input-icon" aria-hidden="true">
+                      <IconUser size={17} stroke={1.75} />
+                    </span>
+                    <span className="login-portal__input-body">
+                      <span className="login-portal__input-control">
+                        <input
+                          type="text"
+                          id="setupUser"
+                          name="username"
+                          className="login-portal__input-field"
+                          autoComplete="username"
+                          placeholder={t('web_setup_username_placeholder')}
+                          value={username}
+                          disabled={busy}
+                          onChange={(e) => setUsername(e.target.value)}
+                        />
+                      </span>
+                    </span>
+                  </label>
+
+                  <label className="login-portal__input" htmlFor="setupPass">
+                    <span className="login-portal__input-icon" aria-hidden="true">
+                      <IconLock size={17} stroke={1.75} />
+                    </span>
+                    <span className="login-portal__input-body">
+                      <span className="login-portal__input-control login-portal__input-control--pass">
+                        <input
+                          ref={passRef}
+                          type={passVisible ? 'text' : 'password'}
+                          id="setupPass"
+                          name="password"
+                          className="login-portal__input-field"
+                          autoComplete="new-password"
+                          placeholder={t('web_setup_password_placeholder')}
+                          value={password}
+                          disabled={busy}
+                          onChange={(e) => setPassword(e.target.value)}
+                          onKeyDown={updateCaps}
+                          onKeyUp={updateCaps}
+                          onBlur={() => setCapsOn(false)}
+                        />
+                        <button
+                          type="button"
+                          className={`login-portal__input-toggle${passVisible ? ' is-on' : ''}`}
+                          aria-label={t('web_login_pass_toggle')}
+                          title={t('web_login_pass_toggle')}
+                          tabIndex={-1}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            togglePass();
+                          }}
+                        >
+                          {passVisible ? (
+                            <IconEyeOff size={17} stroke={1.75} aria-hidden="true" />
+                          ) : (
+                            <IconEye size={17} stroke={1.75} aria-hidden="true" />
+                          )}
+                        </button>
+                      </span>
+                    </span>
+                  </label>
+
+                  <label className="login-portal__input" htmlFor="setupConfirmPass">
+                    <span className="login-portal__input-icon" aria-hidden="true">
+                      <IconLock size={17} stroke={1.75} />
+                    </span>
+                    <span className="login-portal__input-body">
+                      <span className="login-portal__input-control">
+                        <input
+                          type={passVisible ? 'text' : 'password'}
+                          id="setupConfirmPass"
+                          name="confirmPassword"
+                          className="login-portal__input-field"
+                          autoComplete="new-password"
+                          placeholder={t('web_setup_confirm_placeholder')}
+                          value={confirmPassword}
+                          disabled={busy}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onKeyDown={updateCaps}
+                          onKeyUp={updateCaps}
+                          onBlur={() => setCapsOn(false)}
+                        />
+                      </span>
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="login-portal__cta"
+                    id="btnSetupAdmin"
+                    disabled={busy || !username.trim() || !password}
+                  >
+                    <span className="login-portal__cta-mark" aria-hidden="true" />
+                    <span className="login-portal__cta-text">{t('web_setup_submit_btn')}</span>
+                  </button>
+                </div>
+              </form>
+            ) : step === 'credentials' ? (
               <form
                 id="fccWebLoginForm"
                 className="login-screen__form"

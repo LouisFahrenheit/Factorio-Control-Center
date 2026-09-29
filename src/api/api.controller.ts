@@ -201,7 +201,7 @@ export class ApiController {
       strings: loc.strings,
       theme: this.config.sharedTheme,
       web_disable_effects: w.web_disable_effects,
-      default_web_credentials: await this.users.defaultAdminPasswordActive(),
+      needs_setup: !(await this.users.hasAnyUser()),
       available_languages: this.locale.listAvailableLanguages(),
       default_toast_duration_sec: w.toast_duration_sec,
       panel_default_language: this.config.langCode,
