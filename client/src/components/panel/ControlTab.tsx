@@ -18,6 +18,32 @@ import { ServerLogHistoryModal } from './ServerLogHistoryModal';
 
 type Control = ReturnType<typeof useServerControl>;
 
+const RCON_HISTORY_STORAGE_KEY = 'fcc_rcon_history';
+const MAX_RCON_HISTORY = 100;
+
+function loadRconHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(RCON_HISTORY_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === 'string');
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveRconHistory(history: string[]): void {
+  try {
+    localStorage.setItem(RCON_HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    /* ignore */
+  }
+}
+
 interface ControlTabProps {
   control: Control;
   factorioUpdate: FactorioUpdateApi;
@@ -44,6 +70,10 @@ export function ControlTab({
   const blockVariants = reduced ? undefined : PANEL_BLOCK_VARIANTS;
   const sectionVariants = reduced ? undefined : PANEL_TAB_VARIANTS;
   const [rconInput, setRconInput] = useState('');
+  const [history, setHistory] = useState<string[]>(() => loadRconHistory());
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const draftRef = useRef('');
+  const rconInputRef = useRef<HTMLInputElement>(null);
   const [ipTouched, setIpTouched] = useState(false);
   const [portTouched, setPortTouched] = useState(false);
   const logRef = useRef<HTMLPreElement>(null);
@@ -73,8 +103,91 @@ export function ControlTab({
 
   function onRconKey(ev: KeyboardEvent<HTMLInputElement>) {
     if (ev.key === 'Enter') {
+      const trimmed = rconInput.trim();
+      if (!trimmed) return;
       ev.preventDefault();
+
+      setHistory((prev) => {
+        const next =
+          prev.length > 0 && prev[prev.length - 1] === trimmed
+            ? prev
+            : [...prev, trimmed].slice(-MAX_RCON_HISTORY);
+        saveRconHistory(next);
+        return next;
+      });
+
+      setHistoryIndex(-1);
+      draftRef.current = '';
       void control.sendRcon(rconInput).then(() => setRconInput(''));
+      return;
+    }
+
+    if (ev.key === 'ArrowUp') {
+      if (history.length === 0) return;
+      ev.preventDefault();
+
+      let nextIndex: number;
+      if (historyIndex === -1) {
+        draftRef.current = rconInput;
+        nextIndex = history.length - 1;
+      } else {
+        nextIndex = Math.max(0, historyIndex - 1);
+      }
+
+      setHistoryIndex(nextIndex);
+      const cmd = history[nextIndex] ?? '';
+      setRconInput(cmd);
+      requestAnimationFrame(() => {
+        const el = rconInputRef.current;
+        if (el) {
+          el.setSelectionRange(cmd.length, cmd.length);
+        }
+      });
+      return;
+    }
+
+    if (ev.key === 'ArrowDown') {
+      if (historyIndex === -1) return;
+      ev.preventDefault();
+
+      const nextIndex = historyIndex + 1;
+      if (nextIndex >= history.length) {
+        setHistoryIndex(-1);
+        const draft = draftRef.current;
+        setRconInput(draft);
+        requestAnimationFrame(() => {
+          const el = rconInputRef.current;
+          if (el) {
+            el.setSelectionRange(draft.length, draft.length);
+          }
+        });
+      } else {
+        setHistoryIndex(nextIndex);
+        const cmd = history[nextIndex] ?? '';
+        setRconInput(cmd);
+        requestAnimationFrame(() => {
+          const el = rconInputRef.current;
+          if (el) {
+            el.setSelectionRange(cmd.length, cmd.length);
+          }
+        });
+      }
+      return;
+    }
+
+    if (ev.key === 'Escape') {
+      if (historyIndex !== -1) {
+        ev.preventDefault();
+        setHistoryIndex(-1);
+        const draft = draftRef.current;
+        setRconInput(draft);
+        requestAnimationFrame(() => {
+          const el = rconInputRef.current;
+          if (el) {
+            el.setSelectionRange(draft.length, draft.length);
+          }
+        });
+      }
     }
   }
 
@@ -224,6 +337,7 @@ export function ControlTab({
                     {t('console_label')}
                   </label>
                   <input
+                    ref={rconInputRef}
                     type="text"
                     id="inpControlRcon"
                     className="input control-rcon__input"
@@ -232,7 +346,12 @@ export function ControlTab({
                     placeholder={t('console_placeholder')}
                     disabled={!control.running || control.maintLocked}
                     value={rconInput}
-                    onChange={(e) => setRconInput(e.target.value)}
+                    onChange={(e) => {
+                      setRconInput(e.target.value);
+                      if (historyIndex === -1) {
+                        draftRef.current = e.target.value;
+                      }
+                    }}
                     onKeyDown={onRconKey}
                   />
                 </div>
