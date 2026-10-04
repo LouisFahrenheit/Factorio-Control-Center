@@ -20,7 +20,7 @@ import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { feedbackMsg } from '../lib/apiFeedback';
 import { modsArchiveDownloadName, parseContentDispositionFilename } from '../lib/downloadFilename';
 import { useUploadProgress } from '../context/UploadProgressContext';
-import { uploadWithProgress } from '../api/uploadWithProgress';
+import { uploadWithProgress, type UploadProgressInfo } from '../api/uploadWithProgress';
 import {
   invalidateSpaceAgeDependentQueries,
   modAffectsSpaceAgeMode,
@@ -502,12 +502,24 @@ export function useMods(
         entry: { f: File; isSettings: boolean },
         confirmReplace: boolean,
         signal: AbortSignal,
-        onProgress: (p: any) => void,
+        onProgress: (p: UploadProgressInfo) => void,
       ) {
         const fd = new FormData();
         fd.append('file', entry.f, entry.f.name || (entry.isSettings ? 'mod-settings.dat' : 'mod.zip'));
         if (confirmReplace) fd.append('confirm_replace', '1');
-        return await uploadWithProgress<ModUploadResponse>('/api/mods/upload', fd, { signal, onProgress });
+        const res = await uploadWithProgress<ModUploadResponse>('/api/mods/upload', fd, { signal, onProgress });
+        if (res && res.ok === false) {
+          const err = new Error(String(res.error || 'mod_upload_failed')) as Error & {
+            code?: string;
+            requiresSpaceAgeMod?: string;
+          };
+          err.code = String(res.error || '');
+          if (res.mod_name) {
+            err.requiresSpaceAgeMod = String(res.mod_name);
+          }
+          throw err;
+        }
+        return res;
       }
 
       let settingsBatchReplace = false;
@@ -607,23 +619,11 @@ export function useMods(
 
         const tail = skipped.length ? ' ' + t('mod_list_upload_skipped_warn', skipped.join(', ')) : '';
         if (batchRes.errors.length) {
-          const failText = batchRes.errors
-            .map((x) => {
-              const rawErr = x.error instanceof Error ? x.error.message : String(x.error);
-              return x.file.name + ': ' + localizeModError(rawErr, undefined, t);
-            })
-            .join('; ');
-          if (batchRes.errors.length === prepared.length) {
-            setModsMsg(failText + tail, true);
-            return;
+          // Errors are displayed directly in the upload progress modal window (UploadProgressModal),
+          // which remains open upon error. Avoid spamming redundant toasts.
+          if (skipped.length) {
+            setModsMsg(t('mod_list_upload_skipped_warn', skipped.join(', ')), true);
           }
-          setModsMsg(
-            t('mod_list_upload_batch_partial', String(prepared.length - batchRes.errors.length), String(batchRes.errors.length)) +
-              ' ' +
-              failText +
-              tail,
-            true,
-          );
           return;
         }
         if (multi) {

@@ -11619,9 +11619,7 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   width: 40px;
   height: 40px;
   opacity: 0.35;
-  background-color: var(--accent-selected);
-  -webkit-mask: url("/assets/icons/start_save.svg") center / contain no-repeat;
-  mask: url("/assets/icons/start_save.svg") center / contain no-repeat;
+  color: var(--accent-selected);
 }
 
 .create-save__preview-loading-ring {

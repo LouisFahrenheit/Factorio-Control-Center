@@ -21,13 +21,29 @@ type Control = ReturnType<typeof useServerControl>;
 const RCON_HISTORY_STORAGE_KEY = 'fcc_rcon_history';
 const MAX_RCON_HISTORY = 100;
 
-function loadRconHistory(): string[] {
+function getRconStorageKey(instanceId?: string): string {
+  const cleanId = String(instanceId ?? '').trim();
+  return cleanId ? `fcc_rcon_history_${cleanId}` : RCON_HISTORY_STORAGE_KEY;
+}
+
+function loadRconHistory(instanceId?: string): string[] {
   try {
-    const raw = localStorage.getItem(RCON_HISTORY_STORAGE_KEY);
+    const key = getRconStorageKey(instanceId);
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         return parsed.filter((item): item is string => typeof item === 'string');
+      }
+    }
+    // Fallback: check global legacy history if instance history is empty
+    if (instanceId) {
+      const legacyRaw = localStorage.getItem(RCON_HISTORY_STORAGE_KEY);
+      if (legacyRaw) {
+        const parsed = JSON.parse(legacyRaw);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((item): item is string => typeof item === 'string');
+        }
       }
     }
   } catch {
@@ -36,9 +52,9 @@ function loadRconHistory(): string[] {
   return [];
 }
 
-function saveRconHistory(history: string[]): void {
+function saveRconHistory(history: string[], instanceId?: string): void {
   try {
-    localStorage.setItem(RCON_HISTORY_STORAGE_KEY, JSON.stringify(history));
+    localStorage.setItem(getRconStorageKey(instanceId), JSON.stringify(history));
   } catch {
     /* ignore */
   }
@@ -52,6 +68,7 @@ interface ControlTabProps {
   blockUpdates: boolean;
   canCommands: boolean;
   enterDelay?: number;
+  instanceId?: string;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
@@ -63,6 +80,7 @@ export function ControlTab({
   blockUpdates,
   canCommands,
   enterDelay = 0,
+  instanceId,
   t,
 }: ControlTabProps) {
   const reduced = webEffectsReduced();
@@ -70,9 +88,15 @@ export function ControlTab({
   const blockVariants = reduced ? undefined : PANEL_BLOCK_VARIANTS;
   const sectionVariants = reduced ? undefined : PANEL_TAB_VARIANTS;
   const [rconInput, setRconInput] = useState('');
-  const [history, setHistory] = useState<string[]>(() => loadRconHistory());
+  const [history, setHistory] = useState<string[]>(() => loadRconHistory(instanceId));
   const [historyIndex, setHistoryIndex] = useState(-1);
   const draftRef = useRef('');
+
+  useEffect(() => {
+    setHistory(loadRconHistory(instanceId));
+    setHistoryIndex(-1);
+    draftRef.current = '';
+  }, [instanceId]);
   const rconInputRef = useRef<HTMLInputElement>(null);
   const [ipTouched, setIpTouched] = useState(false);
   const [portTouched, setPortTouched] = useState(false);
@@ -112,7 +136,7 @@ export function ControlTab({
           prev.length > 0 && prev[prev.length - 1] === trimmed
             ? prev
             : [...prev, trimmed].slice(-MAX_RCON_HISTORY);
-        saveRconHistory(next);
+        saveRconHistory(next, instanceId);
         return next;
       });
 

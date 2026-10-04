@@ -223,6 +223,7 @@ export function UploadProgressProvider({ children }: { children: ReactNode }) {
             ),
           );
         } catch (err) {
+          setIsServerProcessing(false);
           if (
             isCancelledRef.current ||
             (err instanceof DOMException && err.name === 'AbortError')
@@ -362,6 +363,7 @@ export function UploadProgressProvider({ children }: { children: ReactNode }) {
 
         return { filename: finalName, cancelled: false };
       } catch (err) {
+        setIsServerProcessing(false);
         if (controller.signal.aborted || isCancelledRef.current) {
           return { filename: finalName, cancelled: true };
         }

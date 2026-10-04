@@ -25,6 +25,8 @@ const API_ERROR_I18N: Record<string, string> = {
   invalid_format: 'api_error_invalid_format',
   invalid_save_archive: 'saves_manager_upload_invalid_archive',
   invalid_save_zip: 'saves_manager_upload_invalid_zip',
+  invalid_mod_archive: 'mod_list_upload_invalid_archive',
+  invalid_mod_settings: 'mod_list_upload_invalid_settings',
   client_not_built: 'api_error_client_not_built',
   folder_name_invalid: 'api_error_folder_name_invalid',
   folder_exists: 'api_error_folder_exists',

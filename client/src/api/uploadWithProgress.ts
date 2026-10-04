@@ -10,6 +10,11 @@ export interface UploadProgressInfo {
   filename?: string;
 }
 
+export interface UploadHttpError extends Error {
+  data?: unknown;
+  status?: number;
+}
+
 export interface UploadRequestOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
@@ -123,7 +128,7 @@ export function uploadWithProgress<T = unknown>(
       // When upload reaches 100% and response arrives
       const status = xhr.status;
       const responseText = xhr.responseText;
-      let data: any = null;
+      let data: unknown = null;
 
       try {
         data = JSON.parse(responseText);
@@ -133,18 +138,19 @@ export function uploadWithProgress<T = unknown>(
 
       if (status >= 200 && status < 300) {
         // Success
-        resolve(data != null ? data : (responseText as unknown as T));
+        resolve(data != null ? (data as T) : (responseText as unknown as T));
       } else {
         // HTTP Error
+        const dataObj = data && typeof data === 'object' ? (data as Record<string, unknown>) : null;
         const errMsg =
-          data?.error ||
-          data?.message ||
-          data?.detail ||
+          dataObj?.error ||
+          dataObj?.message ||
+          dataObj?.detail ||
           (typeof data === 'string' ? data : '') ||
           `HTTP ${status}`;
-        const err = new Error(Array.isArray(errMsg) ? errMsg[0] : String(errMsg));
-        (err as any).data = data;
-        (err as any).status = status;
+        const err = new Error(Array.isArray(errMsg) ? String(errMsg[0]) : String(errMsg)) as UploadHttpError;
+        err.data = data;
+        err.status = status;
         reject(err);
       }
     };

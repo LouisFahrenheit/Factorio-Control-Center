@@ -17,6 +17,7 @@ import {
   formatEta,
   formatSpeed,
 } from '../../api/uploadWithProgress';
+import { resolveApiErrorMessage } from '../../lib/networkErrors';
 
 export function UploadProgressModal() {
   const {
@@ -48,6 +49,10 @@ export function UploadProgressModal() {
   if (!open) return null;
 
   const isMulti = files.length > 1;
+  const isCurrentError = currentFile?.status === 'error';
+  const currentErrorText = currentFile?.error
+    ? resolveApiErrorMessage(currentFile.error, t)
+    : '';
   const modalTitle = title || t('upload_progress_title');
 
   if (minimized) {
@@ -81,16 +86,22 @@ export function UploadProgressModal() {
           <span
             className={
               'upload-floating-widget__percent' +
-              (isServerProcessing ? ' is-processing' : '')
+              (isCurrentError
+                ? ' is-error'
+                : isServerProcessing
+                  ? ' is-processing'
+                  : '')
             }
           >
-            {isServerProcessing
-              ? operationKind === 'download'
-                ? t('download_progress_preparing_badge') || 'Подготовка'
-                : t('upload_progress_processing_badge') || 'Обработка'
-              : isMulti
-                ? `${overallPercent}%`
-                : `${currentPercent}%`}
+            {isCurrentError
+              ? t('error_title') || 'Ошибка'
+              : isServerProcessing
+                ? operationKind === 'download'
+                  ? t('download_progress_preparing_badge') || 'Подготовка'
+                  : t('upload_progress_processing_badge') || 'Обработка'
+                : isMulti
+                  ? `${overallPercent}%`
+                  : `${currentPercent}%`}
           </span>
           <div
             className="upload-floating-widget__actions"
@@ -120,8 +131,8 @@ export function UploadProgressModal() {
                 type="button"
                 className="upload-modal__head-btn"
                 onClick={closeModal}
-                title={t('close_btn') || 'Close'}
-                aria-label="Close"
+                title={t('close')}
+                aria-label={t('close')}
               >
                 <IconX size={14} />
               </button>
@@ -133,31 +144,36 @@ export function UploadProgressModal() {
           <div
             className={
               'upload-modal__fill' +
-              (isServerProcessing
-                ? ' is-processing'
-                : isUploading
-                  ? ' is-active'
-                  : ' is-done')
+              (isCurrentError
+                ? ' is-error'
+                : isServerProcessing
+                  ? ' is-processing'
+                  : isUploading
+                    ? ' is-active'
+                    : ' is-done')
             }
             style={{
-              width: isServerProcessing
-                ? '100%'
-                : `${isMulti ? overallPercent : currentPercent}%`,
+              width:
+                isCurrentError || isServerProcessing
+                  ? '100%'
+                  : `${isMulti ? overallPercent : currentPercent}%`,
             }}
           />
         </div>
 
         <div className="upload-floating-widget__meta">
           <span>
-            {isServerProcessing
-              ? operationKind === 'download'
-                ? t('download_progress_preparing') || 'Подготовка файла…'
-                : t('upload_progress_processing') || 'Processing…'
-              : isMulti
-                ? `${currentIndex + 1}/${files.length} • ${formatBytes(overallLoaded)}/${formatBytes(overallTotal)}`
-                : `${formatBytes(currentLoaded)} / ${formatBytes(currentTotal)}`}
+            {isCurrentError
+              ? currentErrorText || t('mod_upload_failed') || 'Ошибка загрузки'
+              : isServerProcessing
+                ? operationKind === 'download'
+                  ? t('download_progress_preparing') || 'Подготовка файла…'
+                  : t('upload_progress_processing') || 'Processing…'
+                : isMulti
+                  ? `${currentIndex + 1}/${files.length} • ${formatBytes(overallLoaded)}/${formatBytes(overallTotal)}`
+                  : `${formatBytes(currentLoaded)} / ${formatBytes(currentTotal)}`}
           </span>
-          {!isServerProcessing && isUploading && currentSpeed > 0 && (
+          {!isCurrentError && !isServerProcessing && isUploading && currentSpeed > 0 && (
             <span>{formatSpeed(currentSpeed)}</span>
           )}
         </div>
@@ -223,8 +239,8 @@ export function UploadProgressModal() {
                 type="button"
                 className="upload-modal__head-btn"
                 onClick={closeModal}
-                title={t('close_btn') || 'Close'}
-                aria-label="Close"
+                title={t('close')}
+                aria-label={t('close')}
               >
                 <IconX size={16} />
               </button>
@@ -273,14 +289,20 @@ export function UploadProgressModal() {
               <span
                 className={
                   'upload-modal__percent-badge' +
-                  (isServerProcessing ? ' is-processing-badge' : '')
+                  (isCurrentError
+                    ? ' is-error-badge'
+                    : isServerProcessing
+                      ? ' is-processing-badge'
+                      : '')
                 }
               >
-                {isServerProcessing
-                  ? operationKind === 'download'
-                    ? t('download_progress_preparing_badge') || 'Подготовка'
-                    : t('upload_progress_processing_badge') || 'Обработка'
-                  : `${currentPercent}%`}
+                {isCurrentError
+                  ? t('error_title') || 'Ошибка'
+                  : isServerProcessing
+                    ? operationKind === 'download'
+                      ? t('download_progress_preparing_badge') || 'Подготовка'
+                      : t('upload_progress_processing_badge') || 'Обработка'
+                    : `${currentPercent}%`}
               </span>
             </div>
 
@@ -288,23 +310,30 @@ export function UploadProgressModal() {
               <div
                 className={
                   'upload-modal__fill' +
-                  (isServerProcessing
-                    ? ' is-processing'
-                    : isUploading
-                      ? ' is-active'
-                      : currentPercent === 100
-                        ? ' is-done'
-                        : '')
+                  (isCurrentError
+                    ? ' is-error'
+                    : isServerProcessing
+                      ? ' is-processing'
+                      : isUploading
+                        ? ' is-active'
+                        : currentPercent === 100
+                          ? ' is-done'
+                          : '')
                 }
                 style={{
-                  width: isServerProcessing ? '100%' : `${currentPercent}%`,
+                  width: isCurrentError || isServerProcessing ? '100%' : `${currentPercent}%`,
                 }}
               />
             </div>
 
             <div className="upload-modal__stats">
               <div className="upload-modal__stats-left">
-                {isServerProcessing ? (
+                {isCurrentError ? (
+                  <span className="upload-modal__error-desc">
+                    <IconAlertTriangle size={15} style={{ flexShrink: 0 }} />
+                    <span>{currentErrorText || t('mod_upload_failed') || 'Ошибка загрузки'}</span>
+                  </span>
+                ) : isServerProcessing ? (
                   <span className="upload-modal__processing-indicator">
                     <span className="spinner spinner--sm" />
                     {operationKind === 'download'
@@ -320,7 +349,7 @@ export function UploadProgressModal() {
                 )}
               </div>
 
-              {!isServerProcessing && isUploading && (
+              {!isCurrentError && !isServerProcessing && isUploading && (
                 <div className="upload-modal__stats-right">
                   {currentSpeed > 0 && (
                     <span className="upload-modal__stat-item">
@@ -355,6 +384,11 @@ export function UploadProgressModal() {
                   >
                     <span className="upload-modal__queue-name" title={item.name}>
                       {item.name} ({formatBytes(item.size)})
+                      {item.status === 'error' && item.error && (
+                        <span className="upload-modal__queue-error">
+                          {resolveApiErrorMessage(item.error, t)}
+                        </span>
+                      )}
                     </span>
                     <span
                       className={`upload-modal__queue-status upload-modal__queue-status--${item.status}`}
@@ -419,7 +453,7 @@ export function UploadProgressModal() {
               className="btn btn--primary btn--compact"
               onClick={closeModal}
             >
-              {t('close_btn') || 'Close'}
+              {t('close')}
             </button>
           )}
         </div>

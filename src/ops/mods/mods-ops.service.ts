@@ -405,6 +405,10 @@ export class ModsOpsService {
     const zipPath = join(sel.pm.modsDir, final);
     const modName = modNameFromZip(final);
     const manifest = readModManifest(zipPath);
+    if (!manifest || typeof manifest !== 'object' || !manifest.name) {
+      rmSync(zipPath, { force: true });
+      return { ok: false, error: 'invalid_mod_archive', mod_name: modName };
+    }
     const serverHasSpaceAge = hasSpaceAge(sel.item.serverPath);
     if (!serverHasSpaceAge && manifestRequiresSpaceAge(manifest)) {
       rmSync(zipPath, { force: true });

@@ -215,6 +215,7 @@ export default function PanelPage() {
             <TabPanelsTransition activeKey={activeTab} className="tab-panels">
             {activeTab === 'main' && (
               <ControlTab
+                instanceId={selectedId}
                 control={control}
                 factorioUpdate={factorioUpdate}
                 logHistory={logHistory}

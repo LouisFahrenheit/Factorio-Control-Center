@@ -444,7 +444,11 @@ export function useSaves(
           const fd = new FormData();
           fd.append('file', file, file.name);
           fd.append('filename', file.name);
-          return await uploadWithProgress('/api/saves/upload', fd, { signal, onProgress });
+          const res = await uploadWithProgress<{ ok?: boolean; error?: string }>('/api/saves/upload', fd, { signal, onProgress });
+          if (res && res.ok === false) {
+            throw new Error(String(res.error || 'invalid_save_archive'));
+          }
+          return res;
         },
       );
 
@@ -454,11 +458,7 @@ export function useSaves(
         return;
       }
 
-      if (batchResult.errors.length > 0) {
-        const firstErr = batchResult.errors[0].error;
-        const raw = firstErr instanceof Error ? firstErr.message : String(firstErr);
-        setSavesMsg(localizeSaveUploadError(raw, t), true);
-      } else {
+      if (batchResult.errors.length === 0) {
         setSavesMsg(t('updated_successfully'), false);
       }
       await reload();

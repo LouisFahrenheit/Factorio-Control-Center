@@ -24,6 +24,7 @@ import {
   type MapPreviewAnnotations,
 } from '../../lib/mapGen/previewAnnotations';
 import { webEffectsReduced } from '../../theme/webEffects';
+import { AppIcon } from '../AppIcon';
 
 /** Default zoom inside the preview frame (wheel adjusts from min to max). */
 const PREVIEW_ZOOM_DEFAULT = 1.65;
@@ -1086,7 +1087,7 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
           }
         >
           {!satelliteConnecting ? (
-            <span className="create-save__preview-empty-icon" aria-hidden />
+            <AppIcon name="start_save" size={40} className="create-save__preview-empty-icon" />
           ) : null}
           {satelliteConnecting && connectingStages?.length ? (
             <div className="create-save__preview-console" aria-live="polite">

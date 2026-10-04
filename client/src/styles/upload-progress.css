@@ -187,11 +187,29 @@
   animation: uploadProcessingBadgePulse 1.8s ease-in-out infinite;
 }
 
+.upload-modal__percent-badge.is-error-badge {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--error, #e53935);
+  background: color-mix(in srgb, var(--error, #e53935) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--error, #e53935) 36%, transparent);
+  border-radius: 4px;
+  padding: 1px 7px;
+}
+
 .upload-floating-widget__percent.is-processing {
   font-family: inherit;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--starting, #ffaa00);
+}
+
+.upload-floating-widget__percent.is-error {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--error, #e53935);
 }
 
 @keyframes uploadProcessingBadgePulse {
@@ -313,6 +331,24 @@
   gap: 6px;
   color: var(--starting);
   font-weight: 500;
+}
+
+.upload-modal__error-desc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--error, #e53935);
+  font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.upload-modal__queue-error {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--error, #e53935);
+  margin-top: 2px;
+  word-break: break-word;
 }
 
 /* Overall progress (when multiple files) */
