@@ -11,13 +11,15 @@ describe('UsersService - Initial Admin Setup', () => {
     mockUserRepo = {
       find: jest.fn().mockImplementation(async () => [...savedUsers]),
       count: jest.fn().mockImplementation(async () => savedUsers.length),
-      create: jest.fn().mockImplementation((dto) => ({ ...dto, id: savedUsers.length + 1 })),
+      create: jest
+        .fn()
+        .mockImplementation((dto) => ({ ...dto, id: savedUsers.length + 1 })),
       save: jest.fn().mockImplementation(async (entity) => {
         savedUsers.push(entity);
         return entity;
       }),
     };
-    service = new UsersService(mockUserRepo as any);
+    service = new UsersService(mockUserRepo);
   });
 
   it('reports hasAnyUser as false when database is empty and no env var provided', async () => {
@@ -45,7 +47,10 @@ describe('UsersService - Initial Admin Setup', () => {
     delete process.env.FCC_ADMIN_PASS;
     await service.load();
 
-    const created = await service.createInitialAdmin('masteradmin', 'securePass123');
+    const created = await service.createInitialAdmin(
+      'masteradmin',
+      'securePass123',
+    );
     expect(created.username).toBe('masteradmin');
     expect(created.role).toBe('administrator');
     expect(created.enabled).toBe(true);
@@ -60,20 +65,20 @@ describe('UsersService - Initial Admin Setup', () => {
     await service.load();
     await service.createInitialAdmin('firstadmin', 'securePass123');
 
-    await expect(service.createInitialAdmin('secondadmin', 'anotherPass123')).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      service.createInitialAdmin('secondadmin', 'anotherPass123'),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('validates username and password length', async () => {
     delete process.env.FCC_ADMIN_PASSWORD;
     await service.load();
 
-    await expect(service.createInitialAdmin('a', 'validPassword')).rejects.toThrow(
-      BadRequestException,
-    );
-    await expect(service.createInitialAdmin('validAdmin', '12')).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(
+      service.createInitialAdmin('a', 'validPassword'),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.createInitialAdmin('validAdmin', '12'),
+    ).rejects.toThrow(BadRequestException);
   });
 });

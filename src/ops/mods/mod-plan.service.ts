@@ -7,7 +7,10 @@ import {
   gameVersion,
   writeModList,
 } from '../ops-utils';
-import { ModPortalService, type ModPortalReleaseItem } from '../mod-portal/mod-portal.service';
+import {
+  ModPortalService,
+  type ModPortalReleaseItem,
+} from '../mod-portal/mod-portal.service';
 import {
   normalizeModListName,
   portalDependencyNames,
@@ -210,7 +213,9 @@ export class ModPlanService {
       const parsed = this.portal.parseModInput(raw);
       const modName = parsed.modName;
       const ver =
-        typeof root === 'object' && root.version ? root.version : parsed.version;
+        typeof root === 'object' && root.version
+          ? root.version
+          : parsed.version;
       const sub = await this.planInstall(serverPath, modsDir, modName, ver);
       merged.push(...sub);
     }

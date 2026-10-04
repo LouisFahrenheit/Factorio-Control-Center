@@ -51,10 +51,7 @@ export function getPlayerStatsMap(
  * Called when a player joins the server.
  * Increments session count and ensures player stat entry exists.
  */
-export function recordPlayerJoin(
-  serverPath: string,
-  playerName: string,
-): void {
+export function recordPlayerJoin(serverPath: string, playerName: string): void {
   const name = String(playerName || '').trim();
   if (!name) return;
 
@@ -126,7 +123,8 @@ export function batchAddPlayerOnlineSeconds(
       total_seconds: 0,
       last_leave: '—',
     };
-    current.total_seconds = (Number(current.total_seconds) || 0) + Math.floor(sec);
+    current.total_seconds =
+      (Number(current.total_seconds) || 0) + Math.floor(sec);
     doc.stats[name] = current;
   }
 
@@ -145,10 +143,5 @@ export function recordPlayerLeave(
   const name = String(playerName || '').trim();
   if (!name) return;
 
-  addPlayerOnlineSeconds(
-    serverPath,
-    name,
-    elapsedSeconds,
-    panelTimestamp(),
-  );
+  addPlayerOnlineSeconds(serverPath, name, elapsedSeconds, panelTimestamp());
 }

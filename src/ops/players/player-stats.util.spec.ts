@@ -98,12 +98,7 @@ describe('Player Stats Util', () => {
       const now = Date.now();
       const joinTime = new Date(now - 10 * 60 * 1000).toISOString(); // 10m ago
 
-      const rows = buildPlayerStatsFromStore(
-        {},
-        { Dave: joinTime },
-        {},
-        now,
-      );
+      const rows = buildPlayerStatsFromStore({}, { Dave: joinTime }, {}, now);
 
       expect(rows).toHaveLength(1);
       const dave = rows[0];

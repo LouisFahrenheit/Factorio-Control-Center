@@ -1301,10 +1301,7 @@ export class ApiFullController {
     const path = String(data.path || '');
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(
-      path,
-      String(data.name || `${name}.${formatStr}`),
-    );
+    return res.download(path, String(data.name || `${name}.${formatStr}`));
   }
 
   @Get('map-presets')

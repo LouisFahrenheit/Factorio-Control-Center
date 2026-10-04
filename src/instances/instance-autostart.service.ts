@@ -76,7 +76,10 @@ export class InstanceAutostartService {
 
     try {
       if (item.maintenanceLock) {
-        await this.instances.update(item.id, { ...item, maintenanceLock: false });
+        await this.instances.update(item.id, {
+          ...item,
+          maintenanceLock: false,
+        });
         item = { ...item, maintenanceLock: false };
       }
 

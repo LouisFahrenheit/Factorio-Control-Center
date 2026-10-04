@@ -1,5 +1,8 @@
 import { TelegramService } from './telegram.service';
-import { NotificationsService, FactorioUpdateCandidate } from './notifications.service';
+import {
+  NotificationsService,
+  FactorioUpdateCandidate,
+} from './notifications.service';
 import type { FccConfigService } from '../config/fcc-config.service';
 import type { InstancesService } from '../instances/instances.service';
 import type { WebhookService } from './webhook.service';
@@ -41,10 +44,16 @@ describe('Factorio Update Notifications', () => {
         { name: 'Server 2', currentVersion: '2.0.13' },
       ]);
       expect(msg).toContain('Factorio Update Available');
-      expect(msg).toContain('A new version of Factorio is available: <code>2.0.15</code>');
+      expect(msg).toContain(
+        'A new version of Factorio is available: <code>2.0.15</code>',
+      );
       expect(msg).toContain('<b>Servers:</b>');
-      expect(msg).toContain('• <b>Server 1</b> (installed: <code>2.0.14</code>)');
-      expect(msg).toContain('• <b>Server 2</b> (installed: <code>2.0.13</code>)');
+      expect(msg).toContain(
+        '• <b>Server 1</b> (installed: <code>2.0.14</code>)',
+      );
+      expect(msg).toContain(
+        '• <b>Server 2</b> (installed: <code>2.0.13</code>)',
+      );
     });
   });
 
@@ -55,7 +64,12 @@ describe('Factorio Update Notifications', () => {
     let mockWebhooks: Partial<WebhookService>;
     let mockPaths: Partial<PathsService>;
     let service: NotificationsService;
-    let sentMessages: Array<{ botToken: string; chatId: string; text: string; silent?: boolean }>;
+    let sentMessages: Array<{
+      botToken: string;
+      chatId: string;
+      text: string;
+      silent?: boolean;
+    }>;
 
     beforeEach(() => {
       sentMessages = [];
@@ -86,17 +100,28 @@ describe('Factorio Update Notifications', () => {
 
       mockInstances = {
         getById: (id: string) => {
-          if (id === 'inst-1') return { id: 'inst-1', name: 'Main Server' } as any;
-          if (id === 'inst-2') return { id: 'inst-2', name: 'Secondary Server' } as any;
+          if (id === 'inst-1')
+            return { id: 'inst-1', name: 'Main Server' } as any;
+          if (id === 'inst-2')
+            return { id: 'inst-2', name: 'Secondary Server' } as any;
           return null;
         },
       };
 
       mockTelegram = {
-        fmtFactorioUpdate: new TelegramService().fmtFactorioUpdate.bind(new TelegramService()),
-        sendMessage: jest.fn(async (botToken: string, chatId: string, text: string, silent?: boolean) => {
-          sentMessages.push({ botToken, chatId, text, silent });
-        }),
+        fmtFactorioUpdate: new TelegramService().fmtFactorioUpdate.bind(
+          new TelegramService(),
+        ),
+        sendMessage: jest.fn(
+          async (
+            botToken: string,
+            chatId: string,
+            text: string,
+            silent?: boolean,
+          ) => {
+            sentMessages.push({ botToken, chatId, text, silent });
+          },
+        ),
       };
 
       mockWebhooks = {
@@ -138,8 +163,12 @@ describe('Factorio Update Notifications', () => {
       expect(sentMessages).toHaveLength(1);
       expect(sentMessages[0].chatId).toBe('chat-1001');
       expect(sentMessages[0].text).toContain('<b>Servers:</b>');
-      expect(sentMessages[0].text).toContain('• <b>Main Server</b> (installed: <code>2.0.14</code>)');
-      expect(sentMessages[0].text).toContain('• <b>Secondary Server</b> (installed: <code>2.0.13</code>)');
+      expect(sentMessages[0].text).toContain(
+        '• <b>Main Server</b> (installed: <code>2.0.14</code>)',
+      );
+      expect(sentMessages[0].text).toContain(
+        '• <b>Secondary Server</b> (installed: <code>2.0.13</code>)',
+      );
     });
 
     it('does NOT send duplicate notification for the same version on subsequent checks ("раз в версию")', async () => {

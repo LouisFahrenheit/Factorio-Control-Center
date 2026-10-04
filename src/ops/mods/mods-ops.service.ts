@@ -515,7 +515,10 @@ export class ModsOpsService {
       }
       const modList = readModList(sel.pm);
       const modRow = modList.mods.find(
-        (r) => String(r.name || '').trim().toLowerCase() === modId.toLowerCase(),
+        (r) =>
+          String(r.name || '')
+            .trim()
+            .toLowerCase() === modId.toLowerCase(),
       );
       const pinned = String(modRow?.version || '').trim();
       const currentInstalled =
@@ -540,7 +543,10 @@ export class ModsOpsService {
         const gv = gameVersion(serverPath);
         const modList = readModList(sel.pm);
         const modRow = modList.mods.find(
-          (r) => String(r.name || '').trim().toLowerCase() === modId.toLowerCase(),
+          (r) =>
+            String(r.name || '')
+              .trim()
+              .toLowerCase() === modId.toLowerCase(),
         );
         const pinned = String(modRow?.version || '').trim();
         const currentInstalled =
@@ -769,8 +775,9 @@ export class ModsOpsService {
       try {
         const meta = await this.portal.fetchFull(modName);
         const sel = selectedInstance(this.instances);
-        const serverPath =
-          !isErrorResult(sel) ? sel.item.serverPath : undefined;
+        const serverPath = !isErrorResult(sel)
+          ? sel.item.serverPath
+          : undefined;
         const rel = this.portal.resolveRelease(meta, {
           serverPath,
           gameVersion: this.currentGameVersion(),
@@ -853,8 +860,9 @@ export class ModsOpsService {
       try {
         const meta = await this.portal.fetchFull(name);
         const sel = selectedInstance(this.instances);
-        const serverPath =
-          !isErrorResult(sel) ? sel.item.serverPath : undefined;
+        const serverPath = !isErrorResult(sel)
+          ? sel.item.serverPath
+          : undefined;
         const rel = this.portal.resolveRelease(meta, {
           serverPath,
           gameVersion: this.currentGameVersion(),

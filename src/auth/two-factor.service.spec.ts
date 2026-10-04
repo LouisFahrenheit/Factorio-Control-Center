@@ -23,24 +23,32 @@ describe('TwoFactorService', () => {
         if (username.toLowerCase() === 'admin') return mockUser;
         return undefined;
       }),
-      setTwoFactor: jest.fn().mockImplementation(async (username, enabled, secret, codes) => {
-        if (username.toLowerCase() === 'admin') {
-          mockUser.twoFactorEnabled = enabled;
-          mockUser.twoFactorSecret = secret;
-          mockUser.twoFactorRecoveryCodes = codes;
-          return true;
-        }
-        return false;
-      }),
-      removeRecoveryCode: jest.fn().mockImplementation(async (username, hashed) => {
-        if (username.toLowerCase() === 'admin' && mockUser.twoFactorRecoveryCodes) {
-          mockUser.twoFactorRecoveryCodes = mockUser.twoFactorRecoveryCodes.filter(
-            (c: string) => c !== hashed,
-          );
-          return true;
-        }
-        return false;
-      }),
+      setTwoFactor: jest
+        .fn()
+        .mockImplementation(async (username, enabled, secret, codes) => {
+          if (username.toLowerCase() === 'admin') {
+            mockUser.twoFactorEnabled = enabled;
+            mockUser.twoFactorSecret = secret;
+            mockUser.twoFactorRecoveryCodes = codes;
+            return true;
+          }
+          return false;
+        }),
+      removeRecoveryCode: jest
+        .fn()
+        .mockImplementation(async (username, hashed) => {
+          if (
+            username.toLowerCase() === 'admin' &&
+            mockUser.twoFactorRecoveryCodes
+          ) {
+            mockUser.twoFactorRecoveryCodes =
+              mockUser.twoFactorRecoveryCodes.filter(
+                (c: string) => c !== hashed,
+              );
+            return true;
+          }
+          return false;
+        }),
     };
 
     service = new TwoFactorService(mockUsersService as UsersService);
@@ -124,7 +132,10 @@ describe('TwoFactorService', () => {
       const verifyRes = await service.verifyLogin(challengeToken, 'A1B2-C3D4');
       expect(verifyRes.ok).toBe(true);
       expect(verifyRes.isRecoveryCode).toBe(true);
-      expect(mockUsersService.removeRecoveryCode).toHaveBeenCalledWith('admin', hashed);
+      expect(mockUsersService.removeRecoveryCode).toHaveBeenCalledWith(
+        'admin',
+        hashed,
+      );
     });
   });
 });

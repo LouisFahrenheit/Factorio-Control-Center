@@ -105,7 +105,10 @@ export class PathsService {
       'maintenance_pending_by_instance.json',
     );
     this.auditOpenSessionsPath = join(this.dataDir, 'audit_open_sessions.json');
-    this.notificationsStatePath = join(this.dataDir, 'notifications_state.json');
+    this.notificationsStatePath = join(
+      this.dataDir,
+      'notifications_state.json',
+    );
 
     // 1. Perform auto-migration of old directory layout if needed
     this.migrateLegacyDataStructure();

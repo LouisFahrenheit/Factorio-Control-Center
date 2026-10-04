@@ -9,7 +9,12 @@ import { WebhookService } from './webhook.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SystemPreference, GameInstance])],
-  providers: [PathsService, TelegramService, WebhookService, NotificationsService],
+  providers: [
+    PathsService,
+    TelegramService,
+    WebhookService,
+    NotificationsService,
+  ],
   exports: [NotificationsService],
 })
 export class NotificationsModule {}

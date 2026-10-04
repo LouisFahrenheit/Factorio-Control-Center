@@ -55,23 +55,37 @@ export class UpdateUserDto {
 }
 
 export class Verify2faDto {
-  @ApiProperty({ description: 'Temporary challenge token issued after password check' })
+  @ApiProperty({
+    description: 'Temporary challenge token issued after password check',
+  })
   challengeToken: string;
 
-  @ApiProperty({ example: '123456', description: '6-digit TOTP code or backup recovery code' })
+  @ApiProperty({
+    example: '123456',
+    description: '6-digit TOTP code or backup recovery code',
+  })
   code: string;
 }
 
 export class Enable2faDto {
-  @ApiProperty({ example: '123456', description: '6-digit TOTP code from authenticator app' })
+  @ApiProperty({
+    example: '123456',
+    description: '6-digit TOTP code from authenticator app',
+  })
   code: string;
 }
 
 export class Disable2faDto {
-  @ApiProperty({ required: false, description: 'Current password for confirmation' })
+  @ApiProperty({
+    required: false,
+    description: 'Current password for confirmation',
+  })
   password?: string;
 
-  @ApiProperty({ required: false, description: '6-digit TOTP code for confirmation' })
+  @ApiProperty({
+    required: false,
+    description: '6-digit TOTP code for confirmation',
+  })
   code?: string;
 }
 
@@ -79,7 +93,9 @@ export class SetupAdminDto {
   @ApiProperty({ example: 'admin', description: 'Administrator username' })
   username: string;
 
-  @ApiProperty({ example: 'password123', description: 'Administrator password' })
+  @ApiProperty({
+    example: 'password123',
+    description: 'Administrator password',
+  })
   password: string;
 }
-

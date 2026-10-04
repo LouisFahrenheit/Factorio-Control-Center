@@ -218,7 +218,9 @@ export class NotificationsService {
     const entries = Object.entries(state.notifiedFactorioVersions || {});
     if (entries.length > 200) {
       entries.sort((a, b) => b[1].localeCompare(a[1]));
-      state.notifiedFactorioVersions = Object.fromEntries(entries.slice(0, 100));
+      state.notifiedFactorioVersions = Object.fromEntries(
+        entries.slice(0, 100),
+      );
     }
     writeJsonFile(this.paths.notificationsStatePath, state);
   }

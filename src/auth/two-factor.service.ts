@@ -97,7 +97,10 @@ export class TwoFactorService {
 
     // 2. Try recovery code verification
     const hashed = this.hashRecoveryCode(code);
-    if (user.twoFactorRecoveryCodes && user.twoFactorRecoveryCodes.includes(hashed)) {
+    if (
+      user.twoFactorRecoveryCodes &&
+      user.twoFactorRecoveryCodes.includes(hashed)
+    ) {
       await this.users.removeRecoveryCode(user.username, hashed);
       this.challenges.delete(challengeToken);
       this.log.log(
@@ -217,7 +220,8 @@ export class TwoFactorService {
         period: 30,
         secret: OTPAuth.Secret.fromBase32(user.twoFactorSecret),
       });
-      confirmed = totp.validate({ token: codeConfirm.trim(), window: 1 }) !== null;
+      confirmed =
+        totp.validate({ token: codeConfirm.trim(), window: 1 }) !== null;
     }
 
     if (!confirmed) {
@@ -228,7 +232,9 @@ export class TwoFactorService {
     return { ok: true };
   }
 
-  async resetForUser(username: string): Promise<{ ok: boolean; error?: string }> {
+  async resetForUser(
+    username: string,
+  ): Promise<{ ok: boolean; error?: string }> {
     const user = await this.users.findUser(username);
     if (!user) return { ok: false, error: 'not_found' };
     await this.users.setTwoFactor(username, false, null, null);

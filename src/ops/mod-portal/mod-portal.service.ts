@@ -107,8 +107,7 @@ export class ModPortalService {
     }
 
     // Check for "ModName_1.0.5.zip" or "ModName_1.0.5"
-    const zipMatch =
-      /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
+    const zipMatch = /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
     if (zipMatch) {
       const candidateName = zipMatch[1].trim();
       const candidateVer = zipMatch[2].trim();
@@ -325,10 +324,7 @@ export class ModPortalService {
           }
         }
         return matchingFv.sort((a, b) =>
-          this.versionNewer(
-            String(a.version || ''),
-            String(b.version || ''),
-          )
+          this.versionNewer(String(a.version || ''), String(b.version || ''))
             ? -1
             : 1,
         )[0];
@@ -337,14 +333,13 @@ export class ModPortalService {
 
     // Fallback: highest version overall
     return (
-      rels.slice().sort((a, b) =>
-        this.versionNewer(
-          String(a.version || ''),
-          String(b.version || ''),
-        )
-          ? -1
-          : 1,
-      )[0] || rels[rels.length - 1]
+      rels
+        .slice()
+        .sort((a, b) =>
+          this.versionNewer(String(a.version || ''), String(b.version || ''))
+            ? -1
+            : 1,
+        )[0] || rels[rels.length - 1]
     );
   }
 

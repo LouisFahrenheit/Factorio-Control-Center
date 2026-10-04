@@ -103,7 +103,9 @@ export class UsersService implements OnModuleInit {
     await this.userRepo.save(admin);
     this.cache = [admin];
     this.isLoaded = true;
-    this.log.log(`Initial administrator '${cleanUser}' created via setup wizard.`);
+    this.log.log(
+      `Initial administrator '${cleanUser}' created via setup wizard.`,
+    );
     return admin;
   }
 

@@ -451,7 +451,8 @@ export class ModpacksOpsService {
         mods: userMods,
       };
       if (hasSettings) {
-        payload.mod_settings_b64 = readFileSync(settingsPath).toString('base64');
+        payload.mod_settings_b64 =
+          readFileSync(settingsPath).toString('base64');
       }
 
       const localeStrings =
@@ -831,10 +832,7 @@ export class ModpacksOpsService {
       for (const item of readdirSync(packDir)) {
         if (item === 'mods') continue;
         const itemLower = item.toLowerCase();
-        if (
-          itemLower.endsWith('.zip') ||
-          itemLower === 'mod-settings.dat'
-        ) {
+        if (itemLower.endsWith('.zip') || itemLower === 'mod-settings.dat') {
           const src = join(packDir, item);
           const dst = join(modsDir, item);
           if (!existsSync(dst)) {
@@ -856,13 +854,9 @@ export class ModpacksOpsService {
       const metaPath = join(packDir, 'metadata.json');
       if (!existsSync(metaPath)) {
         const desc = String(
-          foundManifest.parsed.description ||
-            foundManifest.parsed.desc ||
-            '',
+          foundManifest.parsed.description || foundManifest.parsed.desc || '',
         ).trim();
-        const fv = String(
-          foundManifest.parsed.factorio_version || '',
-        ).trim();
+        const fv = String(foundManifest.parsed.factorio_version || '').trim();
         writeFileSync(
           metaPath,
           JSON.stringify(
