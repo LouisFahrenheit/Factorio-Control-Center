@@ -1380,6 +1380,7 @@
   "web_login_hud_awaiting": "ОЖИДАНИЕ ВВОДА",
   "web_login_access_granted": "ДОСТУП РАЗРЕШЁН",
   "web_login_access_denied": "ДОСТУП ЗАПРЕЩЁН",
+  "auth_rate_limit_locked": "Слишком много неудачных попыток входа. Доступ временно заблокирован на 10 минут.",
   "web_login_now_entering": "ВХОД В СИСТЕМУ",
   "web_logout_btn": "Выйти",
   "web_tab_access": "Доступ",

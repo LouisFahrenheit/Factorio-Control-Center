@@ -61,9 +61,13 @@ export async function api<T = Record<string, unknown>>(
         : undefined;
     const httpError =
       typeof data?.error === 'string' ? data.error.trim() : '';
+    const specificError =
+      httpError && !/^(Forbidden|Unauthorized)$/i.test(httpError)
+        ? httpError
+        : undefined;
     const err =
+      specificError ||
       nestMessage ||
-      (httpError && !/^(Forbidden|Unauthorized)$/i.test(httpError) ? httpError : undefined) ||
       (res.status === 403 ? 'invalid_credentials' : undefined) ||
       httpError ||
       text ||
@@ -80,13 +84,19 @@ const LOGIN_DENIED_KEYS: Record<string, string> = {
   auth_failed: 'web_login_access_denied',
 };
 
+const AUTH_ERROR_MAP: Record<string, string> = {
+  ...LOGIN_DENIED_KEYS,
+  burst_limit_exceeded: 'auth_rate_limit_locked',
+  too_many_attempts: 'auth_rate_limit_locked',
+};
+
 export function isLoginDeniedError(err: string): boolean {
   return String(err || '').trim() in LOGIN_DENIED_KEYS;
 }
 
 export function localizeAuthError(err: string, t: (key: string) => string): string {
   const k = String(err || '').trim();
-  const localeKey = LOGIN_DENIED_KEYS[k] || k;
+  const localeKey = AUTH_ERROR_MAP[k] || k;
   const mapped = t(localeKey);
   return mapped !== localeKey ? mapped : k;
 }

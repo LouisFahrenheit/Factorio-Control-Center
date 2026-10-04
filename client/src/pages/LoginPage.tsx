@@ -131,6 +131,8 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const j = await api<{
+        ok?: boolean;
+        error?: string;
         token?: string;
         requires2fa?: boolean;
         challengeToken?: string;
@@ -139,6 +141,10 @@ export default function LoginPage() {
         body: JSON.stringify({ username: u, password: p }),
         omitBearer: true,
       });
+
+      if (j && j.ok === false && j.error) {
+        throw new Error(j.error);
+      }
 
       if (j && j.requires2fa && j.challengeToken) {
         setChallengeToken(j.challengeToken);
@@ -155,8 +161,8 @@ export default function LoginPage() {
       await finalizeLogin(token);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      setHudStat('denied');
       if (isLoginDeniedError(msg)) {
-        setHudStat('denied');
         showAuthMsg('', false);
       } else {
         showAuthMsg(localizeAuthError(msg, t), true);
@@ -174,18 +180,24 @@ export default function LoginPage() {
     }
     setBusy(true);
     try {
-      const j = await api<{ token?: string }>('/api/auth/2fa/verify', {
-        method: 'POST',
-        body: JSON.stringify({ challengeToken, code }),
-        omitBearer: true,
-      });
+      const j = await api<{ ok?: boolean; error?: string; token?: string }>(
+        '/api/auth/2fa/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify({ challengeToken, code }),
+          omitBearer: true,
+        },
+      );
+      if (j && j.ok === false && j.error) {
+        throw new Error(j.error);
+      }
       const token = (j && j.token) || '';
       if (!token) throw new Error('auth_failed');
       await finalizeLogin(token);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      setHudStat('denied');
       if (isLoginDeniedError(msg)) {
-        setHudStat('denied');
         showAuthMsg('', false);
       } else {
         showAuthMsg(localizeAuthError(msg, t), true);

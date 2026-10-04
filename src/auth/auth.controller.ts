@@ -10,8 +10,12 @@ import {
   Put,
   UnauthorizedException,
   Ip,
+  Req,
+  HttpException,
+  HttpStatus,
   Logger,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -36,6 +40,10 @@ import {
   SetupAdminDto,
 } from '../common/dto/auth.dto';
 import { TwoFactorService } from './two-factor.service';
+import {
+  AuthRateLimiterService,
+  normalizeClientIp,
+} from './auth-rate-limiter.service';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -48,7 +56,17 @@ export class AuthController {
     private readonly instances: InstancesService,
     private readonly eventLog: WebPanelEventLogService,
     private readonly twoFactor: TwoFactorService,
+    private readonly rateLimiter: AuthRateLimiterService,
   ) {}
+
+  private extractClientIp(req?: Request, fallbackIp?: string): string {
+    const forwarded = req?.headers?.['x-forwarded-for'];
+    if (typeof forwarded === 'string' && forwarded.trim()) {
+      const first = forwarded.split(',')[0].trim();
+      if (first) return normalizeClientIp(first);
+    }
+    return normalizeClientIp(fallbackIp || req?.ip);
+  }
 
   @Get('setup-status')
   @ApiOperation({
@@ -114,51 +132,171 @@ export class AuthController {
     description:
       'Login failed — returns { ok: false, error: "invalid_credentials" }',
   })
-  async login(@Body() body: unknown, @Ip() ip: string) {
-    const { username, password } = body as Record<string, string>;
-    this.log.debug(`Login attempt for username: ${username} from IP: ${ip}`);
+  async login(
+    @Body() body: unknown,
+    @Ip() fallbackIp: string,
+    @Req() req: Request,
+  ) {
+    const { username, password } = (body || {}) as Record<string, string>;
+    const ip = this.extractClientIp(req, fallbackIp);
+    const u = String(username || '').trim();
 
-    const record = await this.users.findUser(username);
+    this.log.debug(`Login attempt for username: ${u} from IP: ${ip}`);
+
+    // Check rate limiter before evaluating credentials
+    const check = this.rateLimiter.checkLoginAllowed(ip, u);
+    if (!check.allowed) {
+      this.eventLog.logAuth(
+        'login_locked',
+        u || ip,
+        `${check.reason}, retry in ${check.retryAfterMin}m`,
+      );
+      this.log.warn(
+        `Login blocked by rate limiter for user '${u}' from IP '${ip}' (reason: ${check.reason}, retryAfter: ${check.retryAfterSec}s).`,
+      );
+      throw new HttpException(
+        {
+          ok: false,
+          error: 'auth_rate_limit_locked',
+          retryAfterSec: check.retryAfterSec,
+          retryAfterMin: check.retryAfterMin,
+          message: 'auth_rate_limit_locked',
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const record = await this.users.findUser(u);
     if (!record || !record.enabled) {
-      this.log.debug(`Login failed: user '${username}' not found or disabled.`);
+      this.log.debug(`Login failed: user '${u}' not found or disabled.`);
+      const limitResult = this.rateLimiter.recordFailedAttempt(ip, u);
+      this.eventLog.logAuth('login_failed', u);
+      if (limitResult.locked) {
+        this.eventLog.logAuth(
+          'login_locked',
+          u || ip,
+          `locked for ${limitResult.retryAfterMin}m`,
+        );
+        throw new HttpException(
+          {
+            ok: false,
+            error: 'auth_rate_limit_locked',
+            retryAfterSec: limitResult.retryAfterSec,
+            retryAfterMin: limitResult.retryAfterMin,
+            message: 'auth_rate_limit_locked',
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
       return { ok: false, error: 'invalid_credentials' };
     }
+
     const ok = await verifyPassword(password || '', record.passwordHash);
     if (!ok) {
-      this.log.debug(`Login failed: invalid password for user '${username}'.`);
-      this.eventLog.logAuth('login_failed', username);
-      return { ok: false, error: 'invalid_credentials' };
+      this.log.debug(`Login failed: invalid password for user '${u}'.`);
+      const limitResult = this.rateLimiter.recordFailedAttempt(ip, u);
+      this.eventLog.logAuth('login_failed', u);
+      if (limitResult.locked) {
+        this.eventLog.logAuth(
+          'login_locked',
+          u || ip,
+          `locked for ${limitResult.retryAfterMin}m`,
+        );
+        throw new HttpException(
+          {
+            ok: false,
+            error: 'auth_rate_limit_locked',
+            retryAfterSec: limitResult.retryAfterSec,
+            retryAfterMin: limitResult.retryAfterMin,
+            message: 'auth_rate_limit_locked',
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      return {
+        ok: false,
+        error: 'invalid_credentials',
+        attemptsRemaining: limitResult.attemptsRemaining,
+      };
     }
+
+    this.rateLimiter.recordSuccessfulLogin(ip, u);
 
     if (record.twoFactorEnabled) {
       const challengeToken = this.twoFactor.createChallenge(record.username);
-      this.log.debug(
-        `Login requires 2FA for user '${username}'. Challenge issued.`,
-      );
+      this.log.debug(`Login requires 2FA for user '${u}'. Challenge issued.`);
       return { ok: true, requires2fa: true, challengeToken };
     }
 
     const token = await this.sessions.createSession(record.username, ip);
     this.log.debug(
-      `Login successful: user '${username}', role '${record.role}'. Session created.`,
+      `Login successful: user '${u}', role '${record.role}'. Session created.`,
     );
-    this.eventLog.logAuth('login', username, record.role);
+    this.eventLog.logAuth('login', u, record.role);
     return { ok: true, token, user: this.users.publicView(record) };
   }
 
   @Post('2fa/verify')
   @ApiOperation({ summary: 'Verify 2FA TOTP or recovery code during login' })
   @ApiBody({ type: Verify2faDto })
-  async verify2fa(@Body() body: Verify2faDto, @Ip() ip: string) {
+  async verify2fa(
+    @Body() body: Verify2faDto,
+    @Ip() fallbackIp: string,
+    @Req() req: Request,
+  ) {
+    const ip = this.extractClientIp(req, fallbackIp);
+
+    const check = this.rateLimiter.check2faAllowed(ip, body.challengeToken);
+    if (!check.allowed) {
+      this.eventLog.logAuth(
+        'login_locked',
+        ip,
+        `2FA limit exceeded: ${check.reason}`,
+      );
+      throw new HttpException(
+        {
+          ok: false,
+          error: 'auth_rate_limit_locked',
+          retryAfterSec: check.retryAfterSec,
+          retryAfterMin: check.retryAfterMin,
+          message: 'auth_rate_limit_locked',
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const res = await this.twoFactor.verifyLogin(
       body.challengeToken,
       body.code,
     );
     if (!res.ok) {
       this.log.debug(`2FA verification failed: ${res.error}`);
+      const limitResult = this.rateLimiter.recordFailed2fa(
+        ip,
+        body.challengeToken,
+      );
       this.eventLog.logAuth('login_failed', res.username || 'unknown');
+      if (limitResult.locked) {
+        this.eventLog.logAuth(
+          'login_locked',
+          res.username || ip,
+          `2FA locked for ${limitResult.retryAfterMin}m`,
+        );
+        throw new HttpException(
+          {
+            ok: false,
+            error: 'auth_rate_limit_locked',
+            retryAfterSec: limitResult.retryAfterSec,
+            retryAfterMin: limitResult.retryAfterMin,
+            message: 'auth_rate_limit_locked',
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
       return { ok: false, error: res.error };
     }
+
+    this.rateLimiter.recordSuccessful2fa(ip, body.challengeToken);
 
     const record = await this.users.findUser(res.username!);
     if (!record || !record.enabled) {

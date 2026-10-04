@@ -59,6 +59,7 @@ export class WebPanelEventLogService {
     kind:
       | 'login'
       | 'login_failed'
+      | 'login_locked'
       | 'logout'
       | 'user_create'
       | 'user_update'
@@ -78,6 +79,9 @@ export class WebPanelEventLogService {
         break;
       case 'login_failed':
         message = `Login failed`;
+        break;
+      case 'login_locked':
+        message = `Temporarily locked out due to excessive failed attempts (${detail || '?'})`;
         break;
       case 'logout':
         message = `Logged out`;

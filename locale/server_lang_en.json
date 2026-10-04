@@ -1379,6 +1379,7 @@
   "web_login_hud_awaiting": "AWAITING INPUT",
   "web_login_access_granted": "ACCESS GRANTED",
   "web_login_access_denied": "ACCESS DENIED",
+  "auth_rate_limit_locked": "Too many failed login attempts. Access is temporarily locked for 10 minutes.",
   "web_login_now_entering": "NOW ENTERING SYSTEM",
   "web_logout_btn": "Logout",
   "web_tab_access": "Access",

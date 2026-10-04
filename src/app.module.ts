@@ -28,6 +28,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { SessionService } from './auth/session.service';
 import { UsersService } from './auth/users.service';
 import { TwoFactorService } from './auth/two-factor.service';
+import { AuthRateLimiterService } from './auth/auth-rate-limiter.service';
 import { FccConfigService } from './config/fcc-config.service';
 import { PathsService } from './config/paths.service';
 import { InstancesService } from './instances/instances.service';
@@ -189,6 +190,7 @@ migrateOldDb('fcc_metrics.sqlite-wal', 'fcc_metrics.sqlite-wal');
     UsersService,
     SessionService,
     TwoFactorService,
+    AuthRateLimiterService,
     InstancesService,
     InstanceSummaryService,
     InstanceBootstrapService,
