@@ -25,8 +25,8 @@ RUN npm prune --omit=dev
 # Using Debian-based image because Factorio headless requires glibc.
 FROM node:24-bookworm-slim
 
-# Install xz-utils in case Factorio tarballs use .tar.xz
-RUN apt-get update && apt-get install -y xz-utils && rm -rf /var/lib/apt/lists/*
+# Install xz-utils in case Factorio tarballs use .tar.xz, and curl for healthchecks
+RUN apt-get update && apt-get install -y xz-utils curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -52,5 +52,8 @@ EXPOSE 34197-34207/udp
 
 # Volumes for persistent data
 VOLUME ["/app/data", "/app/logs"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -f http://localhost:8080/api/health || exit 1
 
 CMD ["node", "dist/main"]

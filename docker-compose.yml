@@ -3,6 +3,7 @@ services:
     image: ghcr.io/louisfahrenheit/factorio-control-center:latest
     container_name: factorio-control-center
     restart: unless-stopped
+    stop_grace_period: 45s
     ports:
       - "8080:8080/tcp" # Web Panel
       - "34197-34207:34197-34207/udp" # Factorio Servers
@@ -13,4 +14,10 @@ services:
       - NODE_ENV=production
       # - FCC_ADMIN_USER=admin
       # - FCC_ADMIN_PASSWORD=change_me
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
