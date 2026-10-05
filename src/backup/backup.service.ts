@@ -19,9 +19,10 @@ import { join, basename, dirname } from 'path';
 import { createHash } from 'crypto';
 import { PathsService } from '../config/paths.service';
 import { APP_VERSION } from '../constants/fcc.constants';
+import AdmZip from 'adm-zip';
+import StreamZip from 'node-stream-zip';
 
 const archiver = require('archiver');
-const unzipper = require('unzipper');
 
 function createZipArchive(options: Record<string, unknown> = {}) {
   if (typeof archiver === 'function') {
@@ -252,10 +253,16 @@ export class BackupService {
 
       // If sections is missing/empty or we need to verify actual files
       try {
-        const zip = await unzipper.Open.file(fullPath);
-        const actualFiles = zip.files
-          .filter((f: any) => f.type !== 'Directory')
-          .map((f: any) => String(f.path).replace(/\\/g, '/'));
+        const zip = new StreamZip.async({ file: fullPath });
+        let actualFiles: string[] = [];
+        try {
+          const entries = await zip.entries();
+          actualFiles = Object.values(entries)
+            .filter((f) => !f.isDirectory)
+            .map((f) => String(f.name).replace(/\\/g, '/'));
+        } finally {
+          await zip.close().catch(() => undefined);
+        }
 
         // If manifest didn't have sections, build them
         if (!sections.length) {
@@ -329,15 +336,13 @@ export class BackupService {
     let manifest: BackupManifest | null = null;
     let sections: string[] = [];
     try {
-      const zip = await unzipper.Open.buffer(file.buffer);
-      const manifestEntry = zip.files.find(
-        (f: any) => f.path === 'manifest.json',
-      );
+      const zip = new AdmZip(file.buffer);
+      const manifestEntry = zip.getEntry('manifest.json');
       if (!manifestEntry) {
         throw new BadRequestException('backup_invalid_manifest');
       }
-      const buf = await manifestEntry.buffer();
-      manifest = JSON.parse(buf.toString('utf-8')) as BackupManifest;
+      const rawText = manifestEntry.getData().toString('utf-8');
+      manifest = JSON.parse(rawText) as BackupManifest;
       if (manifest && Array.isArray(manifest.sections)) {
         sections = [...manifest.sections];
       }
@@ -431,69 +436,71 @@ export class BackupService {
     const mode = opts.mode ?? 'all';
     this.log.warn(`Starting restore from ${id}, mode=${mode}`);
 
-    const zip = await unzipper.Open.file(zipPath);
-    const manifestEntry = zip.files.find(
-      (f: any) => f.path === 'manifest.json',
-    );
-    if (!manifestEntry)
-      throw new BadRequestException('backup_invalid_manifest');
+    const zip = new StreamZip.async({ file: zipPath });
+    try {
+      const manifestEntry = await zip.entry('manifest.json');
+      if (!manifestEntry)
+        throw new BadRequestException('backup_invalid_manifest');
 
-    for (const file of zip.files as any[]) {
-      if (file.path === 'manifest.json') continue;
-      if (file.type === 'Directory') continue;
+      const entries = await zip.entries();
+      for (const file of Object.values(entries)) {
+        if (file.name === 'manifest.json') continue;
+        if (file.isDirectory) continue;
 
-      const pathStr = file.path.replace(/\\/g, '/');
-      const topSection = pathStr.split('/')[0];
-      const isDb = topSection === 'database';
+        const pathStr = file.name.replace(/\\/g, '/');
+        const topSection = pathStr.split('/')[0];
+        const isDb = topSection === 'database';
 
-      if (mode === 'db_only' && !isDb) continue;
-      if (mode === 'files_only' && isDb) continue;
+        if (mode === 'db_only' && !isDb) continue;
+        if (mode === 'files_only' && isDb) continue;
 
-      let destPath: string;
-      if (pathStr.startsWith('env/')) {
-        destPath = this.paths.envFilePath;
-      } else if (isDb) {
-        destPath = join(this.paths.dbDir, basename(pathStr) + '.restore');
-      } else if (
-        pathStr.startsWith('security/tls/') ||
-        pathStr.startsWith('tls/')
-      ) {
-        destPath = join(
-          this.paths.tlsDir,
-          pathStr.replace(/^(security\/tls|tls)\//, ''),
-        );
-      } else if (
-        pathStr.startsWith('storage/map_presets/') ||
-        pathStr.startsWith('map_presets/')
-      ) {
-        destPath = join(
-          this.paths.mapPresetsDir,
-          pathStr.replace(/^(storage\/map_presets|map_presets)\//, ''),
-        );
-      } else if (
-        pathStr.startsWith('storage/announcements/') ||
-        pathStr.startsWith('announcements/')
-      ) {
-        destPath = join(
-          this.paths.announcementsDir,
-          pathStr.replace(/^(storage\/announcements|announcements)\//, ''),
-        );
-      } else if (
-        pathStr.startsWith('logs/instances/') ||
-        pathStr.startsWith('instance_logs/')
-      ) {
-        destPath = join(
-          this.paths.instanceLogsDir,
-          pathStr.replace(/^(logs\/instances|instance_logs)\//, ''),
-        );
-      } else {
-        continue;
+        let destPath: string;
+        if (pathStr.startsWith('env/')) {
+          destPath = this.paths.envFilePath;
+        } else if (isDb) {
+          destPath = join(this.paths.dbDir, basename(pathStr) + '.restore');
+        } else if (
+          pathStr.startsWith('security/tls/') ||
+          pathStr.startsWith('tls/')
+        ) {
+          destPath = join(
+            this.paths.tlsDir,
+            pathStr.replace(/^(security\/tls|tls)\//, ''),
+          );
+        } else if (
+          pathStr.startsWith('storage/map_presets/') ||
+          pathStr.startsWith('map_presets/')
+        ) {
+          destPath = join(
+            this.paths.mapPresetsDir,
+            pathStr.replace(/^(storage\/map_presets|map_presets)\//, ''),
+          );
+        } else if (
+          pathStr.startsWith('storage/announcements/') ||
+          pathStr.startsWith('announcements/')
+        ) {
+          destPath = join(
+            this.paths.announcementsDir,
+            pathStr.replace(/^(storage\/announcements|announcements)\//, ''),
+          );
+        } else if (
+          pathStr.startsWith('logs/instances/') ||
+          pathStr.startsWith('instance_logs/')
+        ) {
+          destPath = join(
+            this.paths.instanceLogsDir,
+            pathStr.replace(/^(logs\/instances|instance_logs)\//, ''),
+          );
+        } else {
+          continue;
+        }
+
+        const dir = dirname(destPath);
+        if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+        await zip.extract(file.name, destPath);
       }
-
-      const dir = dirname(destPath);
-      if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-      const buf = await file.buffer();
-      writeFileSync(destPath, buf);
+    } finally {
+      await zip.close().catch(() => undefined);
     }
     this.log.warn(`Restore complete from ${id}. Panel will exit to restart.`);
   }
@@ -509,14 +516,16 @@ export class BackupService {
   }
 
   private async readManifest(zipPath: string): Promise<BackupManifest | null> {
+    const zip = new StreamZip.async({ file: zipPath });
     try {
-      const zip = await unzipper.Open.file(zipPath);
-      const entry = zip.files.find((f: any) => f.path === 'manifest.json');
+      const entry = await zip.entry('manifest.json');
       if (!entry) return null;
-      const buf = await entry.buffer();
+      const buf = await zip.entryData(entry);
       return JSON.parse(buf.toString('utf-8')) as BackupManifest;
     } catch {
       return null;
+    } finally {
+      await zip.close().catch(() => undefined);
     }
   }
 

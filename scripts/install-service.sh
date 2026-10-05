@@ -86,8 +86,8 @@ WorkingDirectory=${FCC_DIR}
 Environment="PATH=${node_dir}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Environment=FCC_ROOT_DIR=${FCC_DIR}
 ExecStart=${run_script}
-Restart=on-failure
-RestartSec=10
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=${wanted_by}

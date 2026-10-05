@@ -59,7 +59,6 @@
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.20",
-    "unzipper": "^0.12.5",
     "uuid": "^14.0.0"
   },
   "devDependencies": {
@@ -78,7 +77,6 @@
     "@types/pidusage": "^2.0.5",
     "@types/qrcode": "^1.5.6",
     "@types/supertest": "^7.0.0",
-    "@types/unzipper": "^0.10.11",
     "@types/uuid": "^10.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

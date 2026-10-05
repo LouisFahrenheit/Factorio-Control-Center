@@ -256,10 +256,6 @@ better-sqlite3@13.0.3
   License: MIT
   Repository: https://github.com/WiseLibs/better-sqlite3
 
-bluebird@3.7.2
-  License: MIT
-  Repository: https://github.com/petkaantonov/bluebird
-
 body-parser@2.3.0
   License: MIT
   Repository: https://github.com/expressjs/body-parser
@@ -420,10 +416,6 @@ dunder-proto@1.0.1
   License: MIT
   Repository: https://github.com/es-shims/dunder-proto
 
-duplexer2@0.1.4
-  License: BSD-3-Clause
-  Repository: https://github.com/deoxxa/duplexer2
-
 ee-first@1.1.1
   License: MIT
   Repository: https://github.com/jonathanong/ee-first
@@ -516,10 +508,6 @@ fresh@2.0.0
   License: MIT
   Repository: https://github.com/jshttp/fresh
 
-fs-extra@11.3.1
-  License: MIT
-  Repository: https://github.com/jprichardson/node-fs-extra
-
 function-bind@1.1.2
   License: MIT
   Repository: https://github.com/Raynos/function-bind
@@ -543,10 +531,6 @@ glob@13.0.6
 gopd@1.2.0
   License: MIT
   Repository: https://github.com/ljharb/gopd
-
-graceful-fs@4.2.11
-  License: ISC
-  Repository: https://github.com/isaacs/node-graceful-fs
 
 has-property-descriptors@1.0.2
   License: MIT
@@ -623,10 +607,6 @@ iterare@1.2.1
 js-yaml@4.3.2
   License: MIT
   Repository: https://github.com/nodeca/js-yaml
-
-jsonfile@6.2.1
-  License: MIT
-  Repository: https://github.com/jprichardson/node-jsonfile
 
 lazystream@1.0.1
   License: MIT
@@ -719,10 +699,6 @@ negotiator@1.0.0
 node-addon-api@8.9.2
   License: MIT
   Repository: https://github.com/nodejs/node-addon-api
-
-node-int64@0.4.0
-  License: MIT
-  Repository: https://github.com/broofa/node-int64
 
 node-stream-zip@1.15.0
   License: MIT
@@ -1028,17 +1004,9 @@ undici-types@7.16.0
   License: MIT
   Repository: https://github.com/nodejs/undici
 
-universalify@2.0.1
-  License: MIT
-  Repository: https://github.com/RyanZim/universalify
-
 unpipe@1.0.0
   License: MIT
   Repository: https://github.com/stream-utils/unpipe
-
-unzipper@0.12.5
-  License: MIT
-  Repository: https://github.com/ZJONSSON/node-unzipper
 
 util-deprecate@1.0.2
   License: MIT
