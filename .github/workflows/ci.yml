@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build and lint
+    name: Build, lint, and test
     runs-on: ubuntu-latest
 
     steps:
@@ -36,6 +36,18 @@ jobs:
 
       - name: Locale unused keys check
         run: npm run locale:check:unused
+
+      - name: Lint backend
+        run: npm run lint:check
+
+      - name: Lint client
+        run: npm run client:lint
+
+      - name: Test backend
+        run: npm test
+
+      - name: Test client
+        run: npm run client:test
 
       - name: Build
         run: npm run build:all
