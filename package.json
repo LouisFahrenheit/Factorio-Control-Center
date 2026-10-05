@@ -100,10 +100,10 @@
     "test-exclude": "^8.0.0",
     "multer": "^2.4.0",
     "js-yaml": "^4.3.2",
-    "eslint": {
-      "minimatch": {
-        "brace-expansion": "^1.1.18"
-      }
+
+    "brace-expansion": "^5.0.12",
+    "minimatch@3": {
+      "brace-expansion": "^1.1.21"
     },
     "typeorm": {
       "better-sqlite3": "$better-sqlite3"
