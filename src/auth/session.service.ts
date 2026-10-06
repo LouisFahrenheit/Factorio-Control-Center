@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { SessionUser } from '../common/types';
 import { UsersService } from './users.service';
@@ -9,10 +9,27 @@ interface SessionRecord extends SessionUser {
 }
 
 @Injectable()
-export class SessionService {
+export class SessionService implements OnModuleInit, OnModuleDestroy {
   private readonly sessions = new Map<string, SessionRecord>();
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor(private readonly users: UsersService) {}
+
+  onModuleInit() {
+    const HOUR_MS = 60 * 60 * 1000;
+    this.cleanupTimer = setInterval(() => this.purgeExpired(), HOUR_MS);
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupTimer) clearInterval(this.cleanupTimer);
+  }
+
+  private purgeExpired(): void {
+    const now = Date.now() / 1000;
+    for (const [token, s] of this.sessions) {
+      if (s.exp < now) this.sessions.delete(token);
+    }
+  }
 
   createToken(user: SessionUser): string {
     const token = randomBytes(36).toString('base64url');

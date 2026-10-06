@@ -64,6 +64,7 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
   const [editorMode, setEditorMode] = useState<WebUserEditorMode>('');
   const [editor, setEditor] = useState<WebUserEditorState>(emptyEditor);
   const [selectedUser, setSelectedUser] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const accessTitle = t('instances_tab_access');
 
@@ -152,6 +153,7 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
     if (!username) return;
     const instance_ids = resolvedInstanceIds(editor);
     const tabs = normalizeUserTabs(editor.tabs);
+    setIsSaving(true);
     try {
       if (editorMode === 'create') {
         await api('/api/auth/users', {
@@ -184,6 +186,8 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
       closeEditor();
     } catch (e) {
       toast(localizeWebUserError(e instanceof Error ? e.message : String(e), t), true);
+    } finally {
+      setIsSaving(false);
     }
   }, [closeEditor, editor, editorMode, refresh, reloadLocale, resolvedInstanceIds, t, toast]);
 
@@ -256,10 +260,10 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
   );
 
   useEffect(() => {
-    if (!editorOpen || editorMode !== 'edit') return;
+    if (!editorOpen || editorMode !== 'edit' || isSaving) return;
     const u = users.find((x) => String(x.username) === selectedUser);
     if (u) setEditor(editorFromUser(u, accessInstances));
-  }, [users, accessInstances, editorOpen, editorMode, selectedUser]);
+  }, [users, accessInstances, editorOpen, editorMode, selectedUser, isSaving]);
 
   return {
     users,

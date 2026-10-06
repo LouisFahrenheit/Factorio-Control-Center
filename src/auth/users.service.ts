@@ -47,7 +47,7 @@ export class UsersService implements OnModuleInit {
       if (envPass) {
         const admin = this.userRepo.create({
           username: envUser,
-          passwordHash: hashPassword(envPass),
+          passwordHash: await hashPassword(envPass),
           role: 'administrator',
           tabs: [...ALL_TABS],
           instanceIds: ['*'],
@@ -94,7 +94,7 @@ export class UsersService implements OnModuleInit {
     }
     const admin = this.userRepo.create({
       username: cleanUser,
-      passwordHash: hashPassword(password),
+      passwordHash: await hashPassword(password),
       role: 'administrator',
       tabs: [...ALL_TABS],
       instanceIds: ['*'],
@@ -236,15 +236,10 @@ export class UsersService implements OnModuleInit {
     if (users.some((u) => u.username.toLowerCase() === username.toLowerCase()))
       return { ok: false, error: 'user_exists' };
     const role = this.normalizeRole(body.role || 'moderator');
-    if (
-      role === 'administrator' &&
-      !(await this.actorIsEnabledAdmin(actorUsername))
-    )
-      return { ok: false, error: 'admin_required' };
 
     const newUser = this.userRepo.create({
       username,
-      passwordHash: hashPassword(body.password || ''),
+      passwordHash: await hashPassword(body.password || ''),
       role,
       tabs: this.cleanTabs(body.tabs ?? this.defaultTabsForRole(role), role),
       instanceIds: body.instance_ids,
@@ -252,6 +247,7 @@ export class UsersService implements OnModuleInit {
     });
 
     await this.userRepo.save(newUser);
+    this.cache = [...this.cache, newUser];
     return { ok: true };
   }
 
@@ -293,9 +289,9 @@ export class UsersService implements OnModuleInit {
     if (this.wouldRemoveLastEnabledAdmin(users, u, nextRole, nextEnabled))
       return { ok: false, error: 'last_admin' };
 
-    if (body.password) u.passwordHash = hashPassword(body.password);
+    if (body.password) u.passwordHash = await hashPassword(body.password);
     if (body.role) u.role = nextRole;
-    if (body.tabs) u.tabs = this.cleanTabs(body.tabs, u.role);
+    if (body.tabs) u.tabs = this.cleanTabs(body.tabs, nextRole);
     if (body.instance_ids) u.instanceIds = body.instance_ids;
     if (body.enabled !== undefined) u.enabled = body.enabled;
 
@@ -330,6 +326,9 @@ export class UsersService implements OnModuleInit {
       return { ok: false, error: 'last_admin' };
 
     await this.userRepo.remove(target);
+    this.cache = this.cache.filter(
+      (u) => u.username.toLowerCase() !== username.toLowerCase(),
+    );
     return { ok: true };
   }
 }
