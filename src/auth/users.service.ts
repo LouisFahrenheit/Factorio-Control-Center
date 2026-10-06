@@ -4,9 +4,13 @@ import {
   Logger,
   BadRequestException,
   ForbiddenException,
+  Inject,
+  Optional,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { SessionService } from './session.service';
 import {
   ALL_TABS,
   ENGINEER_TABS,
@@ -33,6 +37,9 @@ export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @Optional()
+    @Inject(forwardRef(() => SessionService))
+    private readonly sessions?: SessionService,
   ) {}
 
   async onModuleInit() {
@@ -197,6 +204,9 @@ export class UsersService implements OnModuleInit {
     user.twoFactorSecret = secret;
     user.twoFactorRecoveryCodes = recoveryCodes;
     await this.userRepo.save(user);
+    if (!enabled) {
+      this.sessions?.revokeAllForUser(username);
+    }
     return true;
   }
 
@@ -268,6 +278,7 @@ export class UsersService implements OnModuleInit {
       enabled: boolean;
     }>,
     actorUsername: string,
+    currentToken?: string | null,
   ): Promise<{ ok: boolean; error?: string }> {
     if (!(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
@@ -314,6 +325,21 @@ export class UsersService implements OnModuleInit {
       return { ok: false, error: 'last_admin' };
 
     await this.userRepo.save(u);
+
+    if (body.password !== undefined) {
+      const isSelf = actorUsername.toLowerCase() === username.toLowerCase();
+      if (isSelf && currentToken) {
+        this.sessions?.updateSessionPasswordHash(currentToken, u.passwordHash);
+        this.sessions?.revokeAllForUser(username, currentToken);
+      } else {
+        this.sessions?.revokeAllForUser(username);
+      }
+    }
+
+    if (body.enabled === false) {
+      this.sessions?.revokeAllForUser(username);
+    }
+
     return { ok: true };
   }
 
@@ -342,6 +368,7 @@ export class UsersService implements OnModuleInit {
     this.cache = this.cache.filter(
       (u) => u.username.toLowerCase() !== username.toLowerCase(),
     );
+    this.sessions?.revokeAllForUser(username);
     return { ok: true };
   }
 }

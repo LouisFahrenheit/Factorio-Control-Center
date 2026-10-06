@@ -1,4 +1,10 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { SessionUser } from '../common/types';
 import { UsersService } from './users.service';
@@ -6,6 +12,7 @@ import { UsersService } from './users.service';
 interface SessionRecord extends SessionUser {
   exp: number;
   selectedInstanceId?: string;
+  passwordHash?: string;
 }
 
 @Injectable()
@@ -13,7 +20,10 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
   private readonly sessions = new Map<string, SessionRecord>();
   private cleanupTimer?: NodeJS.Timeout;
 
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    @Inject(forwardRef(() => UsersService))
+    private readonly users: UsersService,
+  ) {}
 
   onModuleInit() {
     const HOUR_MS = 60 * 60 * 1000;
@@ -24,18 +34,19 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
     if (this.cleanupTimer) clearInterval(this.cleanupTimer);
   }
 
-  private purgeExpired(): void {
+  purgeExpired(): void {
     const now = Date.now() / 1000;
     for (const [token, s] of this.sessions) {
       if (s.exp < now) this.sessions.delete(token);
     }
   }
 
-  createToken(user: SessionUser): string {
+  createToken(user: SessionUser, passwordHash?: string): string {
     const token = randomBytes(36).toString('base64url');
     this.sessions.set(token, {
       ...user,
       exp: Date.now() / 1000 + 7 * 24 * 3600,
+      passwordHash,
     });
     return token;
   }
@@ -58,7 +69,7 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
       enabled: true,
       twoFactorEnabled: !!record.twoFactorEnabled,
     };
-    return this.createToken(user);
+    return this.createToken(user, record.passwordHash);
   }
 
   async resolve(token: string): Promise<SessionUser | null> {
@@ -71,6 +82,16 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
 
     const record = await this.users.findUser(s.username);
     if (!record || record.enabled === false) {
+      this.sessions.delete(token);
+      return null;
+    }
+
+    // Invalidate session if user's password was changed
+    if (
+      s.passwordHash &&
+      record.passwordHash &&
+      s.passwordHash !== record.passwordHash
+    ) {
       this.sessions.delete(token);
       return null;
     }
@@ -100,6 +121,45 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
 
   logout(token: string): void {
     this.sessions.delete(token);
+  }
+
+  /**
+   * Revoke all active sessions for a user (e.g. on password change, deletion, disable).
+   * Optionally keeps a specific session active (e.g. current actor changing their own password).
+   */
+  revokeAllForUser(username: string, exceptToken?: string): number {
+    const needle = (username || '').trim().toLowerCase();
+    if (!needle) return 0;
+    let count = 0;
+    for (const [token, s] of this.sessions) {
+      if (s.username.trim().toLowerCase() === needle) {
+        if (exceptToken && token === exceptToken) continue;
+        this.sessions.delete(token);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Update the stored passwordHash for a specific session token
+   * so it doesn't get invalidated when the user changes their own password.
+   */
+  updateSessionPasswordHash(token: string, newPasswordHash: string): boolean {
+    const s = this.sessions.get(token);
+    if (!s) return false;
+    s.passwordHash = newPasswordHash;
+    return true;
+  }
+
+  getActiveSessionsCount(username?: string): number {
+    if (!username) return this.sessions.size;
+    const needle = username.trim().toLowerCase();
+    let count = 0;
+    for (const s of this.sessions.values()) {
+      if (s.username.trim().toLowerCase() === needle) count++;
+    }
+    return count;
   }
 
   getSelectedInstanceId(token: string): string {

@@ -452,14 +452,16 @@ export class AuthController {
     @CurrentUser() admin: SessionUser,
     @Param('username') username: string,
     @Body() body: Record<string, unknown>,
+    @Headers('authorization') auth?: string,
   ) {
     const actor = admin.username;
+    const currentToken = extractBearerToken(auth) ?? undefined;
     const beforeList = await this.users.listPublic();
     const before = beforeList.find(
       (u) => u.username.toLowerCase() === username.toLowerCase(),
     );
 
-    const r = await this.users.updateUser(username, body, actor);
+    const r = await this.users.updateUser(username, body, actor, currentToken);
     if (!r.ok) throw new ForbiddenException(r.error);
 
     const changes: string[] = [];
@@ -516,6 +518,7 @@ export class AuthController {
     const actor = admin.username;
     const r = await this.twoFactor.resetForUser(username);
     if (!r.ok) throw new ForbiddenException(r.error);
+    this.sessions.revokeAllForUser(username);
     this.eventLog.logAuth('user_reset_2fa', actor, username);
     return { ok: true };
   }
