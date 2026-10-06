@@ -4,12 +4,12 @@ import {
   Delete,
   ForbiddenException,
   Get,
-  Headers,
   Param,
   Post,
   Put,
-  UnauthorizedException,
+  UseGuards,
   Ip,
+  Headers,
   Req,
   HttpException,
   HttpStatus,
@@ -44,6 +44,11 @@ import {
   AuthRateLimiterService,
   normalizeClientIp,
 } from './auth-rate-limiter.service';
+import { AuthGuard } from './auth.guard';
+import { AdminGuard } from './admin.guard';
+import { CurrentUser } from './current-user.decorator';
+import type { SessionUser } from '../common/types';
+import { extractBearerToken } from './auth.util';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -317,64 +322,52 @@ export class AuthController {
   }
 
   @Post('2fa/setup')
+  @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Initiate 2FA setup for current user' })
-  async setup2fa(@Headers('authorization') auth?: string) {
-    const token = this.bearer(auth);
-    const sessionUser = token ? await this.sessions.resolve(token) : null;
-    if (!sessionUser) throw new ForbiddenException('Invalid token');
-
+  async setup2fa(@CurrentUser() sessionUser: SessionUser) {
     const user = await this.users.findUser(sessionUser.username);
     if (!user) throw new ForbiddenException('User not found');
     if (user.twoFactorEnabled) {
       return { ok: false, error: 'already_enabled' };
     }
-
     const res = await this.twoFactor.initiateSetup(sessionUser.username);
     return { ok: true, ...res };
   }
 
   @Post('2fa/enable')
+  @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Confirm and enable 2FA with TOTP code' })
   @ApiBody({ type: Enable2faDto })
   async enable2fa(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() sessionUser: SessionUser,
     @Body() body: Enable2faDto,
   ) {
-    const token = this.bearer(auth);
-    const sessionUser = token ? await this.sessions.resolve(token) : null;
-    if (!sessionUser) throw new ForbiddenException('Invalid token');
-
     const res = await this.twoFactor.confirmSetup(
       sessionUser.username,
       body.code,
     );
     if (!res.ok) return { ok: false, error: res.error };
-
     this.eventLog.logAuth('2fa_enable', sessionUser.username);
     return { ok: true, recoveryCodes: res.recoveryCodes };
   }
 
   @Post('2fa/disable')
+  @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Disable 2FA with password or TOTP confirmation' })
   @ApiBody({ type: Disable2faDto })
   async disable2fa(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() sessionUser: SessionUser,
     @Body() body: Disable2faDto,
   ) {
-    const token = this.bearer(auth);
-    const sessionUser = token ? await this.sessions.resolve(token) : null;
-    if (!sessionUser) throw new ForbiddenException('Invalid token');
-
     const res = await this.twoFactor.disable(
       sessionUser.username,
       body.password,
       body.code,
     );
     if (!res.ok) return { ok: false, error: res.error };
-
     this.eventLog.logAuth('2fa_disable', sessionUser.username);
     return { ok: true };
   }
@@ -384,7 +377,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and invalidate current session token' })
   @ApiResponse({ status: 200, description: 'Session invalidated successfully' })
   async logout(@Headers('authorization') auth?: string) {
-    const token = this.bearer(auth);
+    const token = extractBearerToken(auth);
     if (!token) return { ok: true };
     const sessionUser = await this.sessions.resolve(token);
     if (sessionUser) {
@@ -396,18 +389,17 @@ export class AuthController {
   }
 
   @Get('me')
+  @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Get current authenticated user info' })
   @ApiResponse({ status: 200, description: 'Returns current user object' })
   @ApiResponse({ status: 403, description: 'Invalid or missing token' })
-  async me(@Headers('authorization') auth?: string) {
-    const token = this.bearer(auth);
-    const user = token ? await this.sessions.resolve(token) : null;
-    if (!user) throw new ForbiddenException('Invalid token');
+  async me(@CurrentUser() user: SessionUser) {
     return { ok: true, user };
   }
 
   @Get('users')
+  @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'List all users (admin only)' })
   @ApiResponse({
@@ -415,8 +407,7 @@ export class AuthController {
     description: 'Returns list of users, available tabs and instances',
   })
   @ApiResponse({ status: 403, description: 'Admin role required' })
-  async listUsers(@Headers('authorization') auth?: string) {
-    await this.requireAdmin(auth);
+  async listUsers() {
     return {
       ok: true,
       users: await this.users.listPublic(),
@@ -429,6 +420,7 @@ export class AuthController {
   }
 
   @Post('users')
+  @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Create a new user (admin only)' })
   @ApiBody({ type: CreateUserDto })
@@ -438,10 +430,10 @@ export class AuthController {
     description: 'Admin role required or validation error',
   })
   async createUser(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() admin: SessionUser,
     @Body() body: Record<string, unknown>,
   ) {
-    const actor = await this.requireAdmin(auth);
+    const actor = admin.username;
     const r = await this.users.createUser(body as never, actor);
     if (!r.ok) throw new ForbiddenException(r.error);
     this.eventLog.logAuth('user_create', actor, String(body.username || ''));
@@ -449,6 +441,7 @@ export class AuthController {
   }
 
   @Put('users/:username')
+  @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Update an existing user (admin only)' })
   @ApiParam({ name: 'username', description: 'Username to update' })
@@ -456,11 +449,11 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 403, description: 'Admin role required' })
   async updateUser(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() admin: SessionUser,
     @Param('username') username: string,
     @Body() body: Record<string, unknown>,
   ) {
-    const actor = await this.requireAdmin(auth);
+    const actor = admin.username;
     const beforeList = await this.users.listPublic();
     const before = beforeList.find(
       (u) => u.username.toLowerCase() === username.toLowerCase(),
@@ -510,16 +503,17 @@ export class AuthController {
   }
 
   @Post('users/:username/reset-2fa')
+  @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Reset 2FA for a user (admin only)' })
   @ApiParam({ name: 'username', description: 'Username to reset 2FA for' })
   @ApiResponse({ status: 200, description: '2FA reset successfully' })
   @ApiResponse({ status: 403, description: 'Admin role required' })
   async reset2fa(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() admin: SessionUser,
     @Param('username') username: string,
   ) {
-    const actor = await this.requireAdmin(auth);
+    const actor = admin.username;
     const r = await this.twoFactor.resetForUser(username);
     if (!r.ok) throw new ForbiddenException(r.error);
     this.eventLog.logAuth('user_reset_2fa', actor, username);
@@ -527,6 +521,7 @@ export class AuthController {
   }
 
   @Delete('users/:username')
+  @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Delete a user (admin only)' })
   @ApiParam({ name: 'username', description: 'Username to delete' })
@@ -536,28 +531,13 @@ export class AuthController {
     description: 'Admin role required or cannot delete self',
   })
   async deleteUser(
-    @Headers('authorization') auth: string | undefined,
+    @CurrentUser() admin: SessionUser,
     @Param('username') username: string,
   ) {
-    const actor = await this.requireAdmin(auth);
+    const actor = admin.username;
     const r = await this.users.deleteUser(username, actor);
     if (!r.ok) throw new ForbiddenException(r.error);
     this.eventLog.logAuth('user_delete', actor, username);
     return { ok: true };
-  }
-
-  private bearer(auth?: string): string | null {
-    const m = /^Bearer\s+(.+)$/i.exec(auth || '');
-    return m ? m[1].trim() : null;
-  }
-
-  private async requireAdmin(auth?: string): Promise<string> {
-    const token = this.bearer(auth);
-    const sessionUser = token ? await this.sessions.resolve(token) : null;
-    if (!sessionUser) throw new ForbiddenException('admin_required');
-    const record = await this.users.findUser(sessionUser.username);
-    if (!record || record.role !== 'administrator' || record.enabled === false)
-      throw new ForbiddenException('admin_required');
-    return sessionUser.username;
   }
 }

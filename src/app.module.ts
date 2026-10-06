@@ -25,6 +25,7 @@ import { ApiBridgeService } from './api/api-bridge.service';
 import { InstanceContextInterceptor } from './api/instance-context.interceptor';
 import { AuthController } from './auth/auth.controller';
 import { AuthGuard } from './auth/auth.guard';
+import { AdminGuard } from './auth/admin.guard';
 import { SessionService } from './auth/session.service';
 import { UsersService } from './auth/users.service';
 import { TwoFactorService } from './auth/two-factor.service';
@@ -229,6 +230,7 @@ migrateOldDb('fcc_metrics.sqlite-wal', 'fcc_metrics.sqlite-wal');
     PanelStartupLogService,
     WebPanelListenerService,
     AuthGuard,
+    AdminGuard,
     EventsGateway,
     LegacyMigrationService,
     MetricsCollectorService,

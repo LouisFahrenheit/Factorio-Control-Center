@@ -26,9 +26,15 @@ export function useAuth() {
   });
 
   async function logout(redirectTo = '/login') {
+    const token = getToken();
     resetAuthUiState();
     try {
-      await api('/api/auth/logout', { method: 'POST', omitBearer: true });
+      if (token) {
+        await api('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
     } catch {
       /* ignore */
     }
