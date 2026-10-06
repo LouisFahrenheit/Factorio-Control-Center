@@ -47,13 +47,6 @@ export async function api<T = Record<string, unknown>>(
     /* non-json */
   }
   if (!res.ok) {
-    if (
-      token &&
-      !omitBearer &&
-      (res.status === 401 || (res.status === 403 && path.startsWith('/api/auth/')))
-    ) {
-      setToken(null);
-    }
     const nestMessage = Array.isArray(data?.message)
       ? data.message[0]
       : typeof data?.message === 'string'
@@ -61,6 +54,20 @@ export async function api<T = Record<string, unknown>>(
         : undefined;
     const httpError =
       typeof data?.error === 'string' ? data.error.trim() : '';
+
+    // 401 always means the session is gone; clear the token.
+    // 403 only clears on session-level errors — not business-logic denials
+    // like 'last_admin' which should not log the user out.
+    const SESSION_ERRORS = new Set(['admin_required', 'invalid_credentials', 'Forbidden', 'Unauthorized']);
+    const shouldClearToken =
+      token &&
+      !omitBearer &&
+      (res.status === 401 ||
+        (res.status === 403 &&
+          (SESSION_ERRORS.has(httpError) || SESSION_ERRORS.has(nestMessage ?? ''))));
+    if (shouldClearToken) {
+      setToken(null);
+    }
     const specificError =
       httpError && !/^(Forbidden|Unauthorized)$/i.test(httpError)
         ? httpError

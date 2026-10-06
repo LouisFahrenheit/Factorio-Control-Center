@@ -123,17 +123,14 @@ export class UsersService implements OnModuleInit {
 
   cleanTabs(raw: unknown, role: UserRole): string[] {
     if (role === 'administrator') return [...ALL_TABS];
+    const allowed = new Set<string>(ALL_TABS);
     const tabs = Array.isArray(raw) ? raw : [];
-    const out: string[] = [];
+    const seen = new Set<string>();
     for (const t of tabs) {
       const key = String(t || '').trim();
-      if (
-        ALL_TABS.includes(key as (typeof ALL_TABS)[number]) &&
-        !out.includes(key)
-      )
-        out.push(key);
+      if (allowed.has(key) && !seen.has(key)) seen.add(key);
     }
-    return out;
+    return Array.from(seen);
   }
 
   defaultTabsForRole(role: UserRole): string[] {
