@@ -1,8 +1,10 @@
-export type WebUserRole = 'administrator' | 'server_engineer' | 'moderator';
+import type { UserRole } from '@fcc/shared/fcc-roles';
+
+export type WebUserRole = UserRole;
 
 export interface WebUser {
   username: string;
-  role?: WebUserRole | string;
+  role?: WebUserRole;
   tabs?: string[];
   instance_ids?: string[];
   enabled?: boolean;

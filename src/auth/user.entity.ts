@@ -6,7 +6,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export type UserRole = 'administrator' | 'server_engineer' | 'moderator';
+import { ALL_ROLES } from '../shared/fcc-roles';
+import type { UserRole } from '../shared/fcc-roles';
+
+export { ALL_ROLES };
+export type { UserRole };
 
 @Entity('users')
 export class User {

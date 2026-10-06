@@ -1,18 +1,27 @@
 import type { WebAccessInstance, WebUserRole } from '../types/webUser';
 import type { AppIconName } from './appIcons';
-import { ALL_TABS, ENGINEER_TABS, MODERATOR_TABS, WEB_USER_TAB_I18N } from '@fcc/shared/fcc-tabs';
+import {
+  ALL_TABS,
+  ENGINEER_TABS,
+  MODERATOR_TABS,
+  WEB_USER_TAB_I18N,
+} from '@fcc/shared/fcc-tabs';
 
 export { ALL_TABS, ENGINEER_TABS, MODERATOR_TABS } from '@fcc/shared/fcc-tabs';
 
 export const ADMIN_TABS = new Set(ALL_TABS);
 
 /** Configurable panel permissions (flat list). */
-export const WEB_USER_TABS: { value: string; i18n: string }[] = ALL_TABS.map((value) => ({
-  value,
-  i18n: WEB_USER_TAB_I18N[value],
-}));
+export const WEB_USER_TABS: { value: string; i18n: string }[] = ALL_TABS.map(
+  (value) => ({
+    value,
+    i18n: WEB_USER_TAB_I18N[value],
+  }),
+);
 
-const TAB_I18N = Object.fromEntries(WEB_USER_TABS.map((tab) => [tab.value, tab.i18n]));
+const TAB_I18N = Object.fromEntries(
+  WEB_USER_TABS.map((tab) => [tab.value, tab.i18n]),
+);
 const TAB_ORDER = WEB_USER_TABS.map((tab) => tab.value);
 
 export function normalizeUserTabs(tabs: string[]): string[] {
@@ -20,11 +29,9 @@ export function normalizeUserTabs(tabs: string[]): string[] {
   return Array.from(set);
 }
 
-const ROLE_I18N: Record<string, string> = {
-  administrator: 'web_role_administrator',
-  server_engineer: 'web_role_server_engineer',
-  moderator: 'web_role_moderator',
-};
+import { ROLE_I18N } from '@fcc/shared/fcc-roles';
+
+export { ROLE_I18N };
 
 function sortedNormalizedTabs(tabs: string[] | undefined): string[] {
   const normalized = normalizeUserTabs(Array.isArray(tabs) ? tabs : []);
@@ -45,16 +52,24 @@ function tabLabel(tab: string, t: (key: string) => string): string {
   return loc === key ? tab : loc;
 }
 
-export function listUserTabLabels(tabs: string[] | undefined, t: (key: string) => string): string[] {
+export function listUserTabLabels(
+  tabs: string[] | undefined,
+  t: (key: string) => string,
+): string[] {
   return sortedNormalizedTabs(tabs).map((tab) => tabLabel(tab, t));
 }
 
-export function formatUserTabs(tabs: string[] | undefined, t: (key: string) => string): string {
+export function formatUserTabs(
+  tabs: string[] | undefined,
+  t: (key: string) => string,
+): string {
   return listUserTabLabels(tabs, t).join(', ');
 }
 
 function sortedInstanceIds(instanceIds: string[] | undefined): string[] {
-  return Array.isArray(instanceIds) ? instanceIds.map((x) => String(x).trim()).filter(Boolean) : [];
+  return Array.isArray(instanceIds)
+    ? instanceIds.map((x) => String(x).trim()).filter(Boolean)
+    : [];
 }
 
 export function isAllUserInstances(
@@ -64,7 +79,9 @@ export function isAllUserInstances(
   const ids = sortedInstanceIds(instanceIds);
   if (!ids.length) return false;
   if (ids.includes('*')) return true;
-  const allIds = instances.map((it) => String(it.id || '').trim()).filter(Boolean);
+  const allIds = instances
+    .map((it) => String(it.id || '').trim())
+    .filter(Boolean);
   if (!allIds.length) return false;
   const idSet = new Set(ids);
   return allIds.every((id) => idSet.has(id));
@@ -81,7 +98,10 @@ export function listUserInstanceLabels(
 
   const idSet = new Set(ids);
   const nameById = new Map(
-    instances.map((it) => [String(it.id || '').trim(), String(it.name || it.id || '').trim()]),
+    instances.map((it) => [
+      String(it.id || '').trim(),
+      String(it.name || it.id || '').trim(),
+    ]),
   );
   const ordered = instances
     .map((it) => String(it.id || '').trim())
@@ -113,9 +133,12 @@ export function userRoleIcon(role: string | undefined): AppIconName {
   return 'person_shield';
 }
 
-export function roleLabel(role: string | undefined, t: (key: string) => string): string {
+export function roleLabel(
+  role: string | undefined,
+  t: (key: string) => string,
+): string {
   const r = String(role || 'moderator');
-  const key = ROLE_I18N[r] || 'web_role_moderator';
+  const key = (ROLE_I18N as Record<string, string>)[r] || 'web_role_moderator';
   return t(key);
 }
 
@@ -127,7 +150,8 @@ export function defaultTabsForRole(role: WebUserRole | string): Set<string> {
 }
 
 export function resolveUserTabs(role: string, preferred?: string[]): string[] {
-  if (Array.isArray(preferred) && preferred.length) return normalizeUserTabs(preferred);
+  if (Array.isArray(preferred) && preferred.length)
+    return normalizeUserTabs(preferred);
   return Array.from(defaultTabsForRole(role));
 }
 
@@ -135,7 +159,10 @@ export function tabsDisabledForRole(role: string): boolean {
   return String(role || '') === 'administrator';
 }
 
-export function isEnabledAdminUser(user: { role?: string; enabled?: boolean }): boolean {
+export function isEnabledAdminUser(user: {
+  role?: string;
+  enabled?: boolean;
+}): boolean {
   return user.role === 'administrator' && user.enabled !== false;
 }
 
@@ -143,14 +170,24 @@ export function isLastEnabledAdmin(
   users: { username?: string; role?: string; enabled?: boolean }[],
   username: string,
 ): boolean {
-  const needle = String(username || '').trim().toLowerCase();
+  const needle = String(username || '')
+    .trim()
+    .toLowerCase();
   if (!needle) return false;
-  const target = users.find((u) => String(u.username || '').trim().toLowerCase() === needle);
+  const target = users.find(
+    (u) =>
+      String(u.username || '')
+        .trim()
+        .toLowerCase() === needle,
+  );
   if (!target || !isEnabledAdminUser(target)) return false;
   return users.filter(isEnabledAdminUser).length <= 1;
 }
 
-export function localizeWebUserError(err: string, t: (key: string) => string): string {
+export function localizeWebUserError(
+  err: string,
+  t: (key: string) => string,
+): string {
   const code = String(err || '').trim();
   if (code === 'last_admin') {
     const msg = t('web_last_admin_forbidden');

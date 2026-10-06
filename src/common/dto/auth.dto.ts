@@ -7,6 +7,8 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { ALL_ROLES } from '../../shared/fcc-roles';
+import type { UserRole } from '../../shared/fcc-roles';
 
 export class LoginDto {
   @ApiProperty({ example: 'admin', description: 'Username' })
@@ -36,10 +38,10 @@ export class CreateUserDto {
 
   @ApiProperty({
     example: 'moderator',
-    enum: ['administrator', 'server_engineer', 'moderator'],
+    enum: [...ALL_ROLES],
   })
-  @IsEnum(['administrator', 'server_engineer', 'moderator'])
-  role: string;
+  @IsEnum(ALL_ROLES)
+  role: UserRole;
 
   @ApiProperty({ example: true })
   @IsBoolean()
@@ -73,11 +75,11 @@ export class UpdateUserDto {
 
   @ApiProperty({
     required: false,
-    enum: ['administrator', 'server_engineer', 'moderator'],
+    enum: [...ALL_ROLES],
   })
   @IsOptional()
-  @IsEnum(['administrator', 'server_engineer', 'moderator'])
-  role?: string;
+  @IsEnum(ALL_ROLES)
+  role?: UserRole;
 
   @ApiProperty({ required: false })
   @IsOptional()

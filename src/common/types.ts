@@ -28,10 +28,12 @@ export interface InstancesState {
   selectedId: string;
 }
 
+import type { UserRole } from '../shared/fcc-roles';
+
 export interface WebUserRecord {
   username: string;
   password_hash: string;
-  role: 'administrator' | 'server_engineer' | 'moderator';
+  role: UserRole;
   tabs: string[];
   instance_ids?: string[];
   enabled: boolean;
@@ -39,7 +41,7 @@ export interface WebUserRecord {
 
 export interface SessionUser {
   username: string;
-  role: 'administrator' | 'server_engineer' | 'moderator';
+  role: UserRole;
   tabs: string[];
   instance_ids: string[];
   enabled: boolean;
@@ -48,7 +50,7 @@ export interface SessionUser {
 
 export interface PublicUserView {
   username: string;
-  role: string;
+  role: UserRole;
   tabs: string[];
   instance_ids: string[];
   enabled: boolean;
