@@ -29,9 +29,11 @@ export function ThemeBackdropSync() {
     refetchInterval: ready && loggedIn && isPanel && !!instances.selectedId ? 2000 : false,
   });
 
+  const { rows: instanceRows, getEffectiveStatus, selectedId } = instances;
+
   const ctx = useMemo(() => {
-    const instanceStatuses = instances.rows.map(
-      (row) => instances.getEffectiveStatus(row) || String(row.status || 'stopped'),
+    const instanceStatuses = instanceRows.map(
+      (row) => getEffectiveStatus(row) || String(row.status || 'stopped'),
     );
 
     let statusKind = 'stopped';
@@ -54,7 +56,7 @@ export function ThemeBackdropSync() {
     return {
       loggedIn,
       instancesDashboard: isInstances || isMobile,
-      panelMode: isPanel && !!instances.selectedId,
+      panelMode: isPanel && !!selectedId,
       statusKind,
       serverRunning,
       instanceStatuses,
@@ -64,9 +66,9 @@ export function ThemeBackdropSync() {
     isInstances,
     isMobile,
     isPanel,
-    instances.rows,
-    instances.getEffectiveStatus,
-    instances.selectedId,
+    instanceRows,
+    getEffectiveStatus,
+    selectedId,
     panelStatusQ.data,
   ]);
 

@@ -394,7 +394,7 @@ export function useServerControl(
     } catch (e) {
       notifyApiError(startStopLabel, e, t);
     }
-  }, [running, kind, stop, start, startStopLabel]);
+  }, [running, kind, stop, start, startStopLabel, t]);
 
   return {
     ip,

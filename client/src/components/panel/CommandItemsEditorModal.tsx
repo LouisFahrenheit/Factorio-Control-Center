@@ -17,7 +17,7 @@ export function CommandItemsEditorModal({ editor, t }: CommandItemsEditorModalPr
   const [itemName, setItemName] = useState('');
   const [itemCount, setItemCount] = useState('1');
 
-  const items = editor.selectedCommand?.items || {};
+  const items = useMemo(() => editor.selectedCommand?.items || {}, [editor.selectedCommand?.items]);
   const itemKeys = useMemo(() => Object.keys(items).sort((a, b) => a.localeCompare(b)), [items]);
 
   const filteredKeys = useMemo(() => {

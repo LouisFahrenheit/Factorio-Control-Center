@@ -56,33 +56,28 @@ export default function InstancesPage() {
 
 
 
+  const {
+    loading: instancesLoading,
+    rows: instancesRows,
+    selectInstance,
+    handleError,
+  } = instances;
+
   useEffect(() => {
-
-    if (!ready || !user || instances.loading) return;
-
+    if (!ready || !user || instancesLoading) return;
     if (!shouldAutoEnterPanel()) return;
-
-    const auto = instances.rows.find((x) => x.autoEnterPanel);
-
+    const auto = instancesRows.find((x) => x.autoEnterPanel);
     if (!auto?.id) return;
 
     void (async () => {
-
       try {
-
-        await instances.selectInstance(String(auto.id));
-
+        await selectInstance(String(auto.id));
         navigateWorkspace('/panel', { replace: true });
-
       } catch (e) {
-
-        instances.handleError(e);
-
+        handleError(e);
       }
-
     })();
-
-  }, [ready, user, instances.loading, instances.rows, instances.selectInstance, instances.handleError, nav]);
+  }, [ready, user, instancesLoading, instancesRows, selectInstance, handleError, nav]);
 
 
 

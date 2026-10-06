@@ -79,10 +79,12 @@ const LocaleContext = createContext<LocaleContextValue>({
   reload: async () => {},
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLocale() {
   return useContext(LocaleContext);
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useT() {
   return useContext(LocaleContext).t;
 }

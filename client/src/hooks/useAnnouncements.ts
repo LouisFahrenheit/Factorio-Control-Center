@@ -72,7 +72,7 @@ export function useAnnouncements(
         loadPromiseRef.current = null;
       }
     },
-    [instanceId, loadedForInstance, persistNow],
+    [instanceId, loadedForInstance],
   );
 
   useEffect(() => {

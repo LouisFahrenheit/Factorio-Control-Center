@@ -126,7 +126,7 @@ export function useModpacks(
     const list = Array.isArray(listQuery.data?.modpacks) ? listQuery.data!.modpacks!.slice() : [];
     list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
     return list;
-  }, [listQuery.data?.modpacks]);
+  }, [listQuery.data]);
 
   const activeName = String(listQuery.data?.active || '').trim();
   const activateUseSymlinks = listQuery.data?.activate_use_symlinks !== false;
@@ -157,7 +157,7 @@ export function useModpacks(
     (text: string, isErr = false) => {
       feedbackMsg(modpacksTitle, text, isErr, false, t);
     },
-    [modpacksTitle],
+    [modpacksTitle, t],
   );
 
   const reload = useCallback(async () => {
@@ -431,6 +431,7 @@ export function useModpacks(
     reload,
     removeOldZips,
     setModpackMsg,
+    startUploadBatch,
     t,
   ]);
 

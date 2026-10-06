@@ -146,34 +146,36 @@ export function useModSettings(
     }
   }, [doc, reload, serverBusy, t]);
 
-  const settingsMeta = schemaQuery.data?.settings || {};
-  const groupTitles = schemaQuery.data?.groupTitles || {};
   const readOnly = serverBusy;
 
   return useMemo(
-    () => ({
-      doc,
-      missingFile,
-      activeSection,
-      setActiveSection,
-      filter,
-      setFilter,
-      dirty,
-      readOnly,
-      loading: dataQuery.isLoading || schemaQuery.isLoading,
-      schemaLoading: schemaQuery.isLoading,
-      schemaProgress,
-      schemaCached: !!schemaQuery.data?.cached,
-      error:
-        (dataQuery.error instanceof Error ? dataQuery.error.message : dataQuery.error ? String(dataQuery.error) : '') ||
-        (schemaQuery.error instanceof Error ? schemaQuery.error.message : schemaQuery.error ? String(schemaQuery.error) : ''),
-      settingsMeta: settingsMeta as Record<string, ModSettingSchemaEntry>,
-      groupTitles,
-      reload,
-      updateEntry,
-      save,
-      saving,
-    }),
+    () => {
+      const settingsMeta = (schemaQuery.data?.settings || {}) as Record<string, ModSettingSchemaEntry>;
+      const groupTitles = schemaQuery.data?.groupTitles || {};
+      return {
+        doc,
+        missingFile,
+        activeSection,
+        setActiveSection,
+        filter,
+        setFilter,
+        dirty,
+        readOnly,
+        loading: dataQuery.isLoading || schemaQuery.isLoading,
+        schemaLoading: schemaQuery.isLoading,
+        schemaProgress,
+        schemaCached: !!schemaQuery.data?.cached,
+        error:
+          (dataQuery.error instanceof Error ? dataQuery.error.message : dataQuery.error ? String(dataQuery.error) : '') ||
+          (schemaQuery.error instanceof Error ? schemaQuery.error.message : schemaQuery.error ? String(schemaQuery.error) : ''),
+        settingsMeta,
+        groupTitles,
+        reload,
+        updateEntry,
+        save,
+        saving,
+      };
+    },
     [
       activeSection,
       dataQuery.error,
@@ -181,17 +183,15 @@ export function useModSettings(
       dirty,
       doc,
       filter,
-      groupTitles,
       missingFile,
       readOnly,
       reload,
       save,
       saving,
       schemaProgress,
-      schemaQuery.data?.cached,
+      schemaQuery.data,
       schemaQuery.error,
       schemaQuery.isLoading,
-      settingsMeta,
       updateEntry,
     ],
   );

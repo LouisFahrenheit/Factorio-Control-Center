@@ -72,7 +72,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
     [filter, saves.rows],
   );
 
-  const compareRows = saves.compare?.rows ?? [];
+  const compareRows = useMemo(() => saves.compare?.rows ?? [], [saves.compare?.rows]);
   const modsLoading = !!saves.selectedSave && saves.compareLoading;
   const initialLoading = tabInitialLoad(saves.loading, saves.rows.length > 0);
   const modCount = compareRows.length;

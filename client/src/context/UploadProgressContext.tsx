@@ -419,6 +419,7 @@ export function UploadProgressProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUploadProgress(): UploadProgressContextValue {
   const ctx = useContext(UploadProgressContext);
   if (!ctx) {

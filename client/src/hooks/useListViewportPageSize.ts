@@ -35,6 +35,7 @@ export function useListViewportPageSize(
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, rowSelector, enabled, ...deps]);
 
   return pageSize;

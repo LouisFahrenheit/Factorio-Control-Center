@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 export type TabLoadingVariant = 'split' | 'table' | 'grid' | 'form' | 'dashboard';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function tabInitialLoad(loading: boolean, hasData: boolean): boolean {
   return loading && !hasData;
 }

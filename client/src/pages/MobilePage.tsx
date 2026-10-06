@@ -38,8 +38,10 @@ export default function MobilePage() {
     return () => document.body.classList.remove('mobile-mode');
   }, []);
 
+  const { rows: instanceRows, getEffectiveStatus, selectedId } = instances;
+
   useEffect(() => {
-    const statuses = instances.rows.map((row) => instances.getEffectiveStatus(row) || String(row.status || 'stopped'));
+    const statuses = instanceRows.map((row) => getEffectiveStatus(row) || String(row.status || 'stopped'));
     syncThemeBackdrop({
       loggedIn: true,
       instancesDashboard: true,
@@ -52,20 +54,20 @@ export default function MobilePage() {
       serverRunning: statuses.some((s) => s === 'running'),
       instanceStatuses: statuses,
     });
-  }, [instances.rows, instances.getEffectiveStatus]);
+  }, [instanceRows, getEffectiveStatus]);
 
   useEffect(() => {
     if (globalBans) return;
-    if (!instances.selectedId && instances.rows.length) {
-      setModServerId(String(instances.rows[0]?.id || ''));
+    if (!selectedId && instanceRows.length) {
+      setModServerId(String(instanceRows[0]?.id || ''));
       return;
     }
-    if (instances.selectedId) setModServerId(instances.selectedId);
-  }, [globalBans, instances.selectedId, instances.rows]);
+    if (selectedId) setModServerId(selectedId);
+  }, [globalBans, selectedId, instanceRows]);
 
   const firstServerId = useMemo(
-    () => String(instances.rows[0]?.id || ''),
-    [instances.rows],
+    () => String(instanceRows[0]?.id || ''),
+    [instanceRows],
   );
 
   const banServerId = useMemo(
@@ -74,13 +76,13 @@ export default function MobilePage() {
   );
 
   const summary = useMemo(() => {
-    const total = instances.rows.length;
-    const running = instances.rows.filter((it) =>
-      ['running', 'starting', 'stopping'].includes(instances.getEffectiveStatus(it)),
+    const total = instanceRows.length;
+    const running = instanceRows.filter((it) =>
+      ['running', 'starting', 'stopping'].includes(getEffectiveStatus(it)),
     ).length;
-    const online = instances.rows.reduce((sum, it) => sum + (Number(it.onlineCount) || 0), 0);
+    const online = instanceRows.reduce((sum, it) => sum + (Number(it.onlineCount) || 0), 0);
     return { total, running, online };
-  }, [instances.rows, instances.getEffectiveStatus]);
+  }, [instanceRows, getEffectiveStatus]);
 
   function changeTheme(id: FccThemeId) {
     setThemeState(id);

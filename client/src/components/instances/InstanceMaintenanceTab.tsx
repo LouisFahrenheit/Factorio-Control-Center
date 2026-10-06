@@ -140,17 +140,19 @@ export function InstanceMaintenanceTab({
     }
   }, [reportPage, reportPageCount]);
 
+  const { setSelectedReport } = maintenance;
   useEffect(() => {
     if (innerTab !== 'reports') return;
     if (!visibleReports.length) {
-      maintenance.setSelectedReport(null);
+      setSelectedReport(null);
       return;
     }
-    const cur = maintenance.selectedReport;
-    const curKey = cur ? reportSelectionKey(cur) : '';
-    const match = visibleReports.find((r) => reportSelectionKey(r) === curKey);
-    maintenance.setSelectedReport(match || visibleReports[0]);
-  }, [innerTab, visibleReports, reportInstanceFilter]);
+    setSelectedReport((cur) => {
+      const curKey = cur ? reportSelectionKey(cur) : '';
+      const match = visibleReports.find((r) => reportSelectionKey(r) === curKey);
+      return match || visibleReports[0];
+    });
+  }, [innerTab, visibleReports, setSelectedReport]);
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);

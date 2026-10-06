@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, type Transition, type Variants } from 'motion/react';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
@@ -264,7 +264,7 @@ export function FactorioUpdateModal({ factorioUpdate, t }: FactorioUpdateModalPr
   const logRef = useRef<HTMLDivElement>(null);
   const status = factorioUpdate.status;
   const running = !!status?.running;
-  const logs = Array.isArray(status?.log) ? status.log : [];
+  const logs = useMemo(() => (Array.isArray(status?.log) ? status.log : []), [status?.log]);
   const isPick = factorioUpdate.mode === 'pick';
   const kind = phaseKind(status);
 

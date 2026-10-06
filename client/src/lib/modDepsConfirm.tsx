@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createElement, useState, type ReactNode } from 'react';
 import { modals } from '@mantine/modals';
 import { AppIcon } from '../components/AppIcon';

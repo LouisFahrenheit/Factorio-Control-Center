@@ -123,7 +123,7 @@ export function useProgramSettings(
         setDraft((d) => ({ ...d, modpack_activate_use_symlinks: !checked }));
       }
     },
-    [saveField],
+    [qc, saveField],
   );
 
   const setSyncBans = useCallback(

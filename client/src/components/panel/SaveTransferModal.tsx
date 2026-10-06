@@ -51,13 +51,13 @@ export function SaveTransferModal({ saves, t }: SaveTransferModalProps) {
     enabled: saves.transferOpen,
   });
 
-  const allServers = instancesQuery.data?.items || [];
+  const serverItems = instancesQuery.data?.items;
   const currentServerId = String(instancesQuery.data?.selectedId || '');
 
   // Filter out current active server
   const otherServers = useMemo(
-    () => allServers.filter((s) => s.id !== currentServerId),
-    [allServers, currentServerId],
+    () => (serverItems || []).filter((s) => s.id !== currentServerId),
+    [serverItems, currentServerId],
   );
 
   const selectedServer = useMemo(

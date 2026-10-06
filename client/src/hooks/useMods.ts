@@ -181,7 +181,7 @@ export function useMods(
     enabled: enabled && !!instanceId,
   });
 
-  const rawRows = useMemo(() => (Array.isArray(query.data?.mods) ? query.data!.mods! : []), [query.data?.mods]);
+  const rawRows = useMemo(() => (Array.isArray(query.data?.mods) ? query.data.mods : []), [query.data]);
   const hasPortalMods = useMemo(() => modListHasPortalMods(rawRows), [rawRows]);
   const allNonBuiltinDisabled = useMemo(() => {
     const nonBuiltin = rawRows.filter((m) => m && !m.is_builtin);

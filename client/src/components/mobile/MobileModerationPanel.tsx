@@ -35,10 +35,11 @@ export function MobileModerationPanel({
   const [busy, setBusy] = useState(false);
   const summary = players.summary;
 
+  const { selectInstance } = instances;
   useEffect(() => {
     if (!enabled || !banServerId) return;
-    void instances.selectInstance(banServerId).catch(() => {});
-  }, [enabled, banServerId, instances.selectInstance]);
+    void selectInstance(banServerId).catch(() => {});
+  }, [enabled, banServerId, selectInstance]);
 
   async function withSelectedServer(run: () => void) {
     if (!banServerId) {

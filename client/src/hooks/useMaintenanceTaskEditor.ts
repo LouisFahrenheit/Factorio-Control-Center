@@ -64,7 +64,10 @@ export function useMaintenanceTaskEditor(
     [form.instancePick, instances, t],
   );
 
-  const nextPreview = useMemo(() => nextFirePreviewLabel(form, t), [form, t, nextPreviewTick]);
+  const nextPreview = useMemo(() => {
+    void nextPreviewTick;
+    return nextFirePreviewLabel(form, t);
+  }, [form, t, nextPreviewTick]);
 
   const scheduleDisabled = form.manualOnly;
   const repeatDisabled = form.manualOnly || form.weekdays.length === 0;

@@ -52,7 +52,7 @@ export function useSaves(
     enabled,
   });
 
-  const rows = listQuery.data || [];
+  const rows = useMemo(() => listQuery.data || [], [listQuery.data]);
   const existingSaveNames = useMemo(
     () => new Set(rows.map((r) => String(r.name || '').toLowerCase())),
     [rows],
@@ -108,7 +108,7 @@ export function useSaves(
     (text: string, isErr = false) => {
       feedbackMsg(savesTitle, text, isErr, false, t);
     },
-    [savesTitle],
+    [savesTitle, t],
   );
 
   const reload = useCallback(async () => {

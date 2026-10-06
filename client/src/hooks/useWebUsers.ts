@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { modals } from '@mantine/modals';
 import { api } from '../api/client';
@@ -73,8 +73,11 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
     enabled,
   });
 
-  const users = query.data?.users || [];
-  const accessInstances: WebAccessInstance[] = query.data?.instances || [];
+  const users: WebUser[] = useMemo(() => query.data?.users || [], [query.data?.users]);
+  const accessInstances = useMemo(
+    () => (query.data?.instances || []) as WebAccessInstance[],
+    [query.data?.instances],
+  );
 
   useEffect(() => {
     if (!enabled || !query.isError) return;

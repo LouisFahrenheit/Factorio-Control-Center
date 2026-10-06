@@ -30,7 +30,7 @@ export function ModSettingsSectionPanel({
   t,
   onChange,
 }: ModSettingsSectionPanelProps) {
-  const sectionData = doc.data[section] || {};
+  const sectionData = useMemo(() => doc.data[section] || {}, [doc.data, section]);
   const groups = useMemo(() => buildSectionGroups(sectionData, settingsMeta), [sectionData, settingsMeta]);
 
   const visibleGroups = useMemo(() => {

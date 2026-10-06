@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AppIcon } from '../AppIcon';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import type { ModJobApi } from '../../hooks/useModJob';
@@ -131,7 +131,7 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
   const logRef = useRef<HTMLDivElement>(null);
   const status = modJob.status;
   const running = !!status?.running;
-  const logs = Array.isArray(status?.log) ? status.log : [];
+  const logs = useMemo(() => (Array.isArray(status?.log) ? status.log : []), [status?.log]);
   const kind = phaseKind(status);
   const downloadRows = activeDownloadRows(status);
 

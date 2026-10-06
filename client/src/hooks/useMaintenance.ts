@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, createElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, createElement } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { modals } from '@mantine/modals';
 import { api } from '../api/client';
@@ -80,7 +80,7 @@ export function useMaintenance(
     notifyNetworkFetchError(maintenanceTitle, reportsQuery.error, t);
   }, [reportsEnabled, reportsQuery.isError, reportsQuery.error, maintenanceTitle, t]);
 
-  const reports = reportsQuery.data?.reports || [];
+  const reports: MaintenanceReport[] = useMemo(() => reportsQuery.data?.reports || [], [reportsQuery.data?.reports]);
 
   useEffect(() => {
     if (!reportsEnabled || !reports.length) {
