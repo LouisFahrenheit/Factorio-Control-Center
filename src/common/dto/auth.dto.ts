@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsNotEmpty,
@@ -25,7 +26,7 @@ export class LoginDto {
 export class CreateUserDto {
   @ApiProperty({ example: 'john' })
   @IsString()
-  @MinLength(2)
+  @MinLength(2, { message: 'invalid_username' })
   username: string;
 
   @ApiProperty({
@@ -39,14 +40,16 @@ export class CreateUserDto {
   @ApiProperty({
     example: 'moderator',
     enum: [...ALL_ROLES],
+    required: false,
   })
+  @IsOptional()
   @IsEnum(ALL_ROLES)
-  role: UserRole;
+  role?: UserRole;
 
-  @ApiProperty({ example: true })
+  @ApiProperty({ example: true, required: false })
   @IsBoolean()
   @IsOptional()
-  enabled: boolean;
+  enabled?: boolean;
 
   @ApiProperty({
     example: ['servers', 'saves'],
@@ -54,6 +57,8 @@ export class CreateUserDto {
     type: [String],
   })
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   tabs?: string[];
 
   @ApiProperty({
@@ -63,6 +68,8 @@ export class CreateUserDto {
     description: 'Instance IDs the user can access. Use ["*"] for all.',
   })
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   instance_ids?: string[];
 }
 
@@ -88,10 +95,14 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false, type: [String] })
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   tabs?: string[];
 
   @ApiProperty({ required: false, type: [String] })
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   instance_ids?: string[];
 }
 

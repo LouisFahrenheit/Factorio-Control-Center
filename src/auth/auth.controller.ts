@@ -104,8 +104,8 @@ export class AuthController {
     if (!username || username.length < 2) {
       return { ok: false, error: 'username_too_short' };
     }
-    if (!password || password.length < 4) {
-      return { ok: false, error: 'password_too_short' };
+    if (!password || password.length < 8) {
+      return { ok: false, error: 'invalid_password' };
     }
 
     try {
@@ -138,11 +138,11 @@ export class AuthController {
       'Login failed — returns { ok: false, error: "invalid_credentials" }',
   })
   async login(
-    @Body() body: unknown,
+    @Body() body: LoginDto,
     @Ip() fallbackIp: string,
     @Req() req: Request,
   ) {
-    const { username, password } = (body || {}) as Record<string, string>;
+    const { username, password } = body;
     const ip = this.extractClientIp(req, fallbackIp);
     const u = String(username || '').trim();
 
@@ -431,10 +431,10 @@ export class AuthController {
   })
   async createUser(
     @CurrentUser() admin: SessionUser,
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateUserDto,
   ) {
     const actor = admin.username;
-    const r = await this.users.createUser(body as never, actor);
+    const r = await this.users.createUser(body, actor);
     if (!r.ok) throw new ForbiddenException(r.error);
     this.eventLog.logAuth('user_create', actor, String(body.username || ''));
     return { ok: true };
@@ -451,7 +451,7 @@ export class AuthController {
   async updateUser(
     @CurrentUser() admin: SessionUser,
     @Param('username') username: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: UpdateUserDto,
     @Headers('authorization') auth?: string,
   ) {
     const actor = admin.username;
@@ -478,14 +478,14 @@ export class AuthController {
         body.tabs !== undefined &&
         JSON.stringify(body.tabs) !== JSON.stringify(before.tabs)
       ) {
-        changes.push(`tabs=[${(body.tabs as string[]).join(', ')}]`);
+        changes.push(`tabs=[${body.tabs.join(', ')}]`);
       }
       if (
         body.instance_ids !== undefined &&
         JSON.stringify(body.instance_ids) !==
           JSON.stringify(before.instance_ids)
       ) {
-        const ids = body.instance_ids as string[];
+        const ids = body.instance_ids;
         if (ids.includes('*')) {
           changes.push(`servers=[All Servers]`);
         } else {
