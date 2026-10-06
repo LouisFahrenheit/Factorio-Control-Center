@@ -8,13 +8,7 @@ export async function hashPassword(
   saltHex?: string,
 ): Promise<string> {
   const salt = saltHex ? Buffer.from(saltHex, 'hex') : randomBytes(16);
-  const key = await pbkdf2Async(
-    password || '',
-    salt,
-    120_000,
-    32,
-    'sha256',
-  );
+  const key = await pbkdf2Async(password || '', salt, 120_000, 32, 'sha256');
   return `pbkdf2_sha256$${salt.toString('hex')}$${key.toString('hex')}`;
 }
 
