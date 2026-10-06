@@ -130,7 +130,7 @@ if (!existsSync(envPath) && existsSync(envExamplePath)) {
 dotenvConfig({ path: envPath });
 
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PathsService } from './config/paths.service';
 import { UsersService } from './auth/users.service';
@@ -167,6 +167,12 @@ async function bootstrap() {
 
   app.setGlobalPrefix('');
   app.enableShutdownHooks();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // Swagger/OpenAPI documentation (enabled via SWAGGER_ENABLED=true in .env)
   const swaggerEnabled =
