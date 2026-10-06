@@ -13,7 +13,11 @@ import {
   MODERATOR_TABS,
 } from '../constants/fcc.constants';
 import { PublicUserView, WebUserRecord } from '../common/types';
-import { hashPassword, verifyPassword } from './password.util';
+import {
+  hashPassword,
+  verifyPassword,
+  MIN_PASSWORD_LENGTH,
+} from './password.util';
 import { User, UserRole } from './user.entity';
 
 function isEnabledAdmin(u: User): boolean {
@@ -89,8 +93,8 @@ export class UsersService implements OnModuleInit {
     if (!cleanUser || cleanUser.length < 2) {
       throw new BadRequestException('username_too_short');
     }
-    if (!password || password.length < 4) {
-      throw new BadRequestException('password_too_short');
+    if (!password || password.length < MIN_PASSWORD_LENGTH) {
+      throw new BadRequestException('invalid_password');
     }
     const admin = this.userRepo.create({
       username: cleanUser,
@@ -228,15 +232,21 @@ export class UsersService implements OnModuleInit {
     if (!(await this.actorIsEnabledAdmin(actorUsername)))
       return { ok: false, error: 'admin_required' };
     const users = await this.load();
-    const username = String(body.username || '').trim();
-    if (!username) return { ok: false, error: 'invalid_username' };
-    if (users.some((u) => u.username.toLowerCase() === username.toLowerCase()))
+    const cleanUser = String(body.username || '').trim();
+    if (!cleanUser || cleanUser.length < 2) {
+      return { ok: false, error: 'invalid_username' };
+    }
+    if (users.some((u) => u.username.toLowerCase() === cleanUser.toLowerCase()))
       return { ok: false, error: 'user_exists' };
+    const password = typeof body.password === 'string' ? body.password : '';
+    if (!password || password.length < MIN_PASSWORD_LENGTH) {
+      return { ok: false, error: 'invalid_password' };
+    }
     const role = this.normalizeRole(body.role || 'moderator');
 
     const newUser = this.userRepo.create({
-      username,
-      passwordHash: await hashPassword(body.password || ''),
+      username: cleanUser,
+      passwordHash: await hashPassword(password),
       role,
       tabs: this.cleanTabs(body.tabs ?? this.defaultTabsForRole(role), role),
       instanceIds: body.instance_ids,
@@ -286,7 +296,13 @@ export class UsersService implements OnModuleInit {
     if (this.wouldRemoveLastEnabledAdmin(users, u, nextRole, nextEnabled))
       return { ok: false, error: 'last_admin' };
 
-    if (body.password) u.passwordHash = await hashPassword(body.password);
+    if (body.password !== undefined) {
+      const password = typeof body.password === 'string' ? body.password : '';
+      if (!password || password.length < MIN_PASSWORD_LENGTH) {
+        return { ok: false, error: 'invalid_password' };
+      }
+      u.passwordHash = await hashPassword(password);
+    }
     if (body.role) u.role = nextRole;
     if (body.tabs) u.tabs = this.cleanTabs(body.tabs, nextRole);
     if (body.instance_ids) u.instanceIds = body.instance_ids;

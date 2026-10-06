@@ -8,6 +8,7 @@ export const PBKDF2_ITERATIONS = 120_000;
 export const PBKDF2_KEYLEN = 32;
 export const PBKDF2_DIGEST = 'sha256';
 export const SALT_BYTE_LENGTH = 16;
+export const MIN_PASSWORD_LENGTH = 8;
 const HEX_32_REGEX = /^[0-9a-fA-F]{32}$/;
 const HEX_64_REGEX = /^[0-9a-fA-F]{64}$/;
 

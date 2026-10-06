@@ -70,15 +70,35 @@ describe('UsersService - Initial Admin Setup', () => {
     ).rejects.toThrow(ForbiddenException);
   });
 
-  it('validates username and password length', async () => {
+  it('validates username and password length (minimum 8 chars)', async () => {
     delete process.env.FCC_ADMIN_PASSWORD;
     await service.load();
 
     await expect(
-      service.createInitialAdmin('a', 'validPassword'),
+      service.createInitialAdmin('a', 'validPassword123'),
     ).rejects.toThrow(BadRequestException);
+
+    // Password shorter than 8 characters must throw BadRequestException
     await expect(
-      service.createInitialAdmin('validAdmin', '12'),
+      service.createInitialAdmin('validAdmin', 'short12'),
     ).rejects.toThrow(BadRequestException);
+
+    // Create valid admin
+    await service.createInitialAdmin('masteradmin', 'longSecretPassword123');
+
+    // createUser rejects passwords shorter than 8 chars
+    const createRes = await service.createUser(
+      { username: 'moderator1', password: '123' },
+      'masteradmin',
+    );
+    expect(createRes).toEqual({ ok: false, error: 'invalid_password' });
+
+    // updateUser rejects passwords shorter than 8 chars
+    const updateRes = await service.updateUser(
+      'masteradmin',
+      { password: '123' },
+      'masteradmin',
+    );
+    expect(updateRes).toEqual({ ok: false, error: 'invalid_password' });
   });
 });

@@ -151,6 +151,14 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
   const saveEditor = useCallback(async () => {
     const username = editor.username.trim();
     if (!username) return;
+    if (editorMode === 'create' && (!editor.password || editor.password.length < 8)) {
+      toast(t('invalid_password'), true);
+      return;
+    }
+    if (editorMode === 'edit' && editor.password && editor.password.length < 8) {
+      toast(t('invalid_password'), true);
+      return;
+    }
     const instance_ids = resolvedInstanceIds(editor);
     const tabs = normalizeUserTabs(editor.tabs);
     setIsSaving(true);

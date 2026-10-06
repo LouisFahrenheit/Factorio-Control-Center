@@ -215,7 +215,7 @@ export default function LoginPage() {
       showAuthMsg(t('web_setup_username_too_short'), true);
       return;
     }
-    if (!p || p.length < 4) {
+    if (!p || p.length < 8) {
       showAuthMsg(t('web_setup_password_too_short'), true);
       return;
     }
