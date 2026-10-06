@@ -54,6 +54,39 @@ describe('TwoFactorService', () => {
     service = new TwoFactorService(mockUsersService as UsersService);
   });
 
+  afterEach(() => {
+    service.onModuleDestroy();
+  });
+
+  describe('lifecycle & cleanup', () => {
+    it('starts and stops cleanup interval via onModuleInit and onModuleDestroy', () => {
+      service.onModuleInit();
+      expect((service as any).cleanupTimer).toBeDefined();
+
+      service.onModuleDestroy();
+      expect((service as any).cleanupTimer).toBeUndefined();
+    });
+
+    it('cleans up expired challenges and expired pending setups', async () => {
+      // Create active challenge
+      const token = service.createChallenge('admin');
+      expect((service as any).challenges.has(token)).toBe(true);
+
+      // Expire challenge
+      (service as any).challenges.get(token).expiresAt = Date.now() - 1000;
+
+      // Initiate pending setup and expire it
+      await service.initiateSetup('admin');
+      expect((service as any).pendingSetups.has('admin')).toBe(true);
+      (service as any).pendingSetups.get('admin').expiresAt = Date.now() - 1000;
+
+      service.cleanup();
+
+      expect((service as any).challenges.has(token)).toBe(false);
+      expect((service as any).pendingSetups.has('admin')).toBe(false);
+    });
+  });
+
   describe('setup & confirm', () => {
     it('should initiate setup and return secret and qrDataUrl', async () => {
       const res = await service.initiateSetup('admin');

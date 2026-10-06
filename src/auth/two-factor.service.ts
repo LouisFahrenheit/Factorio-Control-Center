@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import * as OTPAuth from 'otpauth';
 import * as QRCode from 'qrcode';
 import { randomBytes, createHash } from 'crypto';
@@ -17,17 +22,27 @@ interface PendingSetup {
 }
 
 @Injectable()
-export class TwoFactorService {
+export class TwoFactorService implements OnModuleInit, OnModuleDestroy {
   private readonly log = new Logger(TwoFactorService.name);
   private readonly challenges = new Map<string, ChallengeRecord>();
   private readonly pendingSetups = new Map<string, PendingSetup>();
+  private cleanupTimer?: NodeJS.Timeout;
 
-  constructor(private readonly users: UsersService) {
-    // Periodic cleanup of stale challenges and pending setups every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000).unref();
+  constructor(private readonly users: UsersService) {}
+
+  onModuleInit() {
+    const FIVE_MIN_MS = 5 * 60 * 1000;
+    this.cleanupTimer = setInterval(() => this.cleanup(), FIVE_MIN_MS);
   }
 
-  private cleanup(): void {
+  onModuleDestroy() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = undefined;
+    }
+  }
+
+  cleanup(): void {
     const now = Date.now();
     for (const [k, v] of this.challenges.entries()) {
       if (v.expiresAt < now) this.challenges.delete(k);
