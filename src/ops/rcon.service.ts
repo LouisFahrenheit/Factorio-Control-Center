@@ -79,7 +79,7 @@ export class RconService implements OnModuleDestroy {
     let conn = this.connections.get(key);
 
     if (!conn) {
-      conn = this.createConnection(h, p, password, key);
+      conn = this.createConnection(h, p, password);
       this.connections.set(key, conn);
       this.connect(conn);
     } else if (conn.password !== password) {
@@ -117,7 +117,6 @@ export class RconService implements OnModuleDestroy {
     host: string,
     port: number,
     password: string,
-    key: string,
   ): RconConnection {
     return {
       host,

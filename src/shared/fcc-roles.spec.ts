@@ -1,4 +1,4 @@
-import { ALL_ROLES, ROLE_I18N, UserRole } from './fcc-roles';
+import { ALL_ROLES, ROLE_I18N } from './fcc-roles';
 
 describe('fcc-roles', () => {
   it('defines the 3 canonical roles', () => {

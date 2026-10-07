@@ -19,7 +19,6 @@ import {
   hasSpaceAge,
   readModList,
   readServerSettingsNetworkFlags,
-  readServerSettingsDetails,
 } from '../ops/ops-utils';
 import { isBuiltinModName } from '../ops/mod-deps';
 import { PathManager } from '../ops/path-manager';

@@ -20,7 +20,6 @@ import {
   serializeTranslationsDoc,
   splitMergedCatalog,
   type CommandsBaseDoc,
-  type CommandsMergedDoc,
   type CommandsTranslationsDoc,
 } from './commands-catalog.merge';
 

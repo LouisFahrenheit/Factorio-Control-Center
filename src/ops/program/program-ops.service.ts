@@ -1,14 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import {
-  copyFileSync,
-  existsSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from 'fs';
+import { copyFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { join, relative } from 'path';
-import { parse, stringify } from 'ini';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { PathsService } from '../../config/paths.service';
 import { InstancesService } from '../../instances/instances.service';
@@ -29,7 +21,6 @@ import {
   resolveGameBindIp,
 } from '../../common/network-validation';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
-import { encryptString } from '../../common/crypto.util';
 
 const RUNTIME_TOUCH_KEYS = new Set([
   'tls_enabled',

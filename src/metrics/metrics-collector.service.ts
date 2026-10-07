@@ -57,7 +57,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   async collect(): Promise<void> {
     try {
       const activeInstances = [...this.runtime.runtimes.entries()].filter(
-        ([_, rt]) => rt.proc && rt.proc.pid && rt.proc.exitCode === null,
+        ([, rt]) => rt.proc && rt.proc.pid && rt.proc.exitCode === null,
       );
 
       if (activeInstances.length === 0) return;

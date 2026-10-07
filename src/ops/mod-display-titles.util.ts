@@ -1,6 +1,6 @@
 import AdmZip from 'adm-zip';
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
-import { basename, dirname, extname, join, normalize, resolve } from 'path';
+import { basename, dirname, join } from 'path';
 
 export type LocaleSections = Record<string, Record<string, string>>;
 

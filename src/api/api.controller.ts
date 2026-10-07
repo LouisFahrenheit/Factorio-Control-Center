@@ -439,7 +439,7 @@ export class ApiController {
   @ApiBody({ type: SelectInstanceDto })
   @ApiResponse({ status: 200, description: 'Instance selected' })
   @ApiResponse({ status: 400, description: 'Instance not found or forbidden' })
-  async instancesSelect(@Req() req: Request, @Body() body: { id?: string }) {
+  instancesSelect(@Req() req: Request, @Body() body: { id?: string }) {
     const iid = String(body.id || '').trim();
     const allowed = this.me(req).instance_ids || [];
     if (!allowed.includes('*') && iid && !allowed.includes(iid)) {

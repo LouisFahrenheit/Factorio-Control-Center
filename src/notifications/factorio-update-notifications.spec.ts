@@ -113,19 +113,20 @@ describe('Factorio Update Notifications', () => {
           new TelegramService(),
         ),
         sendMessage: jest.fn(
-          async (
+          (
             botToken: string,
             chatId: string,
             text: string,
             silent?: boolean,
           ) => {
             sentMessages.push({ botToken, chatId, text, silent });
+            return Promise.resolve();
           },
         ),
       };
 
       mockWebhooks = {
-        dispatch: jest.fn(async () => {}),
+        dispatch: jest.fn().mockResolvedValue(undefined),
       };
 
       mockPaths = {

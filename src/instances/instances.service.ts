@@ -10,10 +10,7 @@ import { InstanceItem, InstancesState } from '../common/types';
 import { PathsService } from '../config/paths.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { AuditLogService } from '../maintenance/audit-log.service';
-import {
-  INSTANCE_ALL,
-  taskTargetInstanceIds,
-} from '../maintenance/maintenance-time.util';
+import { INSTANCE_ALL } from '../maintenance/maintenance-time.util';
 import {
   ensureServerSettingsOptionsFromWebPanel,
   nowStamp,

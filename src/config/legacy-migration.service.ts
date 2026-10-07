@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ModuleRef } from '@nestjs/core';
 import { existsSync, renameSync, writeFileSync } from 'fs';
-import * as path from 'path';
 import { randomBytes } from 'crypto';
 import { encryptString } from '../common/crypto.util';
 import { PathsService } from '../config/paths.service';
@@ -14,7 +13,6 @@ import { MaintenanceSchedule } from '../maintenance/maintenance-schedule.entity'
 import { SystemPreference } from '../config/system-preference.entity';
 import { InstancesService } from '../instances/instances.service';
 import { FccConfigService } from '../config/fcc-config.service';
-import { CommandsCatalogService } from '../ops/commands-catalog.service';
 
 @Injectable()
 export class LegacyMigrationService implements OnModuleInit {
@@ -377,7 +375,7 @@ DEBUG_LOGS=${w.debug_logs ?? 'false'}
           `    (Renamed ${originalPath.split(/[\\/]/).pop()} to .bak)`,
         );
       }
-    } catch (e) {
+    } catch {
       // Ignored
     }
   }

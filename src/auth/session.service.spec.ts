@@ -19,11 +19,11 @@ describe('SessionService', () => {
     };
 
     mockUsersService = {
-      findUser: jest.fn().mockImplementation(async (uname: string) => {
+      findUser: jest.fn().mockImplementation((uname: string) => {
         if (uname.toLowerCase() === mockUserRecord.username.toLowerCase()) {
-          return mockUserRecord;
+          return Promise.resolve(mockUserRecord);
         }
-        return undefined;
+        return Promise.resolve(undefined);
       }),
       normalizeRole: jest.fn().mockImplementation((r) => r),
       cleanTabs: jest.fn().mockImplementation((t) => t || []),
@@ -112,7 +112,7 @@ describe('SessionService', () => {
     });
 
     it('preserves other users sessions when revoking', async () => {
-      const tokenAdmin = await sessionService.createSession('testadmin');
+      await sessionService.createSession('testadmin');
 
       // Create another session directly with createToken
       const otherUser: SessionUser = {
@@ -122,7 +122,7 @@ describe('SessionService', () => {
         instance_ids: [],
         enabled: true,
       };
-      const tokenOther = sessionService.createToken(otherUser);
+      sessionService.createToken(otherUser);
 
       sessionService.revokeAllForUser('testadmin');
 

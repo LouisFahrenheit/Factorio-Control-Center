@@ -51,7 +51,7 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
     return token;
   }
 
-  async createSession(username: string, ip?: string): Promise<string> {
+  async createSession(username: string, _ip?: string): Promise<string> {
     const record = await this.users.findUser(username);
     if (!record || !record.enabled) throw new Error('invalid_credentials');
     const role = this.users.normalizeRole(record.role);

@@ -9,14 +9,18 @@ describe('UsersService - Initial Admin Setup', () => {
   beforeEach(() => {
     savedUsers = [];
     mockUserRepo = {
-      find: jest.fn().mockImplementation(async () => [...savedUsers]),
-      count: jest.fn().mockImplementation(async () => savedUsers.length),
+      find: jest
+        .fn()
+        .mockImplementation(() => Promise.resolve([...savedUsers])),
+      count: jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(savedUsers.length)),
       create: jest
         .fn()
         .mockImplementation((dto) => ({ ...dto, id: savedUsers.length + 1 })),
-      save: jest.fn().mockImplementation(async (entity) => {
+      save: jest.fn().mockImplementation((entity) => {
         savedUsers.push(entity);
-        return entity;
+        return Promise.resolve(entity);
       }),
     };
     service = new UsersService(mockUserRepo);

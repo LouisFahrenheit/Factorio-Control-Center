@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { compareVersions, gameVersion, hasSpaceAge } from '../ops-utils';
+import { gameVersion, hasSpaceAge } from '../ops-utils';
 import { isOptionalDependencyString } from '../mod-deps';
 
 const GAME_ENGINE_DEP_VER_RE =

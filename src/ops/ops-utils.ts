@@ -58,6 +58,7 @@ export function normalizeSaveZipName(raw: string): string | null {
   if (!n) return null;
   n = basename(n).replace(/\.zip$/i, '');
   if (!n || /^\.+$/.test(n)) return null;
+  // eslint-disable-next-line no-control-regex
   if (/[<>:"/\\|?*\x00-\x1f]/.test(n)) return null;
   return `${n}.zip`;
 }
@@ -76,11 +77,14 @@ export function safeZipName(name: string): string | null {
 }
 
 export function safeName(name: string, fallback = ''): string {
-  return String(name || fallback)
-    .trim()
-    .replace(/[<>:"/\\|?*\x00-\x1f]+/g, '_')
-    .replace(/^\.+/, '')
-    .slice(0, 120);
+  return (
+    String(name || fallback)
+      .trim()
+      // eslint-disable-next-line no-control-regex
+      .replace(/[<>:"/\\|?*\x00-\x1f]+/g, '_')
+      .replace(/^\.+/, '')
+      .slice(0, 120)
+  );
 }
 
 export function safeJoin(base: string, name: string): string | null {

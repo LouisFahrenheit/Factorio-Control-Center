@@ -33,12 +33,13 @@ jest.mock('archiver', () => {
           Buffer.isBuffer(content) ? content : Buffer.from(content),
         );
       },
-      finalize: async () => {
+      finalize: () => {
         const buffer = zip.toBuffer();
         if (targetStream) {
           targetStream.write(buffer);
           targetStream.end();
         }
+        return Promise.resolve();
       },
     });
   });

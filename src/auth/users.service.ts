@@ -16,12 +16,8 @@ import {
   ENGINEER_TABS,
   MODERATOR_TABS,
 } from '../constants/fcc.constants';
-import { PublicUserView, WebUserRecord } from '../common/types';
-import {
-  hashPassword,
-  verifyPassword,
-  MIN_PASSWORD_LENGTH,
-} from './password.util';
+import { PublicUserView } from '../common/types';
+import { hashPassword, MIN_PASSWORD_LENGTH } from './password.util';
 import { User, UserRole } from './user.entity';
 
 function isEnabledAdmin(u: User): boolean {

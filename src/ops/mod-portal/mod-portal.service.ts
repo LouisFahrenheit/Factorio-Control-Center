@@ -8,7 +8,6 @@ import {
   readFileSync,
 } from 'fs';
 import { join } from 'path';
-import { pipeline } from 'stream/promises';
 import { PathManager } from '../path-manager';
 import { gameVersion } from '../ops-utils';
 import { gameBelowModFactorioReq } from '../mods/mod-game-req';
@@ -135,7 +134,7 @@ export class ModPortalService {
 
   isValidPortalModId(mod: string): boolean {
     const s = (mod || '').trim();
-    return !!s && /^[A-Za-z0-9_ \-]+$/.test(s);
+    return !!s && /^[A-Za-z0-9_ -]+$/.test(s);
   }
 
   private inFlightFetch = new Map<string, Promise<Record<string, unknown>>>();

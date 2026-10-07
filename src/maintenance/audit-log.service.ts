@@ -4,7 +4,6 @@ import { writeFileSync } from 'fs';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
 import { PathsService } from '../config/paths.service';
 import { LogRotationService } from '../logging/log-rotation.service';
-import { panelActorLogLabel } from '../shared/panel-actor';
 
 export type AuditTrigger = 'manual' | 'scheduled' | 'system';
 export type ReportKind = 'manual_session' | 'maintenance_run';

@@ -67,7 +67,7 @@ export class PropertyTree {
   }
 
   static load(buf: Buffer, offset: { o: number }): PropertyTree {
-    const valueType = buf.readUInt8(offset.o);
+    const valueType: PropertyTreeType = buf.readUInt8(offset.o);
     const anyType = !!buf.readUInt8(offset.o + 1);
     offset.o += 2;
 

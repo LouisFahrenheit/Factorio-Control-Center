@@ -40,10 +40,7 @@ import {
   SetupAdminDto,
 } from '../common/dto/auth.dto';
 import { TwoFactorService } from './two-factor.service';
-import {
-  AuthRateLimiterService,
-  normalizeClientIp,
-} from './auth-rate-limiter.service';
+import { AuthRateLimiterService } from './auth-rate-limiter.service';
 import { AuthGuard } from './auth.guard';
 import { AdminGuard } from './admin.guard';
 import { CurrentUser } from './current-user.decorator';
@@ -392,7 +389,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current authenticated user info' })
   @ApiResponse({ status: 200, description: 'Returns current user object' })
   @ApiResponse({ status: 403, description: 'Invalid or missing token' })
-  async me(@CurrentUser() user: SessionUser) {
+  me(@CurrentUser() user: SessionUser) {
     return { ok: true, user };
   }
 

@@ -8,7 +8,7 @@ import {
 import { spawn, execFile, ChildProcessWithoutNullStreams } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join, normalize } from 'path';
+import { dirname, join } from 'path';
 import { randomBytes } from 'crypto';
 import { PathManager } from './path-manager';
 import { RconService } from './rcon.service';
@@ -1185,10 +1185,4 @@ export class RuntimeService implements OnModuleDestroy {
       }
     }
   }
-}
-
-function joinSafe(base: string, name: string): string {
-  const p = normalize(join(base, name));
-  if (!p.startsWith(normalize(base))) throw new Error('path_traversal');
-  return p;
 }

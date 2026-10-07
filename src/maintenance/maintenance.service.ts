@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { existsSync, rmSync } from 'fs';
 import { randomUUID } from 'crypto';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
 import { PathsService } from '../config/paths.service';
@@ -347,8 +346,8 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
             `tick task_id=${task.id} active tz=${tz || 'local'} next_fire=${fireIsoFromMs(nfMs)} delta_sec=${deltaSec.toFixed(1)}`,
           );
         }
-        await this.tickWarnsForTask(task, nfMs, tz);
-        await this.tickFireForTask(task, nfMs, tz);
+        await this.tickWarnsForTask(task, nfMs);
+        this.tickFireForTask(task, nfMs);
       } catch (e) {
         this.maintLog(
           `tick_exception task_id=${task.id} next_fire=${fireIsoFromMs(nfMs)} err=${e instanceof Error ? e.message : String(e)}`,
@@ -360,7 +359,6 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   private async tickWarnsForTask(
     task: MaintenanceTask,
     nfMs: number,
-    tz: string,
   ): Promise<void> {
     if (this.jobRunning) return;
     const taskId = task.id;
@@ -397,11 +395,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private async tickFireForTask(
-    task: MaintenanceTask,
-    nfMs: number,
-    tz: string,
-  ): Promise<void> {
+  private tickFireForTask(task: MaintenanceTask, nfMs: number): void {
     const taskId = task.id;
     const fireIso = fireIsoFromMs(nfMs);
     const nowMs = Date.now();

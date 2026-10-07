@@ -19,36 +19,33 @@ describe('TwoFactorService', () => {
     };
 
     mockUsersService = {
-      findUser: jest.fn().mockImplementation(async (username: string) => {
-        if (username.toLowerCase() === 'admin') return mockUser;
-        return undefined;
+      findUser: jest.fn().mockImplementation((username: string) => {
+        if (username.toLowerCase() === 'admin')
+          return Promise.resolve(mockUser);
+        return Promise.resolve(undefined);
       }),
       setTwoFactor: jest
         .fn()
-        .mockImplementation(async (username, enabled, secret, codes) => {
+        .mockImplementation((username, enabled, secret, codes) => {
           if (username.toLowerCase() === 'admin') {
             mockUser.twoFactorEnabled = enabled;
             mockUser.twoFactorSecret = secret;
             mockUser.twoFactorRecoveryCodes = codes;
-            return true;
+            return Promise.resolve(true);
           }
-          return false;
+          return Promise.resolve(false);
         }),
-      removeRecoveryCode: jest
-        .fn()
-        .mockImplementation(async (username, hashed) => {
-          if (
-            username.toLowerCase() === 'admin' &&
-            mockUser.twoFactorRecoveryCodes
-          ) {
-            mockUser.twoFactorRecoveryCodes =
-              mockUser.twoFactorRecoveryCodes.filter(
-                (c: string) => c !== hashed,
-              );
-            return true;
-          }
-          return false;
-        }),
+      removeRecoveryCode: jest.fn().mockImplementation((username, hashed) => {
+        if (
+          username.toLowerCase() === 'admin' &&
+          mockUser.twoFactorRecoveryCodes
+        ) {
+          mockUser.twoFactorRecoveryCodes =
+            mockUser.twoFactorRecoveryCodes.filter((c: string) => c !== hashed);
+          return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+      }),
     };
 
     service = new TwoFactorService(mockUsersService as UsersService);

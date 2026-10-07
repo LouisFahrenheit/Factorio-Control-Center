@@ -8,7 +8,6 @@ import {
   buildFccFileEnvelope,
   fccFileKindContainsLabel,
   parseJsonObject,
-  unwrapMapPresetPayload,
   unwrapMapPresetsFromFile,
 } from '../../common/fcc-file-format';
 import { PathsService } from '../../config/paths.service';
@@ -98,7 +97,7 @@ export class MapPresetsOpsService {
     return { ok: true, path: out, name: `${safeStub}.fcc` };
   }
 
-  importUpload(tmpPath: string, nameOverride = ''): OpResult {
+  importUpload(tmpPath: string, _nameOverride = ''): OpResult {
     if (!existsSync(tmpPath)) return { ok: false, error: 'tmp_not_found' };
     const raw = readFileSync(tmpPath, 'utf-8');
     const parsed = parseJsonObject(raw);

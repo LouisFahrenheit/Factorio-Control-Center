@@ -7,7 +7,6 @@ import {
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // GCM recommended
-const AUTH_TAG_LENGTH = 16;
 const SCRYPT_SALT = 'factorio-control-center-salt';
 
 /**
@@ -63,7 +62,7 @@ export function decryptString(encryptedText: string, secret: string): string {
     decrypted += decipher.final('utf8');
 
     return decrypted;
-  } catch (error) {
+  } catch {
     // Return empty string on decryption failure to avoid crashing the application
     return '';
   }

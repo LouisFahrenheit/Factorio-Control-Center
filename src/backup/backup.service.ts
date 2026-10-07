@@ -322,6 +322,7 @@ export class BackupService {
     return entries;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async saveUploadedBackup(file: {
     originalname: string;
     buffer: Buffer;
@@ -354,11 +355,11 @@ export class BackupService {
 
     // Determine target filename with uploaded prefix
     const cleanOrig = basename(file.originalname).replace(
-      /[^a-zA-Z0-9_\-\.]/g,
+      /[^a-zA-Z0-9_.-]/g,
       '',
     );
     let ts = '';
-    const match = cleanOrig.match(/\d{4}-\d{2}-\d{2}T[\d\-]+Z?/i);
+    const match = cleanOrig.match(/\d{4}-\d{2}-\d{2}T[\d-]+Z?/i);
     if (match) {
       ts = match[0];
     } else if (manifest?.createdAt) {

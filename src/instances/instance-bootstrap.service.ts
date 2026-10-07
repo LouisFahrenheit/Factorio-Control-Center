@@ -10,7 +10,6 @@ import {
   rmdirSync,
   rmSync,
   statSync,
-  writeFileSync,
   renameSync,
 } from 'fs';
 import { tmpdir } from 'os';

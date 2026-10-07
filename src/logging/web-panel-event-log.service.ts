@@ -331,11 +331,3 @@ export class WebPanelEventLogService {
     this.logRotation.appendLine(this.paths.maintenanceSchedulerLogPath(), line);
   }
 }
-
-function truncate(text: string, max: number): string {
-  const s = String(text || '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (s.length <= max) return s;
-  return `${s.slice(0, max - 1)}…`;
-}

@@ -663,6 +663,7 @@ export class ModsJobService {
       ),
     );
     this.state.download_active = 0;
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     if (firstError) throw firstError;
   }
 
@@ -713,7 +714,7 @@ export class ModsJobService {
     }
     this.appendLog('info', 'mod_job_log_download_done', [fileName, sizeMb]);
 
-    await installLock(async () => {
+    await installLock(() => {
       this.state.phase = 'install';
       this.state.active_downloads = [];
       this.state.current_name = item.name;

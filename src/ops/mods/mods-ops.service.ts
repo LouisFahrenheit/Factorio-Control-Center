@@ -1,13 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  rmSync,
-  statSync,
-} from 'fs';
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'fs';
 import { basename, join } from 'path';
 import { tmpdir } from 'os';
 import { FccConfigService } from '../../config/fcc-config.service';
@@ -16,7 +9,6 @@ import { ModPortalService } from '../mod-portal/mod-portal.service';
 import { RuntimeService } from '../runtime.service';
 import {
   OpResult,
-  compareVersions,
   copyFileUnique,
   ensureModListEntry,
   gameVersion,
@@ -48,7 +40,6 @@ import {
   normalizeModListName,
   parseDependencyModName,
   portalDependencyNames,
-  releaseRequiresSpaceAge,
   type ModInstallConflictInfo,
 } from '../mod-deps';
 import { ModsJobService } from './mods-job.service';

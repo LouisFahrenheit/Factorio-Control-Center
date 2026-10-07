@@ -41,12 +41,7 @@ import { hasFactorioExecutable } from '../ops/path-manager';
 import {
   isDockerContainer,
   getPrimaryDockerVolume,
-  getDockerVolumes,
 } from '../common/docker.util';
-import type {
-  MapGenSettingsJson,
-  MapSettingsJson,
-} from '../ops/map-gen/map-gen-presets';
 import {
   CreateSaveDto,
   BanPlayerDto,

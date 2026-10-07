@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-control-regex
 const SPLIT = /[\r\n\x00\x85\u2028\u2029]/;
 const STDIN_LINE_MAX = 512;
 const PLAYER_MAX = 128;

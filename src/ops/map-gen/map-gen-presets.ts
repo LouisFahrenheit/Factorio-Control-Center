@@ -109,8 +109,8 @@ export interface MapGenPresetBundle {
 }
 
 /** GUI display → map-settings.json raw (Factorio map generator scale). */
-const EVO_TIME_SCALE = 1e-7;
-const EVO_POLLUTION_SCALE = 1e-7;
+export const EVO_TIME_SCALE = 1e-7;
+export const EVO_POLLUTION_SCALE = 1e-7;
 
 /** Built-in presets from data/base/prototypes/map-gen-presets.lua */
 export function mapGenPresetBundle(
