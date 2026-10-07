@@ -1365,7 +1365,6 @@
   "web_setup_username_too_short": "Username must be at least 2 characters long.",
   "web_setup_password_too_short": "Password must be at least 8 characters long.",
   "username_too_short": "Username must be at least 2 characters long.",
-  "password_too_short": "Password must be at least 8 characters long.",
   "invalid_password": "Password must be at least 8 characters long.",
   "setup_already_completed": "Initial administrator setup has already been completed.",
   "setup_failed": "Failed to initialize administrator account.",
