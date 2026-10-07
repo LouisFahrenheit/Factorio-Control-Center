@@ -4,7 +4,9 @@ import {
   ForbiddenException,
   Injectable,
   UnauthorizedException,
+  Optional,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { timingSafeEqual } from 'crypto';
 import { Request } from 'express';
 import {
@@ -16,6 +18,7 @@ import { FccConfigService } from '../config/fcc-config.service';
 import { SessionService } from './session.service';
 import { UsersService } from './users.service';
 import { AUTH_TOKEN_KEY, extractBearerToken } from './auth.util';
+import { IS_PUBLIC_KEY } from './public.decorator';
 
 export const AUTH_USER_KEY = 'fccUser';
 
@@ -25,9 +28,20 @@ export class AuthGuard implements CanActivate {
     private readonly sessions: SessionService,
     private readonly config: FccConfigService,
     private readonly users: UsersService,
+    @Optional() private readonly reflector?: Reflector,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    if (this.reflector) {
+      const isPublic = this.reflector.getAllAndOverride<boolean>(
+        IS_PUBLIC_KEY,
+        [ctx.getHandler(), ctx.getClass()],
+      );
+      if (isPublic) {
+        return true;
+      }
+    }
+
     const req = ctx.switchToHttp().getRequest<Request>();
     const path = req.path || '';
     if (
