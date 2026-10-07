@@ -86,7 +86,9 @@ describe('SessionService', () => {
       // Update role and tabs in mock database
       mockUserRecord.role = 'server_engineer';
       mockUserRecord.tabs = ['control', 'servers', 'saves'];
-      mockUsersService.cleanTabs = jest.fn().mockReturnValue(['control', 'servers', 'saves']);
+      mockUsersService.cleanTabs = jest
+        .fn()
+        .mockReturnValue(['control', 'servers', 'saves']);
 
       const updatedUser = await sessionService.resolve(token);
       expect(updatedUser?.role).toBe('server_engineer');

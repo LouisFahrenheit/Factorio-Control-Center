@@ -48,7 +48,10 @@ import { AuthGuard } from './auth.guard';
 import { AdminGuard } from './admin.guard';
 import { CurrentUser } from './current-user.decorator';
 import type { SessionUser } from '../common/types';
-import { extractBearerToken } from './auth.util';
+import {
+  extractBearerToken,
+  extractClientIp as resolveClientIp,
+} from './auth.util';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -65,12 +68,7 @@ export class AuthController {
   ) {}
 
   private extractClientIp(req?: Request, fallbackIp?: string): string {
-    const forwarded = req?.headers?.['x-forwarded-for'];
-    if (typeof forwarded === 'string' && forwarded.trim()) {
-      const first = forwarded.split(',')[0].trim();
-      if (first) return normalizeClientIp(first);
-    }
-    return normalizeClientIp(fallbackIp || req?.ip);
+    return resolveClientIp(req, fallbackIp);
   }
 
   @Get('setup-status')
