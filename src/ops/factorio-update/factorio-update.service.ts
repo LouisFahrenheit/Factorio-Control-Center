@@ -882,9 +882,10 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     if (global) return global;
     if (!settingsPath || !existsSync(settingsPath)) return null;
     try {
-      const data = JSON.parse(
-        require('fs').readFileSync(settingsPath, 'utf-8'),
-      ) as Record<string, string>;
+      const data = JSON.parse(readFileSync(settingsPath, 'utf-8')) as Record<
+        string,
+        string
+      >;
       const user = String(
         data['service-username'] || data.username || '',
       ).trim();

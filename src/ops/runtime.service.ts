@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { spawn, execFile, ChildProcessWithoutNullStreams } from 'child_process';
 import { promisify } from 'util';
-import { existsSync, mkdirSync } from 'fs';
-import { dirname, join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join, normalize } from 'path';
 import { randomBytes } from 'crypto';
 import { PathManager } from './path-manager';
 import { RconService } from './rcon.service';
@@ -1121,19 +1121,12 @@ export class RuntimeService implements OnModuleDestroy {
     const path = join(rt.serverPath, 'server-history.json');
     try {
       const doc = existsSync(path)
-        ? (JSON.parse(require('fs').readFileSync(path, 'utf-8')) as Record<
-            string,
-            unknown
-          >)
+        ? (JSON.parse(readFileSync(path, 'utf-8')) as Record<string, unknown>)
         : {};
       const history = Array.isArray(doc.history) ? doc.history : [];
       history.push({ player, action, date: panelTimestamp() });
       doc.history = history.slice(-2000);
-      require('fs').writeFileSync(
-        path,
-        JSON.stringify(doc, null, 2) + '\n',
-        'utf-8',
-      );
+      writeFileSync(path, JSON.stringify(doc, null, 2) + '\n', 'utf-8');
     } catch {
       /* ignore */
     }
@@ -1195,7 +1188,6 @@ export class RuntimeService implements OnModuleDestroy {
 }
 
 function joinSafe(base: string, name: string): string {
-  const { join, normalize } = require('path') as typeof import('path');
   const p = normalize(join(base, name));
   if (!p.startsWith(normalize(base))) throw new Error('path_traversal');
   return p;

@@ -424,7 +424,7 @@ export class ServerOpsService {
   chatLogTail(tail = 500): OpResult {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
-    const path = require('path').join(sel.item.serverPath, 'chat_log.txt');
+    const path = join(sel.item.serverPath, 'chat_log.txt');
     const res = tailFile(
       path,
       Math.max(1, Math.min(Number(tail) || 500, 10000)),

@@ -9,6 +9,7 @@ import {
   statSync,
 } from 'fs';
 import { basename, join } from 'path';
+import { tmpdir } from 'os';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { InstancesService } from '../../instances/instances.service';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
@@ -469,7 +470,7 @@ export class ModsOpsService {
   buildArchive(): OpResult {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
-    const out = join(require('os').tmpdir(), `fcc_mods_${Date.now()}.zip`);
+    const out = join(tmpdir(), `fcc_mods_${Date.now()}.zip`);
     const zip = new AdmZip();
     for (const f of readdirSync(sel.pm.modsDir)) {
       if (f.toLowerCase().endsWith('.zip'))

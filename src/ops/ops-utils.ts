@@ -9,7 +9,15 @@ import {
   writeFileSync,
 } from 'fs';
 import { randomBytes } from 'crypto';
-import { basename, dirname, extname, join, normalize, resolve } from 'path';
+import {
+  basename,
+  dirname,
+  extname,
+  join,
+  normalize,
+  resolve,
+  sep,
+} from 'path';
 import { InstanceItem } from '../common/types';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
 import { InstancesService } from '../instances/instances.service';
@@ -78,7 +86,7 @@ export function safeName(name: string, fallback = ''): string {
 export function safeJoin(base: string, name: string): string | null {
   const b = normalize(resolve(base));
   const p = normalize(resolve(join(b, name)));
-  if (p !== b && !p.startsWith(b + require('path').sep)) return null;
+  if (p !== b && !p.startsWith(b + sep)) return null;
   return p;
 }
 

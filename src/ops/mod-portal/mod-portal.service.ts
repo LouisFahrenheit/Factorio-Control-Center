@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { createWriteStream, existsSync, readdirSync, unlinkSync } from 'fs';
+import {
+  createWriteStream,
+  existsSync,
+  readdirSync,
+  unlinkSync,
+  readFileSync,
+} from 'fs';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
 import { PathManager } from '../path-manager';
@@ -600,9 +606,10 @@ export class ModPortalService {
   ): { user: string; token: string } | null {
     if (!existsSync(path)) return null;
     try {
-      const data = JSON.parse(
-        require('fs').readFileSync(path, 'utf-8'),
-      ) as Record<string, string>;
+      const data = JSON.parse(readFileSync(path, 'utf-8')) as Record<
+        string,
+        string
+      >;
       const u = (data['service-username'] || data.username || '').trim();
       const t = (data['service-token'] || data.token || '').trim();
       if (u && t) return { user: u, token: t };

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 import { randomBytes } from 'crypto';
 import { panelTimestamp } from '../../common/datetime.util';
 import {
@@ -92,7 +93,7 @@ export class MapPresetsOpsService {
     const safeStub =
       preset.name.replace(/[^A-Za-z0-9_.-]+/g, '_').replace(/^\.+|\.+$/g, '') ||
       'map-preset';
-    const out = join(require('os').tmpdir(), `${safeStub}.fcc`);
+    const out = join(tmpdir(), `${safeStub}.fcc`);
     writeFileSync(out, JSON.stringify(envelope, null, 2) + '\n', 'utf-8');
     return { ok: true, path: out, name: `${safeStub}.fcc` };
   }

@@ -22,7 +22,8 @@ import { APP_VERSION } from '../constants/fcc.constants';
 import AdmZip from 'adm-zip';
 import StreamZip from 'node-stream-zip';
 
-const archiver = require('archiver');
+import * as _archiver from 'archiver';
+const archiver = _archiver as any;
 
 function createZipArchive(options: Record<string, unknown> = {}) {
   if (typeof archiver === 'function') {

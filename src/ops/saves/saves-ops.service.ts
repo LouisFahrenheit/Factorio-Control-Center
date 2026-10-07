@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { copyFileSync, existsSync, mkdirSync, rmSync, statSync } from 'fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  rmSync,
+  statSync,
+  renameSync,
+  readdirSync,
+} from 'fs';
 import { basename, join } from 'path';
 import { InstancesService } from '../../instances/instances.service';
 import { FccConfigService } from '../../config/fcc-config.service';
@@ -190,7 +198,7 @@ export class SavesOpsService {
     if (!src || !existsSync(src)) return { ok: false, error: 'not_found' };
     if (!dst || existsSync(dst)) return { ok: false, error: 'exists' };
     try {
-      require('fs').renameSync(src, dst);
+      renameSync(src, dst);
       return { ok: true, name: newName };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : String(e) };
@@ -359,14 +367,12 @@ export class SavesOpsService {
   private resolveLaunch(launchSave: string, savesDir: string): string {
     const raw = String(launchSave || '').trim();
     if (raw && raw !== 'latest') return raw;
-    const files = require('fs').existsSync(savesDir)
-      ? require('fs')
-          .readdirSync(savesDir)
-          .filter(
-            (f: string) =>
-              f.toLowerCase().endsWith('.zip') &&
-              !f.toLowerCase().endsWith('.tmp.zip'),
-          )
+    const files = existsSync(savesDir)
+      ? readdirSync(savesDir).filter(
+          (f: string) =>
+            f.toLowerCase().endsWith('.zip') &&
+            !f.toLowerCase().endsWith('.tmp.zip'),
+        )
       : [];
     return (
       files

@@ -7,9 +7,11 @@ import {
   openSync,
   readSync,
   readdirSync,
+  rmdirSync,
   rmSync,
   statSync,
   writeFileSync,
+  renameSync,
 } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
@@ -384,9 +386,9 @@ export class InstanceBootstrapService {
       for (const name of readdirSync(detected)) {
         const dst = join(target, name);
         if (existsSync(dst)) return detected;
-        require('fs').renameSync(join(detected, name), dst);
+        renameSync(join(detected, name), dst);
       }
-      require('fs').rmdirSync(detected);
+      rmdirSync(detected);
       return target;
     } catch {
       return detected;

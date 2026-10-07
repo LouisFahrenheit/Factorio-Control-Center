@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+
 /**
  * Codec for Factorio mod-settings.dat (property tree).
  * Port of factorio_data_codec.py (whitequark/factorio-data-codec, 0-clause BSD).
@@ -327,7 +329,6 @@ export function modSettingsFromJson(raw: unknown): ModSettings {
 
 export function isValidModSettingsDat(path: string): boolean {
   try {
-    const { readFileSync } = require('fs') as typeof import('fs');
     ModSettings.load(readFileSync(path));
     return true;
   } catch {

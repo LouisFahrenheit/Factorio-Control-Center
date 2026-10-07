@@ -10,8 +10,10 @@ import {
   statSync,
   symlinkSync,
   writeFileSync,
+  renameSync,
 } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 import { panelTimestamp } from '../../common/datetime.util';
 import {
   buildFccFileEnvelope,
@@ -359,7 +361,7 @@ export class ModpacksOpsService {
     if (!existsSync(this.dir(old))) return { ok: false, error: 'not_found' };
     if (old !== nn && existsSync(this.dir(nn)))
       return { ok: false, error: 'exists' };
-    require('fs').renameSync(this.dir(old), this.dir(nn));
+    renameSync(this.dir(old), this.dir(nn));
     if (this.activeGet() === old) this.activeSet(nn);
     return { ok: true, name: nn };
   }
@@ -464,7 +466,7 @@ export class ModpacksOpsService {
         created_at: panelTimestamp(),
         contains: fccFileKindContainsLabel('modpack', localeStrings),
       });
-      const out = join(require('os').tmpdir(), `${safeStub}.fcc`);
+      const out = join(tmpdir(), `${safeStub}.fcc`);
       writeFileSync(out, JSON.stringify(envelope, null, 2) + '\n', 'utf-8');
       return { ok: true, path: out, name: `${safeStub}.fcc` };
     }
@@ -524,7 +526,7 @@ export class ModpacksOpsService {
       Buffer.from(JSON.stringify(impManifest, null, 2) + '\n', 'utf-8'),
     );
 
-    const outZip = join(require('os').tmpdir(), `${safeStub}.zip`);
+    const outZip = join(tmpdir(), `${safeStub}.zip`);
     zip.writeZip(outZip);
     return { ok: true, path: outZip, name: `${safeStub}.zip` };
   }
@@ -820,7 +822,7 @@ export class ModpacksOpsService {
         const nestedDir = join(packDir, topItems[0]);
         const nestedItems = readdirSync(nestedDir);
         for (const item of nestedItems) {
-          require('fs').renameSync(join(nestedDir, item), join(packDir, item));
+          renameSync(join(nestedDir, item), join(packDir, item));
         }
         rmSync(nestedDir, { recursive: true, force: true });
       }
@@ -836,7 +838,7 @@ export class ModpacksOpsService {
           const src = join(packDir, item);
           const dst = join(modsDir, item);
           if (!existsSync(dst)) {
-            require('fs').renameSync(src, dst);
+            renameSync(src, dst);
           } else {
             rmSync(src, { force: true });
           }

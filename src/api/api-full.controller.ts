@@ -25,9 +25,9 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync, statSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, resolve, dirname } from 'path';
 import { randomBytes } from 'crypto';
 import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { SessionUser } from '../common/types';
@@ -1413,9 +1413,6 @@ export class ApiFullController {
   }
 
   private fsBrowse(raw: string): Record<string, unknown> {
-    const { readdirSync, existsSync, statSync } =
-      require('fs') as typeof import('fs');
-    const { join, resolve, dirname } = require('path') as typeof import('path');
     if (!raw.trim()) {
       if (process.platform === 'win32') {
         const items = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -1466,9 +1463,6 @@ export class ApiFullController {
   }
 
   private fsMkdirImpl(baseRaw: string, name: string): Record<string, unknown> {
-    const { mkdirSync, existsSync, statSync } =
-      require('fs') as typeof import('fs');
-    const { join, resolve, dirname } = require('path') as typeof import('path');
     if (!name || name === '.' || name === '..')
       return { ok: false, error: 'folder_name_invalid' };
     if (/[/\\]/.test(name)) return { ok: false, error: 'folder_name_invalid' };
@@ -1482,9 +1476,6 @@ export class ApiFullController {
   }
 
   private fsPathInfoImpl(raw: string): Record<string, unknown> {
-    const { existsSync, statSync, readdirSync } =
-      require('fs') as typeof import('fs');
-    const { resolve, join } = require('path') as typeof import('path');
     const path = String(raw || '').trim();
     if (!path) return { ok: false, error: 'path_required' };
     const full = resolve(path);
