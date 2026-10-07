@@ -996,11 +996,10 @@ export class ApiController {
     if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
     const item = this.instances.getById(instanceId);
     if (!item) throw new NotFoundException('instance_not_found');
-    const raw = (item as unknown as { notifOverride?: string | null })
-      ?.notifOverride;
-    let override = null;
+    const raw = item.notifOverride;
+    let override: unknown = null;
     try {
-      if (raw) override = JSON.parse(raw);
+      if (raw) override = JSON.parse(raw) as unknown;
     } catch {
       /* ignore */
     }
@@ -1027,7 +1026,7 @@ export class ApiController {
     const raw = override !== null ? JSON.stringify(override) : null;
     await this.instances.update(instanceId, {
       notifOverride: raw,
-    } as any);
+    });
     return { ok: true };
   }
 

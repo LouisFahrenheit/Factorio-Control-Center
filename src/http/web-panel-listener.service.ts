@@ -1,6 +1,10 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
-import { createServer as createHttpServer, Server as HttpServer } from 'http';
+import {
+  createServer as createHttpServer,
+  Server as HttpServer,
+  type RequestListener,
+} from 'http';
 import {
   createServer as createHttpsServer,
   Server as HttpsServer,
@@ -67,7 +71,7 @@ export class WebPanelListenerService implements OnModuleDestroy {
       throw new Error(this.lastError);
     }
 
-    const handler = this.app.getHttpAdapter().getInstance();
+    const handler = this.app.getHttpAdapter().getInstance() as RequestListener;
     let tlsOptions: { cert: Buffer; key: Buffer; passphrase?: string } | null =
       null;
 

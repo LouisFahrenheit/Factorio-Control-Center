@@ -884,7 +884,12 @@ export class ModpacksOpsService {
       // Update metadata mods_count and settings flag
       if (existsSync(metaPath)) {
         try {
-          const currentMeta = JSON.parse(readFileSync(metaPath, 'utf-8'));
+          const currentMeta = JSON.parse(readFileSync(metaPath, 'utf-8')) as {
+            mods_count?: number;
+            name?: string;
+            has_mod_settings?: boolean;
+            [key: string]: unknown;
+          };
           currentMeta.mods_count = localZipsCount || count;
           currentMeta.name = nm;
           if (existsSync(join(modsDir, 'mod-settings.dat'))) {

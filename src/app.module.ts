@@ -165,7 +165,10 @@ migrateOldDb('fcc_metrics.sqlite-wal', 'fcc_metrics.sqlite-wal');
       serveStaticOptions: {
         index: false,
         fallthrough: true,
-        setHeaders(res, filePath) {
+        setHeaders(
+          res: { setHeader(name: string, value: string): void },
+          filePath: string,
+        ) {
           if (filePath.endsWith('site.webmanifest')) {
             res.setHeader(
               'Content-Type',

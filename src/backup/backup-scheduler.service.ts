@@ -66,7 +66,7 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
       'nextRunAt',
     ];
     for (const k of keys) {
-      const val = (this.settings as any)[k];
+      const val = this.settings[k];
       await this.sysPrefs.upsert(
         { key: `${SECTION}.${k}`, value: String(val ?? '') },
         ['key'],

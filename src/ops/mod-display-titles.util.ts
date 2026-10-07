@@ -147,7 +147,7 @@ function mergeDataPacksLocalePass(
 
   for (const [secName, pairs] of Object.entries(cached)) {
     if (!sections[secName]) {
-      sections[secName] = Object.create(pairs);
+      sections[secName] = Object.create(pairs) as Record<string, string>;
     } else {
       Object.setPrototypeOf(sections[secName], pairs);
     }
@@ -164,7 +164,7 @@ function getAdmZipCached(zipPath: string): AdmZip | null {
     const zip = new AdmZip(zipPath);
     admZipCache.set(zipPath, { mtime: stat.mtimeMs, zip });
     if (admZipCache.size > 200) {
-      const firstKey = admZipCache.keys().next().value;
+      const firstKey = admZipCache.keys().next().value as string | undefined;
       if (firstKey) admZipCache.delete(firstKey);
     }
     return zip;
@@ -322,8 +322,8 @@ function loadModListLocales(
 
   const en: LocaleSections = {};
   for (const [k, v] of Object.entries(active)) {
-    const proto = Object.getPrototypeOf(v);
-    const clone = Object.create(proto);
+    const proto = Object.getPrototypeOf(v) as object | null;
+    const clone = Object.create(proto) as Record<string, string>;
     Object.assign(clone, v);
     en[k] = clone;
   }
@@ -444,7 +444,9 @@ function getVersionFromInfo(pkgPath: string): string {
     if (!pkgPath.toLowerCase().endsWith('.zip')) {
       const infoPath = join(pkgPath, 'info.json');
       if (existsSync(infoPath)) {
-        const info = JSON.parse(readFileSync(infoPath, 'utf-8'));
+        const info = JSON.parse(readFileSync(infoPath, 'utf-8')) as {
+          version?: unknown;
+        };
         if (typeof info.version === 'string' && info.version.trim()) {
           return info.version.trim();
         }
@@ -456,7 +458,9 @@ function getVersionFromInfo(pkgPath: string): string {
         if (ent.isDirectory) continue;
         const parts = ent.entryName.replace(/\\/g, '/').split('/');
         if (parts.length === 2 && parts[1] === 'info.json') {
-          const info = JSON.parse(zip.readAsText(ent, 'utf8'));
+          const info = JSON.parse(zip.readAsText(ent, 'utf8')) as {
+            version?: unknown;
+          };
           if (typeof info.version === 'string' && info.version.trim()) {
             return info.version.trim();
           }

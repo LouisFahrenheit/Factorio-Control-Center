@@ -111,9 +111,10 @@ export class AuthController {
       );
       this.eventLog.logAuth('login', admin.username, admin.role);
       return { ok: true, token, user: this.users.publicView(admin) };
-    } catch (err: any) {
-      this.log.warn(`Setup admin failed: ${err?.message || err}`);
-      return { ok: false, error: err?.message || 'setup_failed' };
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.log.warn(`Setup admin failed: ${errMsg}`);
+      return { ok: false, error: errMsg || 'setup_failed' };
     }
   }
 
@@ -486,7 +487,7 @@ export class AuthController {
         } else {
           const insts = this.instances.list().items;
           const names = ids.map((id) => {
-            const i = insts.find((inst: any) => inst.id === id);
+            const i = insts.find((inst) => inst.id === id);
             return i ? i.name || id : id;
           });
           changes.push(`servers=[${names.join(', ')}]`);

@@ -14,6 +14,57 @@ import { SystemPreference } from '../config/system-preference.entity';
 import { InstancesService } from '../instances/instances.service';
 import { FccConfigService } from '../config/fcc-config.service';
 
+interface LegacyUserJson {
+  username?: string;
+  password_hash?: string;
+  passwordHash?: string;
+  role?: 'administrator' | 'server_engineer' | 'moderator';
+  permissions?: string[];
+  enabled?: boolean;
+  tabs?: string[];
+  instance_ids?: string[];
+  instanceIds?: string[];
+}
+
+interface LegacyInstanceJson {
+  id?: string;
+  name?: string;
+  serverPath?: string;
+  server_path?: string;
+  ip?: string;
+  port?: string | number;
+  rconPort?: string | number;
+  rcon_port?: string | number;
+  rconPassword?: string;
+  rcon_password?: string;
+  launchSave?: string;
+  launch_save?: string;
+  autostartServer?: boolean;
+  autostart_server?: boolean;
+  autoEnterPanel?: boolean;
+  auto_enter_panel?: boolean;
+  blockUpdates?: boolean;
+  block_updates?: boolean;
+  experimentalUpdates?: boolean;
+  experimental_updates?: boolean;
+  isPublic?: boolean;
+  publicDescription?: string;
+  publicConnectionAddress?: string;
+}
+
+interface LegacyMaintenanceJson {
+  id?: string;
+  active?: boolean;
+  time_hhmm?: string;
+  weekdays?: number[];
+  repeat_weekly?: boolean;
+  manual_only?: boolean;
+  timezone?: string;
+  instance_ids?: string[];
+  options?: Record<string, unknown>;
+  last_run_key?: string;
+}
+
 @Injectable()
 export class LegacyMigrationService implements OnModuleInit {
   private readonly log = new Logger(LegacyMigrationService.name);
@@ -77,7 +128,7 @@ export class LegacyMigrationService implements OnModuleInit {
     const path = this.paths.usersPath;
     if (!existsSync(path)) return;
 
-    const data = readJsonFile<{ users?: any[] }>(path, {});
+    const data = readJsonFile<{ users?: LegacyUserJson[] }>(path, {});
     const users = Array.isArray(data.users) ? data.users : [];
 
     if (users.length > 0) {
@@ -101,8 +152,8 @@ export class LegacyMigrationService implements OnModuleInit {
           if (u.role === 'administrator') role = 'administrator';
 
           const userEnt = this.usersRepo.create({
-            username: u.username,
-            passwordHash: u.password_hash || u.passwordHash,
+            username: u.username || '',
+            passwordHash: u.password_hash || u.passwordHash || '',
             role: u.role || role,
             enabled: u.enabled !== false,
             tabs: Array.isArray(u.tabs) ? u.tabs : [],
@@ -124,10 +175,10 @@ export class LegacyMigrationService implements OnModuleInit {
     const path = this.paths.instancesPath;
     if (!existsSync(path)) return;
 
-    const data = readJsonFile<{ items?: any[]; selected_id?: string }>(
-      path,
-      {},
-    );
+    const data = readJsonFile<{
+      items?: LegacyInstanceJson[];
+      selected_id?: string;
+    }>(path, {});
     const items = Array.isArray(data.items) ? data.items : [];
 
     if (items.length > 0) {
@@ -135,11 +186,11 @@ export class LegacyMigrationService implements OnModuleInit {
       if (existing === 0) {
         for (const i of items) {
           const instEnt = this.instancesRepo.create({
-            id: i.id,
+            id: i.id || '',
             name: i.name || '',
             serverPath: i.serverPath || i.server_path || '',
             ip: i.ip || '',
-            port: i.port || '',
+            port: String(i.port || ''),
             rconPort: Number(i.rconPort || i.rcon_port || 0),
             rconPassword: i.rconPassword || i.rcon_password || '',
             launchSave: i.launchSave || i.launch_save || '',
@@ -178,10 +229,10 @@ export class LegacyMigrationService implements OnModuleInit {
     const path = this.paths.maintenancePath;
     if (!existsSync(path)) return;
 
-    const data = readJsonFile<{ tasks?: any[]; scheduler_tz?: string }>(
-      path,
-      {},
-    );
+    const data = readJsonFile<{
+      tasks?: LegacyMaintenanceJson[];
+      scheduler_tz?: string;
+    }>(path, {});
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
 
     if (tasks.length > 0) {
@@ -189,7 +240,7 @@ export class LegacyMigrationService implements OnModuleInit {
       if (existing === 0) {
         for (const t of tasks) {
           const taskEnt = this.maintenanceRepo.create({
-            id: t.id,
+            id: t.id || '',
             active: t.active !== false,
             timeHhmm: t.time_hhmm || '04:00',
             weekdays: Array.isArray(t.weekdays) ? t.weekdays : [],
@@ -231,9 +282,9 @@ export class LegacyMigrationService implements OnModuleInit {
     const fs = await import('fs');
     const path = await import('path');
 
-    let parsed;
+    let parsed: Record<string, unknown> = {};
     try {
-      parsed = ini.parse(fs.readFileSync(iniPath, 'utf-8'));
+      parsed = ini.parse(fs.readFileSync(iniPath, 'utf-8')) || {};
     } catch {
       return;
     }
@@ -241,11 +292,21 @@ export class LegacyMigrationService implements OnModuleInit {
     let dbCount = 0;
 
     // Collect values for env template
-    const w = parsed.web_panel || {};
+    const w = (
+      parsed.web_panel && typeof parsed.web_panel === 'object'
+        ? parsed.web_panel
+        : {}
+    ) as Record<string, unknown>;
 
     // Check if APP_SECRET exists in environment, otherwise generate a secure one
     const appSecret =
       process.env.APP_SECRET || randomBytes(32).toString('base64');
+
+    const apiTokenStr = typeof w.api_token === 'string' ? w.api_token : '';
+    const debugLogsStr =
+      typeof w.debug_logs === 'string' || typeof w.debug_logs === 'boolean'
+        ? String(w.debug_logs)
+        : 'false';
 
     const envTemplate = `# Factorio Control Center - Environment Configuration
 # ===================================================
@@ -280,7 +341,7 @@ PUBLIC_PORT=
 # ---------------------------------------------------
 
 # Secret token for external API access
-API_TOKEN=${w.api_token ?? ''}
+API_TOKEN=${apiTokenStr}
 
 # Secret key for encrypting sensitive data in the database (e.g. game tokens).
 # Must be a randomly generated 64-character base64 or hex string.
@@ -320,15 +381,16 @@ PANEL_THEME=
 
 # Enable verbose logging for troubleshooting purposes.
 # Default: false
-DEBUG_LOGS=${w.debug_logs ?? 'false'}
+DEBUG_LOGS=${debugLogsStr}
 `;
 
     const envKeys = ['api_token', 'debug_logs', 'app_secret'];
 
     for (const [section, values] of Object.entries(parsed)) {
       if (typeof values !== 'object' || values === null) continue;
+      const sectionObj = values as Record<string, unknown>;
 
-      for (const [k, v] of Object.entries(values)) {
+      for (const [k, v] of Object.entries(sectionObj)) {
         if (section === 'web_panel' && envKeys.includes(k)) {
           continue; // Handled by template
         } else if (section === 'language' && k === 'code') {
@@ -339,7 +401,17 @@ DEBUG_LOGS=${w.debug_logs ?? 'false'}
           // DB preference
           const key = `${section}.${k}`;
           let value =
-            typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v);
+            typeof v === 'boolean'
+              ? v
+                ? 'true'
+                : 'false'
+              : typeof v === 'string'
+                ? v
+                : typeof v === 'number' || typeof v === 'bigint'
+                  ? String(v)
+                  : v === null || v === undefined
+                    ? ''
+                    : JSON.stringify(v);
 
           if (k === 'global_token') {
             value = encryptString(value, appSecret);

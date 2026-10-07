@@ -23,20 +23,48 @@ import AdmZip from 'adm-zip';
 import StreamZip from 'node-stream-zip';
 
 import * as _archiver from 'archiver';
-const archiver = _archiver as any;
 
-function createZipArchive(options: Record<string, unknown> = {}) {
+interface ArchiverInstance {
+  on(event: string, listener: (...args: unknown[]) => void): this;
+  pipe(destination: NodeJS.WritableStream): this;
+  file(source: string, data: { name: string }): this;
+  directory(dirPath: string, destPath: string): this;
+  append(source: string | Buffer, data: { name: string }): this;
+  finalize(): Promise<void> | void;
+}
+
+type ArchiverFactoryFn = (
+  format: string,
+  options?: Record<string, unknown>,
+) => ArchiverInstance;
+
+type ArchiverZipCtor = new (
+  options?: Record<string, unknown>,
+) => ArchiverInstance;
+
+interface ArchiverModuleShape {
+  ZipArchive?: ArchiverZipCtor;
+  create?: ArchiverFactoryFn;
+  default?: ArchiverFactoryFn;
+}
+
+const archiver: unknown = _archiver;
+
+function createZipArchive(
+  options: Record<string, unknown> = {},
+): ArchiverInstance {
   if (typeof archiver === 'function') {
-    return archiver('zip', options);
+    return (archiver as ArchiverFactoryFn)('zip', options);
   }
-  if (archiver && archiver.ZipArchive) {
-    return new archiver.ZipArchive(options);
+  const mod = archiver as ArchiverModuleShape;
+  if (mod && mod.ZipArchive) {
+    return new mod.ZipArchive(options);
   }
-  if (archiver && typeof archiver.create === 'function') {
-    return archiver.create('zip', options);
+  if (mod && typeof mod.create === 'function') {
+    return mod.create('zip', options);
   }
-  if (archiver && typeof archiver.default === 'function') {
-    return archiver.default('zip', options);
+  if (mod && typeof mod.default === 'function') {
+    return mod.default('zip', options);
   }
   throw new Error('Failed to instantiate archiver');
 }

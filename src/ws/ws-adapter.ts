@@ -9,13 +9,13 @@ import type { ServerOptions } from 'socket.io';
  * created by WebPanelListenerService, instead of creating its own.
  */
 export class FccWsAdapter extends IoAdapter {
-  private ioServer: any = null;
+  private ioServer: Server | null = null;
 
   constructor(app: INestApplication) {
     super(app);
   }
 
-  createIOServer(port: number, options?: Partial<ServerOptions>) {
+  createIOServer(port: number, options?: Partial<ServerOptions>): Server {
     // Create the Socket.IO server WITHOUT an http server bound yet
     this.ioServer = new Server({
       ...options,

@@ -41,7 +41,9 @@ export class BackupController {
   ) {}
 
   private requireAdmin(req: Request) {
-    const user = (req as any)[AUTH_USER_KEY] as SessionUser | undefined;
+    const user = (req as Request & { [AUTH_USER_KEY]?: SessionUser })[
+      AUTH_USER_KEY
+    ];
     if (String(user?.role ?? '') !== 'administrator')
       throw new ForbiddenException('admin_required');
   }
@@ -75,7 +77,10 @@ export class BackupController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload a backup ZIP file' })
   @ApiConsumes('multipart/form-data')
-  async upload(@Req() req: Request, @UploadedFile() file?: any) {
+  async upload(
+    @Req() req: Request,
+    @UploadedFile() file?: { originalname: string; buffer: Buffer },
+  ) {
     this.requireAdmin(req);
     if (!file) throw new BadRequestException('backup_upload_empty');
     const entry = await this.backups.saveUploadedBackup(file);

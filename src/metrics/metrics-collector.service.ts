@@ -15,6 +15,22 @@ import { InstancesService } from '../instances/instances.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import pidusage from 'pidusage';
 
+interface RawAggregateRow {
+  instanceId: string;
+  hourStr: string;
+  cpuAvg: string | number;
+  cpuMax: string | number;
+  memoryAvg: string | number;
+  memoryMax: string | number;
+  playersMax: string | number;
+  upsAvg: string | number;
+  upsMin: string | number;
+  saveSizeAvg: string | number;
+  saveSizeMax: string | number;
+  spmAvg: string | number;
+  spmMax: string | number;
+}
+
 @Injectable()
 export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   private readonly log = new Logger(MetricsCollectorService.name);
@@ -239,12 +255,11 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
           `Found ${rawCount} raw metrics older than 30 days. Grouping into hourly aggregates...`,
         );
 
-        const queryRunner = this.rawRepo.metadata.connection.createQueryRunner(
-          'metricsConnection' as any,
-        );
+        const queryRunner =
+          this.rawRepo.metadata.connection.createQueryRunner();
 
         // SQLite query to group by hour and calculate aggregates
-        const rawAggregates = await queryRunner.query(
+        const rawAggregates = (await queryRunner.query(
           `
           SELECT 
             instanceId,
@@ -265,24 +280,25 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
           GROUP BY instanceId, hourStr
         `,
           [thirtyDaysAgo.toISOString()],
-        );
+        )) as RawAggregateRow[];
+        await queryRunner.release();
 
         const hourlyRecords: InstanceHourlyMetric[] = [];
         for (const agg of rawAggregates) {
           const record = this.hourlyRepo.create({
             instanceId: agg.instanceId,
             timestamp: new Date(agg.hourStr),
-            cpuAvg: parseFloat(agg.cpuAvg) || 0,
-            cpuMax: parseFloat(agg.cpuMax) || 0,
-            memoryAvg: Math.round(parseFloat(agg.memoryAvg)) || 0,
-            memoryMax: parseInt(agg.memoryMax, 10) || 0,
-            playersMax: parseInt(agg.playersMax, 10) || 0,
-            upsAvg: parseFloat(agg.upsAvg) || 60.0,
-            upsMin: parseFloat(agg.upsMin) || 60.0,
-            saveSizeAvg: Math.round(parseFloat(agg.saveSizeAvg)) || 0,
-            saveSizeMax: parseInt(agg.saveSizeMax, 10) || 0,
-            spmAvg: parseFloat(agg.spmAvg) || 0,
-            spmMax: parseFloat(agg.spmMax) || 0,
+            cpuAvg: Number(agg.cpuAvg) || 0,
+            cpuMax: Number(agg.cpuMax) || 0,
+            memoryAvg: Math.round(Number(agg.memoryAvg)) || 0,
+            memoryMax: parseInt(String(agg.memoryMax), 10) || 0,
+            playersMax: parseInt(String(agg.playersMax), 10) || 0,
+            upsAvg: Number(agg.upsAvg) || 60.0,
+            upsMin: Number(agg.upsMin) || 60.0,
+            saveSizeAvg: Math.round(Number(agg.saveSizeAvg)) || 0,
+            saveSizeMax: parseInt(String(agg.saveSizeMax), 10) || 0,
+            spmAvg: Number(agg.spmAvg) || 0,
+            spmMax: Number(agg.spmMax) || 0,
           });
           hourlyRecords.push(record);
         }
@@ -313,10 +329,9 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
       );
 
       // Free SQLite database space
-      const queryRunner = this.rawRepo.metadata.connection.createQueryRunner(
-        'metricsConnection' as any,
-      );
-      await queryRunner.query('VACUUM');
+      const vacuumRunner = this.rawRepo.metadata.connection.createQueryRunner();
+      await vacuumRunner.query('VACUUM');
+      await vacuumRunner.release();
       this.log.log('VACUUM complete on fcc_metrics.sqlite.');
     } catch (err) {
       this.log.error(`Error during metrics aggregation/cleanup: ${err}`);

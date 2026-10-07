@@ -20,6 +20,7 @@ export interface InstanceItem {
   publicDescription?: string;
   publicConnectionAddress?: string;
   collectGameMetrics?: boolean;
+  notifOverride?: string | null;
 }
 
 export interface InstancesState {

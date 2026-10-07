@@ -35,6 +35,11 @@ import { safeStr, safeTrim } from '../../common/trim.util';
 import { ModSettingsSchemaService } from './mod-settings-schema.service';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
 
+interface ModSettingsJsonDoc {
+  data?: Record<string, Record<string, { value?: unknown }>>;
+  [key: string]: unknown;
+}
+
 const MOD_SETTINGS_MAX_BYTES = 32 * 1024 * 1024;
 
 @Injectable()
@@ -246,57 +251,63 @@ export class FilesOpsService {
       return { ok: false, error: 'server_running' };
     const p = sel.pm.modSettingsDat;
     try {
-      let beforeDoc: Record<string, unknown> = {};
+      let beforeDoc: ModSettingsJsonDoc = {};
       if (existsSync(p)) {
         try {
           const beforeMs = ModSettings.load(readFileSync(p));
-          beforeDoc = JSON.parse(modSettingsToJsonText(beforeMs));
+          beforeDoc = JSON.parse(
+            modSettingsToJsonText(beforeMs),
+          ) as ModSettingsJsonDoc;
         } catch {
           // ignore parsing error for previous mod-settings
         }
       }
 
       const ms = modSettingsFromJson(data);
-      const afterDoc = JSON.parse(modSettingsToJsonText(ms));
+      const afterDoc = JSON.parse(
+        modSettingsToJsonText(ms),
+      ) as ModSettingsJsonDoc;
 
       const changes: { key: string; from: string; to: string }[] = [];
       const beforeData = (
         beforeDoc?.data && typeof beforeDoc.data === 'object'
           ? beforeDoc.data
           : {}
-      ) as Record<string, any>;
+      ) as Record<string, Record<string, { value?: unknown }>>;
       const afterData = (
         afterDoc?.data && typeof afterDoc.data === 'object' ? afterDoc.data : {}
-      ) as Record<string, any>;
+      ) as Record<string, Record<string, { value?: unknown }>>;
 
       for (const scope of ['startup', 'runtime-global', 'runtime-per-user']) {
         const bScope = (
           beforeData[scope] && typeof beforeData[scope] === 'object'
             ? beforeData[scope]
             : {}
-        ) as Record<string, any>;
+        ) as Record<string, { value?: unknown }>;
         const aScope = (
           afterData[scope] && typeof afterData[scope] === 'object'
             ? afterData[scope]
             : {}
-        ) as Record<string, any>;
+        ) as Record<string, { value?: unknown }>;
         const keys = new Set([...Object.keys(bScope), ...Object.keys(aScope)]);
         for (const key of keys) {
           const bv = bScope[key]?.value;
           const av = aScope[key]?.value;
           if (JSON.stringify(bv) === JSON.stringify(av)) continue;
-          const sf =
-            bv === undefined
-              ? '—'
-              : typeof bv === 'object'
-                ? JSON.stringify(bv)
-                : String(bv);
-          const st =
-            av === undefined
-              ? '—'
-              : typeof av === 'object'
-                ? JSON.stringify(av)
-                : String(av);
+          const formatVal = (v: unknown): string => {
+            if (v === undefined) return '—';
+            if (typeof v === 'string') return v;
+            if (
+              typeof v === 'number' ||
+              typeof v === 'boolean' ||
+              typeof v === 'bigint'
+            ) {
+              return String(v);
+            }
+            return JSON.stringify(v);
+          };
+          const sf = formatVal(bv);
+          const st = formatVal(av);
           changes.push({ key: `[${scope}] ${key}`, from: sf, to: st });
         }
       }

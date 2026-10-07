@@ -136,7 +136,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
       manual_only: s.manualOnly,
       timezone: s.timezone || undefined,
       instance_ids: Array.isArray(s.instanceIds) ? s.instanceIds : [],
-      options: s.options || {},
+      options: this.normalizedOptions(s.options),
       last_run_key: s.lastRunKey || undefined,
     };
   }

@@ -130,7 +130,7 @@ if (!existsSync(envPath) && existsSync(envExamplePath)) {
 dotenvConfig({ path: envPath });
 
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, LogLevel, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PathsService } from './config/paths.service';
 import { UsersService } from './auth/users.service';
@@ -145,7 +145,7 @@ process.title = `${APP_NAME} v${APP_VERSION}`;
 
 async function bootstrap() {
   const isDebug = String(process.env.DEBUG_LOGS).toLowerCase() === 'true';
-  const loggerLevels: any = isDebug
+  const loggerLevels: LogLevel[] = isDebug
     ? ['log', 'error', 'warn', 'debug', 'verbose']
     : ['log', 'error', 'warn'];
 

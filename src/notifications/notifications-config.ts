@@ -162,7 +162,9 @@ export function mergeNotifConfig(
   const mode = global.notif_instances_mode || 'all';
   if (mode === 'selected' && instanceId) {
     try {
-      const selected = JSON.parse(global.notif_selected_instance_ids || '[]');
+      const selected: unknown = JSON.parse(
+        global.notif_selected_instance_ids || '[]',
+      );
       if (Array.isArray(selected) && !selected.includes(instanceId)) {
         enabled = false;
       }

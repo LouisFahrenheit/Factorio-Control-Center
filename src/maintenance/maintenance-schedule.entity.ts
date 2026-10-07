@@ -33,7 +33,7 @@ export class MaintenanceSchedule {
   instanceIds: string[];
 
   @Column('simple-json')
-  options: any;
+  options: Record<string, unknown>;
 
   @Column({ nullable: true })
   lastRunKey: string;

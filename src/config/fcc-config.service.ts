@@ -67,7 +67,7 @@ export class FccConfigService implements OnModuleInit {
     const all = await this.sysPrefs.find();
     this.cache = {};
     const appSecret =
-      this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
+      this.env.get<string>('APP_SECRET') || process.env.APP_SECRET || '';
 
     for (const p of all) {
       if (p.key.endsWith('.global_token')) {
@@ -81,7 +81,7 @@ export class FccConfigService implements OnModuleInit {
 
   async updatePreferences(changes: Record<string, string>): Promise<void> {
     const appSecret =
-      this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
+      this.env.get<string>('APP_SECRET') || process.env.APP_SECRET || '';
 
     for (const [key, value] of Object.entries(changes)) {
       let finalValue = value;
@@ -110,28 +110,28 @@ export class FccConfigService implements OnModuleInit {
 
     // strict-env: always read from .env (for secrets/debug)
     const strictEnvBool = (envKey: string, d = false) => {
-      const v = this.env.get(envKey);
+      const v = this.env.get<string>(envKey);
       return ['1', 'true', 'yes', 'on'].includes(String(v ?? d).toLowerCase());
     };
     const strictEnvStr = (envKey: string, d = '') => {
-      return String(this.env.get(envKey) ?? d);
+      return String(this.env.get<string>(envKey) ?? d);
     };
 
     // override: DB wins; .env overrides ONLY when explicitly non-empty.
     // Empty string or missing key in .env = "use DB" (UI changes persist).
     const overrideBool = (k: string, envKey: string, d = false) => {
-      const envVal = this.env.get(envKey);
+      const envVal = this.env.get<string>(envKey);
       const v = envVal !== undefined && envVal !== '' ? envVal : w[k];
       return ['1', 'true', 'yes', 'on'].includes(String(v ?? d).toLowerCase());
     };
     const overrideNum = (k: string, envKey: string, d: number) => {
-      const envVal = this.env.get(envKey);
+      const envVal = this.env.get<string>(envKey);
       const v = envVal !== undefined && envVal !== '' ? envVal : w[k];
       const n = parseInt(String(v ?? d), 10);
       return Number.isFinite(n) ? n : d;
     };
     const overrideStr = (k: string, envKey: string, d = '') => {
-      const envVal = this.env.get(envKey);
+      const envVal = this.env.get<string>(envKey);
       if (envVal !== undefined && envVal !== '') return String(envVal);
       return String(w[k] ?? d);
     };
@@ -296,7 +296,7 @@ export class FccConfigService implements OnModuleInit {
 
   get langCode(): string {
     // DB has priority; PANEL_LANGUAGE in .env overrides only when explicitly non-empty
-    const fromEnv = this.env.get('PANEL_LANGUAGE');
+    const fromEnv = this.env.get<string>('PANEL_LANGUAGE');
     if (fromEnv !== undefined && fromEnv !== '')
       return String(fromEnv).slice(0, 12);
     const fromDb = this.section('language').code;
@@ -311,7 +311,7 @@ export class FccConfigService implements OnModuleInit {
 
   get sharedTheme(): string {
     // DB has priority; PANEL_THEME in .env overrides only when explicitly non-empty
-    const fromEnv = this.env.get('PANEL_THEME');
+    const fromEnv = this.env.get<string>('PANEL_THEME');
     if (fromEnv !== undefined && fromEnv !== '') return String(fromEnv);
     const fromDb = this.section('shared').theme;
     return String(fromDb ?? 'fcc_classic');
@@ -345,7 +345,7 @@ export class FccConfigService implements OnModuleInit {
 
     // Env overrides for secrets (non-empty env always wins)
     const envStr = (envKey: string, dbKey: string, d = '') => {
-      const v = this.env.get(envKey);
+      const v = this.env.get<string>(envKey);
       if (v !== undefined && v !== '') return String(v);
       return String(n[dbKey] ?? d);
     };
@@ -390,15 +390,26 @@ export class FccConfigService implements OnModuleInit {
 
   private async saveKeys(
     section: string,
-    updates: Record<string, any>,
+    updates: Record<string, unknown>,
   ): Promise<void> {
     const appSecret =
-      this.env.get('APP_SECRET') || process.env.APP_SECRET || '';
+      this.env.get<string>('APP_SECRET') || process.env.APP_SECRET || '';
 
     for (const [k, v] of Object.entries(updates)) {
       if (v === undefined) continue;
       const key = `${section}.${k}`;
-      const value = typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v);
+      const value =
+        typeof v === 'boolean'
+          ? v
+            ? 'true'
+            : 'false'
+          : typeof v === 'string'
+            ? v
+            : typeof v === 'number' || typeof v === 'bigint'
+              ? String(v)
+              : v === null
+                ? ''
+                : JSON.stringify(v);
       this.cache[key] = value; // Cache plaintext
 
       const dbValue =

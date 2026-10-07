@@ -252,8 +252,8 @@ export class InstancesService implements OnModuleInit {
         key.startsWith('_')
       )
         continue;
-      const oldVal = (item as any)[key];
-      const newVal = (patch as any)[key];
+      const oldVal = (item as unknown as Record<string, unknown>)[key];
+      const newVal = (patch as Record<string, unknown>)[key];
       if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
         if (key.toLowerCase().includes('password')) {
           changes.push(`${key}=(changed)`);
