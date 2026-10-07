@@ -42,9 +42,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ── Connection lifecycle ─────────────────────────────────────────────
 
   async handleConnection(client: Socket): Promise<void> {
-    const token = String(
-      (client.handshake?.auth as Record<string, unknown>)?.token || '',
-    ).trim();
+    const rawToken = (client.handshake?.auth as Record<string, unknown>)?.token;
+    const token = typeof rawToken === 'string' ? rawToken.trim() : '';
 
     if (!token) {
       client.disconnect(true);

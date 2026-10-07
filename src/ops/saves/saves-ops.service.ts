@@ -74,7 +74,7 @@ export class SavesOpsService {
     if (isErrorResult(sel)) return sel;
     const dl = this.downloadPath(name);
     if (dl.ok === false) return dl;
-    const path = String(dl.path || '');
+    const path = typeof dl.path === 'string' ? dl.path : '';
     try {
       const info = await this.inspect.inspectSaveZip(path);
       let header: {

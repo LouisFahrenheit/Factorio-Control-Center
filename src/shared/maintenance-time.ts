@@ -176,6 +176,11 @@ export function normalizeTaskInstanceIds(
     if (seen.has(INSTANCE_ALL)) return [INSTANCE_ALL];
     return out;
   }
-  const legacy = String(legacySingleId ?? '').trim();
+  const legacy =
+    typeof legacySingleId === 'string'
+      ? legacySingleId.trim()
+      : typeof legacySingleId === 'number'
+        ? String(legacySingleId)
+        : '';
   return legacy ? [legacy] : [];
 }
