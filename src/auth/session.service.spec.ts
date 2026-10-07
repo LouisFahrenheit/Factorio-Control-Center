@@ -76,6 +76,22 @@ describe('SessionService', () => {
       expect(user).toBeNull();
       expect(sessionService.getActiveSessionsCount('testadmin')).toBe(0);
     });
+
+    it('synchronizes updated roles and tabs dynamically upon resolve', async () => {
+      const token = await sessionService.createSession('testadmin');
+      const initialUser = await sessionService.resolve(token);
+      expect(initialUser?.role).toBe('administrator');
+      expect(initialUser?.tabs).toEqual(['control', 'servers']);
+
+      // Update role and tabs in mock database
+      mockUserRecord.role = 'server_engineer';
+      mockUserRecord.tabs = ['control', 'servers', 'saves'];
+      mockUsersService.cleanTabs = jest.fn().mockReturnValue(['control', 'servers', 'saves']);
+
+      const updatedUser = await sessionService.resolve(token);
+      expect(updatedUser?.role).toBe('server_engineer');
+      expect(updatedUser?.tabs).toEqual(['control', 'servers', 'saves']);
+    });
   });
 
   describe('revokeAllForUser', () => {
