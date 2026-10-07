@@ -11,14 +11,31 @@ import { FccConfigService } from '../config/fcc-config.service';
 import { AUTH_TOKEN_KEY } from './auth.util';
 
 describe('AuthGuard', () => {
+  interface MockRequest {
+    path?: string;
+    headers?: Record<string, string>;
+    [AUTH_TOKEN_KEY]?: string;
+    [AUTH_USER_KEY]?: {
+      username: string;
+      role: string;
+      tabs?: string[];
+      instance_ids?: string[];
+      enabled?: boolean;
+    };
+  }
+
   let guard: AuthGuard;
   let mockSessions: Partial<SessionService>;
-  let mockConfig: any;
+  let mockConfig: {
+    webPanel: {
+      api_token: string;
+    };
+  };
   let mockUsers: Partial<UsersService>;
   let mockReflector: Partial<Reflector>;
 
   const createMockContext = (
-    req: Record<string, any>,
+    req: MockRequest,
     handler = () => {},
     controllerClass = class {},
   ): ExecutionContext => {
@@ -46,7 +63,7 @@ describe('AuthGuard', () => {
     };
 
     mockUsers = {
-      cleanTabs: jest.fn().mockImplementation((tabs) => tabs || []),
+      cleanTabs: jest.fn().mockImplementation((tabs: string[]) => tabs || []),
     };
 
     mockReflector = {
@@ -55,7 +72,7 @@ describe('AuthGuard', () => {
 
     guard = new AuthGuard(
       mockSessions as SessionService,
-      mockConfig as FccConfigService,
+      mockConfig as unknown as FccConfigService,
       mockUsers as UsersService,
       mockReflector as Reflector,
     );
@@ -126,7 +143,7 @@ describe('AuthGuard', () => {
       };
       (mockSessions.resolve as jest.Mock).mockResolvedValue(sessionUser);
 
-      const req: any = {
+      const req: MockRequest = {
         path: '/api/servers',
         headers: { authorization: 'Bearer valid-token-123' },
       };
@@ -176,7 +193,7 @@ describe('AuthGuard', () => {
     it('authenticates with global API_TOKEN and creates synthetic administrator', async () => {
       (mockSessions.resolve as jest.Mock).mockResolvedValue(null);
 
-      const req: any = {
+      const req: MockRequest = {
         path: '/api/servers',
         headers: { authorization: 'Bearer secret-api-token-12345' },
       };
@@ -186,9 +203,9 @@ describe('AuthGuard', () => {
 
       expect(allowed).toBe(true);
       expect(req[AUTH_USER_KEY]).toBeDefined();
-      expect(req[AUTH_USER_KEY].username).toBe('api-token');
-      expect(req[AUTH_USER_KEY].role).toBe('administrator');
-      expect(req[AUTH_USER_KEY].instance_ids).toEqual(['*']);
+      expect(req[AUTH_USER_KEY]?.username).toBe('api-token');
+      expect(req[AUTH_USER_KEY]?.role).toBe('administrator');
+      expect(req[AUTH_USER_KEY]?.instance_ids).toEqual(['*']);
     });
 
     it('rejects incorrect API_TOKEN with ForbiddenException', async () => {

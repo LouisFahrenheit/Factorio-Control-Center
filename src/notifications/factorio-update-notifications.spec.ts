@@ -7,6 +7,7 @@ import type { FccConfigService } from '../config/fcc-config.service';
 import type { InstancesService } from '../instances/instances.service';
 import type { WebhookService } from './webhook.service';
 import type { PathsService } from '../config/paths.service';
+import type { InstanceItem } from '../common/types';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { mkdtempSync, rmSync, existsSync } from 'fs';
@@ -101,9 +102,15 @@ describe('Factorio Update Notifications', () => {
       mockInstances = {
         getById: (id: string) => {
           if (id === 'inst-1')
-            return { id: 'inst-1', name: 'Main Server' } as any;
+            return {
+              id: 'inst-1',
+              name: 'Main Server',
+            } as unknown as InstanceItem;
           if (id === 'inst-2')
-            return { id: 'inst-2', name: 'Secondary Server' } as any;
+            return {
+              id: 'inst-2',
+              name: 'Secondary Server',
+            } as unknown as InstanceItem;
           return null;
         },
       };

@@ -1,14 +1,16 @@
 import { SessionService } from './session.service';
 import { UsersService } from './users.service';
 import { SessionUser } from '../common/types';
+import type { User, UserRole } from './user.entity';
 
 describe('SessionService', () => {
   let sessionService: SessionService;
   let mockUsersService: Partial<UsersService>;
-  let mockUserRecord: any;
+  let mockUserRecord: User;
 
   beforeEach(() => {
     mockUserRecord = {
+      id: 'uuid-1',
       username: 'testadmin',
       role: 'administrator',
       tabs: ['control', 'servers'],
@@ -16,7 +18,9 @@ describe('SessionService', () => {
       enabled: true,
       twoFactorEnabled: false,
       passwordHash: 'pbkdf2_sha256$oldSalt$oldHash',
-    };
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as User;
 
     mockUsersService = {
       findUser: jest.fn().mockImplementation((uname: string) => {
@@ -25,8 +29,8 @@ describe('SessionService', () => {
         }
         return Promise.resolve(undefined);
       }),
-      normalizeRole: jest.fn().mockImplementation((r) => r),
-      cleanTabs: jest.fn().mockImplementation((t) => t || []),
+      normalizeRole: jest.fn().mockImplementation((r: UserRole) => r),
+      cleanTabs: jest.fn().mockImplementation((t: string[]) => t || []),
     };
 
     sessionService = new SessionService(mockUsersService as UsersService);
@@ -180,7 +184,11 @@ describe('SessionService', () => {
       const token = sessionService.createToken(expiredUser);
 
       // Mutate exp to past
-      (sessionService as any).sessions.get(token).exp = Date.now() / 1000 - 100;
+      const internalService = sessionService as unknown as {
+        sessions: Map<string, { exp: number }>;
+      };
+      const record = internalService.sessions.get(token);
+      if (record) record.exp = Date.now() / 1000 - 100;
 
       sessionService.purgeExpired();
       expect(sessionService.getActiveSessionsCount()).toBe(0);

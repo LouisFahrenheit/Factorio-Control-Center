@@ -1,10 +1,12 @@
 import { UsersService } from './users.service';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import type { User } from './user.entity';
+import type { Repository } from 'typeorm';
 
 describe('UsersService - Initial Admin Setup', () => {
   let service: UsersService;
-  let mockUserRepo: any;
-  let savedUsers: any[];
+  let mockUserRepo: unknown;
+  let savedUsers: User[];
 
   beforeEach(() => {
     savedUsers = [];
@@ -17,13 +19,16 @@ describe('UsersService - Initial Admin Setup', () => {
         .mockImplementation(() => Promise.resolve(savedUsers.length)),
       create: jest
         .fn()
-        .mockImplementation((dto) => ({ ...dto, id: savedUsers.length + 1 })),
-      save: jest.fn().mockImplementation((entity) => {
+        .mockImplementation(
+          (dto: Partial<User>) =>
+            ({ ...dto, id: savedUsers.length + 1 }) as User,
+        ),
+      save: jest.fn().mockImplementation((entity: User) => {
         savedUsers.push(entity);
         return Promise.resolve(entity);
       }),
     };
-    service = new UsersService(mockUserRepo);
+    service = new UsersService(mockUserRepo as Repository<User>);
   });
 
   it('reports hasAnyUser as false when database is empty and no env var provided', async () => {

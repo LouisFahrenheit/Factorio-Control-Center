@@ -45,7 +45,7 @@ jest.mock('archiver', () => {
   });
 });
 
-import { BackupService } from './backup.service';
+import { BackupService, type BackupManifest } from './backup.service';
 import { PathsService } from '../config/paths.service';
 
 describe('BackupService', () => {
@@ -142,7 +142,9 @@ describe('BackupService', () => {
       const manifestEntry = zip.getEntry('manifest.json');
       expect(manifestEntry).not.toBeNull();
 
-      const manifest = JSON.parse(manifestEntry!.getData().toString('utf-8'));
+      const manifest = JSON.parse(
+        manifestEntry!.getData().toString('utf-8'),
+      ) as BackupManifest;
       expect(manifest.type).toBe('manual');
       expect(manifest.sha256['env/.env']).toBeDefined();
       expect(manifest.sha256['database/fcc_database.sqlite']).toBeDefined();

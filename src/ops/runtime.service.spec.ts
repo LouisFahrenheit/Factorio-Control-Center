@@ -9,9 +9,15 @@ import { InstanceHistoryService } from './instance-history.service';
 import { EventsGateway } from '../ws/events.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
 import { FactorioLogSessionState } from '../shared/factorio-log-timestamps';
+import type { ChildProcessWithoutNullStreams } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+
+interface RuntimeServicePrivate {
+  parseRuntimeLine(rt: InstanceRuntime, line: string): void;
+  flushOnlinePlayersStats(): void;
+}
 
 describe('RuntimeService', () => {
   let service: RuntimeService;
@@ -43,7 +49,7 @@ describe('RuntimeService', () => {
       appendLine: jest.fn(),
     };
     mockConfig = {
-      webPanel: {} as any,
+      webPanel: {} as unknown as FccConfigService['webPanel'],
     };
     mockFirewall = {
       logStartupNotice: jest.fn(),
@@ -96,7 +102,7 @@ describe('RuntimeService', () => {
         killed: false,
         exitCode: null,
         kill: jest.fn(),
-      } as any,
+      } as unknown as ChildProcessWithoutNullStreams,
       startedAt: Date.now(),
       bind: '0.0.0.0:34197',
       saveName: 'save1.zip',
@@ -139,10 +145,10 @@ describe('RuntimeService', () => {
       expect(service.isRunning('inst-1')).toBe(true);
 
       // If process exited, isRunning is false
-      (rt.proc as any).exitCode = 0;
+      if (rt.proc) rt.proc.exitCode = 0;
       expect(service.isRunning('inst-1')).toBe(false);
 
-      (rt.proc as any).exitCode = null;
+      if (rt.proc) rt.proc.exitCode = null;
       rt.proc = null;
       expect(service.isRunning('inst-1')).toBe(false);
     });
@@ -157,15 +163,17 @@ describe('RuntimeService', () => {
 
   describe('log line parsing (parseRuntimeLine)', () => {
     let rt: InstanceRuntime;
+    let privateService: RuntimeServicePrivate;
 
     beforeEach(() => {
       rt = createMockRuntime('inst-1');
       service.runtimes.set('inst-1', rt);
+      privateService = service as unknown as RuntimeServicePrivate;
     });
 
     it('should handle player join line and notify', () => {
       const line = '2026-01-01 12:00:00 [JOIN] Engineer joined the game';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(rt.onlinePlayers['Engineer']).toBeDefined();
       expect(mockNotifications.onPlayerJoin).toHaveBeenCalledWith(
@@ -183,7 +191,7 @@ describe('RuntimeService', () => {
       rt.playerLastTick['Engineer'] = Date.now() - 5000;
 
       const line = '2026-01-01 12:05:00 [LEAVE] Engineer left the game';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(rt.onlinePlayers['Engineer']).toBeUndefined();
       expect(mockNotifications.onPlayerLeave).toHaveBeenCalledWith(
@@ -199,7 +207,7 @@ describe('RuntimeService', () => {
     it('should handle kick moderation event with reason', () => {
       const line =
         '2026-01-01 12:10:00 [KICK] BadActor was kicked by Moderator. Reason: Spamming chat';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(mockNotifications.onModeration).toHaveBeenCalledWith(
         'inst-1',
@@ -213,7 +221,7 @@ describe('RuntimeService', () => {
     it('should handle ban moderation event with reason', () => {
       const line =
         '2026-01-01 12:15:00 [BAN] GriefPlayer was banned by Admin. Reason: Destroyed main base';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(mockNotifications.onModeration).toHaveBeenCalledWith(
         'inst-1',
@@ -227,7 +235,7 @@ describe('RuntimeService', () => {
     it('should handle unban event', () => {
       const line =
         '2026-01-01 12:20:00 [UNBAN] ReformedPlayer was unbanned by Admin';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(mockNotifications.onModeration).toHaveBeenCalledWith(
         'inst-1',
@@ -241,7 +249,7 @@ describe('RuntimeService', () => {
       expect(rt.inGame).toBe(false);
       const line =
         '2026-01-01 12:00:00 Info ServerMultiplayerManager.cpp:780: changing state from(CreatingGame) to(InGame)';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(rt.inGame).toBe(true);
       expect(rt.wasEverInGame).toBe(true);
@@ -251,7 +259,7 @@ describe('RuntimeService', () => {
 
     it('should handle in-game chat messages', () => {
       const line = '2026-01-01 12:00:00 [CHAT] Engineer: Hello Factorio';
-      (service as any).parseRuntimeLine(rt, line);
+      privateService.parseRuntimeLine(rt, line);
 
       expect(mockNotifications.onChatMessage).toHaveBeenCalledWith(
         'inst-1',
@@ -277,7 +285,8 @@ describe('RuntimeService', () => {
       rt.playerLastTick['Engineer'] = oldTick;
       service.runtimes.set('inst-1', rt);
 
-      (service as any).flushOnlinePlayersStats();
+      const privateService = service as unknown as RuntimeServicePrivate;
+      privateService.flushOnlinePlayersStats();
 
       expect(rt.playerLastTick['Engineer']).toBeGreaterThan(oldTick);
     });

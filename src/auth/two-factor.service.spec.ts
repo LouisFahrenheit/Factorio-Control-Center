@@ -2,10 +2,26 @@ import { TwoFactorService } from './two-factor.service';
 import { UsersService } from './users.service';
 import * as OTPAuth from 'otpauth';
 
+interface MockUser {
+  username: string;
+  role: string;
+  enabled: boolean;
+  twoFactorEnabled: boolean;
+  twoFactorSecret: string | null;
+  twoFactorRecoveryCodes: string[] | null;
+  passwordHash: string;
+}
+
+interface TwoFactorServiceInternal {
+  cleanupTimer?: NodeJS.Timeout;
+  challenges: Map<string, { expiresAt: number }>;
+  pendingSetups: Map<string, { expiresAt: number }>;
+}
+
 describe('TwoFactorService', () => {
   let service: TwoFactorService;
   let mockUsersService: Partial<UsersService>;
-  let mockUser: any;
+  let mockUser: MockUser;
 
   beforeEach(() => {
     mockUser = {
@@ -26,26 +42,35 @@ describe('TwoFactorService', () => {
       }),
       setTwoFactor: jest
         .fn()
-        .mockImplementation((username, enabled, secret, codes) => {
-          if (username.toLowerCase() === 'admin') {
-            mockUser.twoFactorEnabled = enabled;
-            mockUser.twoFactorSecret = secret;
-            mockUser.twoFactorRecoveryCodes = codes;
+        .mockImplementation(
+          (
+            username: string,
+            enabled: boolean,
+            secret: string,
+            codes: string[],
+          ) => {
+            if (username.toLowerCase() === 'admin') {
+              mockUser.twoFactorEnabled = enabled;
+              mockUser.twoFactorSecret = secret;
+              mockUser.twoFactorRecoveryCodes = codes;
+              return Promise.resolve(true);
+            }
+            return Promise.resolve(false);
+          },
+        ),
+      removeRecoveryCode: jest
+        .fn()
+        .mockImplementation((username: string, hashed: string) => {
+          if (
+            username.toLowerCase() === 'admin' &&
+            mockUser.twoFactorRecoveryCodes
+          ) {
+            mockUser.twoFactorRecoveryCodes =
+              mockUser.twoFactorRecoveryCodes.filter((c) => c !== hashed);
             return Promise.resolve(true);
           }
           return Promise.resolve(false);
         }),
-      removeRecoveryCode: jest.fn().mockImplementation((username, hashed) => {
-        if (
-          username.toLowerCase() === 'admin' &&
-          mockUser.twoFactorRecoveryCodes
-        ) {
-          mockUser.twoFactorRecoveryCodes =
-            mockUser.twoFactorRecoveryCodes.filter((c: string) => c !== hashed);
-          return Promise.resolve(true);
-        }
-        return Promise.resolve(false);
-      }),
     };
 
     service = new TwoFactorService(mockUsersService as UsersService);
@@ -57,30 +82,34 @@ describe('TwoFactorService', () => {
 
   describe('lifecycle & cleanup', () => {
     it('starts and stops cleanup interval via onModuleInit and onModuleDestroy', () => {
+      const internal = service as unknown as TwoFactorServiceInternal;
       service.onModuleInit();
-      expect((service as any).cleanupTimer).toBeDefined();
+      expect(internal.cleanupTimer).toBeDefined();
 
       service.onModuleDestroy();
-      expect((service as any).cleanupTimer).toBeUndefined();
+      expect(internal.cleanupTimer).toBeUndefined();
     });
 
     it('cleans up expired challenges and expired pending setups', async () => {
+      const internal = service as unknown as TwoFactorServiceInternal;
       // Create active challenge
       const token = service.createChallenge('admin');
-      expect((service as any).challenges.has(token)).toBe(true);
+      expect(internal.challenges.has(token)).toBe(true);
 
       // Expire challenge
-      (service as any).challenges.get(token).expiresAt = Date.now() - 1000;
+      const challenge = internal.challenges.get(token);
+      if (challenge) challenge.expiresAt = Date.now() - 1000;
 
       // Initiate pending setup and expire it
       await service.initiateSetup('admin');
-      expect((service as any).pendingSetups.has('admin')).toBe(true);
-      (service as any).pendingSetups.get('admin').expiresAt = Date.now() - 1000;
+      expect(internal.pendingSetups.has('admin')).toBe(true);
+      const setup = internal.pendingSetups.get('admin');
+      if (setup) setup.expiresAt = Date.now() - 1000;
 
       service.cleanup();
 
-      expect((service as any).challenges.has(token)).toBe(false);
-      expect((service as any).pendingSetups.has('admin')).toBe(false);
+      expect(internal.challenges.has(token)).toBe(false);
+      expect(internal.pendingSetups.has('admin')).toBe(false);
     });
   });
 
