@@ -25,3 +25,25 @@ export function trimPort(
   const n = parseInt(String(value ?? '').trim(), 10);
   return Number.isFinite(n) && n > 0 && n <= 65535 ? n : fallback;
 }
+
+/** Safely convert unknown/nullable value to string, avoiding [object Object]. */
+export function safeStr(value: unknown, fallback = ''): string {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') return value || fallback;
+  if (
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+  ) {
+    return String(value);
+  }
+  if (value instanceof Error) {
+    return value.message || fallback;
+  }
+  return fallback;
+}
+
+/** Safely convert unknown/nullable value to trimmed string. */
+export function safeTrim(value: unknown, fallback = ''): string {
+  return safeStr(value, fallback).trim();
+}

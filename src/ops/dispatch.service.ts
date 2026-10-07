@@ -1,3 +1,4 @@
+import { safeStr, safeTrim } from '../common/trim.util';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InstancesService } from '../instances/instances.service';
 import { InstanceSummaryService } from '../instances/instance-summary.service';
@@ -30,6 +31,8 @@ function parseModEnabledFlag(value: unknown): boolean {
     return true;
   return !!value;
 }
+
+const s = (v: unknown, fallback = '') => safeStr(v, fallback);
 
 const AUDIT_OP_KIND: Record<string, string> = {
   write_server_settings: 'server_settings',
@@ -115,14 +118,11 @@ export class DispatchService {
       case 'instances_add':
         return this.instances.add(kwargs);
       case 'instances_update':
-        return this.instances.update(String(kwargs.id || ''), kwargs);
+        return this.instances.update(s(kwargs.id, ''), kwargs);
       case 'instances_clone':
-        return this.instances.clone(
-          String(kwargs.id || ''),
-          String(kwargs.name || ''),
-        );
+        return this.instances.clone(s(kwargs.id, ''), s(kwargs.name, ''));
       case 'instances_remove': {
-        const id = String(kwargs.id || '');
+        const id = s(kwargs.id, '');
         const result = await this.instances.remove(id, {
           deleteFromDisk: !!kwargs.deleteFromDisk,
           deleteData: !!kwargs.deleteData,
@@ -131,7 +131,7 @@ export class DispatchService {
         return result;
       }
       case 'instances_select':
-        return this.instances.select(String(kwargs.id || ''));
+        return this.instances.select(s(kwargs.id, ''));
       case 'instance_maintenance_lock':
         return this.instanceMaintenanceLock(kwargs);
       case 'instance_bootstrap_start':
@@ -143,7 +143,7 @@ export class DispatchService {
       case 'status':
         return this.server.status();
       case 'start_server': {
-        const startId = String(this.instances.getSelectedId() || '').trim();
+        const startId = safeTrim(this.instances.getSelectedId());
         const pendingManualStart = startId
           ? this.maintenance.hasPendingManual(startId)
           : false;
@@ -156,7 +156,7 @@ export class DispatchService {
         ) {
           this.maintenance.resumeManualWhenRunning(
             startId,
-            String(kwargs.web_actor || kwargs.actor || '').trim() || undefined,
+            safeTrim(kwargs.web_actor ?? kwargs.actor) || undefined,
           );
         }
         return startResult;
@@ -164,7 +164,7 @@ export class DispatchService {
       case 'stop_server':
         return this.server.stop();
       case 'restart_server': {
-        const restartId = String(this.instances.getSelectedId() || '').trim();
+        const restartId = safeTrim(this.instances.getSelectedId());
         const pendingManualRestart = restartId
           ? this.maintenance.hasPendingManual(restartId)
           : false;
@@ -177,7 +177,7 @@ export class DispatchService {
         ) {
           this.maintenance.resumeManualWhenRunning(
             restartId,
-            String(kwargs.web_actor || kwargs.actor || '').trim() || undefined,
+            safeTrim(kwargs.web_actor ?? kwargs.actor) || undefined,
           );
         }
         return restartResult;
@@ -190,9 +190,9 @@ export class DispatchService {
         return this.server.backup();
       case 'create_save':
         return this.server.createSave({
-          name: String(kwargs.name || ''),
+          name: s(kwargs.name, ''),
           mode: kwargs.mode as CreateSaveOptions['mode'],
-          preset: kwargs.preset != null ? String(kwargs.preset) : undefined,
+          preset: kwargs.preset != null ? s(kwargs.preset) : undefined,
           seed: kwargs.seed != null ? Number(kwargs.seed) : undefined,
           map_gen_settings:
             kwargs.map_gen_settings as CreateSaveOptions['map_gen_settings'],
@@ -200,22 +200,22 @@ export class DispatchService {
             kwargs.map_settings as CreateSaveOptions['map_settings'],
           map_exchange_string:
             kwargs.map_exchange_string != null
-              ? String(kwargs.map_exchange_string)
+              ? s(kwargs.map_exchange_string)
               : undefined,
         });
       case 'rcon_exec':
-        return this.server.rconExec(String(kwargs.command || ''));
+        return this.server.rconExec(s(kwargs.command, ''));
       case 'chat_send_text':
-        return this.server.chatSendText(String(kwargs.message || ''));
+        return this.server.chatSendText(s(kwargs.message, ''));
       case 'log_tail':
         return this.server.logTail(
           Number(kwargs.tail || 500),
-          String(kwargs.instance_id || ''),
+          s(kwargs.instance_id, ''),
         );
       case 'log_file_history':
         return this.server.logFileHistory(
           Number(kwargs.tail || LOG_HISTORY_DEFAULT_TAIL),
-          String(kwargs.instance_id || ''),
+          s(kwargs.instance_id, ''),
           kwargs.full === true ||
             kwargs.full === 'true' ||
             kwargs.full === 1 ||
@@ -223,7 +223,7 @@ export class DispatchService {
         );
       case 'program_log_history':
         return this.program.programLogHistory(
-          String(kwargs.kind || ''),
+          s(kwargs.kind, ''),
           Number(kwargs.tail || LOG_HISTORY_DEFAULT_TAIL),
           kwargs.full === true ||
             kwargs.full === 'true' ||
@@ -235,37 +235,32 @@ export class DispatchService {
       case 'list_saves':
         return this.saves.list();
       case 'get_save_download_path':
-        return this.saves.downloadPath(String(kwargs.name || ''));
+        return this.saves.downloadPath(s(kwargs.name, ''));
       case 'inspect_save':
         return this.saves.inspectSave(
-          String(kwargs.name || ''),
-          String(kwargs.ui_lang || ''),
+          s(kwargs.name, ''),
+          s(kwargs.ui_lang, ''),
         );
       case 'inspect_uploaded_save_mods':
         return this.saves.inspectUploadedSaveMods(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.ui_lang || ''),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.ui_lang, ''),
         );
       case 'rename_save':
-        return this.saves.rename(
-          String(kwargs.name || ''),
-          String(kwargs.new_name || ''),
-        );
+        return this.saves.rename(s(kwargs.name, ''), s(kwargs.new_name, ''));
       case 'delete_save':
-        return this.saves.delete(String(kwargs.name || ''));
+        return this.saves.delete(s(kwargs.name, ''));
       case 'duplicate_save':
-        return this.saves.duplicate(String(kwargs.name || ''));
+        return this.saves.duplicate(s(kwargs.name, ''));
       case 'set_launch_save':
-        return this.saves.setLaunchSave(String(kwargs.name || ''));
+        return this.saves.setLaunchSave(s(kwargs.name, ''));
       case 'transfer_save':
         return this.saves.transfer(
-          String(kwargs.name || ''),
-          String(kwargs.target_instance_id || kwargs.target_server_id || ''),
+          s(kwargs.name, ''),
+          s(kwargs.target_instance_id ?? kwargs.target_server_id),
           {
             mode: kwargs.mode === 'move' ? 'move' : 'copy',
-            target_name: kwargs.target_name
-              ? String(kwargs.target_name)
-              : undefined,
+            target_name: kwargs.target_name ? s(kwargs.target_name) : undefined,
             overwrite:
               kwargs.overwrite === true ||
               kwargs.overwrite === 'true' ||
@@ -275,8 +270,8 @@ export class DispatchService {
         );
       case 'upload_save_archive':
         return this.saves.uploadArchive(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.name || ''),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.name, ''),
         );
       case 'read_server_settings':
         return this.files.readServerSettings();
@@ -295,9 +290,9 @@ export class DispatchService {
       case 'read_ban_list':
         return this.files.readBanList();
       case 'read_commands_catalog':
-        return this.commands.read(String(kwargs.ui_lang || kwargs.lang || ''));
+        return this.commands.read(s(kwargs.ui_lang ?? kwargs.lang));
       case 'write_commands_catalog': {
-        const lang = String(kwargs.ui_lang || kwargs.lang || '');
+        const lang = s(kwargs.ui_lang ?? kwargs.lang);
         const before = this.commands.read(lang);
         const result = this.commands.write(kwargs.data, lang);
         if (result.ok !== false && before.ok !== false && before.data) {
@@ -314,7 +309,7 @@ export class DispatchService {
         return this.files.modSettingsWriteJson(kwargs.data);
       case 'mod_settings_schema':
         return this.modSettingsSchema.get(
-          String(kwargs.ui_lang || ''),
+          s(kwargs.ui_lang, ''),
           !!kwargs.refresh,
         );
       case 'mod_settings_schema_status':
@@ -325,50 +320,41 @@ export class DispatchService {
         return this.players.syncBans();
       case 'ban_player':
         return this.players.ban(
-          String(kwargs.player || ''),
-          String(kwargs.reason || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.player, ''),
+          s(kwargs.reason, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'unban_player':
-        return this.players.unban(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
-        );
+        return this.players.unban(s(kwargs.player, ''), s(kwargs.actor, 'Web'));
       case 'mute_player':
-        return this.players.mute(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
-        );
+        return this.players.mute(s(kwargs.player, ''), s(kwargs.actor, 'Web'));
       case 'unmute_player':
         return this.players.unmute(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.player, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'kick_player':
         return this.players.kick(
-          String(kwargs.player || ''),
-          String(kwargs.reason || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.player, ''),
+          s(kwargs.reason, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'purge_player':
-        return this.players.purge(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
-        );
+        return this.players.purge(s(kwargs.player, ''), s(kwargs.actor, 'Web'));
       case 'whitelist_add':
         return this.players.whitelistAdd(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.player, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'whitelist_remove':
         return this.players.whitelistRemove(
-          String(kwargs.player || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.player, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'whitelist_clear':
-        return this.players.whitelistClear(String(kwargs.actor || 'Web'));
+        return this.players.whitelistClear(s(kwargs.actor, 'Web'));
       case 'mods_list':
-        return this.mods.list(String(kwargs.ui_lang || ''));
+        return this.mods.list(s(kwargs.ui_lang, ''));
       case 'mods_set_prefs':
         return this.mods.setPrefs(kwargs.remove_old_zips);
       case 'mods_check_updates_start':
@@ -377,7 +363,7 @@ export class DispatchService {
         return this.mods.checkUpdatesStatus();
       case 'mods_set_enabled':
         return this.mods.setEnabled(
-          String(kwargs.name || ''),
+          s(kwargs.name, ''),
           parseModEnabledFlag(kwargs.enabled),
         );
       case 'mods_set_all_enabled':
@@ -387,46 +373,43 @@ export class DispatchService {
       case 'mods_disable_conflicts':
         return this.mods.disableConflicts(kwargs.names);
       case 'mods_get_changelog':
-        return this.mods.getChangelog(String(kwargs.name || ''));
+        return this.mods.getChangelog(s(kwargs.name, ''));
       case 'mods_set_version':
-        return this.mods.setVersion(
-          String(kwargs.name || ''),
-          String(kwargs.version || ''),
-        );
+        return this.mods.setVersion(s(kwargs.name, ''), s(kwargs.version, ''));
       case 'mods_remove':
         return this.mods.remove(
-          String(kwargs.name || ''),
-          String(kwargs.scope || 'all'),
-          String(kwargs.version || ''),
+          s(kwargs.name, ''),
+          s(kwargs.scope, 'all'),
+          s(kwargs.version, ''),
         );
       case 'upload_mod_archive':
         return this.mods.uploadArchive(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.name || ''),
-          String(kwargs.actor || 'Web'),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.name, ''),
+          s(kwargs.actor, 'Web'),
         );
       case 'upload_mod_settings_dat':
         return this.files.uploadModSettingsDat(
-          String(kwargs.tmp_path || ''),
+          s(kwargs.tmp_path, ''),
           !!kwargs.confirm_replace,
         );
       case 'get_mod_download_path':
-        return this.mods.downloadPath(String(kwargs.name || ''));
+        return this.mods.downloadPath(s(kwargs.name, ''));
       case 'build_mods_archive':
         return this.mods.buildArchive();
       case 'mods_install_plan':
         return this.mods.installPlan(
-          String(kwargs.mod || ''),
-          kwargs.version ? String(kwargs.version) : undefined,
+          s(kwargs.mod, ''),
+          kwargs.version ? s(kwargs.version) : undefined,
         );
       case 'get_mod_portal_releases':
-        return this.mods.portalReleases(String(kwargs.name || ''));
+        return this.mods.portalReleases(s(kwargs.name, ''));
       case 'mods_install_plan_batch':
         return this.mods.installPlanBatch(kwargs.mods);
       case 'mods_update_all_plan':
         return this.mods.updateAllPlan();
       case 'mods_job_start':
-        return this.mods.jobStart(String(kwargs.mode || ''), kwargs);
+        return this.mods.jobStart(s(kwargs.mode, ''), kwargs);
       case 'mods_job_status':
         return this.mods.jobStatus();
       case 'mods_job_stop':
@@ -446,72 +429,63 @@ export class DispatchService {
       case 'modpack_list':
         return this.modpacks.list();
       case 'modpack_get':
-        return this.modpacks.get(
-          String(kwargs.name || ''),
-          String(kwargs.ui_lang || ''),
-        );
+        return this.modpacks.get(s(kwargs.name, ''), s(kwargs.ui_lang, ''));
       case 'modpack_save_current':
         return this.modpacks.saveCurrent(
-          String(kwargs.name || ''),
-          String(kwargs.description || ''),
+          s(kwargs.name, ''),
+          s(kwargs.description, ''),
           !!kwargs.include_settings,
           !!kwargs.include_disabled,
         );
       case 'modpack_activate':
         return this.modpacks.activate(
-          String(kwargs.name || ''),
+          s(kwargs.name, ''),
           !!kwargs.create_backup,
-          String(kwargs.actor || 'Web'),
+          s(kwargs.actor, 'Web'),
         );
       case 'modpack_rename':
-        return this.modpacks.rename(
-          String(kwargs.old || ''),
-          String(kwargs.new || ''),
-        );
+        return this.modpacks.rename(s(kwargs.old, ''), s(kwargs.new, ''));
       case 'modpack_delete':
-        return this.modpacks.delete(String(kwargs.name || ''));
+        return this.modpacks.delete(s(kwargs.name, ''));
       case 'modpack_reset':
         return this.modpacks.reset();
       case 'modpack_export_prepare':
         return this.modpacks.exportPrepare(
-          String(kwargs.name || ''),
+          s(kwargs.name, ''),
           !!kwargs.include_settings,
-          String(kwargs.description || ''),
-          String(kwargs.format || 'zip'),
+          s(kwargs.description, ''),
+          s(kwargs.format, 'zip'),
         );
       case 'modpack_import_upload':
         return this.modpacks.importUpload(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.name || ''),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.name, ''),
           !!kwargs.apply_settings,
         );
       case 'modpack_import_start_download':
-        return this.modpacks.importStartDownload(
-          String(kwargs.name || ''),
-          kwargs,
-        );
+        return this.modpacks.importStartDownload(s(kwargs.name, ''), kwargs);
       case 'modpack_import_download_plan':
-        return this.modpacks.importDownloadPlan(String(kwargs.name || ''));
+        return this.modpacks.importDownloadPlan(s(kwargs.name, ''));
       case 'modpack_import_append_dependencies':
-        return this.modpacks.importAppendDependencies(
-          String(kwargs.name || ''),
-        );
+        return this.modpacks.importAppendDependencies(s(kwargs.name, ''));
       case 'map_preset_list':
         return this.mapPresets.list();
       case 'map_preset_save':
-        return this.mapPresets.save(String(kwargs.name || ''), kwargs.state);
+        return this.mapPresets.save(s(kwargs.name, ''), kwargs.state);
       case 'map_preset_delete':
-        return this.mapPresets.delete(String(kwargs.id || ''));
+        return this.mapPresets.delete(s(kwargs.id, ''));
       case 'map_preset_export_prepare':
-        return this.mapPresets.exportPrepare(String(kwargs.id || ''));
+        return this.mapPresets.exportPrepare(s(kwargs.id, ''));
       case 'map_preset_import_upload':
         return this.mapPresets.importUpload(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.name || ''),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.name, ''),
         );
       case 'map_preset_import_batch':
         return this.mapPresets.importBatch(
-          Array.isArray(kwargs.presets) ? kwargs.presets : [],
+          Array.isArray(kwargs.presets)
+            ? (kwargs.presets as { name?: string; state?: unknown }[])
+            : [],
         );
       case 'announcements_read':
         return this.announcements.read();
@@ -527,8 +501,8 @@ export class DispatchService {
         return this.program.restartWebPanel();
       case 'upload_web_tls_file':
         return this.program.uploadWebTlsFile(
-          String(kwargs.tmp_path || ''),
-          String(kwargs.kind || ''),
+          s(kwargs.tmp_path, ''),
+          s(kwargs.kind, ''),
         );
       case 'get_server_ini':
         return this.program.getServerIni();
@@ -545,9 +519,7 @@ export class DispatchService {
       case 'maintenance_clear_manual':
         return this.maintenance.clearManual(kwargs);
       case 'get_locale':
-        return this.locale.getLocale(
-          String(kwargs.lang || kwargs.language || ''),
-        );
+        return this.locale.getLocale(s(kwargs.lang ?? kwargs.language));
       default:
         return { ok: false, error: `unknown web op: ${op}` };
     }
@@ -558,7 +530,7 @@ export class DispatchService {
     op: string,
     kwargs: Record<string, unknown> = {},
   ): Promise<Record<string, unknown>> {
-    const iid = String(instanceId || '').trim();
+    const iid = safeTrim(instanceId);
     if (!iid) return this.dispatch(op, kwargs);
     return this.instances.withInstance(iid, () => this.dispatch(op, kwargs));
   }
@@ -571,8 +543,8 @@ export class DispatchService {
     const eventKind = AUDIT_OP_KIND[op];
     if (!eventKind) return;
     const inst = this.instances.getSelected();
-    const actor = String(kwargs.actor || '').trim() || undefined;
-    const triggerRaw = String(kwargs._audit_trigger || '').trim();
+    const actor = safeTrim(kwargs.actor) || undefined;
+    const triggerRaw = safeTrim(kwargs._audit_trigger);
     const trigger =
       triggerRaw === 'scheduled'
         ? 'scheduled'
@@ -594,7 +566,7 @@ export class DispatchService {
       actor,
       trigger,
       success: result.ok !== false,
-      error: result.ok === false ? String(result.error || '') : undefined,
+      error: result.ok === false ? safeStr(result.error) : undefined,
       message_key: `audit_event_${eventKind}`,
       detail,
     });
@@ -608,15 +580,15 @@ export class DispatchService {
     switch (op) {
       case 'mods_remove':
         return {
-          name: String(kwargs.name || ''),
-          scope: String(kwargs.scope || 'all'),
-          version: String(kwargs.version || ''),
+          name: s(kwargs.name, ''),
+          scope: s(kwargs.scope, 'all'),
+          version: s(kwargs.version, ''),
         };
       case 'upload_mod_archive':
-        return { name: String(kwargs.name || result.name || '') };
+        return { name: s(kwargs.name ?? result.name) };
       case 'mods_set_enabled':
         return {
-          name: String(kwargs.name || ''),
+          name: s(kwargs.name, ''),
           enabled: parseModEnabledFlag(kwargs.enabled),
         };
       case 'mods_set_all_enabled':
@@ -628,7 +600,7 @@ export class DispatchService {
       case 'modpack_save_current':
       case 'modpack_import_upload':
         return {
-          name: String(kwargs.name || result.name || ''),
+          name: s(kwargs.name ?? result.name),
           create_backup: kwargs.create_backup,
           include_settings: kwargs.include_settings,
           include_disabled: kwargs.include_disabled,
@@ -636,16 +608,16 @@ export class DispatchService {
         };
       case 'rename_save':
         return {
-          name: String(kwargs.name || ''),
-          new_name: String(kwargs.new_name || result.new_name || ''),
+          name: s(kwargs.name, ''),
+          new_name: s(kwargs.new_name ?? result.new_name),
         };
       case 'delete_save':
       case 'duplicate_save':
       case 'set_launch_save':
       case 'create_save':
-        return { name: String(kwargs.name || result.name || '') };
+        return { name: s(kwargs.name ?? result.name) };
       case 'upload_save_archive':
-        return { name: String(kwargs.name || result.name || '') };
+        return { name: s(kwargs.name ?? result.name) };
       case 'write_server_settings':
       case 'set_server_ini':
       case 'mod_settings_write_json':
@@ -663,9 +635,9 @@ export class DispatchService {
     kwargs: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     if (!kwargs._maintenance_internal) return { ok: false, error: 'forbidden' };
-    const id = String(
-      kwargs.instance_id || kwargs.id || this.instances.getSelectedId() || '',
-    ).trim();
+    const id = safeTrim(
+      kwargs.instance_id ?? kwargs.id ?? this.instances.getSelectedId(),
+    );
     const item = id ? this.instances.getById(id) : undefined;
     if (!item) return { ok: false, error: 'instance_not_found' };
     const locked = !!kwargs.locked;

@@ -48,6 +48,7 @@ import {
   normalizeModUiLang,
   resolveModDisplayTitlesBatch,
 } from '../mod-display-titles.util';
+import { safeStr, safeTrim } from '../../common/trim.util';
 
 const PORTAL_CHECK_WORKERS = 10;
 const PORTAL_VERSION_CACHE_TTL_SEC = 300;
@@ -115,11 +116,11 @@ export class ModsOpsService {
       sel.item.serverPath,
     );
     const rows = modList.mods
-      .filter((row) => String(row.name || '').toLowerCase() !== 'base')
+      .filter((row) => safeTrim(row.name).toLowerCase() !== 'base')
       .map((row) => {
-        const name = String(row.name || '').trim();
+        const name = safeTrim(row.name);
         const versions = installedModVersions(sel.pm.modsDir, name);
-        const pinned = String(row.version || '').trim();
+        const pinned = safeTrim(row.version);
         const local = pinned || latestVersion(versions);
         const zip = local ? join(sel.pm.modsDir, `${name}_${local}.zip`) : '';
         const manifest = zip && existsSync(zip) ? readModManifest(zip) : null;
@@ -144,9 +145,7 @@ export class ModsOpsService {
           available_versions: versions,
           pinned_version: pinned || null,
           zip_size_bytes: zip && existsSync(zip) ? statSync(zip).size : 0,
-          author: isBuiltin
-            ? BUILTIN_MOD_AUTHOR
-            : String(manifest?.author || ''),
+          author: isBuiltin ? BUILTIN_MOD_AUTHOR : safeStr(manifest?.author),
           install_date: isBuiltin
             ? builtinInstallDate
             : String(installMeta.mod_install_dates[name] || ''),
@@ -227,7 +226,7 @@ export class ModsOpsService {
     const names = Array.from(
       new Set(
         readModList(sel.pm)
-          .mods.map((row) => String(row.name || '').trim())
+          .mods.map((row) => safeTrim(row.name))
           .filter((name) => name && !this.portal.isBuiltin(name)),
       ),
     ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
@@ -274,9 +273,7 @@ export class ModsOpsService {
     if (this.runtime.isRunning(sel.item.id))
       return { ok: false, error: 'server_running' };
     const rows = readModList(sel.pm).mods;
-    const row = rows.find(
-      (r) => String(r.name || '') === String(name || '').trim(),
-    );
+    const row = rows.find((r) => safeStr(r.name) === safeTrim(name));
     if (!row) return { ok: false, error: 'not_found' };
     row.enabled = !!enabled;
     writeModList(sel.pm, rows);
@@ -291,7 +288,7 @@ export class ModsOpsService {
     const rows = readModList(sel.pm).mods;
     let changed = 0;
     for (const row of rows) {
-      const name = String(row.name || '').trim();
+      const name = safeTrim(row.name);
       if (!name || this.portal.isBuiltin(name)) continue;
       if (!!row.enabled !== !!enabled) changed += 1;
       row.enabled = !!enabled;
@@ -334,7 +331,7 @@ export class ModsOpsService {
     if (!versions.includes(version))
       return { ok: false, error: 'invalid_version' };
     const rows = readModList(sel.pm).mods;
-    const row = rows.find((r) => String(r.name || '') === name);
+    const row = rows.find((r) => safeStr(r.name) === name);
     if (!row) return { ok: false, error: 'not_found' };
     row.version = version;
     writeModList(sel.pm, rows);
@@ -358,12 +355,12 @@ export class ModsOpsService {
         writeModList(
           sel.pm,
           rows.filter(
-            (r) => String(r.name || '').toLowerCase() !== name.toLowerCase(),
+            (r) => safeTrim(r.name).toLowerCase() !== name.toLowerCase(),
           ),
         );
       } else {
         const row = rows.find(
-          (r) => String(r.name || '').toLowerCase() === name.toLowerCase(),
+          (r) => safeTrim(r.name).toLowerCase() === name.toLowerCase(),
         );
         if (row && row.version === version) {
           row.version = latestVersion(remaining);
@@ -378,7 +375,7 @@ export class ModsOpsService {
       writeModList(
         sel.pm,
         rows.filter(
-          (r) => String(r.name || '').toLowerCase() !== name.toLowerCase(),
+          (r) => safeTrim(r.name).toLowerCase() !== name.toLowerCase(),
         ),
       );
     }
@@ -511,12 +508,9 @@ export class ModsOpsService {
       }
       const modList = readModList(sel.pm);
       const modRow = modList.mods.find(
-        (r) =>
-          String(r.name || '')
-            .trim()
-            .toLowerCase() === modId.toLowerCase(),
+        (r) => safeTrim(r.name).toLowerCase() === modId.toLowerCase(),
       );
-      const pinned = String(modRow?.version || '').trim();
+      const pinned = safeTrim(modRow?.version);
       const currentInstalled =
         (pinned && installedVersions.includes(pinned) ? pinned : '') ||
         latestVersion(installedVersions) ||
@@ -527,7 +521,7 @@ export class ModsOpsService {
         title: typeof meta.title === 'string' ? meta.title : modId,
         game_version: gv,
         factorio_version: this.portal.factorioMajorMinor(gv),
-        recommended_version: resolved ? String(resolved.version || '') : '',
+        recommended_version: resolved ? safeStr(resolved.version) : '',
         installed_version: currentInstalled,
         available_versions: installedVersions,
         releases,
@@ -539,12 +533,9 @@ export class ModsOpsService {
         const gv = gameVersion(serverPath);
         const modList = readModList(sel.pm);
         const modRow = modList.mods.find(
-          (r) =>
-            String(r.name || '')
-              .trim()
-              .toLowerCase() === modId.toLowerCase(),
+          (r) => safeTrim(r.name).toLowerCase() === modId.toLowerCase(),
         );
-        const pinned = String(modRow?.version || '').trim();
+        const pinned = safeTrim(modRow?.version);
         const currentInstalled =
           (pinned && installedVersions.includes(pinned) ? pinned : '') ||
           latestVersion(installedVersions) ||
@@ -655,7 +646,7 @@ export class ModsOpsService {
 
     const rootSet = new Set(
       readModList(sel.pm)
-        .mods.map((r) => String(r.name || '').trim())
+        .mods.map((r) => safeTrim(r.name))
         .filter((n) => n && !this.portal.isBuiltin(n)),
     );
 
@@ -778,7 +769,7 @@ export class ModsOpsService {
           serverPath,
           gameVersion: this.currentGameVersion(),
         });
-        const version = String(rel?.version || '').trim();
+        const version = safeTrim(rel?.version);
         if (!version) {
           const out = { ok: false, version: '', error: 'no_release' };
           this.portalVersionCache.set(modName, {

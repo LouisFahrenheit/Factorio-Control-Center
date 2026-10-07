@@ -9,6 +9,7 @@ import {
 } from 'fs';
 import { basename, dirname, join, resolve } from 'path';
 import { FccConfigService } from '../config/fcc-config.service';
+import { safeStr } from '../common/trim.util';
 
 const DEFAULT_MAX_MB = 50;
 const DEFAULT_INTERVAL_HOURS = 24;
@@ -174,7 +175,7 @@ function clampInt(
   max: number,
   fallback: number,
 ): number {
-  const n = parseInt(String(value ?? ''), 10);
+  const n = typeof value === 'number' ? value : parseInt(safeStr(value), 10);
   if (!Number.isFinite(n)) return fallback;
   return Math.max(min, Math.min(max, n));
 }

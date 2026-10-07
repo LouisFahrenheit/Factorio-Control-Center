@@ -1,5 +1,6 @@
 import { existsSync } from 'fs';
 import { writeJsonFile } from './json-store';
+import { safeTrim } from './trim.util';
 
 export interface BanlistEntry {
   username: string;
@@ -20,9 +21,9 @@ export function normalizeBanlistEntries(raw: unknown): BanlistEntry[] {
       username = item.trim();
     } else if (item && typeof item === 'object') {
       const o = item as Record<string, unknown>;
-      username = String(o.username || o.player || '').trim();
-      reason = String(o.reason || '').trim();
-      address = String(o.address || o.ip || '').trim();
+      username = safeTrim(o.username ?? o.player);
+      reason = safeTrim(o.reason);
+      address = safeTrim(o.address ?? o.ip);
     }
     if (!username) continue;
     const key = username.toLowerCase();

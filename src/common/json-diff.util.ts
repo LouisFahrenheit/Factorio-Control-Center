@@ -1,3 +1,5 @@
+import { safeStr } from './trim.util';
+
 export interface JsonFieldChange {
   key: string;
   from: string;
@@ -23,10 +25,10 @@ function summarizeValue(key: string, value: unknown): string {
     try {
       return JSON.stringify(value);
     } catch {
-      return String(value);
+      return '[Object]';
     }
   }
-  return String(value);
+  return safeStr(value);
 }
 
 /** Shallow JSON diff with nested objects compared by JSON serialization. */

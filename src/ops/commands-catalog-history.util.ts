@@ -1,3 +1,5 @@
+import { safeTrim } from '../common/trim.util';
+
 export interface CommandsCatalogHistoryChange {
   action:
     | 'category_create'
@@ -42,17 +44,17 @@ function snapshotCatalog(raw: unknown): Map<string, CatalogCategorySnap> {
         if (!cmdVal || typeof cmdVal !== 'object' || Array.isArray(cmdVal))
           return;
         const cmd = cmdVal as Record<string, unknown>;
-        const id = String(cmd.id || '').trim();
+        const id = safeTrim(cmd.id);
         if (!id) return;
         commands.set(id, {
           id,
-          name: String(cmd.name || id).trim() || id,
-          command: String(cmd.command || '').trim(),
+          name: safeTrim(cmd.name) || id,
+          command: safeTrim(cmd.command),
         });
       });
       out.set(key, {
         key,
-        name: String(cat.name || key).trim() || key,
+        name: safeTrim(cat.name) || key,
         commands,
       });
     },

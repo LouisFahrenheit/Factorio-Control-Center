@@ -52,6 +52,7 @@ import {
   normalizeModUiLang,
   resolveModDisplayTitlesBatch,
 } from '../mod-display-titles.util';
+import { safeStr, safeTrim } from '../../common/trim.util';
 
 const BUILTIN_MODS = [
   'base',
@@ -120,13 +121,13 @@ export class ModpacksOpsService {
           .map((f) => {
             const manifest = readModManifest(join(modsDir, f));
             return {
-              name: String(
+              name: safeStr(
                 manifest?.name || f.replace(/_\d+\.\d+\.\d+\.zip$/i, ''),
               ),
-              display_name: String(
+              display_name: safeStr(
                 manifest?.name || f.replace(/_\d+\.\d+\.\d+\.zip$/i, ''),
               ),
-              version: String(manifest?.version || ''),
+              version: safeStr(manifest?.version),
             };
           })
       : [];
@@ -190,9 +191,7 @@ export class ModpacksOpsService {
     if (!nm) return { ok: false, error: 'invalid_name' };
     const modList = readModList(sel.pm);
     const isUserMod = (row: Record<string, unknown>) => {
-      const n = String(row.name || '')
-        .trim()
-        .toLowerCase();
+      const n = safeTrim(row.name).toLowerCase();
       return n && !BUILTIN_MODS.includes(n);
     };
     const isEnabled = (row: Record<string, unknown>) => row.enabled !== false;
@@ -202,9 +201,7 @@ export class ModpacksOpsService {
     if (!userModCount) return { ok: false, error: 'empty' };
     const includedModNames = new Set<string>();
     for (const row of modList.mods) {
-      const n = String(row.name || '')
-        .trim()
-        .toLowerCase();
+      const n = safeTrim(row.name).toLowerCase();
       if (!n) continue;
       if (BUILTIN_MODS.includes(n)) {
         includedModNames.add(n);
@@ -232,9 +229,7 @@ export class ModpacksOpsService {
     const modsToWrite = includeDisabled
       ? modList.mods
       : modList.mods.filter((row) => {
-          const n = String(row.name || '')
-            .trim()
-            .toLowerCase();
+          const n = safeTrim(row.name).toLowerCase();
           if (!n) return false;
           if (BUILTIN_MODS.includes(n)) return true;
           return isEnabled(row);
@@ -280,9 +275,7 @@ export class ModpacksOpsService {
       return { ok: false, error: 'modpack_requires_space_age' };
     }
     const installedUserMods = readModList(sel.pm).mods.filter((row) => {
-      const n = String(row.name || '')
-        .trim()
-        .toLowerCase();
+      const n = safeTrim(row.name).toLowerCase();
       return n && !BUILTIN_MODS.includes(n);
     }).length;
     let backup = '';
@@ -340,7 +333,7 @@ export class ModpacksOpsService {
       );
     }
     const modNames = readModList(sel.pm)
-      .mods.map((r) => String(r.name || '').trim())
+      .mods.map((r) => safeTrim(r.name))
       .filter((n) => n && !BUILTIN_MODS.includes(n.toLowerCase()));
     trackModInstallMeta(sel.item.serverPath, modNames, actor, true);
     this.activeSet(nm);
@@ -449,7 +442,7 @@ export class ModpacksOpsService {
 
     if (String(format || '').toLowerCase() === 'fcc') {
       const payload: Record<string, unknown> = {
-        factorio_version: String(meta.factorio_version || '').trim(),
+        factorio_version: safeTrim(meta.factorio_version),
         mods: userMods,
       };
       if (hasSettings) {
@@ -462,7 +455,7 @@ export class ModpacksOpsService {
         this.locale.readLang('en') ||
         {};
       const envelope = buildFccFileEnvelope('modpack', nm, payload, {
-        description: String(description || meta.description || '').trim(),
+        description: safeTrim(description || meta.description),
         created_at: panelTimestamp(),
         contains: fccFileKindContainsLabel('modpack', localeStrings),
       });
@@ -475,8 +468,8 @@ export class ModpacksOpsService {
     const zip = new AdmZip();
     const metaPayload: Record<string, unknown> = {
       name: nm,
-      description: String(description || meta.description || '').trim(),
-      factorio_version: String(meta.factorio_version || '').trim(),
+      description: safeTrim(description || meta.description),
+      factorio_version: safeTrim(meta.factorio_version),
       created_at: panelTimestamp(),
       mods_count: userMods.length,
       has_mod_settings: hasSettings,
@@ -663,8 +656,8 @@ export class ModpacksOpsService {
     const modsDir = join(packDir, 'mods');
     mkdirSync(modsDir, { recursive: true });
 
-    const desc = String(parsed.description || payload.description || '').trim();
-    const fv = String(payload.factorio_version || '').trim();
+    const desc = safeTrim(parsed.description || payload.description);
+    const fv = safeTrim(payload.factorio_version);
     const hasSettings =
       applySettings &&
       typeof payload.mod_settings_b64 === 'string' &&
@@ -855,10 +848,10 @@ export class ModpacksOpsService {
       // Ensure metadata.json exists in packDir
       const metaPath = join(packDir, 'metadata.json');
       if (!existsSync(metaPath)) {
-        const desc = String(
-          foundManifest.parsed.description || foundManifest.parsed.desc || '',
-        ).trim();
-        const fv = String(foundManifest.parsed.factorio_version || '').trim();
+        const desc = safeTrim(
+          foundManifest.parsed.description || foundManifest.parsed.desc,
+        );
+        const fv = safeTrim(foundManifest.parsed.factorio_version);
         writeFileSync(
           metaPath,
           JSON.stringify(
@@ -937,12 +930,12 @@ export class ModpacksOpsService {
     for (const row of mods) {
       if (!row || typeof row !== 'object') continue;
       const rec = row as Record<string, unknown>;
-      const name = String(rec.name || '').trim();
+      const name = safeTrim(rec.name);
       if (!name || BUILTIN_MODS.includes(name.toLowerCase())) continue;
       out.push({
         name,
         enabled: rec.enabled !== false,
-        version: rec.version ? String(rec.version) : undefined,
+        version: rec.version ? safeStr(rec.version) : undefined,
       });
     }
     return out;

@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { safeStr } from '../common/trim.util';
 
 /**
  * Codec for Factorio mod-settings.dat (property tree).
@@ -304,7 +305,11 @@ function decodeJsonValue(raw: unknown): PropertyTree {
     }
     return new PropertyTree(null, items, PropertyTreeType.Dictionary);
   }
-  throw new Error(`Cannot convert JSON value: ${String(raw)}`);
+  const serialized =
+    typeof raw === 'object' && raw !== null
+      ? JSON.stringify(raw)
+      : safeStr(raw);
+  throw new Error(`Cannot convert JSON value: ${serialized}`);
 }
 
 export function modSettingsFromJson(raw: unknown): ModSettings {

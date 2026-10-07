@@ -33,6 +33,7 @@ import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { SessionUser } from '../common/types';
 import { ApiBridgeService } from './api-bridge.service';
 import { LOG_HISTORY_DEFAULT_TAIL } from '../ops/ops-utils';
+import { safeStr } from '../common/trim.util';
 import { LocaleService } from '../locale/locale.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { UsersService } from '../auth/users.service';
@@ -403,10 +404,10 @@ export class ApiFullController {
   @ApiResponse({ status: 404, description: 'Save not found' })
   async saveDownload(@Param('name') name: string, @Res() res: Response) {
     const data = await this.bridge.submit('get_save_download_path', { name });
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || name));
+    return res.download(path, safeStr(data.name, name));
   }
 
   @Get('saves/:name/inspect')
@@ -791,10 +792,10 @@ export class ApiFullController {
   @ApiResponse({ status: 404, description: 'Archive could not be built' })
   async modsDownloadAll(@Res() res: Response) {
     const data = await this.bridge.submit('build_mods_archive');
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || 'mods.zip'));
+    return res.download(path, safeStr(data.name, 'mods.zip'));
   }
 
   @Get('mods/:name/download')
@@ -805,10 +806,10 @@ export class ApiFullController {
   @ApiResponse({ status: 404, description: 'Mod not found' })
   async modDownload(@Param('name') name: string, @Res() res: Response) {
     const data = await this.bridge.submit('get_mod_download_path', { name });
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || name));
+    return res.download(path, safeStr(data.name, name));
   }
 
   @Post('mods/install-plan')
@@ -1293,10 +1294,10 @@ export class ApiFullController {
       description: '',
       format: formatStr,
     });
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || `${name}.${formatStr}`));
+    return res.download(path, safeStr(data.name, `${name}.${formatStr}`));
   }
 
   @Get('map-presets')
@@ -1355,10 +1356,10 @@ export class ApiFullController {
   @Get('map-presets/:id/export')
   async mapPresetExport(@Param('id') id: string, @Res() res: Response) {
     const data = await this.bridge.submit('map_preset_export_prepare', { id });
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !existsSync(path))
       return res.status(404).json({ ok: false, error: 'not_found' });
-    return res.download(path, String(data.name || 'map-preset.fcc'));
+    return res.download(path, safeStr(data.name, 'map-preset.fcc'));
   }
 
   @Post('maintenance/run')

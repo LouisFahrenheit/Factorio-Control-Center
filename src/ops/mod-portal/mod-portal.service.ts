@@ -11,6 +11,7 @@ import { join } from 'path';
 import { PathManager } from '../path-manager';
 import { gameVersion } from '../ops-utils';
 import { gameBelowModFactorioReq } from '../mods/mod-game-req';
+import { safeStr, safeTrim } from '../../common/trim.util';
 
 const BASE = 'https://mods.factorio.com';
 const BUILTIN = new Set([
@@ -225,7 +226,7 @@ export class ModPortalService {
       }
       throw lastErr instanceof Error
         ? lastErr
-        : new Error(String(lastErr || 'fetch_failed'));
+        : new Error(safeStr(lastErr, 'fetch_failed'));
     })();
 
     this.inFlightFetch.set(key, req);
@@ -276,10 +277,10 @@ export class ModPortalService {
     const raw = info.factorio_version;
     if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
       return this.factorioMajorMinor(
-        String((raw as Record<string, unknown>).base || ''),
+        safeStr((raw as Record<string, unknown>).base),
       );
     }
-    return this.factorioMajorMinor(String(raw || ''));
+    return this.factorioMajorMinor(safeStr(raw));
   }
 
   resolveRelease(
@@ -297,9 +298,7 @@ export class ModPortalService {
 
     if (options?.version) {
       const targetVer = String(options.version).trim();
-      const match = rels.find(
-        (r) => String(r.version || '').trim() === targetVer,
-      );
+      const match = rels.find((r) => safeTrim(r.version) === targetVer);
       if (match) return match;
     }
 
@@ -319,19 +318,14 @@ export class ModPortalService {
           );
           if (compatible.length > 0) {
             return compatible.sort((a, b) =>
-              this.versionNewer(
-                String(a.version || ''),
-                String(b.version || ''),
-              )
+              this.versionNewer(safeStr(a.version), safeStr(b.version))
                 ? -1
                 : 1,
             )[0];
           }
         }
         return matchingFv.sort((a, b) =>
-          this.versionNewer(String(a.version || ''), String(b.version || ''))
-            ? -1
-            : 1,
+          this.versionNewer(safeStr(a.version), safeStr(b.version)) ? -1 : 1,
         )[0];
       }
     }
@@ -341,9 +335,7 @@ export class ModPortalService {
       rels
         .slice()
         .sort((a, b) =>
-          this.versionNewer(String(a.version || ''), String(b.version || ''))
-            ? -1
-            : 1,
+          this.versionNewer(safeStr(a.version), safeStr(b.version)) ? -1 : 1,
         )[0] || rels[rels.length - 1]
     );
   }
@@ -376,7 +368,7 @@ export class ModPortalService {
     const targetFv = this.factorioMajorMinor(gv);
 
     const list: ModPortalReleaseItem[] = rels.map((r) => {
-      const ver = String(r.version || '').trim();
+      const ver = safeTrim(r.version);
       const fv = this.releaseFactorioVersion(r);
       let isComp = true;
       if (targetFv) {
@@ -388,9 +380,9 @@ export class ModPortalService {
       return {
         version: ver,
         factorio_version: fv,
-        released_at: String(r.released_at || ''),
-        file_name: String(r.file_name || ''),
-        sha1: String(r.sha1 || ''),
+        released_at: safeStr(r.released_at),
+        file_name: safeStr(r.file_name),
+        sha1: safeStr(r.sha1),
         is_compatible: isComp,
       };
     });
@@ -438,8 +430,8 @@ export class ModPortalService {
     onProgress?: (cur: number, tot: number) => void,
     shouldAbort?: () => boolean,
   ): Promise<string> {
-    const dl = String(release.download_url || '');
-    const fileName = String(release.file_name || '');
+    const dl = safeStr(release.download_url);
+    const fileName = safeStr(release.file_name);
     if (!dl.startsWith('/') || !fileName.endsWith('.zip')) {
       throw new Error('invalid_release');
     }
@@ -492,7 +484,7 @@ export class ModPortalService {
     await new Promise<void>((resolve, reject) => {
       ws.end((e?: Error) => (e ? reject(e) : resolve()));
     });
-    const expected = String(release.sha1 || '').toLowerCase();
+    const expected = safeTrim(release.sha1).toLowerCase();
     if (expected && hash.digest('hex').toLowerCase() !== expected) {
       try {
         unlinkSync(dest);

@@ -31,6 +31,7 @@ import {
 } from '../ops-utils';
 import { diffJsonObjects } from '../../common/json-diff.util';
 import { ensureBanlistFile } from '../../common/banlist.util';
+import { safeStr, safeTrim } from '../../common/trim.util';
 import { ModSettingsSchemaService } from './mod-settings-schema.service';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
 
@@ -71,9 +72,9 @@ export class FilesOpsService {
       normalized.game_password == null ||
       typeof normalized.game_password === 'boolean'
         ? ''
-        : String(normalized.game_password);
-    const token = String(normalized.token || '').trim();
-    const password = String(normalized.password || '').trim();
+        : safeStr(normalized.game_password);
+    const token = safeTrim(normalized.token);
+    const password = safeTrim(normalized.password);
     const vis = normalized.visibility as Record<string, unknown> | undefined;
     if (token && password)
       return {

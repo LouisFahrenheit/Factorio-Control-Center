@@ -4,6 +4,7 @@ import { writeFileSync } from 'fs';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
 import { PathsService } from '../config/paths.service';
 import { LogRotationService } from '../logging/log-rotation.service';
+import { safeStr, safeTrim } from '../common/trim.util';
 
 export type AuditTrigger = 'manual' | 'scheduled' | 'system';
 export type ReportKind = 'manual_session' | 'maintenance_run';
@@ -147,7 +148,7 @@ export class AuditLogService {
       true,
     );
     const data = this.loadReports();
-    const idx = data.findIndex((r) => String(r.run_id || '') === row.run_id);
+    const idx = data.findIndex((r) => safeStr(r.run_id) === row.run_id);
     if (idx >= 0) {
       const rep = { ...data[idx] };
       rep.finished_at = now;
@@ -159,16 +160,14 @@ export class AuditLogService {
   }
 
   appendMaintenanceRun(report: Record<string, unknown>): void {
-    const instId = String(report.instance_id || '').trim();
+    const instId = safeTrim(report.instance_id);
     if (!instId) {
       this.prependReport(report);
       return;
     }
 
-    const trigger = String(report.run_trigger || '').trim() || 'scheduled';
-    const runId = String(
-      report.run_id || `maint-${instId}-${Date.now()}`,
-    ).trim();
+    const trigger = safeTrim(report.run_trigger) || 'scheduled';
+    const runId = safeTrim(report.run_id) || `maint-${instId}-${Date.now()}`;
     const steps = Array.isArray(report.steps) ? report.steps : [];
 
     const entry: Record<string, unknown> = {
@@ -176,7 +175,7 @@ export class AuditLogService {
       report_kind: 'maintenance_run',
       event_kind: 'maintenance_run',
       instance_id: instId,
-      instance_name: String(report.instance_name || instId),
+      instance_name: safeStr(report.instance_name || instId),
       started_at: report.started_at || this.nowIso(),
       finished_at: report.finished_at || this.nowIso(),
       success: report.success !== false,
@@ -191,8 +190,8 @@ export class AuditLogService {
     const data = this.loadReports();
     const idx = data.findIndex(
       (r) =>
-        String(r.run_id || '') === runId &&
-        String(r.report_kind || r.event_kind || '') === 'maintenance_run',
+        safeStr(r.run_id) === runId &&
+        safeStr(r.report_kind || r.event_kind) === 'maintenance_run',
     );
     if (idx >= 0) {
       const updated = { ...data[idx], ...entry };
@@ -207,7 +206,7 @@ export class AuditLogService {
   listReports(): Record<string, unknown>[] {
     return this.loadReports()
       .filter((r) => {
-        const kind = String(r.report_kind || r.event_kind || '');
+        const kind = safeStr(r.report_kind || r.event_kind);
         return kind === 'manual_session' || kind === 'maintenance_run';
       })
       .slice(0, MAX_REPORTS);
@@ -224,7 +223,7 @@ export class AuditLogService {
     }
 
     const data = this.loadReports();
-    const filtered = data.filter((r) => String(r.instance_id || '') !== iid);
+    const filtered = data.filter((r) => safeStr(r.instance_id) !== iid);
     if (filtered.length !== data.length) this.saveReports(filtered);
   }
 
@@ -245,7 +244,7 @@ export class AuditLogService {
     success: boolean,
   ): void {
     const data = this.loadReports();
-    const idx = data.findIndex((r) => String(r.run_id || '') === runId);
+    const idx = data.findIndex((r) => safeStr(r.run_id) === runId);
     if (idx < 0) return;
 
     const report = { ...data[idx] };
@@ -257,7 +256,7 @@ export class AuditLogService {
       steps.splice(0, steps.length - MAX_STEPS_PER_REPORT);
     }
     report.steps = steps;
-    report.finished_at = String(step.t || this.nowIso());
+    report.finished_at = safeStr(step.t || this.nowIso());
     if (!success) report.success = false;
     data.splice(idx, 1);
     data.unshift(report);
@@ -300,7 +299,7 @@ export class AuditLogService {
 
   private saveReports(data: Record<string, unknown>[]): void {
     const cleaned = data.filter(
-      (r) => String(r.report_kind || r.event_kind || '') !== 'daily',
+      (r) => safeStr(r.report_kind || r.event_kind) !== 'daily',
     );
     writeFileSync(
       this.paths.maintenanceReportsPath,
@@ -347,10 +346,10 @@ export class AuditLogService {
   private auditFileDetail(detail?: Record<string, unknown>): string {
     if (!detail || !Object.keys(detail).length) return '';
     const parts: string[] = [];
-    if (detail.message) parts.push(String(detail.message));
-    const name = detail.name != null ? String(detail.name) : '';
-    const newName = detail.new_name != null ? String(detail.new_name) : '';
-    const modName = detail.name != null ? String(detail.name) : '';
+    if (detail.message) parts.push(safeStr(detail.message));
+    const name = detail.name != null ? safeStr(detail.name) : '';
+    const newName = detail.new_name != null ? safeStr(detail.new_name) : '';
+    const modName = detail.name != null ? safeStr(detail.name) : '';
     if (name && newName) parts.push(`${name} → ${newName}`);
     else if (name && !detail.message) parts.push(name);
     else if (modName && detail.enabled != null && !detail.message)

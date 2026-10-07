@@ -1,3 +1,5 @@
+import { safeTrim } from './trim.util';
+
 export const FCC_FILE_FORMAT = 'fcc-file';
 export const FCC_FILE_VERSION = 1;
 
@@ -102,9 +104,9 @@ export function unwrapMapPresetPayload(parsed: unknown): {
     const state = rec.state;
     if (!state || typeof state !== 'object' || Array.isArray(state))
       return null;
-    const name = String(obj.name || rec.name || '').trim();
+    const name = safeTrim(obj.name ?? rec.name);
     if (!name) return null;
-    const description = String(obj.description || rec.description || '').trim();
+    const description = safeTrim(obj.description ?? rec.description);
     return {
       name,
       ...(description ? { description } : {}),
@@ -122,7 +124,7 @@ function mapPresetEntryFromRow(
   const rec = row as Record<string, unknown>;
   const state = rec.state;
   if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
-  const name = String(rec.name || fallbackName || '').trim();
+  const name = safeTrim(rec.name ?? fallbackName);
   if (!name) return null;
   return { name, state: state as Record<string, unknown> };
 }

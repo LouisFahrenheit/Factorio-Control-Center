@@ -26,6 +26,7 @@ import { firstPlanItemRequiringNewerGame } from './mod-game-req';
 import { ModPlanItem, ModPlanService } from './mod-plan.service';
 import { trackModInstallMeta } from '../instance-server-data';
 import { PathManager } from '../path-manager';
+import { safeStr, safeTrim } from '../../common/trim.util';
 
 interface JobState {
   running: boolean;
@@ -73,16 +74,16 @@ function formatModJobHistoryItem(x: unknown): string {
   }
   if (typeof x === 'object') {
     const row = x as Record<string, unknown>;
-    const name = String(row.name || '').trim();
-    const version = String(row.version || '').trim();
-    const from = String(row.from_version || row.from || '').trim();
+    const name = safeTrim(row.name);
+    const version = safeTrim(row.version);
+    const from = safeTrim(row.from_version || row.from);
     if (name && from && version) return `${name} (${from} → ${version})`;
     if (name && version) return `${name} (${version})`;
-    const error = String(row.error || '').trim();
+    const error = safeTrim(row.error);
     if (name && error) return `${name}: ${error}`;
     return name || version || error;
   }
-  const s = String(x).trim();
+  const s = safeTrim(x);
   return s === '[object Object]' ? '' : s;
 }
 
@@ -162,9 +163,9 @@ export class ModsJobService {
     try {
       const sel = selectedInstance(this.instances);
       if (isErrorResult(sel))
-        throw new Error(String(sel.error || 'instance_not_found'));
+        throw new Error(safeStr(sel.error, 'instance_not_found'));
 
-      const modsDir = String(params.mods_dir || sel.pm.modsDir);
+      const modsDir = safeStr(params.mods_dir || sel.pm.modsDir);
       mkdirSync(modsDir, { recursive: true });
       const serverPath = sel.item.serverPath;
       const allowRequiresGameUpdate = !!params.allow_requires_game_update;
@@ -181,10 +182,10 @@ export class ModsJobService {
       let plan: ModPlanItem[] = [];
 
       if (mode === 'install') {
-        const parsed = this.portal.parseModInput(String(params.mod || ''));
+        const parsed = this.portal.parseModInput(safeStr(params.mod));
         const modId = parsed.modName;
         const requestedVer =
-          String(params.version || parsed.version || '').trim() || undefined;
+          safeTrim(params.version || parsed.version) || undefined;
         if (!this.portal.isValidPortalModId(modId))
           throw new Error('invalid_mod_id');
         if (this.portal.isBuiltin(modId)) throw new Error('builtin');
@@ -209,11 +210,11 @@ export class ModsJobService {
         );
       } else if (mode === 'update_one') {
         const parsed = this.portal.parseModInput(
-          String(params.name || params.mod || ''),
+          safeStr(params.name || params.mod),
         );
         const name = parsed.modName;
         const requestedVer =
-          String(params.version || parsed.version || '').trim() || undefined;
+          safeTrim(params.version || parsed.version) || undefined;
         if (!name) throw new Error('empty_name');
         if (!this.portal.isValidPortalModId(name))
           throw new Error('invalid_mod_id');
@@ -293,7 +294,7 @@ export class ModsJobService {
         return;
       }
 
-      const actor = String(params.actor || 'Web').trim() || 'Web';
+      const actor = safeTrim(params.actor) || 'Web';
       const concurrency = this.downloadConcurrency();
 
       if (plan.length <= 1 || concurrency <= 1) {
@@ -322,7 +323,7 @@ export class ModsJobService {
       }
 
       if (isImportModpack) {
-        this.refreshModpackMetadata(String(params.modpack_name || ''), modsDir);
+        this.refreshModpackMetadata(safeStr(params.modpack_name), modsDir);
       }
 
       const installed = this.state.summary.installed.length;
@@ -377,8 +378,8 @@ export class ModsJobService {
         : isUpdate
           ? 'mod_update'
           : 'mod_install';
-    const actor = String(params.actor || '').trim() || undefined;
-    const triggerRaw = String(params._audit_trigger || '').trim();
+    const actor = safeTrim(params.actor) || undefined;
+    const triggerRaw = safeTrim(params._audit_trigger);
     const trigger =
       triggerRaw === 'scheduled' || params.maintenance_auto
         ? 'scheduled'
@@ -462,13 +463,13 @@ export class ModsJobService {
 
     let roots: string[] = [];
     if (mode === 'install') {
-      const modId = this.portal.modIdFromInput(String(params.mod || ''));
+      const modId = this.portal.modIdFromInput(safeStr(params.mod));
       if (modId) roots = [modId];
     } else if (mode === 'install_many' || mode === 'import_modpack') {
       roots = this.parseModNames(params.mods);
     } else if (mode === 'update_one') {
       const name = this.portal.modIdFromInput(
-        String(params.name || params.mod || ''),
+        safeStr(params.name || params.mod),
       );
       if (name) roots = [name];
     } else if (mode === 'update_all') {
@@ -774,7 +775,7 @@ export class ModsJobService {
           },
           () => this.state.stop_requested,
         );
-        const version = String(release.version || '');
+        const version = safeStr(release.version);
         if (removeOldZips && version)
           this.portal.pruneOldZips(modName, version, modsDir);
         return file;
@@ -872,7 +873,7 @@ export class ModsJobService {
         data = { mods: [] };
       }
     }
-    if (data.mods.some((m) => String(m.name || '') === name)) return false;
+    if (data.mods.some((m) => safeStr(m.name) === name)) return false;
     data.mods.push({ name, enabled });
     writeFileSync(listPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
     return true;

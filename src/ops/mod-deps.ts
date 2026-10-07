@@ -15,6 +15,7 @@ import {
   modNameFromZip,
   readModManifest,
 } from './ops-utils';
+import { safeTrim } from '../common/trim.util';
 
 const BUILTIN_MODS = new Set([
   'base',
@@ -239,7 +240,7 @@ export function disableModListEntriesByName(
   const seen = new Set<string>();
 
   for (const row of rows) {
-    const n = String(row.name || '').trim();
+    const n = safeTrim(row.name);
     if (!n || normalizeModListName(n) === 'base') continue;
     if (!keys.has(normalizeModListName(n))) continue;
     if (row.enabled === false) continue;
@@ -473,7 +474,7 @@ function modListRowToEntry(
     name: row.name,
     enabled: row.enabled !== false,
   };
-  const version = String(row.version || '').trim();
+  const version = safeTrim(row.version);
   if (version) entry.version = version;
   return entry;
 }
@@ -503,7 +504,7 @@ export function ensureSaOfficialExpansionRows(
   const others: Record<string, unknown>[] = [];
 
   for (const row of data.mods) {
-    const name = String(row?.name || '').trim();
+    const name = safeTrim(row?.name);
     const key = name.toLowerCase();
     if (key === 'base') {
       base = row;

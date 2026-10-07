@@ -5,6 +5,7 @@ import { panelTimestamp } from '../common/datetime.util';
 import { writeJsonFile } from '../common/json-store';
 import { InstancesService } from '../instances/instances.service';
 import type { CommandsCatalogHistoryChange } from './commands-catalog-history.util';
+import { safeStr, safeTrim } from '../common/trim.util';
 
 export interface HistoryChange {
   key: string;
@@ -65,7 +66,7 @@ const MODS_OPS = new Set([
 const COMMANDS_OPS = new Set(['rcon_exec', 'write_commands_catalog']);
 
 function historyActor(kwargs: Record<string, unknown>): string {
-  return String(kwargs.actor || kwargs.web_actor || '').trim() || 'system';
+  return safeTrim(kwargs.actor || kwargs.web_actor) || 'system';
 }
 
 @Injectable()
@@ -124,7 +125,7 @@ export class InstanceHistoryService {
     if (!inst?.serverPath) return;
     const actor = historyActor(kwargs);
     const success = result.ok !== false;
-    const error = success ? undefined : String(result.error || '');
+    const error = success ? undefined : safeStr(result.error);
     const base = {
       date: panelTimestamp(),
       actor,
@@ -183,7 +184,7 @@ export class InstanceHistoryService {
       actor,
       success,
       error: success ? undefined : String(summary.error || phase),
-      target: params.modpack_name ? String(params.modpack_name) : undefined,
+      target: params.modpack_name ? safeStr(params.modpack_name) : undefined,
       detail: {
         mode,
         installed: summary.installed,
@@ -321,12 +322,12 @@ export class InstanceHistoryService {
     base: Omit<InstanceHistoryEvent, 'action'>,
   ): InstanceHistoryEvent | null {
     if (op === 'rcon_exec') {
-      const command = String(kwargs.command || '').trim();
+      const command = safeTrim(kwargs.command);
       if (!command) return null;
-      const source = String(kwargs.source || 'console').trim() || 'console';
-      const response = String(result.output || result.response || '').trim();
-      const commandName = String(kwargs.command_name || '').trim();
-      const commandId = String(kwargs.command_id || '').trim();
+      const source = safeTrim(kwargs.source) || 'console';
+      const response = safeTrim(result.output || result.response);
+      const commandName = safeTrim(kwargs.command_name);
+      const commandId = safeTrim(kwargs.command_id);
       const detail: Record<string, unknown> = { source };
       if (commandId) detail.command_id = commandId;
       if (commandName) detail.command_name = commandName;
@@ -347,16 +348,16 @@ export class InstanceHistoryService {
         return {
           ...base,
           action: 'install',
-          target: String(kwargs.name || result.name || ''),
+          target: safeStr(kwargs.name || result.name),
         };
       case 'mods_remove':
         return {
           ...base,
           action: 'remove',
-          target: String(kwargs.name || ''),
+          target: safeStr(kwargs.name),
           detail: {
-            scope: String(kwargs.scope || 'all'),
-            version: String(kwargs.version || ''),
+            scope: safeStr(kwargs.scope, 'all'),
+            version: safeStr(kwargs.version),
           },
         };
       case 'mods_set_enabled': {
@@ -367,7 +368,7 @@ export class InstanceHistoryService {
         return {
           ...base,
           action: enabled ? 'enable' : 'disable',
-          target: String(kwargs.name || ''),
+          target: safeStr(kwargs.name),
         };
       }
       case 'mods_set_all_enabled': {
@@ -387,28 +388,26 @@ export class InstanceHistoryService {
         return {
           ...base,
           action: 'update',
-          target: String(kwargs.name || ''),
-          changes: [
-            { key: 'version', from: '—', to: String(kwargs.version || '') },
-          ],
+          target: safeStr(kwargs.name),
+          changes: [{ key: 'version', from: '—', to: safeStr(kwargs.version) }],
         };
       case 'modpack_activate':
         return {
           ...base,
           action: 'modpack_activate',
-          target: String(kwargs.name || result.name || ''),
+          target: safeStr(kwargs.name || result.name),
         };
       case 'modpack_save_current':
         return {
           ...base,
           action: 'modpack_create',
-          target: String(kwargs.name || result.name || ''),
+          target: safeStr(kwargs.name || result.name),
         };
       case 'modpack_delete':
         return {
           ...base,
           action: 'modpack_delete',
-          target: String(kwargs.name || ''),
+          target: safeStr(kwargs.name),
         };
       case 'modpack_reset':
         return { ...base, action: 'modpack_reset' };
@@ -416,18 +415,18 @@ export class InstanceHistoryService {
         return {
           ...base,
           action: 'modpack_add',
-          target: String(kwargs.name || result.name || ''),
+          target: safeStr(kwargs.name || result.name),
         };
       case 'modpack_rename':
         return {
           ...base,
           action: 'modpack_rename',
-          target: String(kwargs.new || ''),
+          target: safeStr(kwargs.new),
           changes: [
             {
               key: 'name',
-              from: String(kwargs.old || ''),
-              to: String(kwargs.new || ''),
+              from: safeStr(kwargs.old),
+              to: safeStr(kwargs.new),
             },
           ],
         };
@@ -478,8 +477,8 @@ export class InstanceHistoryService {
     result: Record<string, unknown>,
     mode: 'create' | 'delete' | 'duplicate' | 'rename' | 'upload',
   ): InstanceHistoryEvent {
-    const name = String(kwargs.name || '').trim();
-    const resultName = String(result.name || '').trim();
+    const name = safeTrim(kwargs.name);
+    const resultName = safeTrim(result.name);
     let changes: HistoryChange[] | undefined;
     switch (mode) {
       case 'create':
@@ -496,7 +495,7 @@ export class InstanceHistoryService {
           changes = [{ key: 'save', from: name, to: resultName }];
         break;
       case 'rename': {
-        const newName = String(kwargs.new_name || resultName || '').trim();
+        const newName = safeTrim(kwargs.new_name || resultName);
         if (name && newName)
           changes = [{ key: 'name', from: name, to: newName }];
         break;
@@ -518,9 +517,9 @@ export class InstanceHistoryService {
         if (!c || typeof c !== 'object') return null;
         const row = c as Record<string, unknown>;
         return {
-          key: String(row.key || ''),
-          from: String(row.from ?? '—'),
-          to: String(row.to ?? '—'),
+          key: safeStr(row.key),
+          from: safeStr(row.from, '—'),
+          to: safeStr(row.to, '—'),
         };
       })
       .filter((c): c is HistoryChange => !!c && !!c.key);

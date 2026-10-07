@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { gameVersion, hasSpaceAge } from '../ops-utils';
 import { isOptionalDependencyString } from '../mod-deps';
+import { safeTrim } from '../../common/trim.util';
 
 const GAME_ENGINE_DEP_VER_RE =
   /^(?<name>.+?)\s*(?<op>>=|<=|!=|>|<|=)\s*(?<ver>.+)$/;
@@ -175,7 +176,7 @@ export function installedBaseSpaceAgeVersions(serverPath: string): {
       const raw = JSON.parse(readFileSync(baseInfo, 'utf-8')) as {
         version?: unknown;
       };
-      base = String(raw.version || '').trim();
+      base = safeTrim(raw.version);
     }
   } catch {
     /* ignore */
@@ -186,7 +187,7 @@ export function installedBaseSpaceAgeVersions(serverPath: string): {
       const raw = JSON.parse(readFileSync(saInfo, 'utf-8')) as {
         version?: unknown;
       };
-      spaceAge = String(raw.version || '').trim();
+      spaceAge = safeTrim(raw.version);
     }
   } catch {
     /* ignore */
@@ -218,9 +219,9 @@ function releaseFactorioRequirementString(
   if (!info) return '';
   const raw = info.factorio_version;
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-    return String((raw as Record<string, unknown>).base || '').trim();
+    return safeTrim((raw as Record<string, unknown>).base);
   }
-  return String(raw || '').trim();
+  return safeTrim(raw);
 }
 
 /** True if installed base/space-age builds are below portal release requirements. */

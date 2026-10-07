@@ -21,6 +21,7 @@ import {
   readServerSettingsNetworkFlags,
 } from '../ops/ops-utils';
 import { isBuiltinModName } from '../ops/mod-deps';
+import { safeTrim } from '../common/trim.util';
 import { PathManager } from '../ops/path-manager';
 import { InstancesService } from './instances.service';
 
@@ -139,7 +140,7 @@ export class InstanceSummaryService {
     const out: string[] = [];
     for (const row of mods) {
       if (row.enabled === false) continue;
-      const name = String(row.name || '').trim();
+      const name = safeTrim(row.name);
       if (name) out.push(name);
     }
     return out;

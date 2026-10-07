@@ -30,6 +30,7 @@ import {
 } from './maintenance-time.util';
 import { MaintenanceSchedule } from './maintenance-schedule.entity';
 import { SystemPreference } from '../config/system-preference.entity';
+import { safeStr, safeTrim } from '../common/trim.util';
 
 export const MAINTENANCE_PANEL_ACTOR = 'System: Panel';
 
@@ -219,7 +220,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
 
     if ('scheduler_tz' in kwargs) {
       const s =
-        kwargs.scheduler_tz == null ? '' : String(kwargs.scheduler_tz).trim();
+        kwargs.scheduler_tz == null ? '' : safeTrim(kwargs.scheduler_tz);
       if (s && !validateIanaZone(s))
         return { ok: false, error: 'invalid_scheduler_tz' };
       await this.setSchedulerTz(s);
@@ -236,14 +237,13 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     kwargs: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     if (this.jobRunning) return { ok: false, error: 'job_running' };
-    const taskId = String(kwargs.task_id || kwargs.id || '').trim();
+    const taskId = safeTrim(kwargs.task_id || kwargs.id);
     const current = await this.repo.findOneBy({ id: taskId });
     if (!current) return { ok: false, error: 'task_not_found' };
     const task = this.mapToTask(current);
 
     const runId = `${new Date().toISOString()}-manual`;
-    const initiatedBy =
-      String(kwargs.actor || kwargs.web_actor || '').trim() || undefined;
+    const initiatedBy = safeTrim(kwargs.actor || kwargs.web_actor) || undefined;
     void this.runJob(task, runId, task.id, initiatedBy);
     return { ok: true, started: true, run_id: runId };
   }
@@ -264,8 +264,8 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   }
 
   clearManual(kwargs: Record<string, unknown>): Record<string, unknown> {
-    const iid = String(kwargs.instance_id || '').trim();
-    const actor = String(kwargs.actor || '').trim() || undefined;
+    const iid = safeTrim(kwargs.instance_id);
+    const actor = safeTrim(kwargs.actor) || undefined;
     const data = readJsonFile<Record<string, unknown>>(
       this.paths.maintenancePendingPath,
       {},
@@ -286,11 +286,10 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
   resumeManualOnStart(
     kwargs: Record<string, unknown>,
   ): Record<string, unknown> {
-    const iid = String(kwargs.instance_id || '').trim();
+    const iid = safeTrim(kwargs.instance_id);
     if (!iid || !this.hasPendingManual(iid))
       return { ok: true, cleared: false };
-    const actor =
-      String(kwargs.actor || kwargs.web_actor || '').trim() || undefined;
+    const actor = safeTrim(kwargs.actor || kwargs.web_actor) || undefined;
     this.auditLog.appendManualResumeStep(iid, actor);
     this.auditLog.endManualSession(iid, actor);
     const data = readJsonFile<Record<string, unknown>>(
@@ -613,7 +612,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         });
         step('maintenance_lock', { detail: lk });
         if (lk.ok === false) {
-          report.error = String(lk.error || 'maintenance_lock_failed');
+          report.error = safeStr(lk.error, 'maintenance_lock_failed');
           return false;
         }
         lockedForService = true;
@@ -636,7 +635,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         });
         step('factorio_update_start', { detail: start });
         if (start.ok === false)
-          throw new Error(String(start.error || 'factorio_update_failed'));
+          throw new Error(safeStr(start.error, 'factorio_update_failed'));
         if (start.started) {
           const fin = await this.poll(
             iid,
@@ -645,9 +644,9 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
             'factorio_update_poll_timeout',
           );
           step('factorio_update', { detail: fin });
-          if (String(fin.phase || '') !== 'done' || fin.error)
+          if (safeStr(fin.phase) !== 'done' || fin.error)
             throw new Error(
-              String(fin.error || fin.phase || 'factorio_update_failed'),
+              safeStr(fin.error || fin.phase, 'factorio_update_failed'),
             );
         } else {
           step('factorio_update', { ok: true, note: 'already_latest' });
@@ -665,7 +664,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
           step('mods_update_all_plan', { detail: planCheck });
           if (planCheck.ok === false)
             throw new Error(
-              String(planCheck.error || 'mods_update_all_plan_failed'),
+              safeStr(planCheck.error, 'mods_update_all_plan_failed'),
             );
           const needsGame = Array.isArray(planCheck.mods_needing_game_update)
             ? planCheck.mods_needing_game_update
@@ -694,7 +693,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
           });
           step('mods_job_start', { detail: start });
           if (start.ok === false)
-            throw new Error(String(start.error || 'mods_job_start_failed'));
+            throw new Error(safeStr(start.error, 'mods_job_start_failed'));
           const fin = await this.poll(
             iid,
             'mods_job_status',
@@ -702,22 +701,20 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
             'mods_job_poll_timeout',
           );
           step('mods_update', {
-            ok: String(fin.phase || '') === 'done',
+            ok: safeStr(fin.phase) === 'done',
             phase: fin.phase,
             summary: fin.summary,
             error: fin.error,
           });
-          if (String(fin.phase || '') !== 'done')
-            throw new Error(
-              String(fin.error || fin.phase || 'mods_job_failed'),
-            );
+          if (safeStr(fin.phase) !== 'done')
+            throw new Error(safeStr(fin.error || fin.phase, 'mods_job_failed'));
         }
       }
 
       const startServer = await dispatch('start_server');
       step('start_server', { detail: startServer });
       if (startServer.ok === false)
-        throw new Error(String(startServer.error || 'start_failed'));
+        throw new Error(safeStr(startServer.error, 'start_failed'));
       if (await this.waitStatus(iid, ['running'], 200)) {
         step('wait_running', { ok: true });
         report.success = true;
@@ -756,7 +753,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     const st = await this.dispatch.dispatchWithInstance(iid, 'status', {
       _maintenance_internal: true,
     });
-    if (String(st.status_kind || '') !== 'running') return;
+    if (safeStr(st.status_kind) !== 'running') return;
     const msg = this.langText(key);
     if (!msg) return;
     try {
@@ -830,10 +827,10 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return base;
     const r = raw as Record<string, unknown>;
-    const tid = String(r.id || '').trim();
+    const tid = safeTrim(r.id);
     base.id = tid || randomUUID();
     base.active = r.active !== false;
-    base.time_hhmm = String(r.time_hhmm || '04:00').trim() || '04:00';
+    base.time_hhmm = safeTrim(r.time_hhmm) || '04:00';
     base.manual_only = !!r.manual_only;
     const days: number[] = [];
     if (Array.isArray(r.weekdays)) {
@@ -853,7 +850,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     base.instance_ids = normalizeTaskInstanceIds(r.instance_ids, r.instance_id);
     delete (base as { instance_id?: string }).instance_id;
     base.options = this.normalizedOptions(r.options);
-    const tzRaw = String(r.timezone || '').trim();
+    const tzRaw = safeTrim(r.timezone);
     if (tzRaw) {
       if (!validateIanaZone(tzRaw)) {
         base.timezone = '';
@@ -878,7 +875,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
     if ('maintenance' in r) o.maintenance = !!r.maintenance;
     if (o.maintenance)
       return { update_mods: false, update_factorio: false, maintenance: true };
-    const policyRaw = String(r.mods_game_version_policy || '').trim();
+    const policyRaw = safeTrim(r.mods_game_version_policy);
     if (
       policyRaw === 'cancel' ||
       policyRaw === 'skip' ||
@@ -923,7 +920,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         const st = await this.dispatch.dispatchWithInstance(iid, 'status', {
           _maintenance_internal: true,
         });
-        if (allowed.includes(String(st.status_kind || ''))) return true;
+        if (allowed.includes(safeStr(st.status_kind))) return true;
       } catch {
         /* ignore */
       }
@@ -944,7 +941,7 @@ export class MaintenanceService implements OnModuleInit, OnModuleDestroy {
         const st = await this.dispatch.dispatchWithInstance(iid, op, {
           _maintenance_internal: true,
         });
-        if (String(st.phase || '') === 'done' || st.error) return st;
+        if (safeStr(st.phase) === 'done' || st.error) return st;
       } catch {
         /* ignore */
       }

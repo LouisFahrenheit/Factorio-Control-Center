@@ -1,3 +1,5 @@
+import { safeStr, safeTrim } from '../common/trim.util';
+
 /** Language-neutral command definition (stored in server_commands.json). */
 export interface CommandsBaseCommand {
   id: string;
@@ -59,20 +61,20 @@ export function emptyTranslationsDoc(): CommandsTranslationsDoc {
 }
 
 function stripBaseCommand(raw: Record<string, unknown>): CommandsBaseCommand {
-  const id = String(raw.id || '').trim();
+  const id = safeTrim(raw.id);
   const out: CommandsBaseCommand = {
     id,
-    command: String(raw.command || ''),
+    command: safeStr(raw.command),
   };
   if (raw.has_player) out.has_player = true;
   if (raw.has_boolean) {
     out.has_boolean = true;
     if (raw.default_value != null)
-      out.default_value = String(raw.default_value);
+      out.default_value = safeStr(raw.default_value);
   } else if (raw.has_value) {
     out.has_value = true;
     if (raw.default_value != null)
-      out.default_value = String(raw.default_value);
+      out.default_value = safeStr(raw.default_value);
   }
   if (raw.has_item) {
     out.has_item = true;
@@ -88,7 +90,7 @@ function stripBaseCommand(raw: Record<string, unknown>): CommandsBaseCommand {
   if (raw.has_quality) {
     out.has_quality = true;
     if (raw.default_quality != null)
-      out.default_quality = String(raw.default_quality);
+      out.default_quality = safeStr(raw.default_quality);
   }
   if (raw.requires_value === false) out.requires_value = false;
   return out;
@@ -116,7 +118,7 @@ export function parseBaseDoc(raw: unknown): CommandsBaseDoc {
       },
     );
   }
-  return { version: String(obj.version || '2.0'), categories };
+  return { version: safeStr(obj.version, '2.0'), categories };
 }
 
 export function parseTranslationsDoc(raw: unknown): CommandsTranslationsDoc {
@@ -132,7 +134,7 @@ export function parseTranslationsDoc(raw: unknown): CommandsTranslationsDoc {
   ) {
     Object.entries(obj.categories as Record<string, string>).forEach(
       ([k, v]) => {
-        categories[k] = String(v || k);
+        categories[k] = safeStr(v, k);
       },
     );
   }
@@ -146,8 +148,8 @@ export function parseTranslationsDoc(raw: unknown): CommandsTranslationsDoc {
         if (!val || typeof val !== 'object' || Array.isArray(val)) return;
         const e = val as Record<string, unknown>;
         commands[id] = {
-          name: String(e.name || id),
-          description: String(e.description || ''),
+          name: safeStr(e.name, id),
+          description: safeStr(e.description),
         };
       },
     );
@@ -186,7 +188,7 @@ export function splitMergedCatalog(merged: unknown): {
   }
   const obj = merged as Record<string, unknown>;
   const base: CommandsBaseDoc = {
-    version: String(obj.version || '2.0'),
+    version: safeStr(obj.version, '2.0'),
     categories: {},
   };
   const translations: CommandsTranslationsDoc = {
@@ -202,18 +204,18 @@ export function splitMergedCatalog(merged: unknown): {
       if (!catVal || typeof catVal !== 'object' || Array.isArray(catVal))
         return;
       const cat = catVal as Record<string, unknown>;
-      translations.categories[catKey] = String(cat.name || catKey);
+      translations.categories[catKey] = safeStr(cat.name, catKey);
       const commands = Array.isArray(cat.commands) ? cat.commands : [];
       base.categories[catKey] = {
         commands: commands
           .filter((c) => c && typeof c === 'object' && !Array.isArray(c))
           .map((c) => {
             const row = c as Record<string, unknown>;
-            const id = String(row.id || '').trim();
+            const id = safeTrim(row.id);
             if (id) {
               translations.commands[id] = {
-                name: String(row.name || id),
-                description: String(row.description || ''),
+                name: safeStr(row.name, id),
+                description: safeStr(row.description),
               };
             }
             return stripBaseCommand(row);

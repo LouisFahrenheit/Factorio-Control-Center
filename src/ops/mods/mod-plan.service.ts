@@ -29,6 +29,7 @@ import {
   type ModGameUpgradeHint,
 } from './mod-game-req';
 import { resolveModDisplayTitlesBatch } from '../mod-display-titles.util';
+import { safeTrim } from '../../common/trim.util';
 
 export interface ModPlanItem {
   name: string;
@@ -106,7 +107,7 @@ export class ModPlanService {
           : undefined;
       return {
         ok: true,
-        version: String(rel.version || ''),
+        version: safeTrim(rel.version),
         release: rel,
         title,
         meta,
@@ -522,7 +523,7 @@ export class ModPlanService {
     const rows = readModList(pm).mods;
     const out: string[] = [];
     for (const row of rows) {
-      const name = String(row.name || '').trim();
+      const name = safeTrim(row.name);
       if (!name || this.portal.isBuiltin(name)) continue;
       const localVer =
         latestVersion(installedModVersions(pm.modsDir, name)) || '';
@@ -548,7 +549,7 @@ export class ModPlanService {
 
     for (const row of rows) {
       hooks.cancelCheck?.();
-      const name = String(row.name || '').trim();
+      const name = safeTrim(row.name);
       if (!name || this.portal.isBuiltin(name)) continue;
 
       const localVer =
@@ -612,7 +613,7 @@ export class ModPlanService {
     const seen = new Set<string>();
 
     for (const row of rows) {
-      const name = String(row.name || '').trim();
+      const name = safeTrim(row.name);
       if (!name || this.portal.isBuiltin(name) || seen.has(name)) continue;
 
       const localVer =

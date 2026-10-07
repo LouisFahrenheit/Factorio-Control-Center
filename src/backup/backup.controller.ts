@@ -25,6 +25,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import type { SessionUser } from '../common/types';
+import { safeStr } from '../common/trim.util';
 import { BackupService } from './backup.service';
 import type { BackupOptions, RestoreOptions } from './backup.service';
 import { BackupSchedulerService } from './backup-scheduler.service';
@@ -129,7 +130,7 @@ export class BackupController {
     const s = this.scheduler.getSettings();
     const bool = (v: unknown, def: boolean) => (v === undefined ? def : !!v);
     const num = (v: unknown, def: number, min: number, max: number) => {
-      const n = parseInt(String(v ?? ''), 10);
+      const n = typeof v === 'number' ? v : parseInt(safeStr(v), 10);
       return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def;
     };
     await this.scheduler.saveSettings({

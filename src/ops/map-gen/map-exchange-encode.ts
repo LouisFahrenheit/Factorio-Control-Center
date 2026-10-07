@@ -1,5 +1,6 @@
 import { crc32, deflateSync } from 'zlib';
 import exchangeDefaults from './map-exchange-defaults.json';
+import { safeStr } from '../../common/trim.util';
 
 /** Factorio 2.0.x map exchange format version. */
 export const MAP_EXCHANGE_VERSION = [2, 0, 75, 0] as const;
@@ -291,7 +292,7 @@ function writeCliffSettings(
   cliff: Record<string, unknown>,
   atLeastV2: boolean,
 ): void {
-  w.writeString(String(cliff.name ?? ''));
+  w.writeString(safeStr(cliff.name));
   if (atLeastV2) w.writeUint8(Number(cliff._unknown ?? 0) & 0xff);
   w.writeFloat(Number(cliff.cliff_elevation_0 ?? 10));
   w.writeFloat(Number(cliff.cliff_elevation_interval ?? 40));
@@ -307,8 +308,8 @@ function writeTerritorySettings(
     ? (territory.units as string[])
     : [];
   w.writeArray(units, (ww, u) => ww.writeString(u));
-  w.writeString(String(territory.territory_index_expression ?? ''));
-  w.writeString(String(territory.territory_variation_expresion ?? ''));
+  w.writeString(safeStr(territory.territory_index_expression));
+  w.writeString(safeStr(territory.territory_variation_expresion));
   w.writeUint32(Number(territory.minimum_territory_size ?? 0) >>> 0);
 }
 
@@ -703,7 +704,7 @@ function writeDifficultySettings(
   w.writeUint8(Number(diff.recipe_difficulty ?? 0) & 0xff);
   w.writeUint8(Number(diff.technology_difficulty ?? 0) & 0xff);
   w.writeDouble(Number(diff.technology_price_multiplier ?? 1));
-  const rq = String(diff.research_queue_setting ?? 'always');
+  const rq = safeStr(diff.research_queue_setting, 'always');
   const rqIdx = ['always', 'after-victory', 'never'].indexOf(rq);
   w.writeUint8(rqIdx >= 0 ? rqIdx : 0);
 }

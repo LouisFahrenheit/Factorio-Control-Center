@@ -21,6 +21,7 @@ import { mapGenSchema } from './map-gen-catalog';
 import { hasSpaceAge, isErrorResult, selectedInstance } from '../ops-utils';
 import { prepareMapGenSettings, prepareMapSettings } from './map-gen-defaults';
 import { execFactorio } from '../factorio-exec';
+import { safeStr } from '../../common/trim.util';
 
 type PreviewWaiter = {
   run: () => Promise<OpResult>;
@@ -300,7 +301,7 @@ export class MapGenOpsService {
     if (result.ok && result.preview_png_base64) {
       onFrame({
         preview_size: FCC_PREVIEW_UI_SIZE,
-        preview_png_base64: String(result.preview_png_base64),
+        preview_png_base64: safeStr(result.preview_png_base64),
         final: true,
       });
     }

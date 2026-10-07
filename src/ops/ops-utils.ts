@@ -20,6 +20,7 @@ import {
 } from 'path';
 import { InstanceItem } from '../common/types';
 import { readJsonFile, writeJsonFile } from '../common/json-store';
+import { safeTrim } from '../common/trim.util';
 import { InstancesService } from '../instances/instances.service';
 import { PathManager } from './path-manager';
 
@@ -313,7 +314,7 @@ export function gameVersion(serverPath: string): string {
     try {
       if (!existsSync(p)) continue;
       const raw = JSON.parse(readFileSync(p, 'utf-8')) as { version?: unknown };
-      const v = String(raw.version || '').trim();
+      const v = safeTrim(raw.version);
       if (v) return v;
     } catch {
       /* ignore */
@@ -330,7 +331,7 @@ export function hasSpaceAgeInstalled(serverPath: string): boolean {
       const raw = JSON.parse(readFileSync(saInfo, 'utf-8')) as {
         version?: unknown;
       };
-      if (String(raw.version || '').trim()) return true;
+      if (safeTrim(raw.version)) return true;
     } catch {
       /* ignore */
     }
@@ -390,7 +391,7 @@ export function ensureModListEntry(
   enabled = true,
 ): void {
   const data = readModList(pm);
-  if (!data.mods.some((m) => String(m.name || '') === name)) {
+  if (!data.mods.some((m) => safeTrim(m.name) === name)) {
     data.mods.push({ name, enabled });
     writeModList(pm, data.mods);
   }

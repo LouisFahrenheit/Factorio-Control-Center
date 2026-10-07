@@ -33,6 +33,7 @@ import {
   isErrorResult,
   selectedInstance,
 } from '../ops-utils';
+import { safeStr, safeTrim } from '../../common/trim.util';
 
 const execFileAsync = promisify(execFile);
 
@@ -149,23 +150,22 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
           id: iid,
           name: nm,
           ok: false,
-          error: String(switched.error || 'update_check_failed'),
+          error: safeStr(switched.error, 'update_check_failed'),
         });
         continue;
       }
       const updates = Array.isArray(switched.updates) ? switched.updates : [];
       const latest =
         updates.length && typeof updates[updates.length - 1] === 'object'
-          ? String(
-              (updates[updates.length - 1] as { to?: string }).to ||
-                switched.latest_stable ||
-                '',
+          ? safeStr(
+              (updates[updates.length - 1] as { to?: string }).to ??
+                switched.latest_stable,
             )
-          : String(switched.latest_stable || '');
+          : safeStr(switched.latest_stable);
 
       const hasUpdates = updates.length > 0;
       if (hasUpdates && latest) {
-        const cur = String(switched.current || '');
+        const cur = safeStr(switched.current);
         if (cur && compareVersions(latest, cur) > 0) {
           pendingUpdates.push({
             instanceId: iid,
@@ -345,7 +345,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         latest_stable: picked.latest[0] || prep.ver,
       };
     }
-    const target = String(targetVersion || '').trim();
+    const target = safeTrim(targetVersion);
     if (target) {
       const targets = updates.map((u) => u.to);
       if (!targets.includes(target)) {
@@ -367,7 +367,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       latest_stable: picked.latest[0] || prep.ver,
       server_path: prep.serverPath,
       started_at: Date.now() / 1000,
-      actor: String(params.actor || '').trim() || undefined,
+      actor: safeTrim(params.actor) || undefined,
       audit_trigger: params.maintenance_auto
         ? 'scheduled'
         : params.actor
@@ -849,7 +849,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         const raw = JSON.parse(readFileSync(saInfo, 'utf-8')) as {
           version?: unknown;
         };
-        const v = String(raw.version || '').trim();
+        const v = safeTrim(raw.version);
         if (v) return v;
       }
     } catch {
@@ -972,7 +972,7 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     }
     throw lastErr instanceof Error
       ? lastErr
-      : new Error(String(lastErr ?? 'fetch failed'));
+      : new Error(safeStr(lastErr, 'fetch failed'));
   }
 
   private async getJson(

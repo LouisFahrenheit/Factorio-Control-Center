@@ -3,6 +3,7 @@ import { InstancesService } from '../instances/instances.service';
 import { AuditLogService } from '../maintenance/audit-log.service';
 import { LogRotationService } from './log-rotation.service';
 import { PathsService } from '../config/paths.service';
+import { safeStr, safeTrim } from '../common/trim.util';
 
 const LOGGED_OPS = new Set([
   'instances_add',
@@ -122,11 +123,11 @@ export class WebPanelEventLogService {
   ): void {
     if (!LOGGED_OPS.has(op)) return;
 
-    const actor = String(kwargs.actor || kwargs.web_actor || '').trim() || '?';
+    const actor = safeTrim(kwargs.actor ?? kwargs.web_actor) || '?';
     const ok = result.ok !== false;
-    const error = ok ? undefined : String(result.error || 'error');
+    const error = ok ? undefined : safeStr(result.error, 'error');
     const selected = this.instances.getSelected();
-    const instId = String(kwargs.id || result.id || selected?.id || '');
+    const instId = safeStr(kwargs.id ?? result.id ?? selected?.id);
     let instName = instId;
     if (instId) {
       const inst = this.instances.getById(instId);
@@ -153,7 +154,7 @@ export class WebPanelEventLogService {
         break;
       }
       case 'instances_clone':
-        message = `Cloned server to ${String(result.id || kwargs.name || '?')}`;
+        message = `Cloned server to ${safeStr(result.id ?? kwargs.name, '?')}`;
         break;
       case 'instance_bootstrap_start':
         message = `Started automatic server setup`;
@@ -215,34 +216,34 @@ export class WebPanelEventLogService {
         message = `Restarted web panel`;
         break;
       case 'upload_web_tls_file':
-        message = `Uploaded new TLS ${String(kwargs.kind || 'certificate')}`;
+        message = `Uploaded new TLS ${safeStr(kwargs.kind, 'certificate')}`;
         break;
       case 'set_server_ini':
         message = `Updated server.ini`;
         break;
       case 'ban_player':
-        message = `Banned player ${String(kwargs.player || '?')}`;
+        message = `Banned player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'unban_player':
-        message = `Unbanned player ${String(kwargs.player || '?')}`;
+        message = `Unbanned player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'kick_player':
-        message = `Kicked player ${String(kwargs.player || '?')}`;
+        message = `Kicked player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'mute_player':
-        message = `Muted player ${String(kwargs.player || '?')}`;
+        message = `Muted player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'unmute_player':
-        message = `Unmuted player ${String(kwargs.player || '?')}`;
+        message = `Unmuted player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'purge_player':
-        message = `Purged player ${String(kwargs.player || '?')}`;
+        message = `Purged player ${safeStr(kwargs.player, '?')}`;
         break;
       case 'whitelist_add':
-        message = `Added ${String(kwargs.player || '?')} to whitelist`;
+        message = `Added ${safeStr(kwargs.player, '?')} to whitelist`;
         break;
       case 'whitelist_remove':
-        message = `Removed ${String(kwargs.player || '?')} from whitelist`;
+        message = `Removed ${safeStr(kwargs.player, '?')} from whitelist`;
         break;
       case 'whitelist_clear':
         message = `Cleared whitelist`;

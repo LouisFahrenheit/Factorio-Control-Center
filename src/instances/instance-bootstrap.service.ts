@@ -22,6 +22,7 @@ import { ensureServerSettingsOptionsFromWebPanel } from '../ops/ops-utils';
 import { markServerCreated } from '../ops/instance-server-data';
 import { initializeInstanceServerFiles } from './instance-server-init';
 import { InstancesService } from './instances.service';
+import { safeTrim } from '../common/trim.util';
 
 const execFileAsync = promisify(execFile);
 
@@ -64,7 +65,7 @@ export class InstanceBootstrapService {
   ) {}
 
   start(kwargs: Record<string, unknown>): Record<string, unknown> {
-    const targetPath = String(kwargs.serverPath || '').trim();
+    const targetPath = safeTrim(kwargs.serverPath);
     if (!targetPath) return { ok: false, error: 'instance_path_required' };
     if (this.state.running)
       return { ok: false, error: 'instance_bootstrap_busy' };
@@ -82,11 +83,11 @@ export class InstanceBootstrapService {
     const showExperimental =
       kwargs.showExperimental === true || kwargs.showExperimental === 'true';
     const addPayload: BootstrapAddPayload = {
-      name: String(kwargs.name || '').trim() || undefined,
-      ip: String(kwargs.ip || '').trim() || undefined,
-      port: String(kwargs.port || '').trim() || undefined,
+      name: safeTrim(kwargs.name) || undefined,
+      ip: safeTrim(kwargs.ip) || undefined,
+      port: safeTrim(kwargs.port) || undefined,
       rconPort: Number(kwargs.rconPort) || undefined,
-      rconPassword: String(kwargs.rconPassword || '').trim() || undefined,
+      rconPassword: safeTrim(kwargs.rconPassword) || undefined,
       autostartServer: !!kwargs.autostartServer,
       autoEnterPanel: !!kwargs.autoEnterPanel,
       blockUpdates: !!kwargs.blockUpdates,
@@ -204,10 +205,7 @@ export class InstanceBootstrapService {
 
   private normalizeBuild(raw: unknown): string {
     if (process.platform === 'linux') return 'headless';
-    const val =
-      String(raw || '')
-        .trim()
-        .toLowerCase() || 'alpha';
+    const val = safeTrim(raw).toLowerCase() || 'alpha';
     if (val === 'headless')
       throw new Error('instance_template_headless_windows');
     if (['alpha', 'expansion', 'demo'].includes(val)) return val;
@@ -215,9 +213,7 @@ export class InstanceBootstrapService {
   }
 
   private normalizeVersion(raw: unknown): string {
-    const val = String(raw || '')
-      .trim()
-      .toLowerCase();
+    const val = safeTrim(raw).toLowerCase();
     if (!val || val === 'latest') return 'latest';
     if (/^\d+(?:\.\d+){1,3}$/.test(val)) return val;
     throw new Error('instance_template_invalid_version');

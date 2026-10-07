@@ -40,6 +40,7 @@ import { isDockerContainer, getDockerVolumes } from '../common/docker.util';
 import { InstancesService } from '../instances/instances.service';
 import { WebPanelEventLogService } from '../logging/web-panel-event-log.service';
 import { resolveAppBuild } from '../common/app-build.util';
+import { safeStr } from '../common/trim.util';
 import { APP_VERSION } from '../constants/fcc.constants';
 import { ApiBridgeService } from './api-bridge.service';
 import { LocaleService } from '../locale/locale.service';
@@ -275,7 +276,7 @@ export class ApiController {
         const publicMods = Array.isArray(it.publicMods)
           ? it.publicMods.map(
               (m: { name: string; title: string; version?: string }) => {
-                const sp = String(it.serverPath || '');
+                const sp = safeStr(it.serverPath);
                 if (!sp) return m;
                 const modsDir = join(sp, 'mods');
                 const packages = modPackagePathsForInternalName(
@@ -377,12 +378,12 @@ export class ApiController {
       this.bridge.submit('build_mods_archive'),
     );
 
-    const path = String(data.path || '');
+    const path = safeStr(data.path);
     if (!path || !fs.existsSync(path)) {
       throw new NotFoundException('Mods archive not found');
     }
 
-    return res.download(path, String(data.name || 'mods.zip'));
+    return res.download(path, safeStr(data.name, 'mods.zip'));
   }
 
   @UseGuards(AuthGuard)
@@ -404,15 +405,12 @@ export class ApiController {
       : [];
     const filtered = allowed.includes('*')
       ? items
-      : items.filter((it) => allowed.includes(String(it.id || '')));
+      : items.filter((it) => allowed.includes(safeStr(it.id)));
     let selectedId = token ? this.sessions.getSelectedInstanceId(token) : '';
     if (selectedId && !allowed.includes('*') && !allowed.includes(selectedId)) {
       selectedId = '';
     }
-    if (
-      selectedId &&
-      !filtered.some((it) => String(it.id || '') === selectedId)
-    ) {
+    if (selectedId && !filtered.some((it) => safeStr(it.id) === selectedId)) {
       selectedId = '';
     }
     return { ...data, items: filtered, selectedId };

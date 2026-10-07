@@ -4,6 +4,7 @@ import { join } from 'path';
 import { InstancesService } from '../../instances/instances.service';
 import { PathsService } from '../../config/paths.service';
 import { readJsonFile, writeJsonFile } from '../../common/json-store';
+import { safeStr, safeTrim } from '../../common/trim.util';
 import { OpResult } from '../ops-utils';
 
 type AnnounceItem = Record<string, unknown>;
@@ -41,7 +42,7 @@ export class AnnouncementsOpsService {
 
     const globalFromFile = this.loadGlobalItems()
       .map((git) => {
-        const extra = gsched[String(git.id || '')];
+        const extra = gsched[safeStr(git.id)];
         if (extra && typeof extra === 'object')
           return this.normalizeItem({ ...git, ...(extra as AnnounceItem) });
         return this.normalizeItem(git);
@@ -90,7 +91,7 @@ export class AnnouncementsOpsService {
           body: nit.body,
           forAllServers: true,
         });
-        const id = String(nit.id || '').trim();
+        const id = safeTrim(nit.id);
         if (id) {
           gsched[id] = {
             autoRepeat: !!nit.autoRepeat,
@@ -141,7 +142,7 @@ export class AnnouncementsOpsService {
         : {};
     return {
       version: Number(base.version || 1),
-      selectedId: base.selectedId ? String(base.selectedId) : undefined,
+      selectedId: base.selectedId ? safeStr(base.selectedId) : undefined,
       items: this.normalizeItems(
         Array.isArray(base.items) ? (base.items as AnnounceItem[]) : [],
       ),
@@ -158,12 +159,12 @@ export class AnnouncementsOpsService {
   }
 
   private normalizeItem(it: AnnounceItem): AnnounceItem | null {
-    const id = String(it.id || '').trim();
+    const id = safeTrim(it.id);
     if (!id) return null;
     return {
       id,
-      title: String(it.title || ''),
-      body: String(it.body || ''),
+      title: safeStr(it.title),
+      body: safeStr(it.body),
       forAllServers: !!it.forAllServers,
       autoRepeat: !!it.autoRepeat,
       intervalHours: Math.max(1, Math.min(99, Number(it.intervalHours || 6))),
@@ -181,7 +182,7 @@ export class AnnouncementsOpsService {
     const seen = new Set<string>();
     for (const src of [global, orphanGlobal, localOnly]) {
       for (const it of src) {
-        const id = String(it.id || '').trim();
+        const id = safeTrim(it.id);
         if (!id || seen.has(id)) continue;
         seen.add(id);
         const nit = this.normalizeItem(it);

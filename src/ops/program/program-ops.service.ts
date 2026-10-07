@@ -14,7 +14,7 @@ import {
   resolveDisplayHost,
   resolveDisplayPort,
 } from '../../http/web-panel-bind.util';
-import { trimHost } from '../../common/trim.util';
+import { trimHost, safeStr, safeTrim } from '../../common/trim.util';
 import {
   isValidGameBindIp,
   isValidGamePort,
@@ -151,10 +151,8 @@ export class ProgramOpsService {
     const settingsChanges: { key: string; from: string; to: string }[] = [];
 
     if ('global_username' in kwargs || 'global_token' in kwargs) {
-      const username = String(
-        kwargs.global_username ?? wp.global_username ?? '',
-      ).trim();
-      const token = String(kwargs.global_token ?? wp.global_token ?? '').trim();
+      const username = safeTrim(kwargs.global_username ?? wp.global_username);
+      const token = safeTrim(kwargs.global_token ?? wp.global_token);
       if (!username || !token) {
         return { ok: false, error: 'factorio_credentials_incomplete' };
       }
@@ -262,7 +260,8 @@ export class ProgramOpsService {
               ? 'true'
               : 'false';
       } else if (key === 'toast_duration_sec') {
-        const n = parseInt(String(raw ?? '5'), 10);
+        const n =
+          typeof raw === 'number' ? raw : parseInt(safeStr(raw, '5'), 10);
         changes[changesKey] = String(
           Math.max(1, Math.min(20, Number.isFinite(n) ? n : 5)),
         );
@@ -271,7 +270,7 @@ export class ProgramOpsService {
         key === 'log_rotation_interval_hours' ||
         key === 'log_rotation_backup_count'
       ) {
-        const n = parseInt(String(raw ?? ''), 10);
+        const n = typeof raw === 'number' ? raw : parseInt(safeStr(raw), 10);
         if (key === 'log_rotation_max_mb') {
           changes[changesKey] = String(
             Math.max(1, Math.min(2048, Number.isFinite(n) ? n : 50)),
@@ -286,12 +285,13 @@ export class ProgramOpsService {
           );
         }
       } else if (key === 'listen_port') {
-        const n = parseInt(String(raw ?? '8080'), 10);
+        const n =
+          typeof raw === 'number' ? raw : parseInt(safeStr(raw, '8080'), 10);
         changes[changesKey] = String(
           Math.max(1, Math.min(65535, Number.isFinite(n) ? n : 8080)),
         );
       } else {
-        changes[changesKey] = String(raw ?? '').trim();
+        changes[changesKey] = safeTrim(raw);
       }
     }
 
@@ -492,7 +492,7 @@ export class ProgramOpsService {
     const changes: { key: string; from: string; to: string }[] = [];
 
     if ('ip' in kwargs) {
-      const raw = String(kwargs.ip ?? '').trim();
+      const raw = safeTrim(kwargs.ip);
       if (raw && !isValidGameBindIp(raw)) {
         return { ok: false, error: 'invalid_ip' };
       }
@@ -502,7 +502,7 @@ export class ProgramOpsService {
       patch.ip = next;
     }
     if ('port' in kwargs) {
-      const port = String(kwargs.port ?? '').trim();
+      const port = safeTrim(kwargs.port);
       if (!isValidGamePort(port)) {
         return { ok: false, error: 'invalid_port' };
       }
@@ -518,7 +518,7 @@ export class ProgramOpsService {
       patch.port = port;
     }
     if ('save' in kwargs) {
-      const next = String(kwargs.save ?? '').trim() || 'latest';
+      const next = safeTrim(kwargs.save) || 'latest';
       const prev = String(selected.launchSave || 'latest');
       if (next !== prev) changes.push({ key: 'save', from: prev, to: next });
       patch.launchSave = next;
@@ -548,21 +548,16 @@ export class ProgramOpsService {
     if (value === undefined || value === null || value === '')
       return defaultTrue;
     if (typeof value === 'boolean') return value;
-    return ['1', 'true', 'yes', 'on'].includes(
-      String(value).trim().toLowerCase(),
-    );
+    return ['1', 'true', 'yes', 'on'].includes(safeTrim(value).toLowerCase());
   }
 
   private normalizeTheme(raw: unknown): string {
-    const t = String(raw || 'fcc_classic').trim();
+    const t = safeTrim(raw, 'fcc_classic');
     return KNOWN_THEMES.includes(t) ? t : 'fcc_classic';
   }
 
   private normalizeLang(raw: unknown, available: string[]): string {
-    const c = String(raw || 'en')
-      .trim()
-      .toLowerCase()
-      .slice(0, 12);
+    const c = safeTrim(raw, 'en').toLowerCase().slice(0, 12);
     if (!c) return available.includes('en') ? 'en' : available[0] || 'en';
     if (available.includes(c)) return c;
     const short = c.slice(0, 2);

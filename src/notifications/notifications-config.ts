@@ -1,4 +1,5 @@
 /** Types and interfaces for the notifications / integrations subsystem. */
+import { safeStr } from '../common/trim.util';
 
 /** Events that can trigger notifications. */
 export type NotifEvent =
@@ -179,9 +180,7 @@ export function mergeNotifConfig(
     key: keyof Pick<GlobalNotifConfig, 'telegram_chat_id' | 'webhook_targets'>,
   ): string => {
     const v = (o as Record<string, unknown>)[key];
-    return v !== null && v !== undefined
-      ? String(v)
-      : String(global[key] ?? '');
+    return v !== null && v !== undefined ? safeStr(v) : safeStr(global[key]);
   };
 
   const resolveBool = (
