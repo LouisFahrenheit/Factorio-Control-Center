@@ -36,6 +36,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   private readonly log = new Logger(MetricsCollectorService.name);
   private timer: NodeJS.Timeout | null = null;
   private dailyTimer: NodeJS.Timeout | null = null;
+  private startupTimer: NodeJS.Timeout | null = null;
   private lastTicks = new Map<string, { tick: number; time: number }>();
   private lowUpsStreak = new Map<string, number>();
   private lowUpsAlerted = new Set<string>();
@@ -55,7 +56,8 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
     this.timer = setInterval(() => void this.collect(), 60000);
 
     // Run daily aggregation and cleanup (starts 10 seconds after boot, then runs every 24 hours)
-    setTimeout(() => {
+    this.startupTimer = setTimeout(() => {
+      this.startupTimer = null;
       void this.aggregateAndCleanup();
       this.dailyTimer = setInterval(
         () => void this.aggregateAndCleanup(),
@@ -65,6 +67,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
+    if (this.startupTimer) clearTimeout(this.startupTimer);
     if (this.timer) clearInterval(this.timer);
     if (this.dailyTimer) clearInterval(this.dailyTimer);
     pidusage.clear();

@@ -35,6 +35,8 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
     nextRunAt: '',
   };
 
+  private destroyed = false;
+
   constructor(
     @InjectRepository(SystemPreference)
     private readonly sysPrefs: Repository<SystemPreference>,
@@ -47,6 +49,7 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
+    this.destroyed = true;
     this.clear();
   }
 
@@ -104,7 +107,7 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
 
   private schedule() {
     this.clear();
-    if (!this.settings.enabled) return;
+    if (this.destroyed || !this.settings.enabled) return;
 
     const intervalMs =
       Math.max(1, this.settings.intervalHours) * 60 * 60 * 1000;
@@ -126,6 +129,7 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async run() {
+    if (this.destroyed) return;
     this.log.log('Auto-backup: running scheduled backup');
     try {
       await this.backups.createBackup({
@@ -137,10 +141,15 @@ export class BackupSchedulerService implements OnModuleInit, OnModuleDestroy {
       this.settings.lastRunAt = new Date().toISOString();
       await this.saveSettings({});
       this.log.log('Auto-backup: done');
-    } catch (err) {
-      this.log.error('Auto-backup failed', err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.log.error(`Auto-backup failed: ${msg}`);
+      this.settings.lastRunAt = new Date().toISOString();
+      await this.saveSettings({}).catch(() => undefined);
     }
-    this.schedule(); // reschedule next run
+    if (!this.destroyed) {
+      this.schedule();
+    }
   }
 
   private clear() {

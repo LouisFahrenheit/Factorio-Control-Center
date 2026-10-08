@@ -4,13 +4,21 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+import { BackupSchedulerService } from '../src/backup/backup-scheduler.service';
+
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(BackupSchedulerService)
+      .useValue({
+        onModuleInit: () => Promise.resolve(),
+        onModuleDestroy: () => {},
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();

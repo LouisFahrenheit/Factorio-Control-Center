@@ -40,6 +40,7 @@ const execFileAsync = promisify(execFile);
 @Injectable()
 export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
   private state = this.idle();
+  private startupCheckTimer: NodeJS.Timeout | null = null;
   private updateCheckTimer: NodeJS.Timeout | null = null;
 
   constructor(
@@ -54,7 +55,8 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     // Initial check after 2 minutes, then every 6 hours
-    setTimeout(() => {
+    this.startupCheckTimer = setTimeout(() => {
+      this.startupCheckTimer = null;
       void this.checkAll().catch(() => {});
       this.updateCheckTimer = setInterval(
         () => void this.checkAll().catch(() => {}),
@@ -64,6 +66,10 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
+    if (this.startupCheckTimer) {
+      clearTimeout(this.startupCheckTimer);
+      this.startupCheckTimer = null;
+    }
     if (this.updateCheckTimer) {
       clearInterval(this.updateCheckTimer);
       this.updateCheckTimer = null;
