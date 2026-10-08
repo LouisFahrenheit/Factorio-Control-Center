@@ -66,15 +66,6 @@ export function useSocket(
     }
   }, [connected, selectedInstanceId]);
 
-  // Re-subscribe after reconnect
-  useEffect(() => {
-    if (!connected) return;
-    const iid = String(selectedInstanceId || '').trim();
-    if (iid) {
-      subscribeInstance(iid);
-    }
-  }, [connected, selectedInstanceId]);
-
   // ── Listen for WS events and update React Query cache ──────────────
   useEffect(() => {
     if (!loggedIn) return;
