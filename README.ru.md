@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="README.md"><img src="docs/images/badge_en.svg" alt="English"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a>
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki/Translating-App-RU"><img src="docs/images/badge_translate_ru.svg" alt="Помочь с переводом"></a>
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>

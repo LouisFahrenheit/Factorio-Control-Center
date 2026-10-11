@@ -23,7 +23,7 @@ Web panel for managing Factorio servers. Install on your PC or VPS - add servers
 
 <p align="center">
   <a href="README.ru.md"><img src="docs/images/badge_ru.svg" alt="Русский"></a> &nbsp;
-  <a href="TRANSLATING.md"><img src="docs/images/badge_translate.svg" alt="Translations"></a>
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki/Translating-App"><img src="docs/images/badge_translate.svg" alt="Translations"></a>
 </p>
 
 <h2 id="features"><img src="docs/images/features_banner.svg" alt="FCC Features"></h2>
