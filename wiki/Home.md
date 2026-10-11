@@ -17,7 +17,9 @@
 - **[General Configuration](General-Configuration)** — Environment variables (`.env`), network ports, firewall rules, and security settings.
 - **[Troubleshooting](Troubleshooting)** — Common issues and fixes for them.
 
+### Development
+- **[Development Guide](Development)** — Environment setup, architecture, tests, API documentation (Swagger), and release packaging.
+
 ### Localization
 - **[Translating the Panel](Translating-App)** — Instructions for translating UI strings and command presets.
 - **[Contributing Translations to the Wiki](Translating-Wiki)** — Instructions for translating wiki pages.
-

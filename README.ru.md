@@ -72,7 +72,7 @@
 
 **Доступ и интерфейс**
 
-- Роли: администратор, инженер сервера, модератор - права по вкладкам и по серверам
+- Роли: администратор, инженер, модератор - права по вкладкам и по серверам
 - Двухфакторная аутентификация (2FA / TOTP)
 - Создание учетной записи админа при первом входе в браузере или через `.env`
 - Публичная страница со статусом серверов и скачиванием модов
@@ -100,16 +100,3 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
 ```
----
-
-## Запуск для разработки
-
-```bash
-git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
-cd Factorio-Control-Center
-npm install && npm install --prefix client
-npm run start:dev   # API на http://127.0.0.1:8080
-npm run client:dev  # UI на http://127.0.0.1:5173
-```
-
-Или запустите **`StartDEV.bat`** (Windows) / **`StartDEV.sh`** (Linux).

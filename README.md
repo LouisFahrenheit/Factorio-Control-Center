@@ -72,7 +72,7 @@ Web panel for managing Factorio servers. Install on your PC or VPS - add servers
 
 **Access and UI**
 
-- Roles: administrator, server engineer, moderator - per-tab and per-server permissions
+- Roles: administrator, engineer, moderator - per-tab and per-server permissions
 - Two-factor authentication (2FA / TOTP)
 - Administrator account creation on first launch in browser or via `.env`
 - Public status page with server list and mod downloads
@@ -100,16 +100,3 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
 ```
----
-
-## Development Setup
-
-```bash
-git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
-cd Factorio-Control-Center
-npm install && npm install --prefix client
-npm run start:dev   # API on http://127.0.0.1:8080
-npm run client:dev  # UI on http://127.0.0.1:5173
-```
-
-Or run **`StartDEV.bat`** (Windows) / **`StartDEV.sh`** (Linux) for the development menu.

@@ -10,6 +10,7 @@
   - [Docker Setup](Docker-Setup)
 - [General Configuration](General-Configuration)
 - [Troubleshooting](Troubleshooting)
+- [Development](Development)
 
 ---
 
@@ -21,6 +22,7 @@
   - [Установка в Docker (RU)](Docker-Setup-RU)
 - [Общие настройки (RU)](General-Configuration-RU)
 - [Решение проблем (RU)](Troubleshooting-RU)
+- [Разработка (RU)](Development-RU)
 
 ---
 
