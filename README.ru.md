@@ -3,17 +3,16 @@
 </p>
 
 <p align="center">
-  <a href="#features"><img src="docs/images/menu_ru_features.svg" alt="Возможности"></a> &nbsp;
-  <a href="#requirements"><img src="docs/images/menu_ru_requirements.svg" alt="Требования"></a> &nbsp;
-  <a href="#install-and-run"><img src="docs/images/menu_ru_install.svg" alt="Установка и запуск"></a> &nbsp;
-  <a href="#development"><img src="docs/images/menu_ru_development.svg" alt="Разработка"></a>
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases"><img src="https://img.shields.io/github/v/release/LouisFahrenheit/Factorio-Control-Center?color=ff8c00&label=%D0%A0%D0%B5%D0%BB%D0%B8%D0%B7" alt="Последний релиз"></a> &nbsp;
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-24-339933?logo=node.js&logoColor=white" alt="Node.js 24"></a> &nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-MIT-blue.svg" alt="Лицензия MIT"></a> &nbsp;
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki/Home-RU"><img src="https://img.shields.io/badge/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F-Wiki-blueviolet" alt="Документация Wiki"></a>
 </p>
 
-Веб-панель для управления выделенными серверами Factorio в браузере. Ставится на
-ПК или VPS: добавляете серверы и управляете всем из одного места.
+Веб-панель для управления серверами Factorio. Ставится на ПК или VPS: добавляете серверы и управляете всем из одного места.
 
 > [!IMPORTANT]
-> **Дисклеймер:** Factorio Control Center — независимый неофициальный open-source проект. Он не связан с Wube Software, не спонсируется и не одобрен ею. Factorio является зарегистрированным товарным знаком Wube Software Ltd.
+> **Дисклеймер:** Factorio Control Center — неофициальный open-source проект. Он не связан с Wube Software, не спонсируется и не одобрен ею. Factorio является зарегистрированным товарным знаком Wube Software Ltd.
 
 <p align="center">
   <img src="docs/images/01_server_list.png" width="49%">
@@ -43,7 +42,7 @@
 
 - Управление сохранениями: список, загрузка, скачивание, удаление, переименование, копирование
 - Встроенный генератор карты со всеми настройками, доступными в игре (Vanilla и Space Age)
-- Пресеты `.fcc` - сохраняет настройки генератора, позволяет экспортировать файл и делиться пресетами
+- Пресеты `.fcc` — сохранение, экспорт и импорт настроек генератора карты
 
 **Моды**
 
@@ -60,7 +59,7 @@
 
 - Кто сейчас на сервере, аптайм и статистика
 - Лог чата и отправка сообщений игрокам
-- Полные возможности модерации
+- Модерация: кик, бан игроков
 - Списки админов, банов и белых списков; опционально — общие для всех серверов
 - Система объявлений на сервере
 
@@ -74,149 +73,43 @@
 **Доступ и интерфейс**
 
 - Роли: администратор, инженер сервера, модератор - права по вкладкам и по серверам
-- **Двухфакторная аутентификация (2FA / TOTP)**: защита учетных записей через приложения-аутентификаторы (Google Authenticator, Aegis, 1Password и др.) и резервные коды восстановления
-- **Мастер первоначальной настройки**: удобное создание учетной записи администратора при первом запуске в браузере, а также возможность автоматического создания через переменные окружения (`FCC_ADMIN_USER`, `FCC_ADMIN_PASSWORD`)
-- **Публичная страница**: возможность включить открытую страницу со списком серверов, онлайном и скачиванием модов (без авторизации)
+- Двухфакторная аутентификация (2FA / TOTP)
+- Создание учетной записи админа при первом входе в браузере или через `.env`
+- Публичная страница со статусом серверов и скачиванием модов
 - Полноценный интерфейс на компьютере и упрощённый вид на телефоне
 - Русский и английский язык интерфейса
 - Несколько тем — все тёмные
 
-<h2 id="requirements"><img src="docs/images/requirements_banner.svg" alt="FCC Requirements"></h2>
+---
 
-- **ОС:** Windows 10+ или Linux (systemd)
-- **[Node.js 24+](https://nodejs.org/)**
-- **Factorio dedicated server** - уже на диске или загрузка через панель при создании сервера
-- **[Аккаунт Factorio](https://factorio.com/profile)** - для скачивания / обновления сервера и загрузки модов с `mods.factorio.com`
+## Быстрый старт
 
-  Укажите **Username** и **Token** в **Настройки → Глобальный логин /
-  Глобальный токен**. Без них можно работать с вручную установленным
-  сервером, но загрузки с портала и обновления из панели недоступны.
+Подробные инструкции по установке, настройке автозапуска и развертыванию в Docker доступны в [документации](https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki/Installation-Guide-RU).
 
-<h2 id="install-and-run"><img src="docs/images/install_banner.svg" alt="FCC Install and run"></h2>
+### Windows
+1. Скачайте [factorio-control-center-win.zip](https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip).
+2. Распакуйте архив и запустите **`Start.bat`**.
+3. Выберите пункт **`1. Start panel`** и откройте `http://127.0.0.1:8080/` в браузере.
 
-<p align="center">
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip"><img src="docs/images/download_windows.svg" height="60" alt="Скачать для Windows"></a>
-  &nbsp;&nbsp;
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz"><img src="docs/images/download_linux.svg" height="60" alt="Скачать для Linux"></a>
-</p>
+### Linux (установка скриптом)
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
+```
 
-1. Скачайте релиз с GitHub Releases.
-   - **Windows** - распакуйте, запустите **`Start.bat`**.
-   - **Linux** - **Быстрый старт**:
-     ```bash
-     bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
-     ```
-     Или ручная установка (пример для `/opt`): скачайте `factorio-control-center-linux.tar.gz` в `/opt`, затем:
-
-     ```bash
-     cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh
-     ```
-
-2. В меню - **1. Start panel**, откройте адрес из вывода: `http://127.0.0.1:8080/` на ПК, `http://IP_сервера:8080/` на VPS.
-3. Откройте адрес в браузере и завершите первоначальную настройку для создания учетной записи администратора.
-
-### Обновление FCC (Standalone)
-
-Все данные серверов (`data/`), логи и настройки (`fcc-settings.ini` / `.env`) сохраняются при обновлении.
-
-- **Через меню запуска:** запустите `./Start.sh` (или `Start.bat` на Windows) и выберите **7. Update panel**.
-- **Напрямую через скрипт (Linux):**
-  ```bash
-  cd /opt/factorio-control-center && sudo ./scripts/update-panel.sh
-  ```
-
-### Запуск через Docker
-
-**Быстрый старт:**
-
+### Docker
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
 ```
+---
 
-Этот скрипт автоматически установит Docker (если его нет), скачает `docker-compose.yml`, загрузит готовый образ и запустит контейнер. После завершения откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и создайте учетную запись администратора через мастер первоначальной настройки.
-
-**Ручная установка через Docker:**
-1. Скачайте файл `docker-compose.yml`.
-2. (Опционально) Укажите `FCC_ADMIN_USER` и `FCC_ADMIN_PASSWORD` в `docker-compose.yml`, если хотите автоматически создать администратора при первом запуске без использования веб-мастера.
-3. Выполните команду: `docker compose up -d`
-4. Откройте `http://127.0.0.1:8080/` (или IP вашего сервера) и войдите либо завершите первоначальную настройку.
-
-**Обновление FCC (Docker):**
-Чтобы обновиться до последней версии (ваши данные не потеряются):
-```bash
-cd /opt/factorio-control-center
-docker compose pull
-docker compose up -d
-```
-
-**Примечание:** По умолчанию `docker-compose.yml` пробрасывает UDP-порты `34197-34207`, что позволяет запускать до 11 серверов Factorio. Вы можете изменить этот диапазон или использовать `host networking`, если вам нужно больше.
-
-**Тома Docker (Volumes) и сохранение данных:**
-По умолчанию в `docker-compose.yml` примонтированы папки `./data` (в `/app/data`) и `./logs` (в `/app/logs`). При создании сервера в панели управления вы **должны** указывать путь внутри `/app/data` (например, `/app/data/servers/my_server`), чтобы файлы сервера сохранялись на вашем диске. Если вы укажете путь вне этих томов (например, `/opt/factorio`), сервер будет удален и все данные будут безвозвратно потеряны при обновлении или пересоздании контейнера. Если вы хотите хранить серверы в другой папке на вашем хосте, добавьте дополнительный том (volume) в ваш `docker-compose.yml` (например, `- /mnt/disk/servers:/servers`).
-
-### Автозапуск (Установка службы)
-
-Вы можете настроить панель так, чтобы она запускалась автоматически при включении системы. Для этого выберите пункт **3. Install service** в главном меню запуска.
-
-- **Windows:** Перед установкой службы обязательно запустите **`Start.bat` от имени администратора**.
-- **Linux:** Если вы запустили панель от `root`, установится системная служба (system-wide). Если от обычного пользователя - установится служба пользователя (user-служба).
-
-**Важно для Linux (user-служба):** Чтобы панель запускалась при загрузке системы без необходимости входа в ваш аккаунт, выполните:
-
-```bash
-sudo loginctl enable-linger $USER
-```
-
-**Firewall:** UDP-порт Factorio открывается автоматически только от admin/root - иначе настройте вручную.
-*(Примечание для Docker: Внутри контейнера эта функция не работает из-за изоляции. Однако Docker автоматически открывает на хосте те порты, которые указаны в блоке `ports` файла `docker-compose.yml`. Просто убедитесь, что ваши серверы используют порты из этого диапазона.)*
-
-**Порт панели:**
-- По умолчанию: **8080** (HTTP) или **8443** (HTTPS)
-- Настраивается в настройках панели или переопределяется в файле `.env` (`PORT=…`)
-*(Примечание для Docker: не меняйте порт в настройках панели, вместо этого измените маппинг портов в `docker-compose.yml`).*
-
-Адрес для входа показывается в меню запуска.
-
-<h2 id="development"><img src="docs/images/development_banner.svg" alt="FCC Development"></h2>
-
-Используйте **`StartDEV.bat`** или **`StartDEV.sh`** - dev/prod, сборка, pack release.
+## Запуск для разработки
 
 ```bash
 git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
 cd Factorio-Control-Center
+npm install && npm install --prefix client
+npm run start:dev   # API на http://127.0.0.1:8080
+npm run client:dev  # UI на http://127.0.0.1:5173
 ```
 
-Или вручную:
-
-```bash
-npm install
-npm install --prefix client
-npm run start:dev      # API
-npm run client:dev     # UI → http://127.0.0.1:5173/login
-```
-
-Локальная сборка: `npm run pack:release` → `release/factorio-control-center-win.zip` (на Windows) или `release/factorio-control-center-linux.tar.gz` (на Linux).  
-*(Примечание: для сборки готового Linux-архива с нативными бинарниками на машине с Windows запустите сборку через WSL или Docker-контейнер Node.js).*
-
-**Сборка из исходников (Docker):**
-Если вы хотите изменить код панели и собрать свой собственный Docker-образ:
-1. Склонируйте репозиторий и перейдите в него.
-2. В `docker-compose.yml` замените `image: ghcr.io/louisfahrenheit/factorio-control-center:latest` на `build: .`
-3. Выполните команду:
-   ```bash
-   docker compose up -d --build
-   ```
-
-## Безопасность
-
-Не публикуйте и не коммитьте `.env`, `data/` (включая базу данных `database.sqlite`), токены и ключи TLS.
-
-## Документация API
-
-FCC предоставляет полный REST API. Чтобы включить интерактивный интерфейс Swagger, задайте `SWAGGER_ENABLED=true` в файле `.env` и откройте:
-
-```
-http://<your-host>:<port>/api/docs
-```
-
-Аутентифицируйтесь с помощью `API_TOKEN` из `.env` или сессионного токена, полученного через `POST /api/auth/login`.
+Или запустите **`StartDEV.bat`** (Windows) / **`StartDEV.sh`** (Linux).

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60" viewBox="0 0 240 60" role="img" aria-label="FCC Troubleshooting">
+  <defs>
+    <clipPath id="left-cell-trouble">
+      <rect width="60" height="60" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Button background -->
+  <rect width="240" height="60" rx="6" fill="#282828"/>
+
+  <!-- Left icon cell -->
+  <rect width="60" height="60" fill="#1e1e1e" clip-path="url(#left-cell-trouble)"/>
+
+  <!-- Divider -->
+  <line x1="60.5" y1="0" x2="60.5" y2="60" stroke="#3e3e3e" stroke-width="1"/>
+
+  <!-- Wrench tool icon, centered at (30, 30) -->
+  <g transform="translate(16.2, 16.2) scale(1.15)" stroke="#e8a640" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+  </g>
+
+  <!-- Title -->
+  <text x="80" y="28" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="14" font-weight="700" fill="#cccccc">FCC</text>
+  <!-- Subtitle -->
+  <text x="80" y="44" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="12" fill="#888888">Troubleshooting</text>
+
+  <!-- Outer frame -->
+  <rect x="0.75" y="0.75" width="238.5" height="58.5" rx="5.5" fill="none" stroke="#555555" stroke-width="1.5"/>
+</svg>

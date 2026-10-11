@@ -35,7 +35,7 @@ EOF
 
 require_node() {
   if ! command -v node >/dev/null 2>&1; then
-    echo "ERROR: Node.js not found. Install Node.js 24+ from https://nodejs.org/"
+    echo "ERROR: Node.js not found. Install Node.js 24 from https://nodejs.org/"
     exit 1
   fi
 }

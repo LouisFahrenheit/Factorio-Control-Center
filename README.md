@@ -3,17 +3,16 @@
 </p>
 
 <p align="center">
-  <a href="#features"><img src="docs/images/menu_features.svg" alt="Features"></a> &nbsp;
-  <a href="#requirements"><img src="docs/images/menu_requirements.svg" alt="Requirements"></a> &nbsp;
-  <a href="#install-and-run"><img src="docs/images/menu_install.svg" alt="Install and run"></a> &nbsp;
-  <a href="#development"><img src="docs/images/menu_development.svg" alt="Development"></a>
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases"><img src="https://img.shields.io/github/v/release/LouisFahrenheit/Factorio-Control-Center?color=ff8c00&label=Release" alt="Latest Release"></a> &nbsp;
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-24-339933?logo=node.js&logoColor=white" alt="Node.js 24"></a> &nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a> &nbsp;
+  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki"><img src="https://img.shields.io/badge/Documentation-Wiki-blueviolet" alt="Documentation Wiki"></a>
 </p>
 
-Web panel for managing Factorio dedicated servers. Install on
-your PC or VPS - add servers and manage everything from one place.
+Web panel for managing Factorio servers. Install on your PC or VPS - add servers and manage everything from one place.
 
 > [!IMPORTANT]
-> **Disclaimer:** Factorio Control Center is an independent, unofficial open-source project and is not affiliated with, endorsed by, or connected to Wube Software. Factorio is a registered trademark of Wube Software Ltd.
+> **Disclaimer:** Factorio Control Center is an unofficial open-source project and is not affiliated with, endorsed by, or connected to Wube Software. Factorio is a registered trademark of Wube Software Ltd.
 
 <p align="center">
   <img src="docs/images/01_server_list.png" width="49%">
@@ -43,7 +42,7 @@ your PC or VPS - add servers and manage everything from one place.
 
 - Save management: list, upload, download, delete, rename, copy
 - Built-in map generator with all in-game settings (Vanilla and Space Age)
-- `.fcc` presets - save generator settings, export a file, and share it
+- `.fcc` presets - export, import, and share map generator settings
 
 **Mods**
 
@@ -60,7 +59,7 @@ your PC or VPS - add servers and manage everything from one place.
 
 - Who is online, uptime, and server stats
 - Chat log and sending messages to players
-- Full moderation tools
+- Moderation tools: kick and ban players
 - Admin, ban, and whitelist lists; optionally shared across all servers
 - In-game announcements
 
@@ -74,150 +73,43 @@ your PC or VPS - add servers and manage everything from one place.
 **Access and UI**
 
 - Roles: administrator, server engineer, moderator - per-tab and per-server permissions
-- **Two-Factor Authentication (2FA / TOTP)**: secure accounts with authenticator apps (Google Authenticator, Aegis, 1Password, etc.) and emergency recovery codes
-- **Initial Setup Wizard**: guided creation of the administrator account on first launch in the browser, with optional headless configuration via environment variables (`FCC_ADMIN_USER`, `FCC_ADMIN_PASSWORD`)
-- **Public page**: optionally expose a read-only status page showing active servers, players, and mod downloads without requiring login
+- Two-factor authentication (2FA / TOTP)
+- Administrator account creation on first launch in browser or via `.env`
+- Public status page with server list and mod downloads
 - Full desktop UI and a simplified mobile view
 - English and Russian UI
 - Several themes — all dark
 
-<h2 id="requirements"><img src="docs/images/requirements_banner.svg" alt="FCC Requirements"></h2>
+---
 
-- **OS:** Windows 10+ or Linux (systemd)
-- **[Node.js 24+](https://nodejs.org/)**
-- **Factorio dedicated server** - already on disk, or download via the panel when creating a server
-- **[Factorio account](https://factorio.com/profile)** - needed to download / update the server and fetch mods from `mods.factorio.com`
+## Quick Start
 
-  Set **Username** and **Token** under **Settings → Global username / Global token**.
-  Without them you can still run a manually installed server, but portal downloads
-  and in-panel updates will not work.
+Detailed installation guides, system service setup, and Docker instructions are available in the [Documentation](https://github.com/LouisFahrenheit/Factorio-Control-Center/wiki/Installation-Guide).
 
-<h2 id="install-and-run"><img src="docs/images/install_banner.svg" alt="FCC Install and run"></h2>
+### Windows
+1. Download [factorio-control-center-win.zip](https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip).
+2. Extract the archive and launch **`Start.bat`**.
+3. Select **`1. Start panel`** and open `http://127.0.0.1:8080/` in your browser.
 
+### Linux (One-Line Installer)
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
+```
 
-<p align="center">
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-win.zip"><img src="docs/images/download_windows.svg" height="60" alt="Download for Windows"></a>
-  &nbsp;&nbsp;
-  <a href="https://github.com/LouisFahrenheit/Factorio-Control-Center/releases/latest/download/factorio-control-center-linux.tar.gz"><img src="docs/images/download_linux.svg" height="60" alt="Download for Linux"></a>
-</p>
-
-1. Download the release from GitHub Releases.
-   - **Windows** - unpack and run **`Start.bat`**.
-   - **Linux** - **Quick start**:
-     ```bash
-     bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install.sh)"
-     ```
-     Or manual install: download `factorio-control-center-linux.tar.gz` to `/opt`, then:
-
-     ```bash
-     cd /opt && sudo tar -xzf factorio-control-center-linux.tar.gz && cd /opt/factorio-control-center && sudo chmod +x Start.sh && sudo ./Start.sh
-     ```
-
-2. In the menu - **1. Start panel**, open the URL from the output: `http://127.0.0.1:8080/` on your PC, `http://server_IP:8080/` on a VPS.
-3. Open the URL in your browser and complete the initial setup wizard to create your administrator account.
-
-### Updating FCC (Standalone)
-
-Your server data (`data/`), logs, and configuration files (`fcc-settings.ini` / `.env`) are preserved during updates.
-
-- **Via start menu:** run `./Start.sh` (or `Start.bat` on Windows) and choose **7. Update panel**.
-- **Directly via script (Linux):**
-  ```bash
-  cd /opt/factorio-control-center && sudo ./scripts/update-panel.sh
-  ```
-
-### Running with Docker
-
-**Quick start:**
-
+### Docker
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/LouisFahrenheit/Factorio-Control-Center/main/install-docker.sh)"
 ```
+---
 
-This script will automatically install Docker (if missing), download the `docker-compose.yml` file, pull the pre-built image, and start the container. Once it's done, open `http://127.0.0.1:8080/` (or your server's IP) and create your administrator account via the initial setup wizard.
-
-**Manual Docker Installation:**
-1. Download the `docker-compose.yml` file.
-2. (Optional) Set `FCC_ADMIN_USER` and `FCC_ADMIN_PASSWORD` in `docker-compose.yml` to automatically initialize the administrator account on first start without using the web wizard.
-3. Run: `docker compose up -d`
-4. Open `http://127.0.0.1:8080/` (or your server's IP) and log in or complete the initial setup wizard.
-
-**Updating FCC (Docker):**
-To update to the latest version without losing any data:
-```bash
-cd /opt/factorio-control-center
-docker compose pull
-docker compose up -d
-```
-
-**Note:** By default, `docker-compose.yml` maps UDP ports `34197-34207` to allow running up to 11 Factorio instances. You can adjust this range or use host networking if you need more.
-
-**Docker Volumes & Data Persistence:**
-By default, the `docker-compose.yml` mounts `./data` to `/app/data` and `./logs` to `/app/logs`. When creating a server inside the panel, you **must** select a path inside `/app/data` (e.g., `/app/data/servers/my_server`) to ensure your server files are saved to your host machine. If you select a path outside of the mounted volumes (like `/opt/factorio`), the server will be deleted and all data lost when the Docker container is updated or recreated. To store servers in another directory on your host, you must manually add a new volume mapping in your `docker-compose.yml` (e.g., `- /mnt/disk/servers:/servers`).
-
-### Autostart (Service Installation)
-
-You can configure the panel to start automatically when your system boots. In the main menu, select **3. Install service**. 
-
-- **Windows:** Run **`Start.bat` as Administrator** before installing the service.
-- **Linux:** If you run the panel as `root`, it installs a system-wide service. If you run it as a normal user, it installs a user service.
-
-**Note for Linux user services:** To ensure the panel starts at boot without requiring you to log in, enable lingering for your user:
-
-```bash
-sudo loginctl enable-linger $USER
-```
-
-**Firewall:** Factorio's UDP port opens automatically only when running as admin/root - otherwise set it up yourself.
-*(Note for Docker: This built-in function does not work inside containers due to network isolation. However, Docker automatically manages the host firewall and opens the ports specified in the `ports` section of your `docker-compose.yml`. Just ensure your game servers use ports from this mapped range.)*
-
-**Panel port:**
-- Default: **8080** (HTTP) or **8443** (HTTPS)
-- Can be changed in panel settings or overridden via `.env` file (`PORT=…`)
-*(Note: If using Docker, do not change the port in the panel settings. Instead, change the port mapping in `docker-compose.yml`).*
-
-The start menu shows the URL to open.
-
-<h2 id="development"><img src="docs/images/development_banner.svg" alt="FCC Development"></h2>
-
-Use **`StartDEV.bat`** or **`StartDEV.sh`** - dev/prod run, build, pack release.
+## Development Setup
 
 ```bash
 git clone https://github.com/LouisFahrenheit/Factorio-Control-Center.git
 cd Factorio-Control-Center
+npm install && npm install --prefix client
+npm run start:dev   # API on http://127.0.0.1:8080
+npm run client:dev  # UI on http://127.0.0.1:5173
 ```
 
-Or manually:
-
-```bash
-npm install
-npm install --prefix client
-npm run start:dev      # API
-npm run client:dev     # UI → http://127.0.0.1:5173/login
-```
-
-Local release build: `npm run pack:release` → `release/factorio-control-center-win.zip` (on Windows) or `release/factorio-control-center-linux.tar.gz` (on Linux).
-*(Note: To build a fully pre-bundled Linux release archive with native Linux binaries on Windows, run the command inside WSL or a Node.js Docker container).*
-
-**Building from source (Docker):**
-If you want to modify the panel and build your own Docker image:
-1. Clone the repository and navigate to it.
-2. In `docker-compose.yml`, replace `image: ghcr.io/louisfahrenheit/factorio-control-center:latest` with `build: .`
-3. Run the following command:
-   ```bash
-   docker compose up -d --build
-   ```
-
-## Security
-
-Do not publish or commit `.env`, `data/` (including `database.sqlite`), tokens, or TLS keys.
-
-## API Documentation
-
-FCC exposes a full REST API. To enable the interactive Swagger UI, set `SWAGGER_ENABLED=true` in your `.env` file and open:
-
-```
-http://<your-host>:<port>/api/docs
-```
-
-Authenticate using your `API_TOKEN` from `.env` or a session token obtained via `POST /api/auth/login`.
+Or run **`StartDEV.bat`** (Windows) / **`StartDEV.sh`** (Linux) for the development menu.
