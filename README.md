@@ -12,6 +12,9 @@
 Web panel for managing Factorio dedicated servers. Install on
 your PC or VPS - add servers and manage everything from one place.
 
+> [!IMPORTANT]
+> **Disclaimer:** Factorio Control Center is an independent, unofficial open-source project and is not affiliated with, endorsed by, or connected to Wube Software. Factorio is a registered trademark of Wube Software Ltd.
+
 <p align="center">
   <img src="docs/images/01_server_list.png" width="49%">
   <img src="docs/images/02_server_control.png" width="49%">
