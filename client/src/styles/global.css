@@ -2243,6 +2243,10 @@ body {
 
 .settings-table__control-stack .btn {
   flex-shrink: 0;
+  white-space: nowrap;
+}
+
+#instanceTabIntegrations .settings-table__control-stack .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2250,6 +2254,11 @@ body {
   height: 32px;
   padding: 0;
   box-sizing: border-box;
+}
+
+#instanceTabIntegrations .settings-table__control-stack .btn.btn--with-icon {
+  width: auto;
+  padding: 4px 10px;
 }
 
 .settings-table__control-spacer {
@@ -2264,6 +2273,13 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
+}
+
+.settings-table__control-stack .btn.btn--with-icon {
+  width: auto;
+  min-width: fit-content;
+  padding: 4px 10px;
+  box-sizing: border-box;
 }
 
 /* ── Badges & Status Indicators ────────────────────────── */
