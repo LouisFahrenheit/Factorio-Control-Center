@@ -18,6 +18,7 @@ describe('FirewallService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
     mockConfig = {
       langCode: 'en',
