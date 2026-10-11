@@ -12,6 +12,9 @@
 Веб-панель для управления выделенными серверами Factorio в браузере. Ставится на
 ПК или VPS: добавляете серверы и управляете всем из одного места.
 
+> [!IMPORTANT]
+> **Дисклеймер:** Factorio Control Center — независимый неофициальный open-source проект. Он не связан с Wube Software, не спонсируется и не одобрен ею. Factorio является зарегистрированным товарным знаком Wube Software Ltd.
+
 <p align="center">
   <img src="docs/images/01_server_list.png" width="49%">
   <img src="docs/images/02_server_control.png" width="49%">
