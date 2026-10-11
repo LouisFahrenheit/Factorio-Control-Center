@@ -29,7 +29,7 @@ describe('MaintenanceService', () => {
   let mockAuditLog: Partial<AuditLogService>;
 
   let storedSchedules: MaintenanceSchedule[] = [];
-  let storedPrefs: Record<string, string> = {};
+  let storedPrefs: Record<string, string | null> = {};
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fcc-maint-test-'));
@@ -59,7 +59,9 @@ describe('MaintenanceService', () => {
             instanceIds: dto.instanceIds || [],
             options: dto.options || {},
             lastRunKey: dto.lastRunKey || '',
-          } as MaintenanceSchedule;
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
         }),
       save: jest
         .fn()
@@ -112,13 +114,7 @@ describe('MaintenanceService', () => {
       load: jest.fn().mockReturnValue({
         items: [{ id: 'inst-1', name: 'Server 1', serverPath: '/srv1' }],
       }),
-      listAll: jest
-        .fn()
-        .mockReturnValue([
-          { id: 'inst-1', name: 'Server 1', serverPath: '/srv1' },
-        ]),
       getById: jest.fn().mockReturnValue({ id: 'inst-1', name: 'Server 1' }),
-      isRunningBlocked: jest.fn().mockReturnValue(false),
     };
 
     mockConfig = {
@@ -187,7 +183,9 @@ describe('MaintenanceService', () => {
         instanceIds: ['inst-1'],
         options: { update_mods: true },
         lastRunKey: '',
-      } as MaintenanceSchedule);
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const res = await service.get();
       expect(res.ok).toBe(true);
@@ -280,7 +278,9 @@ describe('MaintenanceService', () => {
         instanceIds: ['inst-1'],
         options: {},
         lastRunKey: '',
-      } as MaintenanceSchedule);
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const res = await service.runNow({
         task_id: 'manual-task',

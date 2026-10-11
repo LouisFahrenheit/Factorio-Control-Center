@@ -85,13 +85,9 @@ describe('ModpacksOpsService', () => {
       isRunning: jest.fn().mockReturnValue(false),
     };
 
-    mockPortal = {
-      fetchModInfo: jest.fn(),
-    };
+    mockPortal = {};
 
-    mockModJobs = {
-      queueDownload: jest.fn(),
-    };
+    mockModJobs = {};
 
     mockProgram = {
       modpackActivateUseSymlinks: jest.fn().mockReturnValue(false),
