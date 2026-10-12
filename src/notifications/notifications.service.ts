@@ -520,13 +520,34 @@ export class NotificationsService {
     const global = this.config.notifications;
     const sent: string[] = [];
 
+    const resolved = instanceId ? this.resolveInstance(instanceId) : null;
+
     const tgToken = global.telegram_bot_token;
-    const tgChat = instanceId
-      ? (this.resolveInstance(instanceId).cfg?.telegram_chat_id ?? '')
+    const tgChat = resolved
+      ? (resolved.cfg?.telegram_chat_id ?? '')
       : global.telegram_chat_id;
     if (global.telegram_enabled && tgToken && tgChat) {
       await this.telegram.sendMessage(tgToken, tgChat, this.telegram.fmtTest());
       sent.push('telegram');
+    }
+
+    const webhookTargets = resolved
+      ? (resolved.cfg?.webhook_targets ?? [])
+      : parseWebhookTargets(global.webhook_targets);
+    const instanceName = resolved?.name ?? 'Factorio Control Center';
+
+    const activeWebhooks = webhookTargets.filter(
+      (t) => t.enabled !== false && Boolean(t.url),
+    );
+    if (activeWebhooks.length > 0) {
+      await this.webhooks.dispatch(
+        activeWebhooks,
+        'test',
+        instanceId ?? 'global',
+        instanceName,
+        { message: 'Test notification from Factorio Control Center' },
+      );
+      sent.push('webhooks');
     }
 
     return { ok: true, sent };

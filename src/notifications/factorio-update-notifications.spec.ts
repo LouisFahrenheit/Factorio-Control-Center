@@ -111,7 +111,7 @@ describe('Factorio Update Notifications', () => {
               id: 'inst-2',
               name: 'Secondary Server',
             } as unknown as InstanceItem;
-          return null;
+          return undefined;
         },
       };
 

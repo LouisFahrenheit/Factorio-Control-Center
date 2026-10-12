@@ -13,7 +13,8 @@ export type NotifEvent =
   | 'maintenance'
   | 'factorio_update_available'
   | 'low_ups'
-  | 'moderation';
+  | 'moderation'
+  | 'test';
 
 export const ALL_NOTIF_EVENTS: NotifEvent[] = [
   'server_started',
@@ -27,6 +28,7 @@ export const ALL_NOTIF_EVENTS: NotifEvent[] = [
   'factorio_update_available',
   'low_ups',
   'moderation',
+  'test',
 ];
 
 /** One configured generic webhook target. */

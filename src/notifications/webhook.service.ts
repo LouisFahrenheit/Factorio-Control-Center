@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { WebhookTarget, NotifEvent } from './notifications-config';
 
 export interface WebhookPayload {
@@ -31,7 +31,7 @@ export class WebhookService {
     const enabled = targets.filter((t) => {
       if (t.enabled === false) return false;
       if (!t.url) return false;
-      if (Array.isArray(t.events) && t.events.length > 0) {
+      if (event !== 'test' && Array.isArray(t.events) && t.events.length > 0) {
         return t.events.includes(event);
       }
       return true;
@@ -40,11 +40,54 @@ export class WebhookService {
     await Promise.allSettled(enabled.map((t) => this.send(t, payload)));
   }
 
+  private isDiscordWebhook(url: string): boolean {
+    return (
+      url.includes('discord.com/api/webhooks') ||
+      url.includes('discordapp.com/api/webhooks')
+    );
+  }
+
+  private formatDiscordPayload(
+    payload: WebhookPayload,
+  ): Record<string, unknown> {
+    const isTest = payload.event === 'test';
+    const title = isTest
+      ? '🔔 Test Notification'
+      : `Factorio Event: ${payload.event}`;
+    const description = isTest
+      ? `Test notification from **${payload.instanceName || 'Factorio Control Center'}**.`
+      : `Server: **${payload.instanceName || 'Factorio Server'}**\nEvent: **${payload.event}**`;
+
+    const fields = Object.entries(payload.data).map(([key, val]) => ({
+      name: key,
+      value:
+        typeof val === 'object' && val !== null
+          ? JSON.stringify(val)
+          : String(val),
+      inline: true,
+    }));
+
+    return {
+      username: 'Factorio Control Center',
+      embeds: [
+        {
+          title,
+          description,
+          color: isTest ? 0x3498db : 0xe67e22,
+          timestamp: payload.timestamp,
+          ...(fields.length > 0 ? { fields } : {}),
+        },
+      ],
+    };
+  }
+
   private async send(
     target: WebhookTarget,
     payload: WebhookPayload,
   ): Promise<void> {
-    const body = JSON.stringify(payload);
+    const body = this.isDiscordWebhook(target.url)
+      ? JSON.stringify(this.formatDiscordPayload(payload))
+      : JSON.stringify(payload);
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'User-Agent': 'FactorioControlCenter/2.0',
@@ -63,11 +106,14 @@ export class WebhookService {
         if (attempt < 2) {
           await new Promise((r) => setTimeout(r, 2000));
         }
-      } catch (e) {
+      } catch (err: unknown) {
         if (attempt < 2) {
           await new Promise((r) => setTimeout(r, 2000));
         } else {
-          this.log.warn(`Webhook delivery failed for ${target.url}: ${e}`);
+          const message = err instanceof Error ? err.message : String(err);
+          this.log.warn(
+            `Webhook delivery failed for ${target.url}: ${message}`,
+          );
         }
       }
     }
