@@ -1045,4 +1045,24 @@ export class ApiController {
     if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
     return this.notificationsService.sendTest(body?.instanceId);
   }
+
+  @UseGuards(AuthGuard)
+  @Post('config/notifications/webhook/test')
+  @ApiTags('Notifications')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Test a single webhook target (admin only)' })
+  @ApiResponse({ status: 200, description: 'Webhook test result' })
+  async testWebhook(
+    @Req() req: Request,
+    @Body() body: { url: string; secret?: string; instanceId?: string },
+  ) {
+    if (!this.isAdmin(req)) throw new ForbiddenException('admin_required');
+    if (!body?.url || typeof body.url !== 'string') {
+      throw new BadRequestException('URL is required');
+    }
+    return this.notificationsService.testWebhook(
+      { url: body.url.trim(), secret: body.secret },
+      body.instanceId,
+    );
+  }
 }

@@ -2711,6 +2711,18 @@ body {
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
+.integrations-override-active-control {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.integrations-override-active-hint {
+  font-size: calc(var(--ui-font-size) * 0.78);
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
 .integrations-override-chat-wrap {
   display: inline-flex;
   align-items: center;
@@ -2731,6 +2743,44 @@ body {
   border-radius: 4px;
   font-size: calc(var(--ui-font-size) * 0.84);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.integrations-override-webhooks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-widget) 40%, var(--bg-main) 60%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.integrations-override-webhooks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.integrations-override-webhooks-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.integrations-override-webhooks-inherited-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: calc(var(--ui-font-size) * 0.82);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-widget) 60%, var(--bg-main) 40%);
+  border-radius: 4px;
+  border: 1px dashed color-mix(in srgb, var(--border) 60%, transparent);
 }
 
 .integrations-override-events-section {
@@ -2974,7 +3024,7 @@ body {
 
 .integrations-webhook-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
@@ -2983,11 +3033,23 @@ body {
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   transition:
     background-color 0.12s ease,
-    border-color 0.12s ease;
+    border-color 0.12s ease,
+    opacity 0.15s ease;
 }
 
 .integrations-webhook-card:hover {
   border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+.integrations-webhook-card--disabled {
+  opacity: 0.55;
+  background: color-mix(in srgb, var(--bg-widget) 40%, var(--bg-main) 60%);
+}
+
+.integrations-webhook-card__toggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .integrations-webhook-input-wrap {
@@ -3004,17 +3066,52 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+.integrations-webhook-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.integrations-webhook-test-btn {
+  padding: 6px 10px !important;
+  font-size: calc(var(--ui-font-size) * 0.82) !important;
+}
+
 .integrations-webhook-delete-btn {
   padding: 6px 8px !important;
   flex-shrink: 0;
 }
 
+.integrations-webhook-card__result {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: calc(var(--ui-font-size) * 0.82);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.integrations-webhook-card__result--ok {
+  background: color-mix(in srgb, #2ecc71 15%, transparent);
+  color: #2ecc71;
+  border: 1px solid color-mix(in srgb, #2ecc71 30%, transparent);
+}
+
+.integrations-webhook-card__result--err {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
 @media (max-width: 760px) {
   .integrations-webhook-card {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr auto;
   }
   .integrations-webhook-card__secret {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
   }
 }
 
@@ -3693,4 +3790,19 @@ body {
 
 body > .fu-modal-backdrop.mod-job-backdrop--top {
   z-index: 10200;
+}
+
+/* ── Program Settings Logs Grid ─────────────────────────── */
+
+.settings-table__sync-inline--logs {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 24px !important;
+  align-items: center;
+}
+
+@media (max-width: 680px) {
+  .settings-table__sync-inline--logs {
+    grid-template-columns: 1fr !important;
+  }
 }

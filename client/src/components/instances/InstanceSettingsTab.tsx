@@ -132,7 +132,7 @@ export function InstanceSettingsTab({
             onClick={() => setSubTab('integrations')}
           >
             <span className="sub-tabs__tab-inner">
-              <AppIcon name="telegram" size={16} />
+              <AppIcon name="webhook" size={16} />
               {t('settings_subtab_integrations')}
             </span>
           </button>
@@ -224,7 +224,7 @@ export function InstanceSettingsTab({
             className="settings-table-section--compact"
           >
             <tr className="settings-table__row settings-table__row--sync-inline">
-              <td colSpan={2} className="settings-table__sync-inline">
+              <td colSpan={2} className="settings-table__sync-inline settings-table__sync-inline--logs">
                 <FccSwitch
                   id="cbSelectorLogWriteInstance"
                   className="settings-table__sync-item settings-table__sync-item--slider"

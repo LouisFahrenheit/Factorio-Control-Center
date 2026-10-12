@@ -6,7 +6,7 @@ import type { WebhookService } from './webhook.service';
 import type { PathsService } from '../config/paths.service';
 import type { InstanceItem } from '../common/types';
 
-describe('NotificationsService - sendTest', () => {
+describe('NotificationsService - sendTest and testWebhook', () => {
   let mockConfig: Partial<FccConfigService>;
   let mockInstances: Partial<InstancesService>;
   let mockTelegram: Partial<TelegramService>;
@@ -60,6 +60,7 @@ describe('NotificationsService - sendTest', () => {
 
     mockWebhooks = {
       dispatch: jest.fn().mockResolvedValue(undefined),
+      testTarget: jest.fn().mockResolvedValue({ ok: true, status: 200 }),
     };
 
     mockPaths = {
@@ -76,70 +77,66 @@ describe('NotificationsService - sendTest', () => {
     );
   });
 
-  it('sends test notification to both Telegram and Webhooks when both are configured', async () => {
-    const result = await service.sendTest();
+  describe('sendTest', () => {
+    it('sends test notification to Telegram when enabled', async () => {
+      const result = await service.sendTest();
 
-    expect(result.ok).toBe(true);
-    expect(result.sent).toEqual(['telegram', 'webhooks']);
-    expect(mockTelegram.sendMessage).toHaveBeenCalledWith(
-      'bot-token',
-      'chat-id-123',
-      'Test telegram message',
-    );
-    expect(mockWebhooks.dispatch).toHaveBeenCalledWith(
-      [{ url: 'https://example.com/webhook', enabled: true }],
-      'test',
-      'global',
-      'Factorio Control Center',
-      { message: 'Test notification from Factorio Control Center' },
-    );
+      expect(result.ok).toBe(true);
+      expect(result.sent).toEqual(['telegram']);
+      expect(mockTelegram.sendMessage).toHaveBeenCalledWith(
+        'bot-token',
+        'chat-id-123',
+        'Test telegram message',
+      );
+      expect(mockWebhooks.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('returns empty sent array if Telegram is disabled', async () => {
+      mockConfig.notifications!.telegram_enabled = false;
+
+      const result = await service.sendTest();
+
+      expect(result.ok).toBe(true);
+      expect(result.sent).toEqual([]);
+      expect(mockTelegram.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('sends test for a specific instance using its resolved chat id', async () => {
+      const result = await service.sendTest('inst-1');
+
+      expect(result.ok).toBe(true);
+      expect(result.sent).toEqual(['telegram']);
+      expect(mockTelegram.sendMessage).toHaveBeenCalledWith(
+        'bot-token',
+        'chat-id-123',
+        'Test telegram message',
+      );
+    });
   });
 
-  it('sends only to Telegram if no webhooks are configured', async () => {
-    mockConfig.notifications!.webhook_targets = '[]';
+  describe('testWebhook', () => {
+    it('calls webhooks.testTarget with target and instance name', async () => {
+      const target = { url: 'https://example.com/single-hook', enabled: true };
+      const res = await service.testWebhook(target, 'inst-1');
 
-    const result = await service.sendTest();
+      expect(res).toEqual({ ok: true, status: 200 });
+      expect(mockWebhooks.testTarget).toHaveBeenCalledWith(
+        target,
+        'inst-1',
+        'Server 1',
+      );
+    });
 
-    expect(result.ok).toBe(true);
-    expect(result.sent).toEqual(['telegram']);
-    expect(mockTelegram.sendMessage).toHaveBeenCalledTimes(1);
-    expect(mockWebhooks.dispatch).not.toHaveBeenCalled();
-  });
+    it('uses global fallback name when instanceId is omitted', async () => {
+      const target = { url: 'https://example.com/single-hook', enabled: true };
+      const res = await service.testWebhook(target);
 
-  it('sends only to Webhooks if Telegram is disabled', async () => {
-    mockConfig.notifications!.telegram_enabled = false;
-
-    const result = await service.sendTest();
-
-    expect(result.ok).toBe(true);
-    expect(result.sent).toEqual(['webhooks']);
-    expect(mockTelegram.sendMessage).not.toHaveBeenCalled();
-    expect(mockWebhooks.dispatch).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns empty sent array if neither Telegram nor Webhooks are configured', async () => {
-    mockConfig.notifications!.telegram_enabled = false;
-    mockConfig.notifications!.webhook_targets = '[]';
-
-    const result = await service.sendTest();
-
-    expect(result.ok).toBe(true);
-    expect(result.sent).toEqual([]);
-    expect(mockTelegram.sendMessage).not.toHaveBeenCalled();
-    expect(mockWebhooks.dispatch).not.toHaveBeenCalled();
-  });
-
-  it('dispatches test for a specific instance using its resolved config and name', async () => {
-    const result = await service.sendTest('inst-1');
-
-    expect(result.ok).toBe(true);
-    expect(result.sent).toEqual(['telegram', 'webhooks']);
-    expect(mockWebhooks.dispatch).toHaveBeenCalledWith(
-      [{ url: 'https://example.com/webhook', enabled: true }],
-      'test',
-      'inst-1',
-      'Server 1',
-      { message: 'Test notification from Factorio Control Center' },
-    );
+      expect(res).toEqual({ ok: true, status: 200 });
+      expect(mockWebhooks.testTarget).toHaveBeenCalledWith(
+        target,
+        'global',
+        'Factorio Control Center',
+      );
+    });
   });
 });

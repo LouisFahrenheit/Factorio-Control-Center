@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, type ReactNode, type CSSProperties } from
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../api/client';
 import { AppIcon } from '../AppIcon';
+import type { AppIconName } from '../../lib/appIcons';
 import { FccSwitch } from '../FccSwitch';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import type { InstanceItem } from '../../types/instance';
@@ -66,6 +67,7 @@ interface SettingsTableProps {
   title: string;
   titleId: string;
   titleMeta?: ReactNode;
+  icon?: AppIconName;
   sectionId?: string;
   className?: string;
   children: ReactNode;
@@ -75,6 +77,7 @@ function SettingsTable({
   title,
   titleId,
   titleMeta,
+  icon,
   sectionId,
   className,
   children,
@@ -84,7 +87,13 @@ function SettingsTable({
   return (
     <section className={sectionClass} id={sectionId} aria-labelledby={titleId}>
       <h3 id={titleId} className="settings-table-section__title">
-        <span className="settings-table-section__title-text">{title}</span>
+        <span
+          className="settings-table-section__title-text"
+          style={icon ? { display: 'inline-flex', alignItems: 'center', gap: 6 } : undefined}
+        >
+          {icon ? <AppIcon name={icon} size={16} /> : null}
+          {title}
+        </span>
         {titleMeta ? (
           <span className="settings-table-section__title-meta">{titleMeta}</span>
         ) : null}
@@ -185,6 +194,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
   });
 
   const [targets, setTargets] = useState<WebhookTarget[]>([]);
+  const [testingWebhookIdx, setTestingWebhookIdx] = useState<number | null>(null);
+  const [webhookTestResults, setWebhookTestResults] = useState<
+    Record<number, { ok: boolean; text: string }>
+  >({});
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
   const [testStatus, setTestStatus] = useState<string | null>(null);
   const [showBotToken, setShowBotToken] = useState(false);
@@ -193,6 +206,12 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
   const [overrideServerId, setOverrideServerId] = useState<string>('');
   const [hasOverride, setHasOverride] = useState<boolean>(false);
   const [overrideForm, setOverrideForm] = useState<InstanceNotifOverride>({});
+  const [overrideCustomWebhooks, setOverrideCustomWebhooks] = useState<boolean>(false);
+  const [overrideTargets, setOverrideTargets] = useState<WebhookTarget[]>([]);
+  const [testingOverrideWebhookIdx, setTestingOverrideWebhookIdx] = useState<number | null>(null);
+  const [overrideWebhookTestResults, setOverrideWebhookTestResults] = useState<
+    Record<number, { ok: boolean; text: string }>
+  >({});
 
   // Sync global form when query data arrives
   useEffect(() => {
@@ -295,10 +314,35 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       if (overrideData.override) {
         setHasOverride(true);
         setOverrideForm(overrideData.override);
+        if (
+          overrideData.override.webhook_targets !== null &&
+          overrideData.override.webhook_targets !== undefined
+        ) {
+          try {
+            const parsed = JSON.parse(overrideData.override.webhook_targets);
+            if (Array.isArray(parsed)) {
+              setOverrideTargets(parsed);
+              setOverrideCustomWebhooks(true);
+            } else {
+              setOverrideTargets([]);
+              setOverrideCustomWebhooks(false);
+            }
+          } catch {
+            setOverrideTargets([]);
+            setOverrideCustomWebhooks(false);
+          }
+        } else {
+          setOverrideTargets([]);
+          setOverrideCustomWebhooks(false);
+        }
       } else {
         setHasOverride(false);
         setOverrideForm({});
+        setOverrideTargets([]);
+        setOverrideCustomWebhooks(false);
       }
+      setOverrideWebhookTestResults({});
+      setTestingOverrideWebhookIdx(null);
     }
   }, [overrideData]);
 
@@ -311,10 +355,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['config', 'notifications'] });
-      notifyOk(t('notif_saved_success') || 'Bot settings saved.');
+      notifyOk(t('notif_saved_success') || 'Notification settings saved.');
     },
     onError: () => {
-      notifyErr(t('notif_save_err') || 'Failed to save bot settings.');
+      notifyErr(t('notif_save_err') || 'Failed to save notification settings.');
     },
   });
 
@@ -332,10 +376,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['instance', overrideServerId, 'notifications'] });
-      notifyOk(t('notif_saved_success') || 'Bot settings saved.');
+      notifyOk(t('notif_saved_success') || 'Notification settings saved.');
     },
     onError: () => {
-      notifyErr(t('notif_save_err') || 'Failed to save bot settings.');
+      notifyErr(t('notif_save_err') || 'Failed to save notification settings.');
     },
   });
 
@@ -396,9 +440,15 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
 
   const handleSaveOverride = () => {
     if (!overrideServerId) return;
+    const finalOverride: InstanceNotifOverride = {
+      ...overrideForm,
+      webhook_targets: overrideCustomWebhooks
+        ? JSON.stringify(overrideTargets)
+        : null,
+    };
     saveOverrideMutation.mutate({
       instanceId: overrideServerId,
-      override: hasOverride ? overrideForm : null,
+      override: hasOverride ? finalOverride : null,
     });
   };
 
@@ -406,10 +456,86 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
     if (!overrideServerId) return;
     setHasOverride(false);
     setOverrideForm({});
+    setOverrideTargets([]);
+    setOverrideCustomWebhooks(false);
+    setOverrideWebhookTestResults({});
+    setTestingOverrideWebhookIdx(null);
     saveOverrideMutation.mutate({
       instanceId: overrideServerId,
       override: null,
     });
+  };
+
+  const handleAddOverrideTarget = () => {
+    setOverrideTargets((prev) => [...prev, { url: '', secret: '', enabled: true }]);
+  };
+
+  const handleRemoveOverrideTarget = (idx: number) => {
+    setOverrideTargets((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateOverrideTarget = (
+    idx: number,
+    field: keyof WebhookTarget,
+    val: unknown,
+  ) => {
+    setOverrideTargets((prev) =>
+      prev.map((t, i) => (i === idx ? { ...t, [field]: val } : t)),
+    );
+  };
+
+  const handleTestSingleOverrideWebhook = async (idx: number) => {
+    const tgt = overrideTargets[idx];
+    if (!tgt?.url?.trim()) return;
+    setTestingOverrideWebhookIdx(idx);
+    setOverrideWebhookTestResults((prev) => {
+      const copy = { ...prev };
+      delete copy[idx];
+      return copy;
+    });
+
+    try {
+      const res = (await api('/api/config/notifications/webhook/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          url: tgt.url.trim(),
+          secret: tgt.secret?.trim() || undefined,
+        }),
+      })) as { ok: boolean; status?: number; error?: string };
+
+      if (res.ok) {
+        setOverrideWebhookTestResults((prev) => ({
+          ...prev,
+          [idx]: {
+            ok: true,
+            text: `${t('notif_webhook_test_success') || 'Delivered successfully'}${
+              res.status ? ` (HTTP ${res.status})` : ''
+            }`,
+          },
+        }));
+      } else {
+        setOverrideWebhookTestResults((prev) => ({
+          ...prev,
+          [idx]: {
+            ok: false,
+            text: `${t('notif_webhook_test_failed') || 'Delivery failed'}: ${
+              res.error || `HTTP ${res.status || 'error'}`
+            }`,
+          },
+        }));
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setOverrideWebhookTestResults((prev) => ({
+        ...prev,
+        [idx]: {
+          ok: false,
+          text: `${t('notif_webhook_test_failed') || 'Delivery failed'}: ${errMsg}`,
+        },
+      }));
+    } finally {
+      setTestingOverrideWebhookIdx(null);
+    }
   };
 
   const handleAddTarget = () => {
@@ -424,6 +550,63 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
     setTargets((prev) =>
       prev.map((t, i) => (i === idx ? { ...t, [field]: val } : t)),
     );
+  };
+
+  const handleTestSingleWebhook = async (idx: number) => {
+    const tgt = targets[idx];
+    if (!tgt?.url?.trim()) return;
+    setTestingWebhookIdx(idx);
+    setWebhookTestResults((prev) => {
+      const copy = { ...prev };
+      delete copy[idx];
+      return copy;
+    });
+
+    try {
+      const res = (await api('/api/config/notifications/webhook/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          url: tgt.url.trim(),
+          secret: tgt.secret?.trim() || undefined,
+        }),
+      })) as { ok: boolean; status?: number; error?: string };
+
+      if (res.ok) {
+        setWebhookTestResults((prev) => ({
+          ...prev,
+          [idx]: {
+            ok: true,
+            text: `${t('notif_webhook_test_success') || 'Delivered'}${res.status ? ` (HTTP ${res.status})` : ''}`,
+          },
+        }));
+      } else {
+        setWebhookTestResults((prev) => ({
+          ...prev,
+          [idx]: {
+            ok: false,
+            text: `${t('notif_webhook_test_failed') || 'Failed'}: ${res.error || `HTTP ${res.status || 'Error'}`}`,
+          },
+        }));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setWebhookTestResults((prev) => ({
+        ...prev,
+        [idx]: {
+          ok: false,
+          text: `${t('notif_webhook_test_failed') || 'Failed'}: ${msg}`,
+        },
+      }));
+    } finally {
+      setTestingWebhookIdx(null);
+      setTimeout(() => {
+        setWebhookTestResults((prev) => {
+          const copy = { ...prev };
+          delete copy[idx];
+          return copy;
+        });
+      }, 5000);
+    }
   };
 
   const selectedServerItem = useMemo(
@@ -467,10 +650,11 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
         <div className="instance-settings-tables__minor">
           {/* SECTION 1: Telegram Connection */}
           <SettingsTable
-            title={t('notif_telegram_title') || 'Telegram Integration'}
+            title={t('notif_telegram_title') || 'Telegram Bot'}
             titleId="notifTelegramTitle"
             sectionId="notifTelegramSection"
             className="settings-table-section--compact"
+            icon="telegram"
             titleMeta={
               <span
                 className={`integrations-conn-badge ${
@@ -805,11 +989,6 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
             title={t('notif_servers_scope_title') || 'Server Scope & Selection'}
             titleId="notifServersScopeTitle"
             sectionId="notifServersScopeSection"
-            titleMeta={
-              <span className="integrations-counter-badge">
-                {instances.length} {t('instances_count_label') || 'servers'}
-              </span>
-            }
           >
             <tr className="settings-table__row settings-table__row--scope-header">
               <td colSpan={2} className="integrations-scope-cell">
@@ -1018,17 +1197,23 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                     ) : hasOverride ? (
                       <div className="integrations-override-body">
                         <div className="integrations-override-top-bar">
-                          <FccSwitch
-                            id="serverNotifEnabled"
-                            checked={overrideForm.enabled !== false}
-                            onChange={(val) =>
-                              setOverrideForm((p) => ({ ...p, enabled: val }))
-                            }
-                            label={
-                              t('notif_server_active_label') ||
-                              'Allow notifications for this server'
-                            }
-                          />
+                          <div className="integrations-override-active-control">
+                            <FccSwitch
+                              id="serverNotifEnabled"
+                              checked={overrideForm.enabled !== false}
+                              onChange={(val) =>
+                                setOverrideForm((p) => ({ ...p, enabled: val }))
+                              }
+                              label={
+                                t('notif_server_active_label') ||
+                                'Send notifications for this server'
+                              }
+                            />
+                            <span className="integrations-override-active-hint">
+                              {t('notif_server_active_hint') ||
+                                'If disabled, all notifications and webhooks for this server are completely muted.'}
+                            </span>
+                          </div>
                           <div className="integrations-override-chat-wrap">
                             <label htmlFor="serverTelegramChatId" className="integrations-override-chat-label">
                               {t('notif_telegram_chat_override') || 'Telegram Chat ID (Override):'}
@@ -1624,6 +1809,179 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                           </div>
                         </div>
 
+                        {/* Server Webhooks Override */}
+                        <div className="integrations-override-webhooks-section">
+                          <div className="integrations-override-webhooks-header">
+                            <div className="integrations-override-webhooks-header__left">
+                              <span
+                                className="integrations-override-events-title"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                              >
+                                <AppIcon name="webhook" size={15} />
+                                {t('notif_override_webhooks_title') || 'Webhooks for this server:'}
+                              </span>
+                              <FccSwitch
+                                id="toggleOverrideCustomWebhooks"
+                                checked={overrideCustomWebhooks}
+                                onChange={(val) => {
+                                  setOverrideCustomWebhooks(val);
+                                  if (val && overrideTargets.length === 0) {
+                                    setOverrideTargets([{ url: '', secret: '', enabled: true }]);
+                                  }
+                                }}
+                                label={
+                                  overrideCustomWebhooks
+                                    ? t('notif_override_webhooks_mode_custom') || 'Custom server webhooks'
+                                    : t('notif_override_webhooks_mode_inherit') || 'Use global webhooks'
+                                }
+                              />
+                            </div>
+                            {overrideCustomWebhooks && (
+                              <button
+                                type="button"
+                                className="btn btn--compact btn--with-icon"
+                                onClick={handleAddOverrideTarget}
+                              >
+                                <AppIcon name="add" size={14} />
+                                {t('notif_webhook_add_btn') || 'Add Webhook'}
+                              </button>
+                            )}
+                          </div>
+
+                          {!overrideCustomWebhooks ? (
+                            <div className="integrations-override-webhooks-inherited-note">
+                              <AppIcon name="info" size={15} />
+                              <span>
+                                {t('notif_override_webhooks_inherited_hint') ||
+                                  'Events from this server are sent to the global webhooks configured below.'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="integrations-webhooks-list">
+                              {!overrideTargets.length ? (
+                                <div className="integrations-webhooks-empty" style={{ padding: '16px' }}>
+                                  <div className="integrations-webhooks-empty__icon" style={{ width: 36, height: 36 }}>
+                                    <AppIcon name="webhook" size={20} />
+                                  </div>
+                                  <span className="integrations-webhooks-empty__text">
+                                    {t('notif_no_webhooks') || 'No custom webhooks configured.'}
+                                  </span>
+                                </div>
+                              ) : (
+                                overrideTargets.map((tgt, idx) => {
+                                  const isEnabled = tgt.enabled !== false;
+                                  const isTesting = testingOverrideWebhookIdx === idx;
+                                  const result = overrideWebhookTestResults[idx];
+
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className={`integrations-webhook-card ${
+                                        !isEnabled ? 'integrations-webhook-card--disabled' : ''
+                                      }`}
+                                    >
+                                      <div className="integrations-webhook-card__toggle">
+                                        <FccSwitch
+                                          id={`ov_webhook_toggle_${idx}`}
+                                          checked={isEnabled}
+                                          onChange={(val) =>
+                                            handleUpdateOverrideTarget(idx, 'enabled', val)
+                                          }
+                                          title={
+                                            t('notif_webhook_toggle_title') ||
+                                            'Enable or disable this webhook'
+                                          }
+                                        />
+                                      </div>
+                                      <div className="integrations-webhook-card__endpoint">
+                                        <div className="input-with-icon integrations-webhook-input-wrap">
+                                          <AppIcon
+                                            name="add_link"
+                                            size={15}
+                                            className="input-with-icon__icon"
+                                          />
+                                          <input
+                                            type="url"
+                                            className="input integrations-webhook-input"
+                                            placeholder="https://discord.com/api/webhooks/... or https://monitoring.example.com/api"
+                                            value={tgt.url}
+                                            onChange={(e) =>
+                                              handleUpdateOverrideTarget(idx, 'url', e.target.value)
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="integrations-webhook-card__secret">
+                                        <input
+                                          type="text"
+                                          className="input integrations-webhook-input integrations-webhook-input--secret"
+                                          placeholder={
+                                            t('notif_webhook_secret_placeholder') ||
+                                            'Bearer token / secret (optional)'
+                                          }
+                                          autoComplete="off"
+                                          spellCheck={false}
+                                          data-lpignore="true"
+                                          data-1p-ignore="true"
+                                          data-bwignore="true"
+                                          data-fcc-non-credential="1"
+                                          data-form-type="other"
+                                          value={tgt.secret || ''}
+                                          onChange={(e) =>
+                                            handleUpdateOverrideTarget(idx, 'secret', e.target.value)
+                                          }
+                                        />
+                                      </div>
+                                      <div className="integrations-webhook-card__actions">
+                                        <button
+                                          type="button"
+                                          className="btn btn--compact btn--with-icon integrations-webhook-test-btn"
+                                          onClick={() => void handleTestSingleOverrideWebhook(idx)}
+                                          disabled={!tgt.url.trim() || isTesting}
+                                          title={t('notif_webhook_test_btn') || 'Test'}
+                                        >
+                                          <AppIcon
+                                            name={isTesting ? 'refresh' : 'terminal'}
+                                            size={14}
+                                          />
+                                          <span>
+                                            {isTesting
+                                              ? t('notif_webhook_testing') || 'Testing...'
+                                              : t('notif_webhook_test_btn') || 'Test'}
+                                          </span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn--danger btn--compact integrations-webhook-delete-btn"
+                                          onClick={() => handleRemoveOverrideTarget(idx)}
+                                          title={t('delete') || 'Remove'}
+                                        >
+                                          <AppIcon name="delete" size={15} />
+                                        </button>
+                                      </div>
+                                      {result && (
+                                        <div
+                                          className={`integrations-webhook-card__result ${
+                                            result.ok
+                                              ? 'integrations-webhook-card__result--ok'
+                                              : 'integrations-webhook-card__result--err'
+                                          }`}
+                                        >
+                                          <AppIcon
+                                            name={result.ok ? 'check' : 'warning'}
+                                            size={14}
+                                          />
+                                          <span>{result.text}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          )}
+                        </div>
+
                         <div className="integrations-override-actions">
                           <button
                             type="button"
@@ -1659,11 +2017,12 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
             )}
           </SettingsTable>
 
-          {/* SECTION 3: Custom Webhooks (Monitoring) */}
+          {/* SECTION 3: Webhooks (Discord / HTTP) */}
           <SettingsTable
-            title={t('notif_custom_webhooks_title') || 'Custom Webhooks (Monitoring)'}
+            title={t('notif_custom_webhooks_title') || 'Webhooks (Discord / HTTP)'}
             titleId="notifCustomWebhooksTitle"
             sectionId="notifCustomWebhooksSection"
+            icon="webhook"
             titleMeta={
               <button
                 type="button"
@@ -1688,7 +2047,7 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                   {!targets.length ? (
                     <div className="integrations-webhooks-empty">
                       <div className="integrations-webhooks-empty__icon">
-                        <AppIcon name="monitoring" size={24} />
+                        <AppIcon name="webhook" size={24} />
                       </div>
                       <span className="integrations-webhooks-empty__text">
                         {t('notif_no_webhooks') || 'No custom webhooks configured.'}
@@ -1696,53 +2055,115 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
                     </div>
                   ) : (
                     <div className="integrations-webhooks-list">
-                      {targets.map((tgt, idx) => (
-                        <div key={idx} className="integrations-webhook-card">
-                          <div className="integrations-webhook-card__endpoint">
-                            <div className="input-with-icon integrations-webhook-input-wrap">
-                              <AppIcon name="add_link" size={15} className="input-with-icon__icon" />
-                              <input
-                                type="url"
-                                className="input integrations-webhook-input"
-                                placeholder="https://monitoring.example.com/api/webhook"
-                                value={tgt.url}
-                                onChange={(e) =>
-                                  handleUpdateTarget(idx, 'url', e.target.value)
+                      {targets.map((tgt, idx) => {
+                        const isEnabled = tgt.enabled !== false;
+                        const isTesting = testingWebhookIdx === idx;
+                        const result = webhookTestResults[idx];
+
+                        return (
+                          <div
+                            key={idx}
+                            className={`integrations-webhook-card ${
+                              !isEnabled ? 'integrations-webhook-card--disabled' : ''
+                            }`}
+                          >
+                            <div className="integrations-webhook-card__toggle">
+                              <FccSwitch
+                                id={`webhook_toggle_${idx}`}
+                                checked={isEnabled}
+                                onChange={(val) =>
+                                  handleUpdateTarget(idx, 'enabled', val)
+                                }
+                                title={
+                                  t('notif_webhook_toggle_title') ||
+                                  'Enable or disable this webhook'
                                 }
                               />
                             </div>
+                            <div className="integrations-webhook-card__endpoint">
+                              <div className="input-with-icon integrations-webhook-input-wrap">
+                                <AppIcon
+                                  name="add_link"
+                                  size={15}
+                                  className="input-with-icon__icon"
+                                />
+                                <input
+                                  type="url"
+                                  className="input integrations-webhook-input"
+                                  placeholder="https://discord.com/api/webhooks/... or https://monitoring.example.com/api"
+                                  value={tgt.url}
+                                  onChange={(e) =>
+                                    handleUpdateTarget(idx, 'url', e.target.value)
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <div className="integrations-webhook-card__secret">
+                              <input
+                                type="text"
+                                className="input integrations-webhook-input integrations-webhook-input--secret"
+                                placeholder={
+                                  t('notif_webhook_secret_placeholder') ||
+                                  'Bearer token / secret (optional)'
+                                }
+                                autoComplete="off"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-fcc-non-credential="1"
+                                data-form-type="other"
+                                value={tgt.secret || ''}
+                                onChange={(e) =>
+                                  handleUpdateTarget(idx, 'secret', e.target.value)
+                                }
+                              />
+                            </div>
+                            <div className="integrations-webhook-card__actions">
+                              <button
+                                type="button"
+                                className="btn btn--compact btn--with-icon integrations-webhook-test-btn"
+                                onClick={() => void handleTestSingleWebhook(idx)}
+                                disabled={!tgt.url.trim() || isTesting}
+                                title={t('notif_webhook_test_btn') || 'Test'}
+                              >
+                                <AppIcon
+                                  name={isTesting ? 'refresh' : 'terminal'}
+                                  size={14}
+                                />
+                                <span>
+                                  {isTesting
+                                    ? t('notif_webhook_testing') || 'Testing...'
+                                    : t('notif_webhook_test_btn') || 'Test'}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn--danger btn--compact integrations-webhook-delete-btn"
+                                onClick={() => handleRemoveTarget(idx)}
+                                title={t('delete') || 'Remove'}
+                              >
+                                <AppIcon name="delete" size={15} />
+                              </button>
+                            </div>
+                            {result && (
+                              <div
+                                className={`integrations-webhook-card__result ${
+                                  result.ok
+                                    ? 'integrations-webhook-card__result--ok'
+                                    : 'integrations-webhook-card__result--err'
+                                }`}
+                              >
+                                <AppIcon
+                                  name={result.ok ? 'check' : 'close'}
+                                  size={13}
+                                />
+                                <span>{result.text}</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="integrations-webhook-card__secret">
-                            <input
-                              type="text"
-                              className="input integrations-webhook-input integrations-webhook-input--secret"
-                              placeholder={
-                                t('notif_webhook_secret_placeholder') ||
-                                'Bearer token / secret (optional)'
-                              }
-                              autoComplete="off"
-                              spellCheck={false}
-                              data-lpignore="true"
-                              data-1p-ignore="true"
-                              data-bwignore="true"
-                              data-fcc-non-credential="1"
-                              data-form-type="other"
-                              value={tgt.secret || ''}
-                              onChange={(e) =>
-                                handleUpdateTarget(idx, 'secret', e.target.value)
-                              }
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            className="btn btn--danger btn--compact integrations-webhook-delete-btn"
-                            onClick={() => handleRemoveTarget(idx)}
-                            title={t('delete') || 'Remove'}
-                          >
-                            <AppIcon name="delete" size={15} />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

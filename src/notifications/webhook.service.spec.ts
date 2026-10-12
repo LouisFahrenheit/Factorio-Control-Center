@@ -121,6 +121,51 @@ describe('WebhookService', () => {
       ]);
     });
 
+    it('formats Discord payload cleanly for factorio_update_available', async () => {
+      fetchMock.mockResolvedValue({ ok: true, status: 200 });
+
+      const discordTarget: WebhookTarget = {
+        url: 'https://discord.com/api/webhooks/12345/abcdef',
+        enabled: true,
+      };
+
+      await service.dispatch(
+        [discordTarget],
+        'factorio_update_available',
+        'inst-1',
+        'Space Exploration',
+        {
+          latest_version: '2.1.21',
+          current_version: '2.1.8',
+          servers: [
+            {
+              id: 'inst-1',
+              name: 'Space Exploration',
+              current_version: '2.1.8',
+            },
+          ],
+        },
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const call = fetchMock.mock.calls[0];
+      const parsedBody = JSON.parse(call[1].body) as {
+        embeds: Array<{
+          title: string;
+          description: string;
+          fields?: Array<{ name: string; value: string; inline?: boolean }>;
+        }>;
+      };
+
+      expect(parsedBody.embeds[0].title).toBe('🚀 Factorio Update Available');
+      expect(parsedBody.embeds[0].description).toContain('Space Exploration');
+      expect(parsedBody.embeds[0].fields).toEqual([
+        { name: 'Server', value: 'Space Exploration', inline: true },
+        { name: 'Installed', value: '`2.1.8`', inline: true },
+        { name: 'Available', value: '`2.1.21`', inline: true },
+      ]);
+    });
+
     it('handles network failure gracefully without throwing', async () => {
       fetchMock.mockRejectedValue(new Error('Connection timeout'));
 
@@ -132,6 +177,45 @@ describe('WebhookService', () => {
       await expect(
         service.dispatch([target], 'test', 'global', 'FCC'),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe('testTarget', () => {
+    it('returns ok: true and status code on successful delivery', async () => {
+      fetchMock.mockResolvedValue({ ok: true, status: 204 });
+
+      const target: WebhookTarget = {
+        url: 'https://example.com/target-test',
+        enabled: true,
+      };
+
+      const result = await service.testTarget(target, 'inst-1', 'Server Alpha');
+      expect(result).toEqual({ ok: true, status: 204 });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns ok: false and HTTP status on non-ok response', async () => {
+      fetchMock.mockResolvedValue({ ok: false, status: 404 });
+
+      const target: WebhookTarget = {
+        url: 'https://example.com/target-404',
+        enabled: true,
+      };
+
+      const result = await service.testTarget(target);
+      expect(result).toEqual({ ok: false, status: 404, error: 'HTTP 404' });
+    });
+
+    it('returns ok: false and error message on network rejection', async () => {
+      fetchMock.mockRejectedValue(new Error('DNS lookup failed'));
+
+      const target: WebhookTarget = {
+        url: 'https://example.com/target-error',
+        enabled: true,
+      };
+
+      const result = await service.testTarget(target);
+      expect(result).toEqual({ ok: false, error: 'DNS lookup failed' });
     });
   });
 });

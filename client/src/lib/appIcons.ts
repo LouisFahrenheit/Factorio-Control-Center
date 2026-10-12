@@ -66,6 +66,7 @@ export const APP_ICON_URLS = {
   schedule: '/assets/icons/schedule.svg',
   folder_zip: '/assets/icons/folder_zip.svg',
   warning: '/assets/icons/warning.svg',
+  webhook: '/assets/icons/webhook.svg',
 } as const;
 
 export type AppIconName = keyof typeof APP_ICON_URLS;

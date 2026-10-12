@@ -513,7 +513,7 @@ export class NotificationsService {
     });
   }
 
-  /** Send a test notification to configured Telegram chat / Webhooks. */
+  /** Send a test notification to configured Telegram chat. */
   async sendTest(
     instanceId?: string,
   ): Promise<{ ok: boolean; sent: string[] }> {
@@ -531,26 +531,21 @@ export class NotificationsService {
       sent.push('telegram');
     }
 
-    const webhookTargets = resolved
-      ? (resolved.cfg?.webhook_targets ?? [])
-      : parseWebhookTargets(global.webhook_targets);
-    const instanceName = resolved?.name ?? 'Factorio Control Center';
-
-    const activeWebhooks = webhookTargets.filter(
-      (t) => t.enabled !== false && Boolean(t.url),
-    );
-    if (activeWebhooks.length > 0) {
-      await this.webhooks.dispatch(
-        activeWebhooks,
-        'test',
-        instanceId ?? 'global',
-        instanceName,
-        { message: 'Test notification from Factorio Control Center' },
-      );
-      sent.push('webhooks');
-    }
-
     return { ok: true, sent };
+  }
+
+  /** Test a specific webhook target. */
+  async testWebhook(
+    target: WebhookTarget,
+    instanceId?: string,
+  ): Promise<{ ok: boolean; status?: number; error?: string }> {
+    const resolved = instanceId ? this.resolveInstance(instanceId) : null;
+    const instanceName = resolved?.name ?? 'Factorio Control Center';
+    return this.webhooks.testTarget(
+      target,
+      instanceId ?? 'global',
+      instanceName,
+    );
   }
 
   // ── Internals ────────────────────────────────────────────────────────────────
