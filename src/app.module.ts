@@ -13,8 +13,17 @@ import { GameInstance } from './instances/game-instance.entity';
 import { MaintenanceSchedule } from './maintenance/maintenance-schedule.entity';
 
 import { trimPath } from './common/trim.util';
-import { ApiController } from './api/api.controller';
-import { ApiFullController } from './api/api-full.controller';
+import { FileSystemController } from './api/controllers/filesystem.controller';
+import { LogsController } from './api/controllers/logs.controller';
+import { InstancesController } from './api/controllers/instances.controller';
+import { ConfigController } from './api/controllers/config.controller';
+import { ServerOpsController } from './api/controllers/server-ops.controller';
+import { SavesController } from './api/controllers/saves.controller';
+import { MapGenController } from './api/controllers/map-gen.controller';
+import { ModsController } from './api/controllers/mods.controller';
+import { PlayersController } from './api/controllers/players.controller';
+import { MaintenanceController } from './api/controllers/maintenance.controller';
+import { SystemController } from './api/controllers/system.controller';
 import { ApiBridgeService } from './api/api-bridge.service';
 import { InstanceContextInterceptor } from './api/instance-context.interceptor';
 import { AuthController } from './auth/auth.controller';
@@ -151,8 +160,17 @@ if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
   ],
   controllers: [
     PagesController,
-    ApiController,
-    ApiFullController,
+    SystemController,
+    FileSystemController,
+    LogsController,
+    InstancesController,
+    ConfigController,
+    ServerOpsController,
+    SavesController,
+    MapGenController,
+    ModsController,
+    PlayersController,
+    MaintenanceController,
     AuthController,
     FallbackController,
     MetricsController,
