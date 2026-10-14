@@ -249,6 +249,8 @@ if (
   ensureDependencies(clientRoot, 'Client');
 }
 
+rmSync(join(nestRoot, 'dist'), { recursive: true, force: true });
+rmSync(join(clientRoot, 'dist'), { recursive: true, force: true });
 run('npm run build:all', nestRoot);
 assertReleaseArtifacts();
 

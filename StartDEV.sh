@@ -80,10 +80,10 @@ run_dev() {
   ensure_port_free "$VITE_PORT" "Vite" || return
   echo "Starting Nest..."
   (cd "$FCC_DIR" && export FCC_ROOT_DIR="$FCC_ROOT_DIR" && npm run start:dev) &
-  sleep 8
+  sleep 2
   echo "Starting Vite..."
   (cd "$FCC_DIR" && npm run client:dev) &
-  sleep 5
+  sleep 1
   echo "Dev: ${VITE_URL}  |  API: ${NEST_URL}"
   read -r -p "Press Enter..."
 }

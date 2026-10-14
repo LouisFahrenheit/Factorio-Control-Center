@@ -132,8 +132,6 @@ dotenvConfig({ path: envPath });
 import { NestFactory } from '@nestjs/core';
 import { Logger, LogLevel, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { PathsService } from './config/paths.service';
-import { UsersService } from './auth/users.service';
 import { WebPanelListenerService } from './http/web-panel-listener.service';
 import { InstanceAutostartService } from './instances/instance-autostart.service';
 import { PanelStartupLogService } from './logging/panel-startup-log.service';
@@ -216,9 +214,6 @@ async function bootstrap() {
     });
     rootLogger.log('Swagger UI is enabled at /api/docs');
   }
-
-  app.get(PathsService);
-  await app.get(UsersService).load();
 
   // Create the WS adapter and register it before app.init()
   const wsAdapter = new FccWsAdapter(app);

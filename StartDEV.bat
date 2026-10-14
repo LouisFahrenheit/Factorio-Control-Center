@@ -78,10 +78,10 @@ call :ensure_port_free %VITE_PORT% Vite
 if errorlevel 1 goto menu
 echo Starting Nest...
 start "FCC Nest API" /D "%FCC_DIR%" cmd /k "set FCC_ROOT_DIR=%FCC_ROOT_DIR%&& npm run start:dev"
-timeout /t 8 /nobreak >nul
+timeout /t 2 /nobreak >nul
 echo Starting Vite...
 start "FCC React Vite" /D "%FCC_DIR%" cmd /k npm run client:dev
-timeout /t 5 /nobreak >nul
+timeout /t 1 /nobreak >nul
 echo Dev: %VITE_URL%  ^|  API: %NEST_URL%
 pause
 goto menu

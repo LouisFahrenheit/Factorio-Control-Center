@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "nest build",
+    "clean": "node -e \"const fs=require('fs'); fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('client/dist', {recursive:true,force:true}); fs.rmSync('node_modules/.tmp/tsconfig.build.tsbuildinfo', {force:true});\"",
     "build:all": "npm run client:build && npm run build",
     "pack:release": "node scripts/pack-release.mjs",
     "bump": "node scripts/sync-version.mjs",
