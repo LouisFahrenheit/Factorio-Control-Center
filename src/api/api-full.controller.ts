@@ -25,7 +25,14 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
-import { existsSync, readdirSync, statSync, mkdirSync } from 'fs';
+import {
+  existsSync,
+  readdirSync,
+  statSync,
+  mkdirSync,
+  writeFileSync,
+  unlinkSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve, dirname } from 'path';
 import { randomBytes } from 'crypto';
@@ -531,7 +538,6 @@ export class ApiFullController {
       tmpdir(),
       `fcc-save-${randomBytes(8).toString('hex')}.zip`,
     );
-    const { writeFileSync, unlinkSync } = await import('fs');
     writeFileSync(tmp, file.buffer);
     try {
       const uploadName = String(filename || file.originalname || '').trim();
@@ -1328,7 +1334,6 @@ export class ApiFullController {
       tmpdir(),
       `fcc-map-preset-${randomBytes(8).toString('hex')}.fcc`,
     );
-    const { writeFileSync, unlinkSync } = await import('fs');
     writeFileSync(tmp, file.buffer);
     try {
       return await this.bridge.submit('map_preset_import_upload', {
