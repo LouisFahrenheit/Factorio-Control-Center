@@ -13,22 +13,21 @@ describe('UsersService', () => {
   let mockUserRepo: Partial<Record<keyof Repository<User>, jest.Mock>>;
   let mockSessionService: Partial<Record<keyof SessionService, jest.Mock>>;
 
-  const createFakeUser = (overrides: Partial<User> = {}): User =>
-    ({
-      id: 1,
-      username: 'admin',
-      passwordHash: 'hash123',
-      role: 'administrator',
-      tabs: [...ALL_TABS],
-      instanceIds: ['*'],
-      enabled: true,
-      twoFactorEnabled: false,
-      twoFactorSecret: null,
-      twoFactorRecoveryCodes: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ...overrides,
-    }) as User;
+  const createFakeUser = (overrides: Partial<User> = {}): User => ({
+    id: 'user-uuid-1',
+    username: 'admin',
+    passwordHash: 'hash123',
+    role: 'administrator',
+    tabs: [...ALL_TABS],
+    instanceIds: ['*'],
+    enabled: true,
+    twoFactorEnabled: false,
+    twoFactorSecret: null,
+    twoFactorRecoveryCodes: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  });
 
   beforeEach(() => {
     mockUserRepo = {
@@ -37,7 +36,7 @@ describe('UsersService', () => {
       create: jest.fn().mockImplementation(
         (data: Partial<User>) =>
           ({
-            id: Math.floor(Math.random() * 1000) + 1,
+            id: 'uuid-' + Math.random().toString(36).slice(2),
             ...data,
           }) as User,
       ),
@@ -117,7 +116,7 @@ describe('UsersService', () => {
   describe('createUser', () => {
     it('rejects if actor is not an enabled administrator', async () => {
       const mod = createFakeUser({
-        id: 2,
+        id: 'mod-1',
         username: 'mod',
         role: 'moderator',
         enabled: true,
@@ -133,7 +132,7 @@ describe('UsersService', () => {
     });
 
     it('creates a user when called by an admin', async () => {
-      const admin = createFakeUser({ id: 1, username: 'admin' });
+      const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);
 
       const res = await service.createUser(
@@ -150,7 +149,7 @@ describe('UsersService', () => {
     });
 
     it('rejects duplicate username or short password', async () => {
-      const admin = createFakeUser({ id: 1, username: 'admin' });
+      const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);
 
       const resDup = await service.createUser(
@@ -171,7 +170,7 @@ describe('UsersService', () => {
 
   describe('last admin protection in updateUser and deleteUser', () => {
     it('prevents demoting or disabling the only administrator', async () => {
-      const admin = createFakeUser({ id: 1, username: 'admin' });
+      const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);
 
       const demoteRes = await service.updateUser(
@@ -192,7 +191,7 @@ describe('UsersService', () => {
     });
 
     it('prevents deleting the only administrator', async () => {
-      const admin = createFakeUser({ id: 1, username: 'admin' });
+      const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);
 
       const delRes = await service.deleteUser('admin', 'admin');
@@ -201,8 +200,8 @@ describe('UsersService', () => {
     });
 
     it('allows deleting an admin if another enabled admin exists', async () => {
-      const admin1 = createFakeUser({ id: 1, username: 'admin1' });
-      const admin2 = createFakeUser({ id: 2, username: 'admin2' });
+      const admin1 = createFakeUser({ id: 'admin-1', username: 'admin1' });
+      const admin2 = createFakeUser({ id: 'admin-2', username: 'admin2' });
       mockUserRepo.find?.mockResolvedValue([admin1, admin2]);
 
       const delRes = await service.deleteUser('admin2', 'admin1');
@@ -216,7 +215,7 @@ describe('UsersService', () => {
 
   describe('twoFactor management', () => {
     it('enables and disables 2FA, revoking sessions on disable', async () => {
-      const admin = createFakeUser({ id: 1, username: 'admin' });
+      const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);
 
       await service.setTwoFactor('admin', true, 'secret123', ['code1']);
@@ -230,7 +229,7 @@ describe('UsersService', () => {
 
     it('removes recovery code when used', async () => {
       const admin = createFakeUser({
-        id: 1,
+        id: 'admin-1',
         username: 'admin',
         twoFactorRecoveryCodes: ['code1', 'code2'],
       });

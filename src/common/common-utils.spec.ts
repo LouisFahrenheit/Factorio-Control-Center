@@ -56,7 +56,7 @@ describe('common utils', () => {
 
   describe('ban-sanitize', () => {
     it('sanitizeStdinLine strips line breaks and control characters and collapses whitespace', () => {
-      const raw = '  hello\nworld\twith   multiple spaces  ';
+      const raw = '  hello\r\nworld\twith\n\nmultiple   spaces  ';
       const clean = sanitizeStdinLine(raw);
       expect(clean).toBe('hello world with multiple spaces');
     });
