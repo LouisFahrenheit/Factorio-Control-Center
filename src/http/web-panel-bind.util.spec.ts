@@ -14,11 +14,12 @@ describe('web-panel-bind.util', () => {
   const createMockWp = (overrides: Partial<WebPanelIni> = {}): WebPanelIni => ({
     api_token: 'token123',
     global_token: 'plain-token',
+    global_username: '',
     debug_logs: false,
     listen_host: '0.0.0.0',
     listen_port: 8080,
     public_host: '',
-    public_port: 0,
+    public_port: '0',
     tls_enabled: false,
     tls_certfile: '',
     tls_keyfile: '',
@@ -33,6 +34,23 @@ describe('web-panel-bind.util', () => {
     public_page_theme: '',
     public_page_hide_title: false,
     public_page_hide_subtitle: false,
+    public_page_show_players: true,
+    public_page_contact_link: '',
+    web_disable_effects: false,
+    toast_duration_sec: 5,
+    sync_bans_across_instances: false,
+    sync_admins_across_instances: false,
+    sync_whitelist_across_instances: false,
+    require_unique_instance_game_ports: false,
+    server_settings_default_public_off: false,
+    server_settings_apply_global_credentials: false,
+    log_rotation_max_mb: 50,
+    log_rotation_interval_hours: 24,
+    log_rotation_backup_count: 5,
+    log_write_instance: true,
+    log_write_web: true,
+    log_write_maintenance: true,
+    log_write_audit: true,
     ...overrides,
   });
 
@@ -60,10 +78,10 @@ describe('web-panel-bind.util', () => {
 
   describe('resolveDisplayPort', () => {
     it('uses public_port when valid, otherwise falls back to bindPort', () => {
-      expect(resolveDisplayPort(createMockWp({ public_port: 443 }), 8080)).toBe(
-        443,
-      );
-      expect(resolveDisplayPort(createMockWp({ public_port: 0 }), 8080)).toBe(
+      expect(
+        resolveDisplayPort(createMockWp({ public_port: '443' }), 8080),
+      ).toBe(443);
+      expect(resolveDisplayPort(createMockWp({ public_port: '0' }), 8080)).toBe(
         8080,
       );
     });

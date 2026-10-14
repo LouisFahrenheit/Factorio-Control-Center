@@ -21,7 +21,7 @@ describe('UsersService - Initial Admin Setup', () => {
         .fn()
         .mockImplementation(
           (dto: Partial<User>) =>
-            ({ ...dto, id: savedUsers.length + 1 }) as User,
+            ({ ...dto, id: String(savedUsers.length + 1) }) as User,
         ),
       save: jest.fn().mockImplementation((entity: User) => {
         savedUsers.push(entity);

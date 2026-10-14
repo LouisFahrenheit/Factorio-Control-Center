@@ -145,10 +145,22 @@ describe('RuntimeService', () => {
       expect(service.isRunning('inst-1')).toBe(true);
 
       // If process exited, isRunning is false
-      if (rt.proc) rt.proc.exitCode = 0;
+      if (rt.proc) {
+        Object.defineProperty(rt.proc, 'exitCode', {
+          value: 0,
+          writable: true,
+          configurable: true,
+        });
+      }
       expect(service.isRunning('inst-1')).toBe(false);
 
-      if (rt.proc) rt.proc.exitCode = null;
+      if (rt.proc) {
+        Object.defineProperty(rt.proc, 'exitCode', {
+          value: null,
+          writable: true,
+          configurable: true,
+        });
+      }
       rt.proc = null;
       expect(service.isRunning('inst-1')).toBe(false);
     });
