@@ -52,24 +52,14 @@ const applyPendingDb = (
   }
 };
 
-// Check data/db/ pending restore and fallback legacy data/ pending restore
+// Check data/db/ pending restore
 applyPendingDb(
   join(dbDir, 'fcc_database.sqlite.restore'),
   join(dbDir, 'fcc_database.sqlite'),
   'database',
 );
 applyPendingDb(
-  join(dataDir, 'fcc_database.sqlite.restore'),
-  join(dbDir, 'fcc_database.sqlite'),
-  'database',
-);
-applyPendingDb(
   join(dbDir, 'fcc_metrics.sqlite.restore'),
-  join(dbDir, 'fcc_metrics.sqlite'),
-  'metrics database',
-);
-applyPendingDb(
-  join(dataDir, 'fcc_metrics.sqlite.restore'),
   join(dbDir, 'fcc_metrics.sqlite'),
   'metrics database',
 );

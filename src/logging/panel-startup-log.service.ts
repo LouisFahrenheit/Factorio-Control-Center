@@ -14,11 +14,13 @@ import {
 } from '../http/web-panel-bind.util';
 import { listLanIPv4, listPublicIPv4 } from '../http/lan-address.util';
 import { trimHost } from '../common/trim.util';
-import { readJsonFile } from '../common/json-store';
 import { FCC_ASCII_LOGO } from './fcc-ascii-logo';
 import { centerBlock } from './console-center.util';
 import { WebPanelLogService } from './web-panel-log.service';
 import { FirewallService } from '../ops/firewall/firewall.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { MaintenanceSchedule } from '../maintenance/maintenance-schedule.entity';
 
 const SUMMARY_WIDTH = 49;
 const AUTOSTART_DELAY_SEC = 2;
@@ -33,6 +35,8 @@ export class PanelStartupLogService {
     private readonly paths: PathsService,
     private readonly webLog: WebPanelLogService,
     private readonly firewall: FirewallService,
+    @InjectRepository(MaintenanceSchedule)
+    private readonly maintRepo: Repository<MaintenanceSchedule>,
   ) {}
 
   async logReady(): Promise<void> {
@@ -116,7 +120,7 @@ export class PanelStartupLogService {
       .items.filter((i) => i.autostartServer).length;
     const autostartQueued = autostartCount > 0;
     const { total: maintTotal, active: maintActive } =
-      this.countMaintenanceTasks();
+      await this.countMaintenanceTasks();
 
     const lines = [
       this.summaryHeader(),
@@ -157,12 +161,12 @@ export class PanelStartupLogService {
     return '─'.repeat(left) + label + '─'.repeat(pad - left);
   }
 
-  private countMaintenanceTasks(): { total: number; active: number } {
-    const doc = readJsonFile<{
-      tasks?: { active?: boolean; manual_only?: boolean }[];
-    }>(this.paths.maintenancePath, { tasks: [] });
-    const tasks = Array.isArray(doc.tasks) ? doc.tasks : [];
-    const active = tasks.filter((t) => t.active && !t.manual_only).length;
+  private async countMaintenanceTasks(): Promise<{
+    total: number;
+    active: number;
+  }> {
+    const tasks = await this.maintRepo.find();
+    const active = tasks.filter((t) => t.active && !t.manualOnly).length;
     return { total: tasks.length, active };
   }
 
