@@ -1,6 +1,6 @@
 {
   "name": "factorio-control-center",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Self-hosted web panel for managing dedicated Factorio servers.",
   "author": "Louis Fahrenheit",
   "private": true,
