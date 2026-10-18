@@ -175,7 +175,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
   }, [enabled, query.data, rows, selectedId, qc, selectInstance]);
 
   const quickAction = useCallback(
-    async (instanceId: string, action: 'start' | 'stop' | 'kill') => {
+    async (instanceId: string, action: 'start' | 'stop' | 'kill' | 'restart') => {
       const iid = String(instanceId || '').trim();
       if (!iid) return;
       const item = rows.find((x) => String(x.id) === iid);
@@ -185,7 +185,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         setInstanceMsg(localizeInstanceError('port_in_use', t), true);
         return;
       }
-      if (action === 'start' && item?.modJobRunning) {
+      if ((action === 'start' || action === 'restart') && item?.modJobRunning) {
         setInstanceMsg(t('mod_job_running_block_start'), true);
         return;
       }
@@ -216,9 +216,16 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       if (action === 'start') setStatusOverride(iid, 'starting', 9000);
       if (action === 'stop') setStatusOverride(iid, 'stopping', 9000);
       if (action === 'kill') setStatusOverride(iid, 'stopping', 7000);
+      if (action === 'restart') setStatusOverride(iid, 'starting', 12000);
 
       const endpoint =
-        action === 'start' ? '/api/server/start' : action === 'stop' ? '/api/server/stop' : '/api/server/kill';
+        action === 'start'
+          ? '/api/server/start'
+          : action === 'stop'
+            ? '/api/server/stop'
+            : action === 'restart'
+              ? '/api/server/restart'
+              : '/api/server/kill';
       const r = await api<{ ok?: boolean; error?: string }>(endpoint, {
         method: 'POST',
         body: JSON.stringify({ instance_id: iid }),
@@ -230,7 +237,9 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
           ? 'instances_quick_starting'
           : action === 'stop'
             ? 'instances_quick_stopping'
-            : 'instances_quick_killing';
+            : action === 'restart'
+              ? 'instances_quick_restarting'
+              : 'instances_quick_killing';
       setInstanceMsgTimed(t(msgKey, name), false, 5000);
       await reload();
       triggerBurstRefresh();

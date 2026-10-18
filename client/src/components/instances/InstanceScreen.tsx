@@ -1,5 +1,12 @@
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { isAdmin, userHasTab } from '../../hooks/useAuth';
 import type { useInstances } from '../../hooks/useInstances';
 import { useMaintenance } from '../../hooks/useMaintenance';
@@ -18,14 +25,26 @@ import type { AuthUser, InstanceItem } from '../../types/instance';
 import { InstanceAccessTab } from './InstanceAccessTab';
 import { WebAccessHelpModal } from './WebAccessHelpModal';
 import { SectionHelpModal } from '../SectionHelpModal';
-import { INSTANCES_HELP, MAINTENANCE_HELP } from '../../lib/instanceHelpContent';
+import {
+  INSTANCES_HELP,
+  MAINTENANCE_HELP,
+} from '../../lib/instanceHelpContent';
 import { SlidingTabIndicator } from '../SlidingTabHighlight';
 import { TabPanelsTransition } from '../TabPanelsTransition';
-import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
-import { useSlidingTabIndicator, TAB_INDICATOR_ID_ATTR } from '../../hooks/useSlidingTabIndicator';
+import {
+  TabLoadingPlaceholder,
+  tabInitialLoad,
+} from '../TabLoadingPlaceholder';
+import {
+  useSlidingTabIndicator,
+  TAB_INDICATOR_ID_ATTR,
+} from '../../hooks/useSlidingTabIndicator';
 import { InstanceBootstrapProgressModal } from './InstanceBootstrapProgressModal';
 import { InstanceCloneModal } from './InstanceCloneModal';
-import { InstanceDeleteModal, type InstanceDeleteOptions } from './InstanceDeleteModal';
+import {
+  InstanceDeleteModal,
+  type InstanceDeleteOptions,
+} from './InstanceDeleteModal';
 import { InstanceDeleteProgressModal } from './InstanceDeleteProgressModal';
 import { InstanceEditorModal } from './InstanceEditorModal';
 import { InstanceMaintenanceTab } from './InstanceMaintenanceTab';
@@ -35,8 +54,13 @@ import { InstanceRowMenu } from './InstanceRowMenu';
 import { InstanceSettingsTab } from './InstanceSettingsTab';
 import { InstancePublicTab } from './InstancePublicTab';
 import { InstanceTable } from './InstanceTable';
+import { InstanceCards } from './InstanceCards';
 import { InstanceServersBar } from './InstanceServersBar';
-import { InstanceServersEmpty, InstanceServersNoResults } from './InstanceServersEmpty';
+import {
+  InstanceServersEmpty,
+  InstanceServersNoResults,
+} from './InstanceServersEmpty';
+import { useUserServerListViewMode } from '../../hooks/useUserServerListViewMode';
 import { InstanceMonitoringTab } from './InstanceMonitoringTab';
 import { BackupTab } from './BackupTab';
 import { useBackup } from '../../hooks/useBackup';
@@ -49,7 +73,14 @@ import {
 
 type InstancesApi = ReturnType<typeof useInstances>;
 
-type InstanceTabKey = 'servers' | 'monitoring' | 'maintenance' | 'settings' | 'access' | 'public' | 'backup';
+type InstanceTabKey =
+  | 'servers'
+  | 'monitoring'
+  | 'maintenance'
+  | 'settings'
+  | 'access'
+  | 'public'
+  | 'backup';
 
 interface InstanceScreenProps {
   user: AuthUser | null;
@@ -59,11 +90,19 @@ interface InstanceScreenProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 0, t }: InstanceScreenProps) {
+export function InstanceScreen({
+  user,
+  instances,
+  onOpenPanel,
+  listEnterDelay = 0,
+  t,
+}: InstanceScreenProps) {
   const { reload: reloadLocale } = useLocale();
   const reduced = webEffectsReduced();
   const [activeTab, setActiveTab] = useState<InstanceTabKey>('servers');
-  const [maintInnerTab, setMaintInnerTab] = useState<'tasks' | 'reports'>('tasks');
+  const [maintInnerTab, setMaintInnerTab] = useState<'tasks' | 'reports'>(
+    'tasks',
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState<InstanceItem | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -83,6 +122,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
   const [serverSearch, setServerSearch] = useState('');
   const [sortColumn, setSortColumn] = useState<InstanceSortColumn>('name');
   const [sortAsc, setSortAsc] = useState(true);
+  const [viewMode, setViewMode] = useUserServerListViewMode();
   const tableWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,9 +135,16 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
 
   const tabAllowed = useCallback(
     (key: InstanceTabKey) => {
-      if (key === 'settings' || key === 'access' || key === 'public' || key === 'backup') return isAdmin(user);
+      if (
+        key === 'settings' ||
+        key === 'access' ||
+        key === 'public' ||
+        key === 'backup'
+      )
+        return isAdmin(user);
       if (key === 'maintenance') return userHasTab(user, 'maintenance');
-      if (key === 'monitoring') return userHasTab(user, 'monitoring') || isAdmin(user);
+      if (key === 'monitoring')
+        return userHasTab(user, 'monitoring') || isAdmin(user);
       return true;
     },
     [user],
@@ -113,7 +160,11 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
     setMenuOpen(false);
   }, []);
 
-  const onRowClick = (item: InstanceItem, rowEl: HTMLTableRowElement, ev: MouseEvent) => {
+  const onRowClick = (
+    item: InstanceItem,
+    rowEl: HTMLElement,
+    ev: MouseEvent,
+  ) => {
     ev.stopPropagation();
     const x = Number.isFinite(ev.clientX)
       ? Math.round(ev.clientX + 2)
@@ -158,9 +209,7 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
     const item = deleteItem;
     const opts = { ...deleteOptions };
     closeDelete();
-    instances
-      .removeInstance(item, opts)
-      .catch((e) => instances.handleError(e));
+    instances.removeInstance(item, opts).catch((e) => instances.handleError(e));
   };
 
   const openClone = (item: InstanceItem) => {
@@ -216,11 +265,13 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
   );
 
   const displayRows = useMemo(
-    () => sortInstanceRows(filteredRows, sortColumn, sortAsc, getEffectiveStatus),
+    () =>
+      sortInstanceRows(filteredRows, sortColumn, sortAsc, getEffectiveStatus),
     [filteredRows, sortColumn, sortAsc, getEffectiveStatus],
   );
 
-  const maintenanceEnabled = activeTab === 'maintenance' || activeTab === 'settings';
+  const maintenanceEnabled =
+    activeTab === 'maintenance' || activeTab === 'settings';
   const maintenance = useMaintenance(
     maintenanceEnabled,
     activeTab === 'maintenance',
@@ -233,7 +284,11 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
     selectedId || '',
     t,
   );
-  const programSettings = useProgramSettings(activeTab === 'settings' || activeTab === 'public', t, () => void reloadLocale());
+  const programSettings = useProgramSettings(
+    activeTab === 'settings' || activeTab === 'public',
+    t,
+    () => void reloadLocale(),
+  );
   const webUsers = useWebUsers(activeTab === 'access', t);
   const backupApi = useBackup(activeTab === 'backup', t);
 
@@ -268,7 +323,10 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
       initial={reduced ? false : 'hidden'}
       animate={reduced ? undefined : 'show'}
     >
-      <motion.div className="instance-screen__header" variants={reduced ? undefined : SCREEN_HEADER_VARIANTS}>
+      <motion.div
+        className="instance-screen__header"
+        variants={reduced ? undefined : SCREEN_HEADER_VARIANTS}
+      >
         <div
           ref={mainTabsRef}
           className="sub-tabs instance-screen__tabs"
@@ -279,7 +337,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
           <button
             type="button"
             className={
-              'sub-tabs__tab btn--with-icon' + (activeTab === 'servers' ? ' sub-tabs__tab--active' : '')
+              'sub-tabs__tab btn--with-icon' +
+              (activeTab === 'servers' ? ' sub-tabs__tab--active' : '')
             }
             id="instanceTabServersBtn"
             role="tab"
@@ -297,7 +356,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <button
               type="button"
               className={
-                'sub-tabs__tab btn--with-icon' + (activeTab === 'monitoring' ? ' sub-tabs__tab--active' : '')
+                'sub-tabs__tab btn--with-icon' +
+                (activeTab === 'monitoring' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabMonitoringBtn"
               role="tab"
@@ -316,7 +376,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <button
               type="button"
               className={
-                'sub-tabs__tab btn--with-icon' + (activeTab === 'maintenance' ? ' sub-tabs__tab--active' : '')
+                'sub-tabs__tab btn--with-icon' +
+                (activeTab === 'maintenance' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabMaintenanceBtn"
               role="tab"
@@ -335,7 +396,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <button
               type="button"
               className={
-                'sub-tabs__tab btn--with-icon' + (activeTab === 'public' ? ' sub-tabs__tab--active' : '')
+                'sub-tabs__tab btn--with-icon' +
+                (activeTab === 'public' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabPublicBtn"
               role="tab"
@@ -373,7 +435,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <button
               type="button"
               className={
-                'sub-tabs__tab btn--with-icon' + (activeTab === 'backup' ? ' sub-tabs__tab--active' : '')
+                'sub-tabs__tab btn--with-icon' +
+                (activeTab === 'backup' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabBackupBtn"
               role="tab"
@@ -391,7 +454,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             <button
               type="button"
               className={
-                'sub-tabs__tab btn--with-icon' + (activeTab === 'settings' ? ' sub-tabs__tab--active' : '')
+                'sub-tabs__tab btn--with-icon' +
+                (activeTab === 'settings' ? ' sub-tabs__tab--active' : '')
               }
               id="instanceTabSettingsBtn"
               role="tab"
@@ -408,7 +472,11 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
           )}
         </div>
         {activeTab === 'access' && (
-          <div className="instance-servers-toolbar" role="toolbar" aria-label={t('instances_tab_access')}>
+          <div
+            className="instance-servers-toolbar"
+            role="toolbar"
+            aria-label={t('instances_tab_access')}
+          >
             <div className="instance-servers-toolbar__segment">
               <button
                 type="button"
@@ -436,7 +504,11 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
           </div>
         )}
         {activeTab === 'maintenance' && (
-          <div className="instance-servers-toolbar" role="toolbar" aria-label={t('instances_tab_maintenance')}>
+          <div
+            className="instance-servers-toolbar"
+            role="toolbar"
+            aria-label={t('instances_tab_maintenance')}
+          >
             {maintInnerTab === 'tasks' && (
               <>
                 <div className="instance-servers-toolbar__segment">
@@ -484,12 +556,17 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
           </div>
         )}
         {activeTab === 'servers' && (
-          <div className="instance-servers-toolbar" role="toolbar" aria-label={t('instances_tab_servers')}>
+          <div
+            className="instance-servers-toolbar"
+            role="toolbar"
+            aria-label={t('instances_tab_servers')}
+          >
             <div className="instance-servers-toolbar__segment">
               <button
                 type="button"
                 className={
-                  'instance-servers-toolbar__btn' + (!hasServers ? ' btn--update-available' : '')
+                  'instance-servers-toolbar__btn' +
+                  (!hasServers ? ' btn--update-available' : '')
                 }
                 id="btnInstanceAdd"
                 data-i18n-title="instances_add_btn"
@@ -565,8 +642,14 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
         )}
       </motion.div>
 
-      <motion.div className="panel__body" variants={reduced ? undefined : SCREEN_BODY_VARIANTS}>
-        <TabPanelsTransition activeKey={activeTab} stageClassName="tab-panels__stage instance-screen__tab-stage">
+      <motion.div
+        className="panel__body"
+        variants={reduced ? undefined : SCREEN_BODY_VARIANTS}
+      >
+        <TabPanelsTransition
+          activeKey={activeTab}
+          stageClassName="tab-panels__stage instance-screen__tab-stage"
+        >
           {activeTab === 'servers' && (
             <div
               id="instanceTabServers"
@@ -574,9 +657,15 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
               role="tabpanel"
             >
               {tabInitialLoad(instancesLoading, rows.length > 0) ? (
-                <TabLoadingPlaceholder variant="table" label={t('tab_data_loading')} />
+                <TabLoadingPlaceholder
+                  variant="table"
+                  label={t('tab_data_loading')}
+                />
               ) : !rows.length ? (
-                <InstanceServersEmpty onAdd={() => instanceEditor.openAdd()} t={t} />
+                <InstanceServersEmpty
+                  onAdd={() => instanceEditor.openAdd()}
+                  t={t}
+                />
               ) : (
                 <>
                   <InstanceServersBar
@@ -585,6 +674,8 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
                     onRefresh={() => void instances.reload().catch(handleError)}
                     shownCount={displayRows.length}
                     totalCount={rows.length}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                     t={t}
                   />
                   {!displayRows.length ? (
@@ -593,13 +684,41 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
                       onClear={() => setServerSearch('')}
                       t={t}
                     />
+                  ) : viewMode === 'cards' ? (
+                    <InstanceCards
+                      rows={displayRows}
+                      enterKey={serversListEnterKey}
+                      listEnterDelay={listEnterDelay}
+                      getEffectiveStatus={getEffectiveStatus}
+                      selectedRowId={
+                        menuOpen && menuItem ? String(menuItem.id) : ''
+                      }
+                      onOpenPanel={onOpenPanel}
+                      onStart={(it) => {
+                        quickAction(String(it.id), 'start').catch(handleError);
+                      }}
+                      onStop={(it) => {
+                        quickAction(String(it.id), 'stop').catch(handleError);
+                      }}
+                      onRestart={(it) => {
+                        quickAction(String(it.id), 'restart').catch(handleError);
+                      }}
+                      onEdit={(it) => {
+                        instanceEditor.openEdit(it);
+                      }}
+                      onRowClick={onRowClick}
+                      cardsWrapRef={tableWrapRef}
+                      t={t}
+                    />
                   ) : (
                     <InstanceTable
                       rows={displayRows}
                       enterKey={serversListEnterKey}
                       listEnterDelay={listEnterDelay}
                       getEffectiveStatus={getEffectiveStatus}
-                      selectedRowId={menuOpen && menuItem ? String(menuItem.id) : ''}
+                      selectedRowId={
+                        menuOpen && menuItem ? String(menuItem.id) : ''
+                      }
                       sortColumn={sortColumn}
                       sortAsc={sortAsc}
                       onSortColumn={onSortColumn}
@@ -628,15 +747,24 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
             />
           )}
           {activeTab === 'settings' && (
-            <InstanceSettingsTab settings={programSettings} instances={rows} t={t} />
+            <InstanceSettingsTab
+              settings={programSettings}
+              instances={rows}
+              t={t}
+            />
           )}
-          {activeTab === 'access' && <InstanceAccessTab webUsers={webUsers} t={t} />}
+          {activeTab === 'access' && (
+            <InstanceAccessTab webUsers={webUsers} t={t} />
+          )}
           {activeTab === 'public' && (
-            <InstancePublicTab instances={rows} instancesApi={instances} settings={programSettings} t={t} />
+            <InstancePublicTab
+              instances={rows}
+              instancesApi={instances}
+              settings={programSettings}
+              t={t}
+            />
           )}
-          {activeTab === 'backup' && (
-            <BackupTab backup={backupApi} t={t} />
-          )}
+          {activeTab === 'backup' && <BackupTab backup={backupApi} t={t} />}
         </TabPanelsTransition>
       </motion.div>
 
@@ -706,7 +834,9 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
         open={deleteOpen}
         item={deleteItem}
         options={deleteOptions}
-        onOptionsChange={(patch) => setDeleteOptions((o) => ({ ...o, ...patch }))}
+        onOptionsChange={(patch) =>
+          setDeleteOptions((o) => ({ ...o, ...patch }))
+        }
         onConfirm={confirmDelete}
         onClose={closeDelete}
         t={t}
@@ -716,7 +846,11 @@ export function InstanceScreen({ user, instances, onOpenPanel, listEnterDelay = 
         serverName={instances.deleteProgressName}
         t={t}
       />
-      <WebAccessHelpModal open={accessHelpOpen} onClose={() => setAccessHelpOpen(false)} t={t} />
+      <WebAccessHelpModal
+        open={accessHelpOpen}
+        onClose={() => setAccessHelpOpen(false)}
+        t={t}
+      />
       <SectionHelpModal
         open={serversHelpOpen}
         onClose={() => setServersHelpOpen(false)}

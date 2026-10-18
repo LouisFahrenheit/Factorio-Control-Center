@@ -3,6 +3,9 @@ const TOAST_SEC_MAX = 20;
 const TOAST_STORAGE_KEY = 'fcc_user_toast_duration_sec';
 const SERVER_LIST_MOD_BADGES_KEY = 'fcc_user_show_server_list_mod_badges';
 const SERVER_LIST_SA_BADGE_KEY = 'fcc_user_show_server_list_sa_badge';
+const SERVER_LIST_VIEW_MODE_KEY = 'fcc_user_server_list_view_mode';
+
+export type ServerListViewMode = 'list' | 'cards';
 
 export const USER_PREFS_CHANGED_EVENT = 'fcc-user-prefs-changed';
 
@@ -38,7 +41,10 @@ export function getToastAutoCloseMs(): number {
 
 export function setUserToastDurationSec(raw: string): void {
   try {
-    localStorage.setItem(TOAST_STORAGE_KEY, String(clampToastSec(raw, defaultToastSec)));
+    localStorage.setItem(
+      TOAST_STORAGE_KEY,
+      String(clampToastSec(raw, defaultToastSec)),
+    );
   } catch {
     /* ignore */
   }
@@ -47,7 +53,8 @@ export function setUserToastDurationSec(raw: string): void {
 export function readUserToastDurationSec(): string {
   try {
     const raw = localStorage.getItem(TOAST_STORAGE_KEY);
-    if (raw != null && raw !== '') return String(clampToastSec(raw, defaultToastSec));
+    if (raw != null && raw !== '')
+      return String(clampToastSec(raw, defaultToastSec));
   } catch {
     /* ignore */
   }
@@ -82,6 +89,27 @@ export function readUserShowServerListSpaceAgeBadge(): boolean {
 export function setUserShowServerListSpaceAgeBadge(show: boolean): void {
   try {
     localStorage.setItem(SERVER_LIST_SA_BADGE_KEY, show ? '1' : '0');
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readUserServerListViewMode(): ServerListViewMode {
+  try {
+    if (typeof localStorage === 'undefined') return 'list';
+    const raw = localStorage.getItem(SERVER_LIST_VIEW_MODE_KEY);
+    if (raw === 'cards' || raw === 'list') return raw;
+  } catch {
+    /* ignore */
+  }
+  return 'list';
+}
+
+export function setUserServerListViewMode(mode: ServerListViewMode): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(SERVER_LIST_VIEW_MODE_KEY, mode);
     dispatchUserPrefsChanged();
   } catch {
     /* ignore */
