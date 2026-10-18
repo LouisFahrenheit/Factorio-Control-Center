@@ -196,27 +196,31 @@ export class InstancesService implements OnModuleInit {
         item.rconPort = this.pickFreePort(requestedRcon + 1, used.rcon);
       }
     }
-    this.initializeServerFilesIfNeeded(serverPath);
+    this.initializeServerFilesIfNeeded(serverPath, item.name);
     st.items.push(item);
     if (!st.selectedId) st.selectedId = id;
     await this.save(st);
     return { ok: true, item };
   }
 
-  private initializeServerFilesIfNeeded(serverPath: string): void {
+  private initializeServerFilesIfNeeded(
+    serverPath: string,
+    name?: string,
+  ): void {
     const init = initializeInstanceServerFiles(
       serverPath,
       ensureServerSettingsOptionsFromWebPanel(this.config.webPanel),
       'if_needed',
     );
+    const label = name ? `"${name}" (${serverPath})` : `(${serverPath})`;
     if (init.serverSettings.attempted && !init.serverSettings.ok) {
       this.log.warn(
-        `Instance server settings init failed (${serverPath}): ${init.serverSettings.error || 'unknown'}`,
+        `Instance server settings init failed ${label}: ${init.serverSettings.error || 'unknown'}`,
       );
     }
     if (init.mods.attempted && !init.mods.ok) {
       this.log.warn(
-        `Instance mods init failed (${serverPath}): ${init.mods.error || 'unknown'}`,
+        `Instance mods init failed ${label}: ${init.mods.error || 'unknown'}`,
       );
     }
   }

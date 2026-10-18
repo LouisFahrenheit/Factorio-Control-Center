@@ -51,6 +51,15 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
     private readonly notifications: NotificationsService,
   ) {}
 
+  private instanceLabel(id: string): string {
+    const item = this.instances.getById(id);
+    const name = item?.name?.trim();
+    if (name && name !== id) {
+      return `"${name}" (${id})`;
+    }
+    return id;
+  }
+
   onModuleInit() {
     // Collect metrics every 60 seconds
     this.timer = setInterval(() => void this.collect(), 60000);
@@ -206,9 +215,10 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
               const st = statSync(savePath);
               saveSize = st.size;
             }
-          } catch (err) {
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
             this.log.debug(
-              `Failed to get save size for instance ${id}: ${err}`,
+              `Failed to get save size for instance ${this.instanceLabel(id)}: ${msg}`,
             );
           }
 
@@ -223,9 +233,10 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
             spm,
           });
           records.push(record);
-        } catch (err) {
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
           this.log.debug(
-            `Failed to collect metrics for instance ${id} (PID ${pid}): ${err}`,
+            `Failed to collect metrics for instance ${this.instanceLabel(id)} (PID ${pid}): ${msg}`,
           );
         }
       }

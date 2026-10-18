@@ -56,7 +56,12 @@ export class InstanceAutostartService {
   private serverLabel(
     item: { name?: string; id?: string } | undefined,
   ): string {
-    return String(item?.name || item?.id || '?').trim() || '?';
+    const name = String(item?.name || '').trim();
+    const id = String(item?.id || '').trim();
+    if (name && id && name !== id) {
+      return `"${name}" (${id})`;
+    }
+    return name || id || '?';
   }
 
   async maybeAutostart(instanceId: string, attempt: number): Promise<void> {

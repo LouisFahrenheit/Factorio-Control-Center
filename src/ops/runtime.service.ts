@@ -174,7 +174,9 @@ export class RuntimeService implements OnModuleDestroy {
           rt.stopping = true;
           rt.inGame = false;
           await this.rcon.run(ep.host, ep.port, ep.password, '/quit', 10000);
-          this.log.log(`[${rt.instanceId}] Graceful /quit sent`);
+          this.log.log(
+            `[${this.instanceLabel(rt.instanceId)}] Graceful /quit sent`,
+          );
         } catch {
           // RCON failed or server already closing — fall back to SIGTERM
           try {
@@ -198,8 +200,11 @@ export class RuntimeService implements OnModuleDestroy {
 
     const stuck = stillRunning();
     if (stuck.length > 0) {
+      const stuckNames = stuck
+        .map((rt) => this.instanceLabel(rt.instanceId))
+        .join(', ');
       this.log.warn(
-        `${stuck.length} instance(s) did not stop in time — force killing`,
+        `${stuck.length} instance(s) [${stuckNames}] did not stop in time — force killing`,
       );
       await Promise.allSettled(stuck.map((rt) => this.forceKillProc(rt)));
     } else {
@@ -228,11 +233,19 @@ export class RuntimeService implements OnModuleDestroy {
     return !this.isRunning(instanceId);
   }
 
+  private instanceLabel(id: string, name?: string): string {
+    const trimmed = (name || this.instances.getById(id)?.name || '').trim();
+    if (trimmed && trimmed !== id) {
+      return `"${trimmed}" (${id})`;
+    }
+    return id;
+  }
+
   async start(item: InstanceItem): Promise<{ ok: boolean; error?: string }> {
     const iid = item.id;
     if (this.isRunning(iid)) return { ok: false, error: 'already_busy' };
 
-    this.log.log(`Starting instance ${iid}`);
+    this.log.log(`Starting instance ${this.instanceLabel(iid, item.name)}`);
 
     const pm = new PathManager(item.serverPath);
     if (!existsSync(pm.serverSettings)) {
@@ -254,7 +267,9 @@ export class RuntimeService implements OnModuleDestroy {
 
     const exe = pm.findFactorioExe();
     if (!exe) return { ok: false, error: 'no_factorio_exe' };
-    this.log.debug(`[${iid}] Selected executable: ${exe}`);
+    this.log.debug(
+      `[${this.instanceLabel(iid, item.name)}] Selected executable: ${exe}`,
+    );
 
     const ip = (item.ip || '0.0.0.0').trim();
     const port = String(item.port || '34197').trim();
@@ -435,7 +450,7 @@ export class RuntimeService implements OnModuleDestroy {
   async stop(
     instanceId: string,
   ): Promise<{ ok: boolean; error?: string; forced_kill?: boolean }> {
-    this.log.log(`Stopping instance ${instanceId}`);
+    this.log.log(`Stopping instance ${this.instanceLabel(instanceId)}`);
     const rt = this.runtimes.get(instanceId);
     const ep = this.rconEndpoint(instanceId);
     if (!ep) {
@@ -458,6 +473,7 @@ export class RuntimeService implements OnModuleDestroy {
   }
 
   kill(instanceId: string): { ok: boolean; error?: string } {
+    this.log.log(`Killing instance ${this.instanceLabel(instanceId)}`);
     const rt = this.runtimes.get(instanceId);
     if (!rt?.proc || rt.proc.exitCode !== null)
       return { ok: false, error: 'not_running' };
@@ -660,7 +676,7 @@ export class RuntimeService implements OnModuleDestroy {
     if (!pids.size) return;
 
     this.log.warn(
-      `[${instanceId}] Orphan process detected on ports ${gamePort}/${rconPort}` +
+      `[${this.instanceLabel(instanceId)}] Orphan process detected on ports ${gamePort}/${rconPort}` +
         ` (PID ${[...pids].join(', ')}) — cleaning up before start`,
     );
 
