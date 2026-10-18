@@ -38,17 +38,28 @@ function SettingNameLabel({
   settingKey: string;
   description: string;
 }) {
-  const showTechnicalKey = displayName.trim().toLowerCase() === settingKey.trim().toLowerCase();
-  const titleParts = [description.trim(), !showTechnicalKey ? settingKey : ''].filter(Boolean);
+  const tooltip = [description.trim(), settingKey].filter(Boolean).join('\n\n');
   return (
-    <span className="mod-settings-row__name" title={titleParts.length ? titleParts.join('\n\n') : undefined}>
-      {displayName}
-      {showTechnicalKey ? <span className="mod-settings-row__key">{settingKey}</span> : null}
-    </span>
+    <div className="mod-settings-row__info">
+      <div className="mod-settings-row__name" title={tooltip}>
+        {displayName}
+      </div>
+      {description ? (
+        <div className="mod-settings-row__desc">{description}</div>
+      ) : null}
+    </div>
   );
 }
 
-export function SettingField({ section, settingKey, entry, meta, readOnly, t, onChange }: SettingFieldProps) {
+export function SettingField({
+  section,
+  settingKey,
+  entry,
+  meta,
+  readOnly,
+  t,
+  onChange,
+}: SettingFieldProps) {
   const displayName = meta?.display_name || settingKey;
   const description = meta?.description || '';
   const { kind, value } = useMemo(() => inferSettingValueKind(entry), [entry]);
@@ -65,28 +76,34 @@ export function SettingField({ section, settingKey, entry, meta, readOnly, t, on
     return choices;
   }, [entry, meta?.allowed_values]);
 
+  const setValue = (nextValue: unknown) => {
+    onChange(section, settingKey, { value: nextValue });
+  };
+
   if (allowedChoices) {
     const current = isSimpleValueEntry(entry) ? entry.value : undefined;
     return (
-      <label className="mod-settings-row">
+      <div className="mod-settings-row">
         <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-        <select
-          className="input mod-settings-row__input"
-          disabled={readOnly}
-          value={choicesIndexValue(allowedChoices, current)}
-          onChange={(e) => {
-            const idx = parseInt(e.target.value, 10);
-            const picked = allowedChoices[idx];
-            if (picked) onChange(section, settingKey, { value: picked.value });
-          }}
-        >
-          {allowedChoices.map((choice, idx) => (
-            <option key={idx} value={String(idx)}>
-              {choiceLabelText(choice.label, t)}
-            </option>
-          ))}
-        </select>
-      </label>
+        <div className="mod-settings-row__control">
+          <select
+            className="input mod-settings-row__input"
+            disabled={readOnly}
+            value={choicesIndexValue(allowedChoices, current)}
+            onChange={(e) => {
+              const idx = parseInt(e.target.value, 10);
+              const picked = allowedChoices[idx];
+              if (picked) setValue(picked.value);
+            }}
+          >
+            {allowedChoices.map((choice, idx) => (
+              <option key={idx} value={String(idx)}>
+                {choiceLabelText(choice.label, t)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     );
   }
 
@@ -95,70 +112,75 @@ export function SettingField({ section, settingKey, entry, meta, readOnly, t, on
     return (
       <div className="mod-settings-row mod-settings-row--json">
         <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-        <textarea
-          className="input mod-settings-row__json"
-          rows={4}
-          readOnly={readOnly}
-          value={text}
-          onChange={(e) => {
-            setJsonDraft(e.target.value);
-            setJsonError('');
-          }}
-          onBlur={() => {
-            if (readOnly) return;
-            const raw = (jsonDraft || text).trim();
-            if (!raw) return;
-            try {
-              onChange(section, settingKey, JSON.parse(raw));
-              setJsonDraft('');
+        <div className="mod-settings-row__control">
+          <textarea
+            className="input mod-settings-row__json"
+            rows={4}
+            readOnly={readOnly}
+            value={text}
+            onChange={(e) => {
+              setJsonDraft(e.target.value);
               setJsonError('');
-            } catch (e) {
-              setJsonError(e instanceof Error ? e.message : String(e));
-            }
-          }}
-        />
+            }}
+            onBlur={() => {
+              if (readOnly) return;
+              const raw = (jsonDraft || text).trim();
+              if (!raw) return;
+              try {
+                onChange(section, settingKey, JSON.parse(raw));
+                setJsonDraft('');
+                setJsonError('');
+              } catch (e) {
+                setJsonError(e instanceof Error ? e.message : String(e));
+              }
+            }}
+          />
+        </div>
         {jsonError ? <div className="mod-settings-row__error">{jsonError}</div> : null}
       </div>
     );
   }
 
-  const setValue = (nextValue: unknown) => {
-    onChange(section, settingKey, { value: nextValue });
-  };
-
   if (kind === 'bool') {
     const inputId = `modSettingBool-${section}-${settingKey}`;
     return (
-      <FccSwitch
-        id={inputId}
+      <div
         className="mod-settings-row mod-settings-row--bool"
-        labelClassName="mod-settings-row__bool-label"
-        checked={!!value}
-        disabled={readOnly}
-        onChange={setValue}
-        label={<SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />}
-      />
+        onClick={() => !readOnly && setValue(!value)}
+      >
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <div className="mod-settings-row__control" onClick={(e) => e.stopPropagation()}>
+          <FccSwitch
+            id={inputId}
+            checked={!!value}
+            disabled={readOnly}
+            onChange={setValue}
+          />
+        </div>
+      </div>
     );
   }
 
   if (kind === 'uint64') {
     const n = Number((value as { v?: number })?.v ?? 0);
     return (
-      <label className="mod-settings-row">
+      <div className="mod-settings-row">
         <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-        <input
-          type="number"
-          className="input input--narrow mod-settings-row__input"
-          min={0}
-          step={1}
-          disabled={readOnly}
-          value={Number.isFinite(n) ? String(n) : '0'}
-          onChange={(e) => {
-            const parsed = parseInt(e.target.value, 10);
-            setValue({ '!pt': 'uint64', v: Number.isFinite(parsed) ? parsed : 0 });
-          }}
-        />
-      </label>
+        <div className="mod-settings-row__control">
+          <input
+            type="number"
+            className="input input--narrow mod-settings-row__input"
+            min={0}
+            step={1}
+            disabled={readOnly}
+            value={Number.isFinite(n) ? String(n) : '0'}
+            onChange={(e) => {
+              const parsed = parseInt(e.target.value, 10);
+              setValue({ '!pt': 'uint64', v: Number.isFinite(parsed) ? parsed : 0 });
+            }}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -167,28 +189,30 @@ export function SettingField({ section, settingKey, entry, meta, readOnly, t, on
     return (
       <div className="mod-settings-row mod-settings-row--color">
         <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-        <div className="mod-settings-row__color">
-          <input
-            type="color"
-            disabled={readOnly}
-            value={rgbaToHex(rgba)}
-            onChange={(e) => setValue(hexToRgba(e.target.value, rgba.a))}
-            title={t('mod_settings_color_pick')}
-          />
-          <input
-            type="number"
-            className="input input--narrow"
-            min={0}
-            max={1}
-            step={0.01}
-            disabled={readOnly}
-            value={rgba.a}
-            onChange={(e) => {
-              const a = parseFloat(e.target.value);
-              setValue({ ...rgba, a: Number.isFinite(a) ? a : rgba.a });
-            }}
-            title={t('mod_settings_alpha_label')}
-          />
+        <div className="mod-settings-row__control">
+          <div className="mod-settings-row__color">
+            <input
+              type="color"
+              disabled={readOnly}
+              value={rgbaToHex(rgba)}
+              onChange={(e) => setValue(hexToRgba(e.target.value, rgba.a))}
+              title={t('mod_settings_color_pick')}
+            />
+            <input
+              type="number"
+              className="input input--narrow"
+              min={0}
+              max={1}
+              step={0.01}
+              disabled={readOnly}
+              value={rgba.a}
+              onChange={(e) => {
+                const a = parseFloat(e.target.value);
+                setValue({ ...rgba, a: Number.isFinite(a) ? a : rgba.a });
+              }}
+              title={t('mod_settings_alpha_label')}
+            />
+          </div>
         </div>
       </div>
     );
@@ -199,28 +223,30 @@ export function SettingField({ section, settingKey, entry, meta, readOnly, t, on
     return (
       <div className="mod-settings-row mod-settings-row--json">
         <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-        <textarea
-          className="input mod-settings-row__json"
-          rows={3}
-          readOnly={readOnly}
-          value={text}
-          onChange={(e) => {
-            setJsonDraft(e.target.value);
-            setJsonError('');
-          }}
-          onBlur={() => {
-            if (readOnly) return;
-            const raw = (jsonDraft || text).trim();
-            if (!raw) return;
-            try {
-              setValue(JSON.parse(raw));
-              setJsonDraft('');
+        <div className="mod-settings-row__control">
+          <textarea
+            className="input mod-settings-row__json"
+            rows={3}
+            readOnly={readOnly}
+            value={text}
+            onChange={(e) => {
+              setJsonDraft(e.target.value);
               setJsonError('');
-            } catch (e) {
-              setJsonError(e instanceof Error ? e.message : String(e));
-            }
-          }}
-        />
+            }}
+            onBlur={() => {
+              if (readOnly) return;
+              const raw = (jsonDraft || text).trim();
+              if (!raw) return;
+              try {
+                setValue(JSON.parse(raw));
+                setJsonDraft('');
+                setJsonError('');
+              } catch (e) {
+                setJsonError(e instanceof Error ? e.message : String(e));
+              }
+            }}
+          />
+        </div>
         {jsonError ? <div className="mod-settings-row__error">{jsonError}</div> : null}
       </div>
     );
@@ -229,30 +255,32 @@ export function SettingField({ section, settingKey, entry, meta, readOnly, t, on
   const inputType = kind === 'int' || kind === 'float' ? 'number' : 'text';
   const inputValue = value == null ? '' : String(value);
   return (
-    <label className="mod-settings-row">
+    <div className="mod-settings-row">
       <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
-      <input
-        type={inputType}
-        className="input mod-settings-row__input"
-        step={kind === 'float' ? 'any' : '1'}
-        disabled={readOnly}
-        value={inputValue}
-        onChange={(e) => {
-          const raw = e.target.value;
-          if (kind === 'int') {
-            const parsed = parseInt(raw, 10);
-            setValue(Number.isFinite(parsed) ? parsed : 0);
-            return;
-          }
-          if (kind === 'float') {
-            const parsed = parseFloat(raw);
-            setValue(Number.isFinite(parsed) ? parsed : 0);
-            return;
-          }
-          setValue(raw);
-        }}
-      />
-    </label>
+      <div className="mod-settings-row__control">
+        <input
+          type={inputType}
+          className="input mod-settings-row__input"
+          step={kind === 'float' ? 'any' : '1'}
+          disabled={readOnly}
+          value={inputValue}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (kind === 'int') {
+              const parsed = parseInt(raw, 10);
+              setValue(Number.isFinite(parsed) ? parsed : 0);
+              return;
+            }
+            if (kind === 'float') {
+              const parsed = parseFloat(raw);
+              setValue(Number.isFinite(parsed) ? parsed : 0);
+              return;
+            }
+            setValue(raw);
+          }}
+        />
+      </div>
+    </div>
   );
 }
 

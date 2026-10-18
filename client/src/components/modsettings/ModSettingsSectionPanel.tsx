@@ -54,7 +54,10 @@ export function ModSettingsSectionPanel({
     return (
       <div className="mod-settings-page__empty">
         <AppIcon name={filtered ? 'search' : 'edit_document'} size={30} className="mod-settings-page__empty-icon" />
-        <span>{t(filtered ? 'mod_settings_no_results' : 'mod_settings_empty')}</span>
+        <span className="mod-settings-page__empty-title">{t(filtered ? 'mod_settings_no_results' : 'mod_settings_empty')}</span>
+        {!filtered ? (
+          <p className="mod-settings-page__empty-hint">{t('mod_settings_startup_required_hint')}</p>
+        ) : null}
       </div>
     );
   }
@@ -64,6 +67,7 @@ export function ModSettingsSectionPanel({
       {visibleGroups.map(({ groupId, visibleKeys }) => (
         <section key={groupId} className="mod-settings-group">
           <header className="mod-settings-group__header">
+            <AppIcon name="folder_zip" size={18} className="mod-settings-group__icon" />
             <h3 className="mod-settings-group__title">{groupTitle(groupId, groupTitles, t)}</h3>
             <span className="mod-settings-group__count">{visibleKeys.length}</span>
           </header>

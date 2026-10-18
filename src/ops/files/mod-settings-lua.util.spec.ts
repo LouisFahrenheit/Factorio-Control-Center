@@ -87,6 +87,36 @@ describe('mod-settings-lua.util', () => {
       expect(names.has('enable-extra-ore')).toBe(true);
     });
 
+    it('finds consecutive settings sharing similar prefix without regex bleeding', () => {
+      const lua = `
+        data:extend({
+          {
+            type = "bool-setting",
+            name = "enable_alert_destroyed_replacement",
+            setting_type = "startup",
+            default_value = true,
+          },
+          {
+            type = "bool-setting",
+            name = "enable_repair_sound_replacement",
+            setting_type = "startup",
+            default_value = true,
+          },
+          {
+            type = "string-setting",
+            name = "repair_sound_variant",
+            setting_type = "startup",
+            default_value = "variant1",
+          }
+        })
+      `;
+
+      const names = extractSettingNamesFromLuaText(lua);
+      expect(names.has('enable_alert_destroyed_replacement')).toBe(true);
+      expect(names.has('enable_repair_sound_replacement')).toBe(true);
+      expect(names.has('repair_sound_variant')).toBe(true);
+    });
+
     it('ignores non-setting entries', () => {
       const lua = `
         {
@@ -287,6 +317,7 @@ describe('mod-settings-lua.util', () => {
     it('returns true for root settings files', () => {
       expect(isSettingsLuaMember('settings.lua')).toBe(true);
       expect(isSettingsLuaMember('settings-updates.lua')).toBe(true);
+      expect(isSettingsLuaMember('settings-final-fixes.lua')).toBe(true);
       expect(isSettingsLuaMember('sub/SETTINGS.LUA')).toBe(true);
     });
 

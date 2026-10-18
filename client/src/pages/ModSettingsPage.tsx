@@ -43,6 +43,13 @@ export default function ModSettingsPage() {
   );
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('fcc_mod_settings_hint_dismissed') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const statusQuery = usePanelStatus(ready && !!selectedId, 'mods', selectedId);
   const status = statusQuery.data;
@@ -165,7 +172,10 @@ export default function ModSettingsPage() {
                 </div>
               </header>
 
-              {serverBusy || modSettings.dirty || (!modSettings.schemaLoading && modSettings.schemaCached) ? (
+              {serverBusy ||
+              modSettings.dirty ||
+              (!modSettings.schemaLoading && modSettings.schemaCached) ||
+              !hintDismissed ? (
                 <div className="mod-settings-page__banners">
                   {serverBusy ? (
                     <p className="mod-settings-page__banner mod-settings-page__banner--warn">
@@ -184,6 +194,27 @@ export default function ModSettingsPage() {
                       <AppIcon name="info" size={16} />
                       <span>{t('mod_settings_schema_cached_hint')}</span>
                     </p>
+                  ) : null}
+                  {!hintDismissed ? (
+                    <div className="mod-settings-page__banner mod-settings-page__banner--info">
+                      <AppIcon name="info" size={16} />
+                      <span>{t('mod_settings_startup_required_hint')}</span>
+                      <button
+                        type="button"
+                        className="mod-settings-page__banner-close"
+                        aria-label={t('close')}
+                        onClick={() => {
+                          setHintDismissed(true);
+                          try {
+                            localStorage.setItem('fcc_mod_settings_hint_dismissed', '1');
+                          } catch {
+                            /* ignore */
+                          }
+                        }}
+                      >
+                        <AppIcon name="close" size={14} />
+                      </button>
+                    </div>
                   ) : null}
                 </div>
               ) : null}

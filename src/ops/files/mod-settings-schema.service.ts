@@ -473,7 +473,11 @@ export class ModSettingsSchemaService {
       seen.add(fp);
       return fp;
     };
-    for (const fname of ['settings.lua', 'settings-updates.lua']) {
+    for (const fname of [
+      'settings.lua',
+      'settings-updates.lua',
+      'settings-final-fixes.lua',
+    ]) {
       const got = tryEmit(join(modRoot, fname));
       if (got) yield got;
     }
@@ -488,7 +492,11 @@ export class ModSettingsSchemaService {
       for (const sub of readdirSync(modRoot, { withFileTypes: true })) {
         if (!sub.isDirectory() || sub.name.startsWith('.')) continue;
         const subRoot = join(modRoot, sub.name);
-        for (const fname of ['settings.lua', 'settings-updates.lua']) {
+        for (const fname of [
+          'settings.lua',
+          'settings-updates.lua',
+          'settings-final-fixes.lua',
+        ]) {
           const got = tryEmit(join(subRoot, fname));
           if (got) yield got;
         }
@@ -538,10 +546,15 @@ export class ModSettingsSchemaService {
       const byPrefix = this.settingGroupByKeyPrefixPackages(
         settingKey,
         modsDir,
+        modsSorted,
       );
       if (byPrefix) return byPrefix;
     }
-    const under = this.settingGroupUnderscorePrefix(settingKey);
+    const under = this.settingGroupUnderscorePrefix(
+      settingKey,
+      modsDir,
+      modsSorted,
+    );
     if (under) return under;
     return OTHER_GROUP;
   }
@@ -549,6 +562,7 @@ export class ModSettingsSchemaService {
   private settingGroupByKeyPrefixPackages(
     settingKey: string,
     modsDir: string,
+    modsSorted: string[],
   ): string | null {
     const parts = settingKey.split('-');
     if (!parts.length || !parts[0]?.trim()) return null;
@@ -556,14 +570,32 @@ export class ModSettingsSchemaService {
       const cand = parts.slice(0, end).join('-');
       if (!cand) continue;
       if (modPackagePathsForInternalName(modsDir, cand).length) return cand;
+      const foundMod = modsSorted.find(
+        (m) => m.toLowerCase() === cand.toLowerCase(),
+      );
+      if (foundMod) return foundMod;
     }
-    return parts[0] || null;
+    return null;
   }
 
-  private settingGroupUnderscorePrefix(settingKey: string): string | null {
-    if (settingKey.includes('-') || !settingKey.includes('_')) return null;
-    const pre = settingKey.split('_', 1)[0]?.trim();
-    return pre || null;
+  private settingGroupUnderscorePrefix(
+    settingKey: string,
+    modsDir: string,
+    modsSorted: string[],
+  ): string | null {
+    if (!settingKey.includes('_')) return null;
+    const parts = settingKey.split('_');
+    if (!parts.length || !parts[0]?.trim()) return null;
+    for (let end = parts.length; end > 0; end -= 1) {
+      const cand = parts.slice(0, end).join('_');
+      if (!cand) continue;
+      if (modPackagePathsForInternalName(modsDir, cand).length) return cand;
+      const foundMod = modsSorted.find(
+        (m) => m.toLowerCase() === cand.toLowerCase(),
+      );
+      if (foundMod) return foundMod;
+    }
+    return null;
   }
 
   private resolveLocRef(

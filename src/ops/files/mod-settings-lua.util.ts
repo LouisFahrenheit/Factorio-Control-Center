@@ -1,6 +1,3 @@
-const MOD_LUA_SETTING_TYPE_RE = /type\s*=\s*["'](\w+-setting)["']/gi;
-const ALLOWED_VALUES_START_RE = /allowed_values\s*=\s*\{/gi;
-
 export interface LuaSettingUiRefs {
   titles: Record<string, string>;
   descriptions: Record<string, string>;
@@ -59,60 +56,129 @@ export function parseLuaListLiteralInner(inner: string): unknown[] {
   return items;
 }
 
+function findEnclosingTable(text: string, typeIdx: number): string | null {
+  let openBrace = -1;
+  let depth = 0;
+  for (let i = typeIdx; i >= 0; i -= 1) {
+    const c = text[i];
+    if (c === '}') depth += 1;
+    else if (c === '{') {
+      if (depth === 0) {
+        openBrace = i;
+        break;
+      }
+      depth -= 1;
+    }
+  }
+  if (openBrace === -1) return null;
+
+  let closeBrace = -1;
+  depth = 0;
+  const n = text.length;
+  for (let i = openBrace; i < n; i += 1) {
+    if (text[i] === '"' || text[i] === "'") {
+      const q = text[i];
+      i += 1;
+      while (i < n) {
+        if (text[i] === '\\' && i + 1 < n) {
+          i += 2;
+          continue;
+        }
+        if (text[i] === q) break;
+        i += 1;
+      }
+      continue;
+    }
+    if (text[i] === '-' && text[i + 1] === '-') {
+      if (text.slice(i, i + 4) === '--[[') {
+        const end = text.indexOf(']]', i + 4);
+        i = end === -1 ? n : end + 1;
+        continue;
+      }
+      const nextLine = text.indexOf('\n', i + 2);
+      i = nextLine === -1 ? n : nextLine;
+      continue;
+    }
+    if (text[i] === '{') depth += 1;
+    else if (text[i] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        closeBrace = i;
+        break;
+      }
+    }
+  }
+  if (closeBrace === -1) return null;
+  return text.slice(openBrace, closeBrace + 1);
+}
+
+function extractSettingTables(text: string): { name: string; block: string }[] {
+  const tables: { name: string; block: string }[] = [];
+  const seenNames = new Set<string>();
+  const searchRegex = /type\s*=\s*["'](\w+-setting)["']/g;
+  let match: RegExpExecArray | null;
+  while ((match = searchRegex.exec(text)) !== null) {
+    const block = findEnclosingTable(text, match.index);
+    if (!block) continue;
+    const nameMatch = /name\s*=\s*["']([^"']+)["']/.exec(block);
+    if (nameMatch) {
+      const sname = nameMatch[1].trim();
+      if (!seenNames.has(sname)) {
+        seenNames.add(sname);
+        tables.push({ name: sname, block });
+      }
+    }
+  }
+
+  // Also support direct data.raw assignments: data.raw["bool-setting"]["sname"]
+  const rawRegex = /data\.raw\[["']\w+-setting["']\]\[["']([^"']+)["']\]/g;
+  while ((match = rawRegex.exec(text)) !== null) {
+    const sname = match[1].trim();
+    if (!seenNames.has(sname)) {
+      seenNames.add(sname);
+      const after = text.slice(match.index, match.index + 2000);
+      tables.push({ name: sname, block: after });
+    }
+  }
+
+  return tables;
+}
+
 export function extractAllowedValuesFromLuaText(
   text: string,
 ): Record<string, unknown[]> {
   const out: Record<string, unknown[]> = {};
-  const n = text.length;
-  ALLOWED_VALUES_START_RE.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = ALLOWED_VALUES_START_RE.exec(text))) {
-    const brace = text.indexOf('{', m.index);
-    if (brace < 0) continue;
+  for (const { name, block } of extractSettingTables(text)) {
+    const allowedMatch = /allowed_values\s*=\s*\{/.exec(block);
+    if (!allowedMatch) continue;
+    const braceIdx = block.indexOf('{', allowedMatch.index);
+    if (braceIdx === -1) continue;
     let depth = 0;
-    let innerEnd = -1;
-    for (let k = brace; k < n; k += 1) {
-      const ch = text[k];
-      if (ch === '{') depth += 1;
-      else if (ch === '}') {
+    let endIdx = -1;
+    for (let k = braceIdx; k < block.length; k += 1) {
+      if (block[k] === '{') depth += 1;
+      else if (block[k] === '}') {
         depth -= 1;
         if (depth === 0) {
-          innerEnd = k;
+          endIdx = k;
           break;
         }
       }
     }
-    if (innerEnd < 0) continue;
-    const inner = text.slice(brace + 1, innerEnd);
+    if (endIdx === -1) continue;
+    const inner = block.slice(braceIdx + 1, endIdx);
     const vals = parseLuaListLiteralInner(inner);
-    if (!vals.length) continue;
-    const chunk = text.slice(Math.max(0, m.index - 4000), m.index);
-    const names = [...chunk.matchAll(/name\s*=\s*["']([^"']+)["']/g)];
-    if (!names.length) continue;
-    const sname = names[names.length - 1][1].trim();
-    if (sname) out[sname] = vals;
+    if (vals.length) {
+      out[name] = vals;
+    }
   }
   return out;
 }
 
 export function extractSettingNamesFromLuaText(text: string): Set<string> {
   const names = new Set<string>();
-  const capped = text.length > 800_000 ? text.slice(0, 800_000) : text;
-  MOD_LUA_SETTING_TYPE_RE.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = MOD_LUA_SETTING_TYPE_RE.exec(capped))) {
-    const start = Math.max(0, m.index - 500);
-    const end = Math.min(capped.length, m.index + 700);
-    const chunk = capped.slice(start, end);
-    const nm = /name\s*=\s*["']([^"']+)["']/.exec(chunk);
-    if (nm?.[1]) names.add(nm[1].trim());
-  }
-  for (const hit of capped.matchAll(/name\s*=\s*["']([^"']+)["']/g)) {
-    const s = hit[1]?.trim();
-    if (!s || s.length > 200) continue;
-    const start = Math.max(0, hit.index - 400);
-    const end = Math.min(capped.length, hit.index + hit[0].length + 400);
-    if (MOD_LUA_SETTING_TYPE_RE.test(capped.slice(start, end))) names.add(s);
+  for (const { name } of extractSettingTables(text)) {
+    names.add(name);
   }
   return names;
 }
@@ -135,20 +201,14 @@ export function extractLuaModSettingUiStrings(
   text: string,
   into: LuaSettingUiRefs,
 ): void {
-  MOD_LUA_SETTING_TYPE_RE.lastIndex = 0;
-  let tm: RegExpExecArray | null;
-  while ((tm = MOD_LUA_SETTING_TYPE_RE.exec(text))) {
-    const chunk = text.slice(tm.index, tm.index + 2800);
-    const nm = /name\s*=\s*["']([^"']+)["']/.exec(chunk);
-    if (!nm?.[1]) continue;
-    const sname = nm[1].trim();
+  for (const { name: sname, block } of extractSettingTables(text)) {
     for (const [pat, isDesc] of [
       [/localised_name\s*=\s*"((?:[^"\\]|\\.)*)"/, false],
       [/localised_name\s*=\s*'((?:[^'\\]|\\.)*)'/, false],
       [/localised_description\s*=\s*"((?:[^"\\]|\\.)*)"/, true],
       [/localised_description\s*=\s*'((?:[^'\\]|\\.)*)'/, true],
     ] as const) {
-      const m = pat.exec(chunk);
+      const m = pat.exec(block);
       if (!m?.[1]) continue;
       const val = unescapeLuaStringLiteral(m[1]).trim();
       if (!val) continue;
@@ -157,7 +217,7 @@ export function extractLuaModSettingUiStrings(
     }
     const arr2 =
       /localised_name\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arr2)
       into.titleRefs[sname] ??= [
@@ -166,7 +226,7 @@ export function extractLuaModSettingUiStrings(
       ];
     const arrNested =
       /localised_name\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arrNested) {
       into.titleRefs[sname] ??= [
@@ -176,7 +236,7 @@ export function extractLuaModSettingUiStrings(
     }
     const arrNestedOnly =
       /localised_name\s*=\s*\{\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arrNestedOnly) {
       into.titleRefs[sname] ??= [
@@ -186,7 +246,7 @@ export function extractLuaModSettingUiStrings(
     }
     const arr2d =
       /localised_description\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arr2d)
       into.descRefs[sname] ??= [
@@ -195,7 +255,7 @@ export function extractLuaModSettingUiStrings(
       ];
     const arrNestedD =
       /localised_description\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arrNestedD) {
       into.descRefs[sname] ??= [
@@ -205,7 +265,7 @@ export function extractLuaModSettingUiStrings(
     }
     const arrNestedOnlyD =
       /localised_description\s*=\s*\{\s*\{\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\}\s*\}/.exec(
-        chunk,
+        block,
       );
     if (arrNestedOnlyD) {
       into.descRefs[sname] ??= [
@@ -214,7 +274,7 @@ export function extractLuaModSettingUiStrings(
       ];
     }
     const arr1 = /localised_name\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*\}/.exec(
-      chunk,
+      block,
     );
     if (arr1 && !into.titles[sname]) {
       const single = unescapeLuaStringLiteral(arr1[1]);
@@ -223,7 +283,7 @@ export function extractLuaModSettingUiStrings(
         into.titleRefs[sname] ??= [single.slice(0, dot), single.slice(dot + 1)];
     }
     const arr1d =
-      /localised_description\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*\}/.exec(chunk);
+      /localised_description\s*=\s*\{\s*"((?:[^"\\]|\\.)*)"\s*\}/.exec(block);
     if (arr1d && !into.descriptions[sname]) {
       const single = unescapeLuaStringLiteral(arr1d[1]);
       const dot = single.indexOf('.');
@@ -303,6 +363,7 @@ export function isSettingsLuaMember(name: string): boolean {
   return (
     base === 'settings.lua' ||
     base === 'settings-updates.lua' ||
+    base === 'settings-final-fixes.lua' ||
     norm.includes('/settings/')
   );
 }

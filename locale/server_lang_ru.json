@@ -553,6 +553,7 @@
   "mod_settings_unsaved_msg": "Есть несохранённые настройки модов. Выйти без сохранения?",
   "mod_settings_unsaved_leave_btn": "Выйти без сохранения",
   "mod_settings_schema_cached_hint": "Загружено из кэша",
+  "mod_settings_startup_required_hint": "Настройки модов формируются Factorio только после старта. Если вы добавили новые моды, запустите сервер хотя бы один раз, чтобы их параметры появились в списке.",
   "commands_btn": "Команды",
   "chat_log_viewer_title": "Лог чата",
   "chat_log_reload_failed": "Не удалось прочитать лог чата:\n{0}",
