@@ -472,16 +472,16 @@ export class RuntimeService implements OnModuleDestroy {
     }
   }
 
-  kill(instanceId: string): { ok: boolean; error?: string } {
+  async kill(instanceId: string): Promise<{ ok: boolean; error?: string }> {
     this.log.log(`Killing instance ${this.instanceLabel(instanceId)}`);
     const rt = this.runtimes.get(instanceId);
     if (!rt?.proc || rt.proc.exitCode !== null)
       return { ok: false, error: 'not_running' };
     rt.killRequested = true;
     rt.inGame = false;
-    void this.forceKillProc(rt);
     rt.stopping = false;
     rt.stopWatchdogActive = false;
+    await this.forceKillProc(rt);
     return { ok: true };
   }
 
@@ -713,18 +713,32 @@ export class RuntimeService implements OnModuleDestroy {
       process.kill(pid, 'SIGKILL');
     };
 
-    const pids = new Set<number>();
-    if (proc.pid) pids.add(proc.pid);
+    // Kill the known process tree immediately first without waiting for netstat
+    if (proc.pid) {
+      try {
+        await killPid(proc.pid);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (proc.exitCode === null) {
+      try {
+        proc.kill('SIGKILL');
+      } catch {
+        /* ignore */
+      }
+    }
 
+    const pids = new Set<number>();
     const item = this.instances.getById(rt.instanceId);
     const gamePort = parseInt(String(item?.port || ''), 10);
     if (gamePort > 0) {
       const byPort = await this.findListeningPid(gamePort);
-      if (byPort) pids.add(byPort);
+      if (byPort && byPort !== proc.pid) pids.add(byPort);
     }
     if (item?.rconPort) {
       const byRcon = await this.findListeningPid(item.rconPort);
-      if (byRcon) pids.add(byRcon);
+      if (byRcon && byRcon !== proc.pid) pids.add(byRcon);
     }
 
     for (const pid of pids) {
@@ -732,14 +746,6 @@ export class RuntimeService implements OnModuleDestroy {
         await killPid(pid);
       } catch {
         /* try next */
-      }
-    }
-
-    if (proc.exitCode === null) {
-      try {
-        proc.kill();
-      } catch {
-        /* ignore */
       }
     }
   }

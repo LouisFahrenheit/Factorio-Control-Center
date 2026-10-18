@@ -208,14 +208,14 @@ describe('ServerOpsService', () => {
       expect(mockRuntime.stop).toHaveBeenCalledWith(inst.id);
     });
 
-    it('kill returns error if no instance is selected', () => {
+    it('kill returns error if no instance is selected', async () => {
       (mockInstances.getSelectedId as jest.Mock).mockReturnValue(undefined);
-      const res = service.kill();
+      const res = await service.kill();
       expect(res).toEqual({ ok: false, error: 'instance_not_found' });
     });
 
-    it('kill delegates to runtime.kill', () => {
-      const res = service.kill();
+    it('kill delegates to runtime.kill', async () => {
+      const res = await service.kill();
       expect(res).toEqual({ ok: true });
       expect(mockRuntime.kill).toHaveBeenCalledWith(inst.id);
     });

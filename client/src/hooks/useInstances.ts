@@ -67,6 +67,20 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       overridesRef.current.delete(iid);
       return realStatus;
     }
+    if (
+      ov.status === 'stopping' &&
+      (realStatus === 'stopped' || realStatus === 'ready' || realStatus === 'error')
+    ) {
+      overridesRef.current.delete(iid);
+      return realStatus;
+    }
+    if (
+      ov.status === 'starting' &&
+      (realStatus === 'running' || realStatus === 'error')
+    ) {
+      overridesRef.current.delete(iid);
+      return realStatus;
+    }
     if (realStatus === 'starting' || realStatus === 'stopping') return realStatus;
     return String(ov.status || realStatus);
   }, []);
@@ -215,7 +229,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
 
       if (action === 'start') setStatusOverride(iid, 'starting', 9000);
       if (action === 'stop') setStatusOverride(iid, 'stopping', 9000);
-      if (action === 'kill') setStatusOverride(iid, 'stopping', 7000);
+      if (action === 'kill') setStatusOverride(iid, 'stopping', 1500);
       if (action === 'restart') setStatusOverride(iid, 'starting', 12000);
 
       const endpoint =
@@ -231,6 +245,10 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         body: JSON.stringify({ instance_id: iid }),
       });
       if (r?.ok === false) throw new Error(String(r.error || action + '_failed'));
+
+      if (action === 'kill') {
+        overridesRef.current.delete(iid);
+      }
 
       const msgKey =
         action === 'start'
@@ -409,12 +427,13 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       const nm = String(it.name || iid);
       try {
         setInstanceMsgTimed(t('instances_quick_killing', nm), false, 2200);
-        setStatusOverride(iid, 'stopping', 7000);
+        setStatusOverride(iid, 'stopping', 1500);
         const r = await api<{ ok?: boolean; error?: string }>('/api/server/kill', {
           method: 'POST',
           body: JSON.stringify({ instance_id: iid }),
         });
         if (r?.ok === false) throw new Error(String(r.error || 'kill_failed'));
+        overridesRef.current.delete(iid);
         killed += 1;
       } catch {
         failed += 1;

@@ -234,7 +234,7 @@ export class ServerOpsService {
         RESTART_STOP_WAIT_MS,
       );
       if (!stopped) {
-        const killRes = this.runtime.kill(id);
+        const killRes = await this.runtime.kill(id);
         if (killRes.ok) {
           stopped = await this.runtime.waitUntilStopped(
             id,
@@ -248,7 +248,7 @@ export class ServerOpsService {
     return this.start();
   }
 
-  kill(): OpResult {
+  async kill(): Promise<OpResult> {
     const id = this.instances.getSelectedId();
     if (!id) return { ok: false, error: 'instance_not_found' };
     return this.runtime.kill(id);
