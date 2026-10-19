@@ -1,0 +1,1020 @@
+/* ==========================================================================
+   Factorio Control Center — Access / Web Users Redesign Styles
+   ========================================================================== */
+
+#instanceTabAccess.sub-tab-panel--active {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+#webUsersSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.access-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 12px;
+}
+
+/* ── 2FA Icon ────────────────────────────────────────────────────────── */
+
+.access-user-2fa-icon {
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  opacity: 0.85;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
+}
+
+.access-user-2fa-icon:hover {
+  opacity: 1;
+  color: var(--accent-selected);
+}
+
+/* ── Toolbar & Controls ──────────────────────────────────────────────── */
+
+.access-users-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.access-users-bar__search {
+  flex: 1 1 200px;
+  min-width: 170px;
+}
+
+.access-users-bar__filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.access-users-bar__select {
+  padding: 5px 8px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.access-users-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.access-users-bar__view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.access-users-bar__view-toggle-btn:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-input) 90%);
+}
+
+.access-users-bar__count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-widget) 80%, var(--bg-main) 20%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  white-space: nowrap;
+}
+
+/* ── Status Dot ──────────────────────────────────────────────────────── */
+
+.access-user-table-cell .instance-run-dot,
+.access-user-card__header-left .instance-run-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-dark);
+  box-shadow: none;
+  flex: 0 0 9px;
+}
+
+.access-user-table-cell .instance-run-dot--on,
+.access-user-card__header-left .instance-run-dot--on {
+  background: var(--running);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--running) 60%, transparent);
+  animation: none;
+}
+
+/* ── Role Text (clean, neutral, no color, no icon) ──────────────────── */
+
+.access-users-role-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.access-users-role-text--disabled {
+  opacity: 0.55;
+}
+
+/* ── Status Label (clean text, no neon background) ──────────────────── */
+
+.access-users-status-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.access-users-status-label--on {
+  color: var(--running);
+}
+
+.access-users-status-label--off {
+  color: var(--text-muted);
+}
+
+/* ── Chips (Servers & Permissions) ───────────────────────────────────── */
+
+.access-users-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.access-users-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.access-users-chip--all-servers {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
+  font-weight: 500;
+}
+
+.access-users-chip--server {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%);
+  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-users-chip--perm {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 80%, var(--bg-widget) 20%);
+  border-color: color-mix(in srgb, var(--border-dark) 90%, transparent);
+  font-size: 0.78rem;
+  padding: 2px 8px;
+}
+
+.access-users-chip--perm:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.access-users-chip-muted {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+/* ── Full Permissions (Admin) ────────────────────────────────────────── */
+
+.access-users-admin-full-perms {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.access-users-admin-star {
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+/* ── Table Layout ────────────────────────────────────────────────────── */
+
+.access-users-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
+  background: color-mix(in srgb, var(--bg-data) 88%, var(--bg-widget) 12%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+table.access-users-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+table.access-users-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+table.access-users-table tbody tr.access-users-row {
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+table.access-users-table tbody tr.access-users-row td {
+  padding: 12px 16px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 75%, transparent);
+  background: transparent;
+  vertical-align: middle;
+}
+
+table.access-users-table tbody tr.access-users-row:hover td {
+  background: var(--fcc-row-hover-bg);
+}
+
+table.access-users-table tbody tr.access-users-row--selected td {
+  background: var(--fcc-row-hover-selected-bg);
+}
+
+.access-user-table-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.access-users-row__name {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+.access-users-row--disabled {
+  opacity: 0.65;
+}
+
+.access-users-table__col-actions {
+  text-align: right;
+  width: 140px;
+}
+
+.access-users-table__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.access-users-table__action-btn {
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.access-users-table__action-btn--danger:hover:not(:disabled) {
+  color: #ff7070;
+  background: color-mix(in srgb, var(--error) 18%, transparent);
+}
+
+.access-users-table__action-btn--activate {
+  color: var(--running);
+}
+
+.access-users-table__action-btn--reset-2fa:hover:not(:disabled) {
+  color: #9ec8ff;
+  background: color-mix(in srgb, #4a78b8 18%, transparent);
+}
+
+/* ── Cards Grid Layout ───────────────────────────────────────────────── */
+
+.access-users-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  padding: 2px 2px 14px;
+}
+
+.access-user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.access-user-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.32),
+    0 0 10px rgba(var(--accent-rgb), 0.08);
+}
+
+.access-user-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.4);
+}
+
+.access-user-card--selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-widget) 93%);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.28),
+    0 0 10px rgba(var(--accent-rgb), 0.15);
+}
+
+.access-user-card--disabled {
+  opacity: 0.65;
+}
+
+.access-user-card__glow-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-dark);
+  opacity: 0.3;
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.access-user-card--disabled .access-user-card__glow-bar {
+  background: var(--border-dark);
+  opacity: 0.15;
+}
+
+/* ── Card Header ─────────────────────────────────────────────────────── */
+
+.access-user-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.access-user-card__header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.access-user-card__header-left .instance-run-dot {
+  margin-top: 5px;
+}
+
+.access-user-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.access-user-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.access-user-card__username {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Card Meta (Servers) ─────────────────────────────────────────────── */
+
+.access-user-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-user-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.access-user-card__meta-icon {
+  color: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.access-user-card__servers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* ── Card Permissions Section ────────────────────────────────────────── */
+
+.access-user-card__perms-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+
+.access-user-card__perms-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.access-user-card__admin-full-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-height: 56px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px dashed color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-user-card__admin-full-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.access-user-card__admin-perms-desc {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.78rem;
+}
+
+/* ── Card Actions ────────────────────────────────────────────────────── */
+
+.access-user-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-user-card__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.access-user-card__action-btn--edit {
+  flex: 1 1 auto;
+}
+
+.access-user-card__action-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--error) 20%, transparent);
+  border-color: color-mix(in srgb, var(--error) 50%, transparent);
+  color: #ff8080;
+}
+
+.access-user-card__action-btn--toggle-off:hover:not(:disabled) {
+  background: color-mix(in srgb, #e09030 18%, transparent);
+  border-color: color-mix(in srgb, #e09030 45%, transparent);
+  color: #f0b060;
+}
+
+.access-user-card__action-btn--toggle-on {
+  background: color-mix(in srgb, var(--running) 12%, transparent);
+  border-color: color-mix(in srgb, var(--running) 35%, transparent);
+  color: var(--running);
+}
+
+.access-user-card__action-btn--reset-2fa:hover:not(:disabled) {
+  background: color-mix(in srgb, #4a78b8 20%, transparent);
+  border-color: color-mix(in srgb, #4a78b8 45%, transparent);
+  color: #9ec8ff;
+}
+
+.access-users-empty-box {
+  margin: 20px auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Web User Editor Modal
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.fu-modal.web-user-editor-modal {
+  width: min(780px, 96vw);
+  max-height: calc(100dvh - 2 * max(14px, 2.5vh));
+  border-radius: 12px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.web-user-editor-modal .fu-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.web-user-editor-modal__header-icon {
+  color: var(--accent-selected);
+  opacity: 0.9;
+}
+
+.web-user-editor-modal__header-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.web-user-editor-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px;
+  overflow-y: auto;
+}
+
+/* ── Hero / Account Credentials & Status Card ────────────────────────── */
+
+.web-user-modal-hero {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--bg-data) 80%, var(--bg-widget) 20%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.web-user-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.web-user-modal-hero .access-user-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+.web-user-modal-hero .access-user-field__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.web-user-modal-hero .access-user-field__input,
+.web-user-modal-hero .input.access-user-field__input {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: 7px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  color: var(--text);
+  font-size: 0.94rem;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.web-user-modal-hero select.access-user-field__input {
+  cursor: pointer;
+  padding-right: 32px;
+}
+
+.web-user-modal-hero .access-user-field__input:focus,
+.web-user-modal-hero .input.access-user-field__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+  outline: none;
+}
+
+.web-user-modal-hero .access-user-field__input.is-locked,
+.web-user-modal-hero .input.access-user-field__input.is-locked {
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-input) 35%);
+  color: var(--text);
+  opacity: 0.85;
+  cursor: default;
+  border-color: color-mix(in srgb, var(--border-dark) 70%, transparent);
+}
+
+/* ── Status & 2FA Bar (under credentials) ────────────────────────────── */
+
+.web-user-modal-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  min-height: 40px;
+  flex-wrap: wrap;
+}
+
+.web-user-modal-status-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  min-height: 34px;
+}
+
+.web-user-modal-status-item__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+  margin: 0;
+}
+
+.web-user-modal-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.web-user-modal-switch-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.web-user-modal-switch-text--on {
+  color: var(--running);
+}
+
+.web-user-modal-switch-text--off {
+  color: var(--text-muted);
+}
+
+.web-user-modal-lock-hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.web-user-modal-2fa-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2FA Badge & Reset Button in Modal */
+.web-user-modal-2fa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.web-user-modal-2fa-badge--on {
+  background: color-mix(in srgb, var(--running) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--running) 35%, transparent);
+  color: var(--running);
+}
+
+.web-user-modal-2fa-badge--off {
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text-muted);
+}
+
+.web-user-modal-2fa-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.web-user-modal-2fa-reset-btn:hover {
+  background: color-mix(in srgb, #4a78b8 20%, transparent);
+  border-color: color-mix(in srgb, #4a78b8 45%, transparent);
+  color: #9ec8ff;
+}
+
+/* ── Permissions & Server Access Groups ──────────────────────────────── */
+
+.web-user-editor-modal .access-perm-groups {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.web-user-editor-modal .access-perm-group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-data) 82%, var(--bg-widget) 18%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.web-user-editor-modal .access-perm-group__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.web-user-editor-modal .access-perm-group__header-icon {
+  color: var(--accent-selected);
+  opacity: 0.9;
+}
+
+.web-user-editor-modal .access-perm-group__title {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Administrator Full Access Callout */
+.access-perm-admin-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 20px;
+  gap: 10px;
+  flex: 1 1 auto;
+}
+
+.access-perm-admin-notice__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.access-perm-admin-notice__title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 14px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.access-perm-admin-notice__desc {
+  margin: 0;
+  max-width: 320px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Permission List Grid (when not admin) */
+.web-user-editor-modal .access-perm-grid--stack {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  gap: 2px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.web-user-editor-modal .access-perm-grid__item {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.web-user-editor-modal .access-perm-grid__item:hover {
+  background: color-mix(in srgb, var(--bg-main) 50%, transparent);
+}
+
+.web-user-editor-modal .access-perm-switch {
+  width: 100%;
+}
+
+.web-user-editor-modal .access-perm-grid__label {
+  font-size: 0.86rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Instances List */
+.web-user-editor-modal .access-perm-grid--instances {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  gap: 4px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.access-instance-check-wrap--all {
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 75%, transparent);
+}
+
+.access-instance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.web-user-editor-modal .access-instance-check {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.web-user-editor-modal
+  .access-instance-check:hover:not(:has(> input:disabled)) {
+  background: color-mix(in srgb, var(--bg-main) 60%, transparent);
+  border-color: color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.web-user-editor-modal .access-instance-check:has(> input:checked) {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-main) 90%);
+  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.web-user-editor-modal .access-instance-check__label {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.web-user-editor-modal
+  .access-instance-check--all
+  .access-instance-check__label {
+  font-weight: 600;
+}
+
+/* Responsive collapse on smaller viewports */
+@media (max-width: 680px) {
+  .web-user-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .web-user-editor-modal .access-perm-groups {
+    grid-template-columns: 1fr;
+  }
+}

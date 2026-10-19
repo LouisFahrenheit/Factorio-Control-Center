@@ -115,3 +115,28 @@ export function setUserServerListViewMode(mode: ServerListViewMode): void {
     /* ignore */
   }
 }
+
+const USERS_VIEW_MODE_KEY = 'fcc_user_access_view_mode';
+export type UserAccessViewMode = 'cards' | 'table';
+
+export function readUserAccessViewMode(): UserAccessViewMode {
+  try {
+    if (typeof localStorage === 'undefined') return 'cards';
+    const raw = localStorage.getItem(USERS_VIEW_MODE_KEY);
+    if (raw === 'cards' || raw === 'table') return raw;
+  } catch {
+    /* ignore */
+  }
+  return 'cards';
+}
+
+export function setUserAccessViewMode(mode: UserAccessViewMode): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(USERS_VIEW_MODE_KEY, mode);
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+

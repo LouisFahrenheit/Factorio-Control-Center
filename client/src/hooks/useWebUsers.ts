@@ -293,6 +293,7 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
     setEnabled,
     deleteUser,
     reset2fa,
+    refresh,
   };
 }
 

@@ -1,15 +1,13 @@
-import { useCallback, useState, type MouseEvent } from 'react';
-import { AppIcon } from '../AppIcon';
-import {
-  listUserInstanceLabels,
-  listUserTabLabels,
-  roleLabel,
-  userRoleClass,
-  userRoleIcon,
-} from '../../lib/webUserUtils';
+import { useCallback, useMemo, useState, type MouseEvent } from 'react';
 import type { WebUsersApi } from '../../hooks/useWebUsers';
+import { useUserAccessViewMode } from '../../hooks/useUserAccessViewMode';
 import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
 import type { WebUser } from '../../types/webUser';
+import { listUserInstanceLabels, roleLabel } from '../../lib/webUserUtils';
+import { AccessUsersBar } from './AccessUsersBar';
+import { AccessUsersCards } from './AccessUsersCards';
+import { AccessUsersTable } from './AccessUsersTable';
+import { AccessUsersEmpty, AccessUsersNoResults } from './AccessUsersEmpty';
 import { WebUserEditorModal } from './WebUserEditorModal';
 import { WebUserRowMenu } from './WebUserRowMenu';
 
@@ -19,16 +17,22 @@ interface InstanceAccessTabProps {
 }
 
 export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
+  const [viewMode, setViewMode] = useUserAccessViewMode();
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuUser, setMenuUser] = useState<WebUser | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+
   const initialLoading = tabInitialLoad(webUsers.loading, webUsers.users.length > 0);
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
   }, []);
 
-  const onRowClick = (user: WebUser, ev: MouseEvent<HTMLTableRowElement>) => {
+  const onRowClick = (user: WebUser, _targetEl: HTMLElement, ev: MouseEvent) => {
     ev.stopPropagation();
     setMenuUser(user);
     setMenuPos({
@@ -37,6 +41,42 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
     });
     setMenuOpen(true);
   };
+
+  const totalCount = webUsers.users.length;
+
+  // Filtered users
+  const filteredUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return webUsers.users.filter((u) => {
+      // Role filter
+      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+
+      // Status filter
+      if (statusFilter === 'enabled' && u.enabled === false) return false;
+      if (statusFilter === 'disabled' && u.enabled !== false) return false;
+      if (statusFilter === '2fa' && !u.twoFactorEnabled) return false;
+
+      // Search query filter
+      if (q) {
+        const usernameMatch = (u.username || '').toLowerCase().includes(q);
+        const roleText = roleLabel(u.role, t).toLowerCase();
+        const roleMatch = roleText.includes(q) || (u.role || '').toLowerCase().includes(q);
+        const instanceText = listUserInstanceLabels(
+          u.instance_ids,
+          webUsers.accessInstances,
+          t,
+        )
+          .join(' ')
+          .toLowerCase();
+        const instanceMatch = instanceText.includes(q);
+
+        if (!usernameMatch && !roleMatch && !instanceMatch) return false;
+      }
+
+      return true;
+    });
+  }, [webUsers.users, webUsers.accessInstances, search, roleFilter, statusFilter, t]);
 
   return (
     <div
@@ -47,124 +87,76 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
     >
       <section id="webUsersSection">
         <div id="accessLayout" className="access-layout">
-          <div className="access-layout__table">
+          {/* Search, Filter, View Mode, Actions Toolbar */}
+          <AccessUsersBar
+            search={search}
+            onSearchChange={setSearch}
+            roleFilter={roleFilter}
+            onRoleFilterChange={setRoleFilter}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onRefresh={() => void webUsers.refresh()}
+            shownCount={filteredUsers.length}
+            totalCount={totalCount}
+            t={t}
+          />
+
+          {/* Main Content Area */}
+          <div className="access-layout__content">
             {initialLoading ? (
               <TabLoadingPlaceholder variant="table" label={t('tab_data_loading')} />
             ) : webUsers.loadError ? (
               <p className="maintenance-tab__inline-error" role="alert">
                 {webUsers.loadError}
               </p>
+            ) : totalCount === 0 ? (
+              <AccessUsersEmpty onCreate={webUsers.openCreate} t={t} />
+            ) : filteredUsers.length === 0 ? (
+              <AccessUsersNoResults
+                query={search}
+                onClear={() => {
+                  setSearch('');
+                  setRoleFilter('all');
+                  setStatusFilter('all');
+                }}
+                t={t}
+              />
+            ) : viewMode === 'cards' ? (
+              <AccessUsersCards
+                users={filteredUsers}
+                accessInstances={webUsers.accessInstances}
+                selectedUser={webUsers.editorMode === 'edit' ? webUsers.selectedUser : undefined}
+                isLastEnabledAdmin={webUsers.isLastEnabledAdmin}
+                onOpenEdit={webUsers.openEdit}
+                onToggleEnabled={(u) => void webUsers.setEnabled(u.username, u.enabled === false)}
+                onReset2fa={(username) => void webUsers.reset2fa(username)}
+                onDeleteUser={(username) => void webUsers.deleteUser(username)}
+                onRowClick={onRowClick}
+                t={t}
+              />
             ) : (
-            <div className="table-wrap table-wrap--access-users">
-              <table className="data access-users-table">
-                <thead>
-                  <tr>
-                    <th className="access-users-table__col-status">{t('web_user_status_label')}</th>
-                    <th className="access-users-table__col-2fa">{t('web_user_2fa_label')}</th>
-                    <th className="access-users-table__col-user">{t('web_user_label')}</th>
-                    <th className="access-users-table__col-role">{t('web_role_label')}</th>
-                    <th className="access-users-table__col-perms">{t('web_access_perms_label')}</th>
-                    <th className="access-users-table__col-servers">{t('instances_tab_servers')}</th>
-                  </tr>
-                </thead>
-                <tbody id="tblWebUsersBody">
-                  {webUsers.users.map((u) => {
-                      const selected =
-                        webUsers.editorMode === 'edit' && webUsers.selectedUser === u.username;
-                      const enabled = u.enabled !== false;
-                      const tabLabels = listUserTabLabels(u.tabs, t);
-                      const instanceLabels = listUserInstanceLabels(
-                        u.instance_ids,
-                        webUsers.accessInstances,
-                        t,
-                      );
-                      const rowClass = [
-                        'access-users-row',
-                        selected ? 'access-users-row--selected' : '',
-                        !enabled ? 'access-users-row--disabled' : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ');
-
-                      return (
-                        <tr key={u.username} className={rowClass} onClick={(ev) => onRowClick(u, ev)}>
-                          <td className="access-users-table__col-status">
-                            <span
-                              className={
-                                'access-users-status ' +
-                                (enabled ? 'access-users-status--on' : 'access-users-status--off')
-                              }
-                            >
-                              {enabled ? t('web_enabled_label') : t('web_user_status_off')}
-                            </span>
-                          </td>
-                          <td className="access-users-table__col-2fa">
-                            <span
-                              className={
-                                'access-users-status ' +
-                                (u.twoFactorEnabled ? 'access-users-status--on' : 'access-users-status--off')
-                              }
-                            >
-                              {u.twoFactorEnabled ? t('web_2fa_enabled_badge') : t('web_2fa_disabled_badge')}
-                            </span>
-                          </td>
-                          <td className="access-users-table__col-user">
-                            <span className="access-users-row__name">{u.username}</span>
-                          </td>
-                          <td className="access-users-table__col-role">
-                            <span
-                              className={
-                                'access-users-role ' +
-                                userRoleClass(u.role) +
-                                (!enabled ? ' access-users-role--disabled' : '')
-                              }
-                            >
-                              <AppIcon
-                                name={enabled ? userRoleIcon(u.role) : 'person_off'}
-                                size={18}
-                                className="access-users-role__icon"
-                              />
-                              {roleLabel(u.role, t)}
-                            </span>
-                          </td>
-                          <td className="access-users-table__col-perms">
-                            <div className="access-users-chip-list">
-                              {tabLabels.map((label, index) => (
-                                <span
-                                  key={`${u.username}-perm-${index}`}
-                                  className="access-users-chip access-users-chip--perm"
-                                >
-                                  {label}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="access-users-table__col-servers">
-                            <div className="access-users-chip-list">
-                              {instanceLabels.length ? (
-                                instanceLabels.map((label, index) => (
-                                  <span
-                                    key={`${u.username}-srv-${index}`}
-                                    className="access-users-chip access-users-chip--server"
-                                  >
-                                    {label}
-                                  </span>
-                                ))
-                              ) : (
-                                <span className="access-users-chip access-users-chip--muted">—</span>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
+              <AccessUsersTable
+                users={filteredUsers}
+                accessInstances={webUsers.accessInstances}
+                selectedUser={webUsers.editorMode === 'edit' ? webUsers.selectedUser : undefined}
+                isLastEnabledAdmin={webUsers.isLastEnabledAdmin}
+                onOpenEdit={webUsers.openEdit}
+                onToggleEnabled={(u) => void webUsers.setEnabled(u.username, u.enabled === false)}
+                onReset2fa={(username) => void webUsers.reset2fa(username)}
+                onDeleteUser={(username) => void webUsers.deleteUser(username)}
+                onRowClick={onRowClick}
+                t={t}
+              />
             )}
           </div>
         </div>
+
+        {/* Edit / Create User Modal */}
         <WebUserEditorModal webUsers={webUsers} t={t} />
+
+        {/* Row Context Menu */}
         <WebUserRowMenu
           open={menuOpen}
           user={menuUser}

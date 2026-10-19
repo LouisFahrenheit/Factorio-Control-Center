@@ -4801,7 +4801,8 @@ table.data.data--modpacks tbody tr:hover td {
   max-width: 420px;
 }
 
-.instance-servers-bar__refresh {
+.instance-servers-bar__refresh,
+.instance-servers-bar__view-toggle-btn {
   flex: 0 0 auto;
 }
 
@@ -4814,40 +4815,6 @@ table.data.data--modpacks tbody tr:hover td {
   color: var(--text-muted);
   font-size: 0.9em;
   white-space: nowrap;
-}
-
-.instance-servers-bar__view-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  background: color-mix(in srgb, var(--bg-main) 60%, transparent);
-  padding: 2px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
-}
-
-.instance-servers-bar__view-btn {
-  opacity: 0.65;
-  transition: all 0.15s ease;
-  min-width: 32px;
-  height: 32px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.instance-servers-bar__view-btn:hover {
-  opacity: 1;
-  color: var(--text);
-}
-
-.instance-servers-bar__view-btn--active {
-  opacity: 1;
-  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%);
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
 .instance-cards-wrap {

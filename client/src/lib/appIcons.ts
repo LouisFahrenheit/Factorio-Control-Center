@@ -1,5 +1,6 @@
 /** Material Symbols (Google) — Apache License 2.0. SVGs in `public/assets/icons/`. */
 export const APP_ICON_URLS = {
+  '2fa': '/assets/icons/2fa.svg',
   add: '/assets/icons/add.svg',
   add_link: '/assets/icons/add_link.svg',
   arrow_back: '/assets/icons/arrow_back.svg',

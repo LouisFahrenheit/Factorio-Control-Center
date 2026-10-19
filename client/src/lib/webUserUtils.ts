@@ -90,7 +90,7 @@ export function isAllUserInstances(
 export function listUserInstanceLabels(
   instanceIds: string[] | undefined,
   instances: WebAccessInstance[],
-  t: (key: string) => string,
+  t: (key: string, ...args: (string | number)[]) => string,
 ): string[] {
   const ids = sortedInstanceIds(instanceIds);
   if (!ids.length) return [];
@@ -106,8 +106,7 @@ export function listUserInstanceLabels(
   const ordered = instances
     .map((it) => String(it.id || '').trim())
     .filter((id) => idSet.has(id));
-  const unknown = ids.filter((id) => id !== '*' && !nameById.has(id));
-  return [...ordered, ...unknown].map((id) => nameById.get(id) || id);
+  return ordered.map((id) => nameById.get(id) || id);
 }
 
 export function formatUserInstances(
