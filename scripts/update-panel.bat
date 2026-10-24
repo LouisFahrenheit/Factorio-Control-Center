@@ -115,6 +115,11 @@ if not exist "%SRC%\dist\main.js" (
 
 (
 echo Updating %FCC_DIR% ...
+if exist "%FCC_DIR%\data\db\fcc_database.sqlite" (
+    if not exist "%FCC_DIR%\data\db\snapshots" mkdir "%FCC_DIR%\data\db\snapshots"
+    copy /Y "%FCC_DIR%\data\db\fcc_database.sqlite" "%FCC_DIR%\data\db\snapshots\fcc_database_pre_update.sqlite" >nul
+    echo   Created safety snapshot: fcc_database_pre_update.sqlite
+)
 robocopy "%SRC%" "%FCC_DIR%" /E /XD data logs /XF fcc-settings.ini /NFL /NDL /NJH /NJS /nc /ns /np
 if errorlevel 8 (
     echo ERROR: Update copy failed.

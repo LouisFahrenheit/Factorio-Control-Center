@@ -126,6 +126,12 @@ if [[ -z "$SRC" || ! -f "$SRC/dist/main.js" ]]; then
 fi
 
 echo "Updating $FCC_DIR ..."
+if [[ -f "$FCC_DIR/data/db/fcc_database.sqlite" ]]; then
+  mkdir -p "$FCC_DIR/data/db/snapshots"
+  SNAPSHOT_TS="$(date +%Y%m%d_%H%M%S)"
+  cp -f "$FCC_DIR/data/db/fcc_database.sqlite" "$FCC_DIR/data/db/snapshots/fcc_database_pre_update_${SNAPSHOT_TS}.sqlite" 2>/dev/null || true
+  echo "  Created safety snapshot: fcc_database_pre_update_${SNAPSHOT_TS}.sqlite"
+fi
 shopt -s dotglob
 for item in "$SRC"/*; do
   name="$(basename "$item")"

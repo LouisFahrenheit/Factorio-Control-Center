@@ -137,9 +137,13 @@ import { InstanceAutostartService } from './instances/instance-autostart.service
 import { PanelStartupLogService } from './logging/panel-startup-log.service';
 import { FccWsAdapter } from './ws/ws-adapter';
 import { APP_NAME, APP_VERSION } from './constants/fcc.constants';
+import { backupDbBeforeStartup } from './config/db-bootstrap-backup';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 process.title = `${APP_NAME} v${APP_VERSION}`;
+
+// Pre-boot database safety backup and version-upgrade snapshot
+backupDbBeforeStartup(join(dbDir, 'fcc_database.sqlite'), APP_VERSION);
 
 async function bootstrap() {
   const isDebug = String(process.env.DEBUG_LOGS).toLowerCase() === 'true';

@@ -97,13 +97,23 @@ const dbDir = join(dataDir, 'db');
 if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
 
 interface SqliteDatabaseConnection {
-  pragma: (sql: string) => unknown;
+  pragma: (sql: string, options?: { simple?: boolean }) => unknown;
 }
+
+const applyDatabasePatches = (sqlite: SqliteDatabaseConnection): void => {
+  const userVersion = Number(
+    sqlite.pragma('user_version', { simple: true }) ?? 0,
+  );
+  if (userVersion === 0) {
+    sqlite.pragma('user_version = 1');
+  }
+};
 
 const configureSqlitePragmas = (db: unknown): void => {
   const sqlite = db as SqliteDatabaseConnection;
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('busy_timeout = 5000');
+  applyDatabasePatches(sqlite);
 };
 
 @Module({
