@@ -6,7 +6,8 @@ import { LocaleService } from '../locale/locale.service';
 import { FccConfigService } from '../config/fcc-config.service';
 import { WebPanelLogService } from '../logging/web-panel-log.service';
 
-const AUTOSTART_DELAY_MS = 1500;
+export const AUTOSTART_DELAY_MS = 1500;
+export const AUTOSTART_STAGGER_MS = 2500;
 const MAX_ATTEMPTS = 20;
 const RETRY_MS = 2000;
 
@@ -30,8 +31,13 @@ export class InstanceAutostartService {
 
   private async runAutostarts(): Promise<void> {
     const items = this.instances.load().items.filter((i) => i.autostartServer);
-    for (const item of items) {
-      await this.maybeAutostart(item.id, 0);
+    for (let i = 0; i < items.length; i++) {
+      await this.maybeAutostart(items[i].id, 0);
+      if (i < items.length - 1) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, AUTOSTART_STAGGER_MS),
+        );
+      }
     }
   }
 
