@@ -218,11 +218,13 @@ do_restore() {
   if [[ "$mode_choice" == "1" || "$mode_choice" == "2" ]]; then
     if [[ -f "${tmp_extract}/database/fcc_database.sqlite" ]]; then
       mkdir -p "${DB_DIR}"
+      rm -f "${DB_DIR}/fcc_database.sqlite-wal" "${DB_DIR}/fcc_database.sqlite-shm"
       cp -f "${tmp_extract}/database/fcc_database.sqlite" "${DB_DIR}/fcc_database.sqlite"
       echo -e "  ${GREEN}✓ Restored:${NC} fcc_database.sqlite"
     fi
     if [[ -f "${tmp_extract}/database/fcc_metrics.sqlite" ]]; then
       mkdir -p "${DB_DIR}"
+      rm -f "${DB_DIR}/fcc_metrics.sqlite-wal" "${DB_DIR}/fcc_metrics.sqlite-shm"
       cp -f "${tmp_extract}/database/fcc_metrics.sqlite" "${DB_DIR}/fcc_metrics.sqlite"
       echo -e "  ${GREEN}✓ Restored:${NC} fcc_metrics.sqlite"
     fi

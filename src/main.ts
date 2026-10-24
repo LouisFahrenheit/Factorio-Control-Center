@@ -38,6 +38,16 @@ const applyPendingDb = (
           /* */
         }
       }
+      for (const ext of ['-wal', '-shm']) {
+        const auxPath = `${targetPath}${ext}`;
+        if (existsSync(auxPath)) {
+          try {
+            unlinkSync(auxPath);
+          } catch {
+            /* */
+          }
+        }
+      }
       renameSync(pendingPath, targetPath);
       console.log(`[Bootstrap] Applied restored ${label} from backup.`);
     } catch {

@@ -3,7 +3,10 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import {
   existsSync,
   mkdirSync,
@@ -102,7 +105,15 @@ export class BackupService {
   private readonly log = new Logger(BackupService.name);
   private creating = false;
 
-  constructor(private readonly paths: PathsService) {}
+  constructor(
+    private readonly paths: PathsService,
+    @Optional()
+    @InjectDataSource()
+    private readonly dataSource?: DataSource,
+    @Optional()
+    @InjectDataSource('metricsConnection')
+    private readonly metricsDataSource?: DataSource,
+  ) {}
 
   get isCreating(): boolean {
     return this.creating;
@@ -111,6 +122,21 @@ export class BackupService {
   async createBackup(opts: BackupOptions = {}): Promise<BackupEntry> {
     if (this.creating) throw new BadRequestException('backup_already_running');
     this.creating = true;
+
+    if (this.dataSource?.isInitialized) {
+      try {
+        await this.dataSource.query('PRAGMA wal_checkpoint(TRUNCATE)');
+      } catch {
+        /* ignore checkpoint error */
+      }
+    }
+    if (opts.includeMetrics && this.metricsDataSource?.isInitialized) {
+      try {
+        await this.metricsDataSource.query('PRAGMA wal_checkpoint(TRUNCATE)');
+      } catch {
+        /* ignore checkpoint error */
+      }
+    }
 
     const backupType: 'manual' | 'auto' =
       opts.type === 'auto' ? 'auto' : 'manual';

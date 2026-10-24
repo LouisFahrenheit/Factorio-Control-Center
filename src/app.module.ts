@@ -96,6 +96,16 @@ const dataDir = join(fccRoot, 'data');
 const dbDir = join(dataDir, 'db');
 if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
 
+interface SqliteDatabaseConnection {
+  pragma: (sql: string) => unknown;
+}
+
+const configureSqlitePragmas = (db: unknown): void => {
+  const sqlite = db as SqliteDatabaseConnection;
+  sqlite.pragma('journal_mode = WAL');
+  sqlite.pragma('busy_timeout = 5000');
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -108,6 +118,9 @@ if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
       database: join(fccRoot, 'data', 'db', 'fcc_database.sqlite'),
       entities: [User, SystemPreference, GameInstance, MaintenanceSchedule],
       synchronize: true, // Auto-create tables (good for this use-case, but use migrations in prod ideally)
+      enableWAL: true,
+      timeout: 5000,
+      prepareDatabase: configureSqlitePragmas,
     }),
     TypeOrmModule.forRoot({
       name: 'metricsConnection',
@@ -115,6 +128,9 @@ if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
       database: join(fccRoot, 'data', 'db', 'fcc_metrics.sqlite'),
       entities: [InstanceRawMetric, InstanceHourlyMetric],
       synchronize: true,
+      enableWAL: true,
+      timeout: 5000,
+      prepareDatabase: configureSqlitePragmas,
     }),
     TypeOrmModule.forFeature([
       User,
