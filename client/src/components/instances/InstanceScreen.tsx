@@ -348,7 +348,7 @@ export function InstanceScreen({
             data-i18n="instances_tab_servers"
           >
             <span className="sub-tabs__tab-inner">
-              <AppIcon name="list" size={18} />
+              <AppIcon name="server" size={18} />
               {t('instances_tab_servers')}
             </span>
           </button>

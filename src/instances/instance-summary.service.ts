@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { existsSync, readFileSync, statSync } from 'fs';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { existsSync, readFileSync, statSync, statfsSync } from 'fs';
 import { join } from 'path';
+import * as os from 'os';
 import {
   getModDetailsCached,
   modPackagePathsForInternalName,
@@ -24,6 +25,23 @@ import { isBuiltinModName } from '../ops/mod-deps';
 import { safeTrim } from '../common/trim.util';
 import { PathManager } from '../ops/path-manager';
 import { InstancesService } from './instances.service';
+
+export interface HostMemoryInfo {
+  total: number;
+  free: number;
+  used: number;
+}
+
+export interface HostCpuInfo {
+  percent: number;
+  cores: number;
+}
+
+export interface HostDiskInfo {
+  total: number;
+  free: number;
+  used: number;
+}
 
 export interface InstanceSummaryRow {
   id: string;
@@ -65,7 +83,12 @@ export interface InstanceSummaryRow {
 }
 
 @Injectable()
-export class InstanceSummaryService {
+export class InstanceSummaryService implements OnModuleDestroy {
+  private cpuTicker: NodeJS.Timeout | null = null;
+  private lastCpuTimes = this.getCpuTimes();
+  private lastCpuPercent = 0;
+  private lastCpuTimestamp = Date.now();
+
   private readonly settingsCache = new Map<
     string,
     {
@@ -88,15 +111,95 @@ export class InstanceSummaryService {
     private readonly runtime: RuntimeService,
     private readonly modJobs: ModsJobService,
     private readonly paths: PathsService,
-  ) {}
+  ) {
+    this.cpuTicker = setInterval(() => {
+      this.getRecentCpuPercent();
+    }, 2000);
+    if (typeof this.cpuTicker.unref === 'function') {
+      this.cpuTicker.unref();
+    }
+  }
 
-  list(): { ok: true; items: InstanceSummaryRow[]; selectedId: string | null } {
+  onModuleDestroy() {
+    if (this.cpuTicker) {
+      clearInterval(this.cpuTicker);
+      this.cpuTicker = null;
+    }
+  }
+
+  private getCpuTimes(): { idle: number; total: number } {
+    const cpus = os.cpus();
+    let idle = 0;
+    let total = 0;
+    for (const cpu of cpus) {
+      for (const type of ['user', 'nice', 'sys', 'idle', 'irq'] as const) {
+        total += cpu.times[type] ?? 0;
+      }
+      idle += cpu.times.idle;
+    }
+    return { idle, total };
+  }
+
+  private getRecentCpuPercent(): number {
+    const now = Date.now();
+    const elapsed = now - this.lastCpuTimestamp;
+    if (elapsed >= 500) {
+      const current = this.getCpuTimes();
+      const idleDiff = current.idle - this.lastCpuTimes.idle;
+      const totalDiff = current.total - this.lastCpuTimes.total;
+      if (totalDiff > 0) {
+        const usage = 1 - idleDiff / totalDiff;
+        this.lastCpuPercent = Math.max(
+          0,
+          Math.min(100, Math.round(usage * 100)),
+        );
+      }
+      this.lastCpuTimes = current;
+      this.lastCpuTimestamp = now;
+    }
+    return this.lastCpuPercent;
+  }
+
+  private getDiskInfo(): HostDiskInfo {
+    try {
+      const checkPath =
+        this.paths.dataDir || this.paths.rootDir || process.cwd();
+      const stats = statfsSync(checkPath);
+      const total = Number(stats.blocks) * Number(stats.bsize);
+      const free = Number(stats.bavail) * Number(stats.bsize);
+      const used = Math.max(0, total - free);
+      return { total, free, used };
+    } catch {
+      return { total: 0, free: 0, used: 0 };
+    }
+  }
+
+  list(): {
+    ok: true;
+    items: InstanceSummaryRow[];
+    selectedId: string | null;
+    hostMemory: HostMemoryInfo;
+    hostCpu: HostCpuInfo;
+    hostDisk: HostDiskInfo;
+  } {
     const st = this.instances.load();
     const pending = this.pendingManualResumeIds();
+    const total = os.totalmem();
+    const free = os.freemem();
     return {
       ok: true,
       items: st.items.map((it) => this.summarize(it, pending)),
       selectedId: st.selectedId || null,
+      hostMemory: {
+        total,
+        free,
+        used: Math.max(0, total - free),
+      },
+      hostCpu: {
+        percent: this.getRecentCpuPercent(),
+        cores: os.cpus().length,
+      },
+      hostDisk: this.getDiskInfo(),
     };
   }
 

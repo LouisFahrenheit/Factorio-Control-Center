@@ -143,7 +143,16 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     notifyNetworkFetchError(instancesTitle, query.error, t);
   }, [enabled, query.isError, query.error, instancesTitle, t]);
 
-  const dashboard = useMemo(() => syncInstancesDashboard(rows), [rows]);
+  const dashboard = useMemo(
+    () =>
+      syncInstancesDashboard(
+        rows,
+        query.data?.hostMemory,
+        query.data?.hostCpu,
+        query.data?.hostDisk,
+      ),
+    [rows, query.data?.hostMemory, query.data?.hostCpu, query.data?.hostDisk],
+  );
 
   const showEndMaintenanceAll = useMemo(
     () => rows.some((it) => instanceMaintenanceManualMode(it, getEffectiveStatus)),

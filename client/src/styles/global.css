@@ -3806,3 +3806,90 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ── Instance Dashboard Host CPU, RAM & DISK Alerts ─────── */
+
+.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__icon {
+  color: var(--starting, #ffb833) !important;
+  background: color-mix(in srgb, var(--starting, #ffb833) 14%, var(--bg-main) 86%) !important;
+  border-color: color-mix(in srgb, var(--starting, #ffb833) 30%, transparent) !important;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__value {
+  color: var(--starting, #ffb833);
+}
+
+.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__icon {
+  color: var(--error, #ff4d4d) !important;
+  background: color-mix(in srgb, var(--error, #ff4d4d) 16%, var(--bg-main) 84%) !important;
+  border-color: color-mix(in srgb, var(--error, #ff4d4d) 32%, transparent) !important;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__value {
+  color: var(--error, #ff4d4d) !important;
+}
+
+/* ── Instance Top Dashboard (Polished & Unified with Panel) ── */
+
+.instance-dashboard-top {
+  display: inline-flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.instance-dashboard-top .instance-dashboard-stat {
+  min-width: 76px;
+  padding: 6px 12px 6px 10px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat__icon {
+  color: var(--text-muted, #9ba3af) !important;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%) !important;
+  border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.instance-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
+  color: var(--text, #fff) !important;
+  border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
+}
+
+.instance-dashboard-top .instance-dashboard-stat__value {
+  font-size: 1.16em;
+  font-weight: 750;
+}
+
+.instance-dashboard-top .instance-dashboard-stat__value--compact-stat {
+  font-size: 1.05em !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em;
+}
+
+.instance-dashboard-top .instance-dashboard-stat__unit {
+  font-size: 0.74em;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-left: 2px;
+  vertical-align: baseline;
+}
+
+.instance-dashboard-top__divider {
+  width: 1px;
+  height: 24px;
+  align-self: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--border, #444) 40%, transparent);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.04);
+  margin: 0 2px;
+}

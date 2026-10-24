@@ -1,4 +1,9 @@
-import type { InstanceItem } from '../types/instance';
+import type {
+  HostCpuInfo,
+  HostDiskInfo,
+  HostMemoryInfo,
+  InstanceItem,
+} from '../types/instance';
 import { localizeApiError } from './apiErrorUtils';
 
 export function formatUptime(sec: number | null | undefined, placeholder: string): string {
@@ -96,7 +101,27 @@ export function isGamePortBusyByAnotherInstance(
   });
 }
 
-export function syncInstancesDashboard(rows: InstanceItem[]) {
+export interface InstancesDashboardStats {
+  total: number;
+  running: number;
+  stopped: number;
+  online: number;
+  hostRam?: HostMemoryInfo;
+  hostCpu?: HostCpuInfo;
+  hostDisk?: HostDiskInfo;
+}
+
+export function formatRamGb(bytes: number | undefined): string {
+  if (!bytes || bytes < 0) return '0';
+  return (bytes / (1024 * 1024 * 1024)).toFixed(1);
+}
+
+export function syncInstancesDashboard(
+  rows: InstanceItem[],
+  hostMemory?: HostMemoryInfo,
+  hostCpu?: HostCpuInfo,
+  hostDisk?: HostDiskInfo,
+): InstancesDashboardStats {
   let onlineTotal = 0;
   let runningCount = 0;
   let stoppedCount = 0;
@@ -107,5 +132,13 @@ export function syncInstancesDashboard(rows: InstanceItem[]) {
     if (status === 'running') runningCount += 1;
     if (status === 'ready') stoppedCount += 1;
   });
-  return { total: rows.length, running: runningCount, stopped: stoppedCount, online: onlineTotal };
+  return {
+    total: rows.length,
+    running: runningCount,
+    stopped: stoppedCount,
+    online: onlineTotal,
+    ...(hostMemory ? { hostRam: hostMemory } : {}),
+    ...(hostCpu ? { hostCpu } : {}),
+    ...(hostDisk ? { hostDisk } : {}),
+  };
 }

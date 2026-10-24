@@ -1,15 +1,23 @@
 import { AppIcon } from './AppIcon';
 import { roleLabel, userRoleClass } from '../lib/webUserUtils';
 import { formatDashboardGameVersion, resolveStatusKind, statusLabel, type PanelStatus } from '../types/panel';
-import { formatUptime } from '../lib/instanceUtils';
-import type { AuthUser } from '../types/instance';
+import { formatRamGb, formatUptime } from '../lib/instanceUtils';
+import type { AuthUser, HostCpuInfo, HostDiskInfo, HostMemoryInfo } from '../types/instance';
 
 interface AppStatusBarProps {
   mode: 'instances' | 'panel';
   user: AuthUser | null;
   status?: PanelStatus | null;
   serverName?: string;
-  dashboard?: { total: number; running: number; stopped: number; online: number };
+  dashboard?: {
+    total: number;
+    running: number;
+    stopped: number;
+    online: number;
+    hostRam?: HostMemoryInfo;
+    hostCpu?: HostCpuInfo;
+    hostDisk?: HostDiskInfo;
+  };
   onLogout: () => void;
   onServers?: () => void;
   onAbout?: () => void;
@@ -80,7 +88,7 @@ export function AppStatusBar({
           <div id="serversTopDash" className="instance-dashboard-top">
             <div className="instance-dashboard-stat instance-dashboard-stat--total">
               <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                <AppIcon name="list" size={16} />
+                <AppIcon name="server" size={14} />
               </span>
               <div className="instance-dashboard-stat__body">
                 <span className="instance-dashboard-stat__label" data-i18n="instances_total_servers">
@@ -93,7 +101,7 @@ export function AppStatusBar({
             </div>
             <div className="instance-dashboard-stat instance-dashboard-stat--running">
               <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                <AppIcon name="start" size={16} />
+                <AppIcon name="start" size={18} />
               </span>
               <div className="instance-dashboard-stat__body">
                 <span className="instance-dashboard-stat__label" data-i18n="instances_running_servers">
@@ -101,19 +109,6 @@ export function AppStatusBar({
                 </span>
                 <span className="instance-dashboard-stat__value" id="instancesRunningTop">
                   {dashboard?.running ?? 0}
-                </span>
-              </div>
-            </div>
-            <div className="instance-dashboard-stat instance-dashboard-stat--stopped">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                <AppIcon name="stop" size={16} />
-              </span>
-              <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_stopped_servers">
-                  {t('instances_stopped_servers')}
-                </span>
-                <span className="instance-dashboard-stat__value" id="instancesStoppedTop">
-                  {dashboard?.stopped ?? 0}
                 </span>
               </div>
             </div>
@@ -130,6 +125,136 @@ export function AppStatusBar({
                 </span>
               </div>
             </div>
+            <div className="instance-dashboard-stat instance-dashboard-stat--stopped">
+              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <AppIcon name="stop" size={18} />
+              </span>
+              <div className="instance-dashboard-stat__body">
+                <span className="instance-dashboard-stat__label" data-i18n="instances_stopped_servers">
+                  {t('instances_stopped_servers')}
+                </span>
+                <span className="instance-dashboard-stat__value" id="instancesStoppedTop">
+                  {dashboard?.stopped ?? 0}
+                </span>
+              </div>
+            </div>
+            {dashboard?.hostCpu || dashboard?.hostRam || dashboard?.hostDisk ? (
+              <div className="instance-dashboard-top__divider" aria-hidden="true" />
+            ) : null}
+            {dashboard?.hostCpu ? (() => {
+              const pct = Math.max(0, Math.min(100, Math.round(dashboard.hostCpu.percent)));
+              const isCpuDanger = pct >= 90;
+              const isCpuWarn = !isCpuDanger && pct >= 75;
+              const cpuTitle = t('instances_host_cpu_title', pct, dashboard.hostCpu.cores);
+              return (
+                <div
+                  className={
+                    'instance-dashboard-stat instance-dashboard-stat--cpu' +
+                    (isCpuDanger
+                      ? ' instance-dashboard-stat--cpu-danger'
+                      : isCpuWarn
+                        ? ' instance-dashboard-stat--cpu-warn'
+                        : '')
+                  }
+                  title={cpuTitle}
+                >
+                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                    <AppIcon name="cpu" size={16} />
+                  </span>
+                  <div className="instance-dashboard-stat__body">
+                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_cpu">
+                      {t('instances_host_cpu')}
+                    </span>
+                    <span className="instance-dashboard-stat__value" id="instancesCpuTop">
+                      {pct}<span className="instance-dashboard-stat__unit">%</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })() : null}
+            {dashboard?.hostRam ? (() => {
+              const usedGb = formatRamGb(dashboard.hostRam.used);
+              const totalGb = formatRamGb(dashboard.hostRam.total);
+              const freeGb = formatRamGb(dashboard.hostRam.free);
+              const pct =
+                dashboard.hostRam.total > 0
+                  ? Math.round((dashboard.hostRam.used / dashboard.hostRam.total) * 100)
+                  : 0;
+              const isRamDanger = pct >= 90 || dashboard.hostRam.free < 1.5 * 1024 * 1024 * 1024;
+              const isRamWarn = !isRamDanger && pct >= 75;
+              const ramTitle = t('instances_host_ram_title', usedGb, totalGb, pct, freeGb);
+              return (
+                <div
+                  className={
+                    'instance-dashboard-stat instance-dashboard-stat--ram' +
+                    (isRamDanger
+                      ? ' instance-dashboard-stat--ram-danger'
+                      : isRamWarn
+                        ? ' instance-dashboard-stat--ram-warn'
+                        : '')
+                  }
+                  title={ramTitle}
+                >
+                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                    <AppIcon name="memory" size={16} />
+                  </span>
+                  <div className="instance-dashboard-stat__body">
+                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_ram">
+                      {t('instances_host_ram')}
+                    </span>
+                    <span
+                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                      id="instancesRamTop"
+                    >
+                      {usedGb} / {totalGb} <span className="instance-dashboard-stat__unit">GB</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })() : null}
+            {dashboard?.hostDisk ? (() => {
+              const usedGb = formatRamGb(dashboard.hostDisk.used);
+              const totalGb = formatRamGb(dashboard.hostDisk.total);
+              const freeGb = formatRamGb(dashboard.hostDisk.free);
+              const pct =
+                dashboard.hostDisk.total > 0
+                  ? Math.round((dashboard.hostDisk.used / dashboard.hostDisk.total) * 100)
+                  : 0;
+              const isDiskDanger =
+                pct >= 90 || dashboard.hostDisk.free < 10 * 1024 * 1024 * 1024;
+              const isDiskWarn =
+                !isDiskDanger &&
+                (pct >= 80 || dashboard.hostDisk.free < 25 * 1024 * 1024 * 1024);
+              const diskTitle = t('instances_host_disk_title', usedGb, totalGb, pct, freeGb);
+              return (
+                <div
+                  className={
+                    'instance-dashboard-stat instance-dashboard-stat--disk' +
+                    (isDiskDanger
+                      ? ' instance-dashboard-stat--disk-danger'
+                      : isDiskWarn
+                        ? ' instance-dashboard-stat--disk-warn'
+                        : '')
+                  }
+                  title={diskTitle}
+                >
+                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                    <AppIcon name="disk" size={16} />
+                  </span>
+                  <div className="instance-dashboard-stat__body">
+                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_disk">
+                      {t('instances_host_disk')}
+                    </span>
+                    <span
+                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                      id="instancesDiskTop"
+                    >
+                      {usedGb} / {totalGb} <span className="instance-dashboard-stat__unit">GB</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })() : null}
           </div>
         ) : (
           <>

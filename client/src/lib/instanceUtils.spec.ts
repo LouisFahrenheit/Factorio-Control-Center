@@ -6,6 +6,7 @@ import {
   runningInstanceBlocked,
   instanceMaintenanceManualMode,
   isGamePortBusyByAnotherInstance,
+  formatRamGb,
   syncInstancesDashboard,
 } from './instanceUtils';
 import type { InstanceItem } from '../types/instance';
@@ -167,6 +168,39 @@ describe('instanceUtils lib', () => {
         stopped: 1,
         online: 7,
       });
+    });
+
+    it('includes hostRam, hostCpu, and hostDisk when provided', () => {
+      const rows = [{ id: '1', status: 'running', onlineCount: 1 } as InstanceItem];
+      const hostMemory = {
+        total: 16 * 1024 * 1024 * 1024,
+        free: 8 * 1024 * 1024 * 1024,
+        used: 8 * 1024 * 1024 * 1024,
+      };
+      const hostCpu = {
+        percent: 42.5,
+        cores: 8,
+      };
+      const hostDisk = {
+        total: 500 * 1024 * 1024 * 1024,
+        free: 350 * 1024 * 1024 * 1024,
+        used: 150 * 1024 * 1024 * 1024,
+      };
+
+      const dashboard = syncInstancesDashboard(rows, hostMemory, hostCpu, hostDisk);
+      expect(dashboard.hostRam).toEqual(hostMemory);
+      expect(dashboard.hostCpu).toEqual(hostCpu);
+      expect(dashboard.hostDisk).toEqual(hostDisk);
+    });
+  });
+
+  describe('formatRamGb', () => {
+    it('formats bytes into gigabytes with 1 decimal place', () => {
+      expect(formatRamGb(undefined)).toBe('0');
+      expect(formatRamGb(-100)).toBe('0');
+      expect(formatRamGb(0)).toBe('0');
+      expect(formatRamGb(8 * 1024 * 1024 * 1024)).toBe('8.0');
+      expect(formatRamGb(16.5 * 1024 * 1024 * 1024)).toBe('16.5');
     });
   });
 });

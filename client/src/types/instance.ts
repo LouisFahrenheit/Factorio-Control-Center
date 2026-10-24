@@ -39,10 +39,30 @@ export interface InstanceItem {
   serverSettingsAfkAutokick?: number;
 }
 
+export interface HostMemoryInfo {
+  total: number;
+  free: number;
+  used: number;
+}
+
+export interface HostCpuInfo {
+  percent: number;
+  cores: number;
+}
+
+export interface HostDiskInfo {
+  total: number;
+  free: number;
+  used: number;
+}
+
 export interface InstancesListResponse {
   ok?: boolean;
   items?: InstanceItem[];
   selectedId?: string;
+  hostMemory?: HostMemoryInfo;
+  hostCpu?: HostCpuInfo;
+  hostDisk?: HostDiskInfo;
   error?: string;
 }
 
