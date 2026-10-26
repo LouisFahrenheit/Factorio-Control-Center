@@ -564,11 +564,11 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       if (process.platform === 'win32' && kl.includes('win64')) return k;
       if (isLinux && kl.includes('linux') && kl.includes('headless')) return k;
     }
-    if (keys.includes(defaultPkg)) return defaultPkg;
     const expansionKey = keys.find((k) =>
       k.toLowerCase().includes('expansion'),
     );
     if (expansionKey) return expansionKey;
+    if (keys.includes(defaultPkg)) return defaultPkg;
     return keys[0];
   }
 

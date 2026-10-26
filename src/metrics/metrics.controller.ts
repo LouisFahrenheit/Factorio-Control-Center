@@ -14,6 +14,7 @@ import { AuthGuard, AUTH_USER_KEY } from '../auth/auth.guard';
 import { InstanceRawMetric } from './entities/instance-raw-metric.entity';
 import { InstanceHourlyMetric } from './entities/instance-hourly-metric.entity';
 import { SessionUser } from '../common/types';
+import { MetricsCollectorService } from './metrics-collector.service';
 
 export interface MetricPoint {
   timestamp: string;
@@ -28,6 +29,24 @@ export interface MetricPoint {
   saveSizeMax?: number;
   spm: number;
   spmMax?: number;
+  espm?: number;
+  espmMax?: number;
+  evolution?: number;
+  evolutionMax?: number;
+  evolutionGleba?: number;
+  evolutionGlebaMax?: number;
+  pollution?: number;
+  pollutionMax?: number;
+  pollutionAbsorbed?: number;
+  pollutionAbsorbedMax?: number;
+  pollutionGleba?: number;
+  pollutionGlebaMax?: number;
+  pollutionGlebaAbsorbed?: number;
+  pollutionGlebaAbsorbedMax?: number;
+  pollutionTotal?: number;
+  pollutionTotalMax?: number;
+  pollutionGlebaTotal?: number;
+  pollutionGlebaTotalMax?: number;
 }
 
 interface RawHourlyAggregateRow {
@@ -43,6 +62,24 @@ interface RawHourlyAggregateRow {
   saveSizeMax: string | number;
   spmAvg: string | number;
   spmMax: string | number;
+  espmAvg: string | number;
+  espmMax: string | number;
+  evolutionAvg: string | number;
+  evolutionMax: string | number;
+  evolutionGlebaAvg: string | number;
+  evolutionGlebaMax: string | number;
+  pollutionAvg: string | number;
+  pollutionMax: string | number;
+  pollutionAbsorbedAvg: string | number;
+  pollutionAbsorbedMax: string | number;
+  pollutionGlebaAvg: string | number;
+  pollutionGlebaMax: string | number;
+  pollutionGlebaAbsorbedAvg: string | number;
+  pollutionGlebaAbsorbedMax: string | number;
+  pollutionTotalAvg: string | number;
+  pollutionTotalMax: string | number;
+  pollutionGlebaTotalAvg: string | number;
+  pollutionGlebaTotalMax: string | number;
 }
 
 interface BlockTimeAggregateRow {
@@ -58,6 +95,24 @@ interface BlockTimeAggregateRow {
   saveSizeMax: string | number;
   spm: string | number;
   spmMax: string | number;
+  espm: string | number;
+  espmMax: string | number;
+  evolution: string | number;
+  evolutionMax: string | number;
+  evolutionGleba: string | number;
+  evolutionGlebaMax: string | number;
+  pollution: string | number;
+  pollutionMax: string | number;
+  pollutionAbsorbed: string | number;
+  pollutionAbsorbedMax: string | number;
+  pollutionGleba: string | number;
+  pollutionGlebaMax: string | number;
+  pollutionGlebaAbsorbed: string | number;
+  pollutionGlebaAbsorbedMax: string | number;
+  pollutionTotal: string | number;
+  pollutionTotalMax: string | number;
+  pollutionGlebaTotal: string | number;
+  pollutionGlebaTotalMax: string | number;
 }
 
 @Controller('api')
@@ -68,6 +123,7 @@ export class MetricsController {
     private readonly rawRepo: Repository<InstanceRawMetric>,
     @InjectRepository(InstanceHourlyMetric, 'metricsConnection')
     private readonly hourlyRepo: Repository<InstanceHourlyMetric>,
+    private readonly metricsCollector: MetricsCollectorService,
   ) {}
 
   private me(req: Request): SessionUser {
@@ -80,6 +136,28 @@ export class MetricsController {
         enabled: false,
       }
     );
+  }
+
+  @Get('metrics/:instanceId/live')
+  async getLiveMetrics(
+    @Param('instanceId') instanceId: string,
+    @Req() req: Request,
+  ) {
+    const user = this.me(req);
+    const instances = user.instance_ids || [];
+    const isAllowed =
+      user.role === 'administrator' ||
+      instances.includes('*') ||
+      instances.includes(instanceId);
+
+    if (!isAllowed) {
+      throw new ForbiddenException('access_denied_to_instance');
+    }
+
+    const uiLangRaw = req.headers['x-fcc-ui-lang'] as string | undefined;
+    const uiLang = (uiLangRaw || 'en').trim().toLowerCase();
+
+    return await this.metricsCollector.getLiveMetrics(instanceId, uiLang);
   }
 
   @Get('metrics/:instanceId')
@@ -152,6 +230,15 @@ export class MetricsController {
       ups: r.ups,
       saveSize: Number(r.saveSize),
       spm: r.spm,
+      espm: Number(r.espm) || 0,
+      evolution: Number(r.evolution) || 0,
+      evolutionGleba: Number(r.evolutionGleba) || 0,
+      pollution: Number(r.pollution) || 0,
+      pollutionAbsorbed: Number(r.pollutionAbsorbed) || 0,
+      pollutionGleba: Number(r.pollutionGleba) || 0,
+      pollutionGlebaAbsorbed: Number(r.pollutionGlebaAbsorbed) || 0,
+      pollutionTotal: Number(r.pollutionTotal) || 0,
+      pollutionGlebaTotal: Number(r.pollutionGlebaTotal) || 0,
     }));
   }
 
@@ -184,6 +271,24 @@ export class MetricsController {
         saveSizeMax: Number(r.saveSizeMax),
         spm: r.spmAvg,
         spmMax: r.spmMax,
+        espm: r.espmAvg,
+        espmMax: r.espmMax,
+        evolution: r.evolutionAvg,
+        evolutionMax: r.evolutionMax,
+        evolutionGleba: r.evolutionGlebaAvg,
+        evolutionGlebaMax: r.evolutionGlebaMax,
+        pollution: r.pollutionAvg,
+        pollutionMax: r.pollutionMax,
+        pollutionAbsorbed: r.pollutionAbsorbedAvg,
+        pollutionAbsorbedMax: r.pollutionAbsorbedMax,
+        pollutionGleba: r.pollutionGlebaAvg,
+        pollutionGlebaMax: r.pollutionGlebaMax,
+        pollutionGlebaAbsorbed: r.pollutionGlebaAbsorbedAvg,
+        pollutionGlebaAbsorbedMax: r.pollutionGlebaAbsorbedMax,
+        pollutionTotal: r.pollutionTotalAvg,
+        pollutionTotalMax: r.pollutionTotalMax,
+        pollutionGlebaTotal: r.pollutionGlebaTotalAvg,
+        pollutionGlebaTotalMax: r.pollutionGlebaTotalMax,
       });
     }
 
@@ -203,7 +308,25 @@ export class MetricsController {
         AVG(saveSize) as saveSizeAvg,
         MAX(saveSize) as saveSizeMax,
         AVG(spm) as spmAvg,
-        MAX(spm) as spmMax
+        MAX(spm) as spmMax,
+        AVG(espm) as espmAvg,
+        MAX(espm) as espmMax,
+        AVG(evolution) as evolutionAvg,
+        MAX(evolution) as evolutionMax,
+        AVG(evolutionGleba) as evolutionGlebaAvg,
+        MAX(evolutionGleba) as evolutionGlebaMax,
+        AVG(pollution) as pollutionAvg,
+        MAX(pollution) as pollutionMax,
+        AVG(pollutionAbsorbed) as pollutionAbsorbedAvg,
+        MAX(pollutionAbsorbed) as pollutionAbsorbedMax,
+        AVG(pollutionGleba) as pollutionGlebaAvg,
+        MAX(pollutionGleba) as pollutionGlebaMax,
+        AVG(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbedAvg,
+        MAX(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbedMax,
+        AVG(pollutionTotal) as pollutionTotalAvg,
+        MAX(pollutionTotal) as pollutionTotalMax,
+        AVG(pollutionGlebaTotal) as pollutionGlebaTotalAvg,
+        MAX(pollutionGlebaTotal) as pollutionGlebaTotalMax
       FROM instance_raw_metrics
       WHERE instanceId = ? AND timestamp >= ?
       GROUP BY hourStr
@@ -229,6 +352,24 @@ export class MetricsController {
         saveSizeMax: parseInt(String(agg.saveSizeMax), 10) || 0,
         spm: Number(agg.spmAvg) || 0,
         spmMax: Number(agg.spmMax) || 0,
+        espm: Number(agg.espmAvg) || 0,
+        espmMax: Number(agg.espmMax) || 0,
+        evolution: Number(agg.evolutionAvg) || 0,
+        evolutionMax: Number(agg.evolutionMax) || 0,
+        evolutionGleba: Number(agg.evolutionGlebaAvg) || 0,
+        evolutionGlebaMax: Number(agg.evolutionGlebaMax) || 0,
+        pollution: Number(agg.pollutionAvg) || 0,
+        pollutionMax: Number(agg.pollutionMax) || 0,
+        pollutionAbsorbed: Number(agg.pollutionAbsorbedAvg) || 0,
+        pollutionAbsorbedMax: Number(agg.pollutionAbsorbedMax) || 0,
+        pollutionGleba: Number(agg.pollutionGlebaAvg) || 0,
+        pollutionGlebaMax: Number(agg.pollutionGlebaMax) || 0,
+        pollutionGlebaAbsorbed: Number(agg.pollutionGlebaAbsorbedAvg) || 0,
+        pollutionGlebaAbsorbedMax: Number(agg.pollutionGlebaAbsorbedMax) || 0,
+        pollutionTotal: Number(agg.pollutionTotalAvg) || 0,
+        pollutionTotalMax: Number(agg.pollutionTotalMax) || 0,
+        pollutionGlebaTotal: Number(agg.pollutionGlebaTotalAvg) || 0,
+        pollutionGlebaTotalMax: Number(agg.pollutionGlebaTotalMax) || 0,
       });
     }
 
@@ -260,7 +401,25 @@ export class MetricsController {
         AVG(saveSizeAvg) as saveSize,
         MAX(saveSizeMax) as saveSizeMax,
         AVG(spmAvg) as spm,
-        MAX(spmMax) as spmMax
+        MAX(spmMax) as spmMax,
+        AVG(espmAvg) as espm,
+        MAX(espmMax) as espmMax,
+        AVG(evolutionAvg) as evolution,
+        MAX(evolutionMax) as evolutionMax,
+        AVG(evolutionGlebaAvg) as evolutionGleba,
+        MAX(evolutionGlebaMax) as evolutionGlebaMax,
+        AVG(pollutionAvg) as pollution,
+        MAX(pollutionMax) as pollutionMax,
+        AVG(pollutionAbsorbedAvg) as pollutionAbsorbed,
+        MAX(pollutionAbsorbedMax) as pollutionAbsorbedMax,
+        AVG(pollutionGlebaAvg) as pollutionGleba,
+        MAX(pollutionGlebaMax) as pollutionGlebaMax,
+        AVG(pollutionGlebaAbsorbedAvg) as pollutionGlebaAbsorbed,
+        MAX(pollutionGlebaAbsorbedMax) as pollutionGlebaAbsorbedMax,
+        AVG(pollutionTotalAvg) as pollutionTotal,
+        MAX(pollutionTotalMax) as pollutionTotalMax,
+        AVG(pollutionGlebaTotalAvg) as pollutionGlebaTotal,
+        MAX(pollutionGlebaTotalMax) as pollutionGlebaTotalMax
       FROM instance_hourly_metrics
       WHERE instanceId = ? AND timestamp >= ?
       GROUP BY blockTime
@@ -284,6 +443,24 @@ export class MetricsController {
         saveSizeMax: parseInt(String(agg.saveSizeMax), 10) || 0,
         spm: Number(agg.spm) || 0,
         spmMax: Number(agg.spmMax) || 0,
+        espm: Number(agg.espm) || 0,
+        espmMax: Number(agg.espmMax) || 0,
+        evolution: Number(agg.evolution) || 0,
+        evolutionMax: Number(agg.evolutionMax) || 0,
+        evolutionGleba: Number(agg.evolutionGleba) || 0,
+        evolutionGlebaMax: Number(agg.evolutionGlebaMax) || 0,
+        pollution: Number(agg.pollution) || 0,
+        pollutionMax: Number(agg.pollutionMax) || 0,
+        pollutionAbsorbed: Number(agg.pollutionAbsorbed) || 0,
+        pollutionAbsorbedMax: Number(agg.pollutionAbsorbedMax) || 0,
+        pollutionGleba: Number(agg.pollutionGleba) || 0,
+        pollutionGlebaMax: Number(agg.pollutionGlebaMax) || 0,
+        pollutionGlebaAbsorbed: Number(agg.pollutionGlebaAbsorbed) || 0,
+        pollutionGlebaAbsorbedMax: Number(agg.pollutionGlebaAbsorbedMax) || 0,
+        pollutionTotal: Number(agg.pollutionTotal) || 0,
+        pollutionTotalMax: Number(agg.pollutionTotalMax) || 0,
+        pollutionGlebaTotal: Number(agg.pollutionGlebaTotal) || 0,
+        pollutionGlebaTotalMax: Number(agg.pollutionGlebaTotalMax) || 0,
       });
     }
 
@@ -302,7 +479,25 @@ export class MetricsController {
         AVG(saveSize) as saveSize,
         MAX(saveSize) as saveSizeMax,
         AVG(spm) as spm,
-        MAX(spm) as spmMax
+        MAX(spm) as spmMax,
+        AVG(espm) as espm,
+        MAX(espm) as espmMax,
+        AVG(evolution) as evolution,
+        MAX(evolution) as evolutionMax,
+        AVG(evolutionGleba) as evolutionGleba,
+        MAX(evolutionGleba) as evolutionGlebaMax,
+        AVG(pollution) as pollution,
+        MAX(pollution) as pollutionMax,
+        AVG(pollutionAbsorbed) as pollutionAbsorbed,
+        MAX(pollutionAbsorbed) as pollutionAbsorbedMax,
+        AVG(pollutionGleba) as pollutionGleba,
+        MAX(pollutionGleba) as pollutionGlebaMax,
+        AVG(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbed,
+        MAX(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbedMax,
+        AVG(pollutionTotal) as pollutionTotal,
+        MAX(pollutionTotal) as pollutionTotalMax,
+        AVG(pollutionGlebaTotal) as pollutionGlebaTotal,
+        MAX(pollutionGlebaTotal) as pollutionGlebaTotalMax
       FROM instance_raw_metrics
       WHERE instanceId = ? AND timestamp >= ?
       GROUP BY blockTime
@@ -328,6 +523,24 @@ export class MetricsController {
         saveSizeMax: parseInt(String(agg.saveSizeMax), 10) || 0,
         spm: Number(agg.spm) || 0,
         spmMax: Number(agg.spmMax) || 0,
+        espm: Number(agg.espm) || 0,
+        espmMax: Number(agg.espmMax) || 0,
+        evolution: Number(agg.evolution) || 0,
+        evolutionMax: Number(agg.evolutionMax) || 0,
+        evolutionGleba: Number(agg.evolutionGleba) || 0,
+        evolutionGlebaMax: Number(agg.evolutionGlebaMax) || 0,
+        pollution: Number(agg.pollution) || 0,
+        pollutionMax: Number(agg.pollutionMax) || 0,
+        pollutionAbsorbed: Number(agg.pollutionAbsorbed) || 0,
+        pollutionAbsorbedMax: Number(agg.pollutionAbsorbedMax) || 0,
+        pollutionGleba: Number(agg.pollutionGleba) || 0,
+        pollutionGlebaMax: Number(agg.pollutionGlebaMax) || 0,
+        pollutionGlebaAbsorbed: Number(agg.pollutionGlebaAbsorbed) || 0,
+        pollutionGlebaAbsorbedMax: Number(agg.pollutionGlebaAbsorbedMax) || 0,
+        pollutionTotal: Number(agg.pollutionTotal) || 0,
+        pollutionTotalMax: Number(agg.pollutionTotalMax) || 0,
+        pollutionGlebaTotal: Number(agg.pollutionGlebaTotal) || 0,
+        pollutionGlebaTotalMax: Number(agg.pollutionGlebaTotalMax) || 0,
       });
     }
 

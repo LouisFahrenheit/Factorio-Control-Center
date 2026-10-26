@@ -250,6 +250,7 @@ export default function PanelPage() {
               <MonitoringTab
                 instanceId={selectedId}
                 serverRunning={serverRunning}
+                collectGameMetrics={selectedInstance?.collectGameMetrics}
                 t={t}
               />
             )}

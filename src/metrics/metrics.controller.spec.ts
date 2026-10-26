@@ -7,6 +7,8 @@ import { InstanceHourlyMetric } from './entities/instance-hourly-metric.entity';
 import { AUTH_USER_KEY } from '../auth/auth.guard';
 import { SessionUser } from '../common/types';
 
+import { MetricsCollectorService } from './metrics-collector.service';
+
 describe('MetricsController', () => {
   let controller: MetricsController;
   type MockRepoWithConnection = {
@@ -20,12 +22,18 @@ describe('MetricsController', () => {
 
   let mockRawRepo: MockRepoWithConnection;
   let mockHourlyRepo: MockRepoWithConnection;
+  let mockCollector: {
+    getLiveMetrics: jest.Mock;
+  };
   let mockQueryRunner: {
     query: jest.Mock;
     release: jest.Mock;
   };
 
-  const createFakeReq = (overrides: Partial<SessionUser> = {}): Request =>
+  const createFakeReq = (
+    overrides: Partial<SessionUser> = {},
+    headers: Record<string, string> = {},
+  ): Request =>
     ({
       [AUTH_USER_KEY]: {
         username: 'test_user',
@@ -34,6 +42,9 @@ describe('MetricsController', () => {
         instance_ids: ['inst-1'],
         enabled: true,
         ...overrides,
+      },
+      headers: {
+        ...headers,
       },
     }) as unknown as Request;
 
@@ -61,9 +72,22 @@ describe('MetricsController', () => {
       },
     };
 
+    mockCollector = {
+      getLiveMetrics: jest.fn().mockResolvedValue({
+        active: true,
+        game_speed: 1.0,
+        paused: false,
+        research: {
+          name: 'automation-2',
+          progress_percent: 45.5,
+        },
+      }),
+    };
+
     controller = new MetricsController(
       mockRawRepo as unknown as Repository<InstanceRawMetric>,
       mockHourlyRepo as unknown as Repository<InstanceHourlyMetric>,
+      mockCollector as unknown as MetricsCollectorService,
     );
   });
 
@@ -115,6 +139,15 @@ describe('MetricsController', () => {
         ups: 60.0,
         saveSize: 5242880,
         spm: 120.0,
+        espm: 150.0,
+        evolution: 0.45,
+        evolutionGleba: 0.1,
+        pollution: 150,
+        pollutionAbsorbed: 140,
+        pollutionGleba: 25,
+        pollutionGlebaAbsorbed: 20,
+        pollutionTotal: 50000,
+        pollutionGlebaTotal: 0,
       },
     ];
 
@@ -132,6 +165,15 @@ describe('MetricsController', () => {
         ups: 60.0,
         saveSize: 5242880,
         spm: 120.0,
+        espm: 150.0,
+        evolution: 0.45,
+        evolutionGleba: 0.1,
+        pollution: 150,
+        pollutionAbsorbed: 140,
+        pollutionGleba: 25,
+        pollutionGlebaAbsorbed: 20,
+        pollutionTotal: 50000,
+        pollutionGlebaTotal: 0,
       });
 
       await controller.getMetrics('inst-1', '6h', req);
@@ -156,6 +198,24 @@ describe('MetricsController', () => {
           saveSizeMax: 6000,
           spmAvg: 100,
           spmMax: 150,
+          espmAvg: 120,
+          espmMax: 180,
+          evolutionAvg: 0.4,
+          evolutionMax: 0.45,
+          evolutionGlebaAvg: 0.1,
+          evolutionGlebaMax: 0.15,
+          pollutionAvg: 100,
+          pollutionMax: 150,
+          pollutionAbsorbedAvg: 90,
+          pollutionAbsorbedMax: 130,
+          pollutionGlebaAvg: 20,
+          pollutionGlebaMax: 30,
+          pollutionGlebaAbsorbedAvg: 15,
+          pollutionGlebaAbsorbedMax: 25,
+          pollutionTotalAvg: 45000,
+          pollutionTotalMax: 50000,
+          pollutionGlebaTotalAvg: 0,
+          pollutionGlebaTotalMax: 0,
         },
       ];
       mockHourlyRepo.find?.mockResolvedValue(fakeHourly);
@@ -173,6 +233,18 @@ describe('MetricsController', () => {
           saveSizeMax: '6100',
           spmAvg: '110',
           spmMax: '160',
+          evolutionAvg: '0.42',
+          evolutionMax: '0.45',
+          evolutionGlebaAvg: '0.12',
+          evolutionGlebaMax: '0.15',
+          pollutionAvg: '110',
+          pollutionMax: '160',
+          pollutionAbsorbedAvg: '100',
+          pollutionAbsorbedMax: '140',
+          pollutionGlebaAvg: '22',
+          pollutionGlebaMax: '35',
+          pollutionGlebaAbsorbedAvg: '18',
+          pollutionGlebaAbsorbedMax: '30',
         },
       ]);
 
@@ -200,6 +272,18 @@ describe('MetricsController', () => {
           saveSizeMax: '8000',
           spm: '130',
           spmMax: '170',
+          evolution: '0.4',
+          evolutionMax: '0.5',
+          evolutionGleba: '0.1',
+          evolutionGlebaMax: '0.2',
+          pollution: '120',
+          pollutionMax: '200',
+          pollutionAbsorbed: '110',
+          pollutionAbsorbedMax: '180',
+          pollutionGleba: '25',
+          pollutionGlebaMax: '40',
+          pollutionGlebaAbsorbed: '20',
+          pollutionGlebaAbsorbedMax: '35',
         },
       ]);
 
@@ -209,7 +293,42 @@ describe('MetricsController', () => {
       expect(points).toHaveLength(1);
       expect(points[0].cpu).toBe(18);
       expect(points[0].cpuMax).toBe(30);
+      expect(points[0].evolution).toBe(0.4);
+      expect(points[0].pollution).toBe(120);
+      expect(points[0].pollutionMax).toBe(200);
+      expect(points[0].pollutionAbsorbed).toBe(110);
+      expect(points[0].pollutionAbsorbedMax).toBe(180);
+      expect(points[0].pollutionGleba).toBe(25);
+      expect(points[0].pollutionGlebaMax).toBe(40);
+      expect(points[0].pollutionGlebaAbsorbed).toBe(20);
+      expect(points[0].pollutionGlebaAbsorbedMax).toBe(35);
       expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
+  });
+
+  describe('getLiveMetrics', () => {
+    it('returns live metrics when access is allowed', async () => {
+      const req = createFakeReq(
+        { instance_ids: ['inst-1'] },
+        { 'x-fcc-ui-lang': 'ru' },
+      );
+      const live = await controller.getLiveMetrics('inst-1', req);
+      expect(mockCollector.getLiveMetrics).toHaveBeenCalledWith('inst-1', 'ru');
+      expect(live?.active).toBe(true);
+      expect(live?.research?.name).toBe('automation-2');
+    });
+
+    it('falls back to en when x-fcc-ui-lang header is absent', async () => {
+      const req = createFakeReq({ instance_ids: ['inst-1'] });
+      await controller.getLiveMetrics('inst-1', req);
+      expect(mockCollector.getLiveMetrics).toHaveBeenCalledWith('inst-1', 'en');
+    });
+
+    it('throws ForbiddenException when user does not have access', async () => {
+      const req = createFakeReq({ instance_ids: ['inst-other'] });
+      await expect(controller.getLiveMetrics('inst-1', req)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

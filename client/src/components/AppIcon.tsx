@@ -6,22 +6,30 @@ interface AppIconProps {
   size?: number;
   className?: string;
   title?: string;
+  style?: CSSProperties;
 }
 
 /** Monochrome UI icon from `/assets/icons/` (mask; follows `color` of parent). */
-export function AppIcon({ name, size = 18, className, title }: AppIconProps) {
+export function AppIcon({
+  name,
+  size = 18,
+  className,
+  title,
+  style,
+}: AppIconProps) {
   const url = APP_ICON_URLS[name];
-  const style: CSSProperties = {
+  const maskStyle: CSSProperties = {
     width: size,
     height: size,
     WebkitMaskImage: `url(${url})`,
     maskImage: `url(${url})`,
+    ...style,
   };
 
   return (
     <span
       className={'app-icon' + (className ? ` ${className}` : '')}
-      style={style}
+      style={maskStyle}
       role={title ? 'img' : undefined}
       aria-hidden={title ? undefined : true}
       aria-label={title}

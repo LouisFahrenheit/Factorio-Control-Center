@@ -352,6 +352,80 @@ export function lookupLocaleString(
   return locLookup(sections, section, key);
 }
 
+const techTitleCache = new Map<
+  string,
+  { mtime: number; title: string | undefined }
+>();
+
+export function resolveTechnologyTitle(
+  serverPath: string,
+  techName: string,
+  uiLang: string,
+): string | undefined {
+  if (!serverPath || !techName) return undefined;
+  const lang = normalizeModUiLang(uiLang, 'en');
+  const cacheKey = `${serverPath}::${lang}::${techName}`;
+
+  const dataDir = join(serverPath, 'data');
+  const modsDir = join(serverPath, 'mods');
+
+  let mtime = 0;
+  try {
+    if (existsSync(modsDir)) {
+      mtime = statSync(modsDir).mtimeMs;
+    }
+  } catch {
+    /* ignore */
+  }
+
+  const cached = techTitleCache.get(cacheKey);
+  if (cached && cached.mtime === mtime) {
+    return cached.title;
+  }
+
+  let enabledMods: string[] = [];
+  const modListPath = join(modsDir, 'mod-list.json');
+  if (existsSync(modListPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(modListPath, 'utf-8')) as {
+        mods?: { name?: string; enabled?: boolean }[];
+      };
+      if (Array.isArray(parsed?.mods)) {
+        enabledMods = parsed.mods
+          .filter((m) => m?.enabled !== false && typeof m?.name === 'string')
+          .map((m) => m.name!);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const { active, en } = loadFactorioLocaleSections(
+    modsDir,
+    dataDir,
+    enabledMods,
+    lang,
+  );
+
+  let title = lookupLocaleString(active, 'technology-name', techName);
+  if (!title && lang !== 'en') {
+    title = lookupLocaleString(en, 'technology-name', techName);
+  }
+
+  if (!title) {
+    const stripped = techName.replace(/-\d+$/, '');
+    if (stripped !== techName) {
+      title = lookupLocaleString(active, 'technology-name', stripped);
+      if (!title && lang !== 'en') {
+        title = lookupLocaleString(en, 'technology-name', stripped);
+      }
+    }
+  }
+
+  techTitleCache.set(cacheKey, { mtime, title });
+  return title;
+}
+
 function resolveModRowTitle(
   modInternal: string,
   modsDir: string,

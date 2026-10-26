@@ -29,4 +29,31 @@ export class InstanceRawMetric {
 
   @Column('float', { default: 0 })
   spm: number;
+
+  @Column('float', { default: 0 })
+  espm: number;
+
+  @Column('float', { default: 0 })
+  evolution: number;
+
+  @Column('float', { default: 0 })
+  evolutionGleba: number;
+
+  @Column('float', { default: 0 })
+  pollution: number;
+
+  @Column('float', { default: 0 })
+  pollutionAbsorbed: number;
+
+  @Column('float', { default: 0 })
+  pollutionGleba: number;
+
+  @Column('float', { default: 0 })
+  pollutionGlebaAbsorbed: number;
+
+  @Column('float', { default: 0 })
+  pollutionTotal: number;
+
+  @Column('float', { default: 0 })
+  pollutionGlebaTotal: number;
 }

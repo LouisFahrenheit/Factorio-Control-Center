@@ -1113,6 +1113,8 @@ export class RuntimeService implements OnModuleDestroy {
         this.emitRuntimeStatus(rt);
         // Notify: server started
         void this.notifications.onServerStarted(rt.instanceId);
+        // Handshake with FCC: Metrics mod
+        void this.handshakeMetricsMod(rt.instanceId);
       }
     }
 
@@ -1205,6 +1207,26 @@ export class RuntimeService implements OnModuleDestroy {
       if (Object.keys(deltas).length > 0) {
         batchAddPlayerOnlineSeconds(rt.serverPath, deltas);
       }
+    }
+  }
+
+  private async handshakeMetricsMod(instanceId: string): Promise<void> {
+    // Wait briefly for RCON listener socket to be ready
+    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      const res = await this.rconExec(instanceId, '/fcc-connected', false);
+      if (
+        res.ok &&
+        res.output &&
+        (res.output.includes('fcc-metrics') ||
+          res.output.includes('factorio-control-center-metrics'))
+      ) {
+        this.log.log(
+          `[FCC: Metrics] Mod handshake confirmed for instance ${this.instanceLabel(instanceId)}`,
+        );
+      }
+    } catch {
+      /* ignore if mod not installed or RCON transient failure */
     }
   }
 }

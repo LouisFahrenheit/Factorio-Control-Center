@@ -511,6 +511,25 @@ describe('FactorioUpdateService', () => {
 
       expect(selected).toBe('core-win64');
     });
+
+    it('should select linux expansion package key when flavor is expansion on any runner', () => {
+      const avail = {
+        'core-linux_headless64': [],
+        'expansion-linux_headless64': [],
+      };
+
+      const selected = (
+        service as unknown as {
+          selectPackage: (
+            avail: Record<string, unknown>,
+            defaultPkg: string,
+            flavor: string,
+          ) => string;
+        }
+      ).selectPackage(avail, 'core-linux_headless64', 'expansion');
+
+      expect(selected).toBe('expansion-linux_headless64');
+    });
   });
 
   describe('start, status, and stop', () => {

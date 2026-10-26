@@ -51,6 +51,8 @@ export const APP_ICON_URLS = {
   reset: '/assets/icons/reset.svg',
   restart: '/assets/icons/restart.svg',
   save: '/assets/icons/save.svg',
+  science: '/assets/icons/science.svg',
+  science_off: '/assets/icons/science_off.svg',
   search: '/assets/icons/search.svg',
   server: '/assets/icons/server.svg',
   select_check_box: '/assets/icons/select_check_box.svg',

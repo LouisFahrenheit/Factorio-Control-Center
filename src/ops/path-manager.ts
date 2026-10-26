@@ -32,6 +32,18 @@ export class PathManager {
     return join(this.serverPath, 'saves');
   }
 
+  get scriptOutputDir(): string {
+    return join(this.serverPath, 'script-output');
+  }
+
+  get companionMetricsFile(): string {
+    return join(
+      this.scriptOutputDir,
+      'factorio-control-center',
+      'metrics.json',
+    );
+  }
+
   findFactorioExe(): string | null {
     return findFactorioExecutable(this.serverPath);
   }

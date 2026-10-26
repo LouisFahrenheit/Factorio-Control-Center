@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import { existsSync, statSync } from 'fs';
+import { existsSync, promises as fsPromises, statSync } from 'fs';
 import { join } from 'path';
 import { InstanceRawMetric } from './entities/instance-raw-metric.entity';
 import { InstanceHourlyMetric } from './entities/instance-hourly-metric.entity';
 import { RuntimeService } from '../ops/runtime.service';
 import { InstancesService } from '../instances/instances.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { resolveTechnologyTitle } from '../ops/mod-display-titles.util';
 import pidusage from 'pidusage';
 
 interface RawAggregateRow {
@@ -29,6 +30,76 @@ interface RawAggregateRow {
   saveSizeMax: string | number;
   spmAvg: string | number;
   spmMax: string | number;
+  espmAvg: string | number;
+  espmMax: string | number;
+  evolutionAvg: string | number;
+  evolutionMax: string | number;
+  evolutionGlebaAvg: string | number;
+  evolutionGlebaMax: string | number;
+  pollutionAvg: string | number;
+  pollutionMax: string | number;
+  pollutionAbsorbedAvg: string | number;
+  pollutionAbsorbedMax: string | number;
+  pollutionGlebaAvg: string | number;
+  pollutionGlebaMax: string | number;
+  pollutionGlebaAbsorbedAvg: string | number;
+  pollutionGlebaAbsorbedMax: string | number;
+  pollutionTotalAvg: string | number;
+  pollutionTotalMax: string | number;
+  pollutionGlebaTotalAvg: string | number;
+  pollutionGlebaTotalMax: string | number;
+}
+
+export interface CompanionEvolutionData {
+  factor?: number;
+  percent?: number;
+  nauvis_percent?: number;
+  gleba_percent?: number;
+}
+
+export interface CompanionPollutionData {
+  nauvis?: number;
+  nauvis_absorbed?: number;
+  nauvis_total?: number;
+  gleba?: number;
+  gleba_absorbed?: number;
+  gleba_total?: number;
+}
+
+export interface CompanionResearchData {
+  name?: string;
+  localised_name?: string;
+  level?: number;
+  progress_percent?: number;
+  units_done?: number;
+  units_total?: number;
+  eta_seconds?: number | null;
+  ingredients?: Array<{ name: string; amount: number }>;
+}
+
+export interface CompanionLiveMetrics {
+  active: boolean;
+  disabled?: boolean;
+  game_speed?: number;
+  paused?: boolean;
+  research?: CompanionResearchData | null;
+  evolution?: CompanionEvolutionData;
+  pollution?: CompanionPollutionData;
+  updatedAt?: number;
+}
+
+export interface CompanionMetricsPayload {
+  ok?: boolean;
+  tick?: number;
+  ups?: number;
+  spm?: number;
+  espm?: number;
+  total_spm?: number;
+  game_speed?: number;
+  paused?: boolean;
+  evolution?: CompanionEvolutionData;
+  pollution?: CompanionPollutionData;
+  research?: CompanionResearchData;
 }
 
 @Injectable()
@@ -40,6 +111,7 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
   private lastTicks = new Map<string, { tick: number; time: number }>();
   private lowUpsStreak = new Map<string, number>();
   private lowUpsAlerted = new Set<string>();
+  private latestCompanionMetrics = new Map<string, CompanionLiveMetrics>();
 
   constructor(
     @InjectRepository(InstanceRawMetric, 'metricsConnection')
@@ -104,84 +176,72 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
           // Only runs if the instance has collectGameMetrics enabled (disabled by default to protect achievements).
           let ups = 60.0;
           let spm = 0.0;
+          let espm = 0.0;
+          let evolution = 0.0;
+          let evolutionGleba = 0.0;
+          let pollution = 0.0;
+          let pollutionAbsorbed = 0.0;
+          let pollutionTotal = 0.0;
+          let pollutionGleba = 0.0;
+          let pollutionGlebaAbsorbed = 0.0;
+          let pollutionGlebaTotal = 0.0;
           const item = this.instances.getById(id);
           if (item?.collectGameMetrics) {
-            const luaScript = `
-              local tick = game.tick
-              local max_spm = 0
-              local force = game.forces['player']
-              if force then
-                local packs = {
-                  "automation-science-pack",
-                  "logistic-science-pack",
-                  "military-science-pack",
-                  "chemical-science-pack",
-                  "production-science-pack",
-                  "utility-science-pack",
-                  "space-science-pack",
-                  "metallurgic-science-pack",
-                  "electromagnetic-science-pack",
-                  "agricultural-science-pack",
-                  "cryogenic-science-pack",
-                  "promethium-science-pack"
-                }
-                local item_prototypes = prototypes and prototypes.item or game.item_prototypes
-                for _, p in ipairs(packs) do
-                  if item_prototypes and item_prototypes[p] then
-                    local total_count = 0
-                    if type(force.get_item_production_statistics) == "function" then
-                      for _, surface in pairs(game.surfaces) do
-                        local stats = force.get_item_production_statistics(surface)
-                        if stats then
-                          total_count = total_count + (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
-                        end
-                      end
-                    else
-                      local stats = force.item_production_statistics
-                      if stats then
-                        total_count = (stats.get_flow_count{name=p, category="output", precision_index=defines.flow_precision_index.one_minute} or 0)
-                      end
-                    end
-                    if total_count > max_spm then
-                      max_spm = total_count
-                    end
-                  end
-                end
-              end
-              rcon.print(tick .. "," .. max_spm)
-            `;
+            const gameMetrics = await this.collectInstanceGameMetrics(id);
+            ups = gameMetrics.ups;
+            spm = gameMetrics.spm;
+            espm = gameMetrics.espm;
 
-            const res = await this.runtime.rconExec(
-              id,
-              `/silent-command ${luaScript.replace(/\s+/g, ' ').trim()}`,
-              false,
-            );
-            if (res.ok && res.output) {
-              const parts = res.output.trim().split(',');
-              const currentTick = parseInt(parts[0], 10);
-              if (parts[1]) {
-                spm = parseFloat(parts[1]) || 0.0;
+            const companion = this.latestCompanionMetrics.get(id);
+            if (companion?.evolution) {
+              if (typeof companion.evolution.nauvis_percent === 'number') {
+                evolution = companion.evolution.nauvis_percent;
+              } else if (typeof companion.evolution.percent === 'number') {
+                evolution = companion.evolution.percent;
               }
 
-              if (!isNaN(currentTick)) {
-                const last = this.lastTicks.get(id);
-                const currentTime = Date.now();
-                if (last && currentTick >= last.tick) {
-                  const tickDiff = currentTick - last.tick;
-                  const timeDiffSec = (currentTime - last.time) / 1000;
-                  if (timeDiffSec > 0) {
-                    // Calculate UPS = ticks / seconds, max 60.0
-                    ups = Math.min(60.0, Math.max(0.0, tickDiff / timeDiffSec));
+              if (typeof companion.evolution.gleba_percent === 'number') {
+                evolutionGleba = companion.evolution.gleba_percent;
+              }
+            }
+
+            if (companion?.pollution) {
+              if (typeof companion.pollution.nauvis === 'number') {
+                pollution = companion.pollution.nauvis;
+              }
+              if (typeof companion.pollution.nauvis_absorbed === 'number') {
+                pollutionAbsorbed = companion.pollution.nauvis_absorbed;
+              }
+              if (typeof companion.pollution.nauvis_total === 'number') {
+                pollutionTotal = companion.pollution.nauvis_total;
+              } else {
+                try {
+                  const res = await this.runtime.rconExec(
+                    id,
+                    '/silent-command local sn=game.surfaces["nauvis"]; local sg=game.surfaces["gleba"]; rcon.print((sn and sn.get_total_pollution() or 0) .. "," .. (sg and sg.get_total_pollution() or 0))',
+                  );
+                  if (res?.ok && res.output) {
+                    const parts = res.output.trim().split(',');
+                    const nTot = parseFloat(parts[0]);
+                    const gTot = parseFloat(parts[1]);
+                    if (!isNaN(nTot))
+                      pollutionTotal = Math.round(nTot * 10) / 10;
+                    if (!isNaN(gTot))
+                      pollutionGlebaTotal = Math.round(gTot * 10) / 10;
                   }
+                } catch {
+                  // Ignore RCON failures
                 }
-                this.lastTicks.set(id, {
-                  tick: currentTick,
-                  time: currentTime,
-                });
               }
-            } else {
-              // If RCON command failed, server could be starting, sleeping, or frozen
-              ups = 0.0;
+              if (typeof companion.pollution.gleba === 'number') {
+                pollutionGleba = companion.pollution.gleba;
+              }
+              if (typeof companion.pollution.gleba_absorbed === 'number') {
+                pollutionGlebaAbsorbed = companion.pollution.gleba_absorbed;
+              }
+              if (typeof companion.pollution.gleba_total === 'number') {
+                pollutionGlebaTotal = companion.pollution.gleba_total;
+              }
             }
 
             const onlineCount = Object.keys(rt.onlinePlayers || {}).length;
@@ -231,6 +291,15 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
             ups,
             saveSize,
             spm,
+            espm,
+            evolution,
+            evolutionGleba,
+            pollution,
+            pollutionAbsorbed,
+            pollutionGleba,
+            pollutionGlebaAbsorbed,
+            pollutionTotal,
+            pollutionGlebaTotal,
           });
           records.push(record);
         } catch (err: unknown) {
@@ -288,7 +357,25 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
             AVG(saveSize) as saveSizeAvg,
             MAX(saveSize) as saveSizeMax,
             AVG(spm) as spmAvg,
-            MAX(spm) as spmMax
+            MAX(spm) as spmMax,
+            AVG(espm) as espmAvg,
+            MAX(espm) as espmMax,
+            AVG(evolution) as evolutionAvg,
+            MAX(evolution) as evolutionMax,
+            AVG(evolutionGleba) as evolutionGlebaAvg,
+            MAX(evolutionGleba) as evolutionGlebaMax,
+            AVG(pollution) as pollutionAvg,
+            MAX(pollution) as pollutionMax,
+            AVG(pollutionAbsorbed) as pollutionAbsorbedAvg,
+            MAX(pollutionAbsorbed) as pollutionAbsorbedMax,
+            AVG(pollutionGleba) as pollutionGlebaAvg,
+            MAX(pollutionGleba) as pollutionGlebaMax,
+            AVG(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbedAvg,
+            MAX(pollutionGlebaAbsorbed) as pollutionGlebaAbsorbedMax,
+            AVG(pollutionTotal) as pollutionTotalAvg,
+            MAX(pollutionTotal) as pollutionTotalMax,
+            AVG(pollutionGlebaTotal) as pollutionGlebaTotalAvg,
+            MAX(pollutionGlebaTotal) as pollutionGlebaTotalMax
           FROM instance_raw_metrics
           WHERE timestamp < ?
           GROUP BY instanceId, hourStr
@@ -313,6 +400,30 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
             saveSizeMax: parseInt(String(agg.saveSizeMax), 10) || 0,
             spmAvg: Number(agg.spmAvg) || 0,
             spmMax: Number(agg.spmMax) || 0,
+            espmAvg: Number(agg.espmAvg) || 0,
+            espmMax: Number(agg.espmMax) || 0,
+            evolutionAvg: Number(agg.evolutionAvg) || 0,
+            evolutionMax: Number(agg.evolutionMax) || 0,
+            evolutionGlebaAvg: Number(agg.evolutionGlebaAvg) || 0,
+            evolutionGlebaMax: Number(agg.evolutionGlebaMax) || 0,
+            pollutionAvg: Math.round(Number(agg.pollutionAvg)) || 0,
+            pollutionMax: Math.round(Number(agg.pollutionMax)) || 0,
+            pollutionAbsorbedAvg:
+              Math.round(Number(agg.pollutionAbsorbedAvg)) || 0,
+            pollutionAbsorbedMax:
+              Math.round(Number(agg.pollutionAbsorbedMax)) || 0,
+            pollutionGlebaAvg: Math.round(Number(agg.pollutionGlebaAvg)) || 0,
+            pollutionGlebaMax: Math.round(Number(agg.pollutionGlebaMax)) || 0,
+            pollutionGlebaAbsorbedAvg:
+              Math.round(Number(agg.pollutionGlebaAbsorbedAvg)) || 0,
+            pollutionGlebaAbsorbedMax:
+              Math.round(Number(agg.pollutionGlebaAbsorbedMax)) || 0,
+            pollutionTotalAvg: Math.round(Number(agg.pollutionTotalAvg)) || 0,
+            pollutionTotalMax: Math.round(Number(agg.pollutionTotalMax)) || 0,
+            pollutionGlebaTotalAvg:
+              Math.round(Number(agg.pollutionGlebaTotalAvg)) || 0,
+            pollutionGlebaTotalMax:
+              Math.round(Number(agg.pollutionGlebaTotalMax)) || 0,
           });
           hourlyRecords.push(record);
         }
@@ -347,8 +458,211 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
       await vacuumRunner.query('VACUUM');
       await vacuumRunner.release();
       this.log.log('VACUUM complete on fcc_metrics.sqlite.');
-    } catch (err) {
-      this.log.error(`Error during metrics aggregation/cleanup: ${err}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.log.error(`Error during metrics aggregation/cleanup: ${msg}`);
     }
+  }
+
+  /**
+   * Reads in-game UPS and SPM metrics exclusively from script-output/factorio-control-center/metrics.json
+   * exported periodically by the FCC: Metrics mod.
+   * 100% achievement-safe, passive, and never sends RCON commands (avoids waking the server during auto-pause).
+   */
+  private async collectInstanceGameMetrics(
+    id: string,
+  ): Promise<{ ups: number; spm: number; espm: number }> {
+    let ups = 60.0;
+    let spm = 0.0;
+    let espm = 0.0;
+    const now = Date.now();
+    const rt = this.runtime.get(id);
+    if (!rt?.serverPath) {
+      return { ups, spm, espm };
+    }
+
+    // Check if the mod is explicitly disabled in mods/mod-list.json
+    const modListPath = join(rt.serverPath, 'mods', 'mod-list.json');
+    if (existsSync(modListPath)) {
+      try {
+        const rawModList = await fsPromises.readFile(modListPath, 'utf-8');
+        const parsedModList = JSON.parse(rawModList) as {
+          mods?: Array<{ name?: string; enabled?: boolean }>;
+        };
+        if (Array.isArray(parsedModList?.mods)) {
+          const entry = parsedModList.mods.find(
+            (m) =>
+              m?.name &&
+              (m.name === 'fcc-metrics' ||
+                m.name === 'factorio-control-center-metrics' ||
+                m.name === 'fcc_metrics' ||
+                m.name.startsWith('fcc-metrics') ||
+                m.name.startsWith('factorio-control-center-metrics') ||
+                m.name.startsWith('fcc_metrics')),
+          );
+          if (entry && entry.enabled === false) {
+            this.latestCompanionMetrics.set(id, {
+              active: false,
+              disabled: true,
+              updatedAt: now,
+            });
+            return { ups: 60.0, spm: 0.0, espm: 0.0 };
+          }
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.log.debug(
+          `Failed to check mod-list.json for instance ${this.instanceLabel(id)}: ${msg}`,
+        );
+      }
+    }
+
+    const filePath = join(
+      rt.serverPath,
+      'script-output',
+      'factorio-control-center',
+      'metrics.json',
+    );
+
+    if (!existsSync(filePath)) {
+      this.latestCompanionMetrics.set(id, {
+        active: false,
+        disabled: false,
+        updatedAt: now,
+      });
+      return { ups: 0.0, spm: 0.0, espm: 0.0 };
+    }
+
+    try {
+      const st = statSync(filePath);
+      const ageMs = Math.max(0, now - st.mtimeMs);
+      const raw = await fsPromises.readFile(filePath, 'utf-8');
+      const data = JSON.parse(raw) as CompanionMetricsPayload;
+
+      if (data && data.ok && typeof data.tick === 'number') {
+        if (typeof data.spm === 'number') {
+          spm = data.spm;
+        }
+        if (typeof data.espm === 'number') {
+          espm = data.espm;
+        }
+
+        // The mod exports metrics every 60 ticks (1 second).
+        // If mtime is older than 3.5 seconds, or game.tick_paused is true, the simulation is paused.
+        const isPaused = Boolean(data.paused) || ageMs > 3500;
+
+        if (isPaused) {
+          ups = 0.0;
+        } else {
+          const last = this.lastTicks.get(id);
+          if (last && data.tick >= last.tick) {
+            const tickDiff = data.tick - last.tick;
+            const timeDiffSec = (now - last.time) / 1000;
+            if (timeDiffSec > 0) {
+              const maxExpected = (data.game_speed || 1.0) * 60.0;
+              ups = Math.min(
+                maxExpected,
+                Math.max(0.0, tickDiff / timeDiffSec),
+              );
+            }
+          } else {
+            ups = (data.game_speed || 1.0) * 60.0;
+          }
+        }
+
+        this.lastTicks.set(id, { tick: data.tick, time: now });
+
+        this.latestCompanionMetrics.set(id, {
+          active: true,
+          disabled: false,
+          game_speed:
+            typeof data.game_speed === 'number' ? data.game_speed : 1.0,
+          paused: isPaused,
+          research: data.research ?? null,
+          evolution: data.evolution,
+          pollution: data.pollution,
+          updatedAt: now,
+        });
+      } else {
+        this.latestCompanionMetrics.set(id, {
+          active: false,
+          disabled: false,
+          updatedAt: now,
+        });
+      }
+    } catch (err: unknown) {
+      this.latestCompanionMetrics.set(id, {
+        active: false,
+        disabled: false,
+        updatedAt: now,
+      });
+      const message = err instanceof Error ? err.message : String(err);
+      this.log.debug(
+        `Failed to read companion metrics JSON for instance ${this.instanceLabel(id)}: ${message}`,
+      );
+    }
+
+    return { ups, spm, espm };
+  }
+
+  async getLiveMetrics(
+    id: string,
+    uiLang?: string,
+  ): Promise<CompanionLiveMetrics | null> {
+    const rt = this.runtime.get(id);
+    if (!rt?.proc || rt.proc.exitCode !== null) {
+      return null;
+    }
+
+    await this.collectInstanceGameMetrics(id);
+    const metrics = this.latestCompanionMetrics.get(id);
+    if (!metrics) {
+      return null;
+    }
+
+    if (metrics.pollution && metrics.pollution.nauvis_total === undefined) {
+      try {
+        const res = await this.runtime.rconExec(
+          id,
+          '/silent-command local sn=game.surfaces["nauvis"]; local sg=game.surfaces["gleba"]; rcon.print((sn and sn.get_total_pollution() or 0) .. "," .. (sg and sg.get_total_pollution() or 0))',
+        );
+        if (res?.ok && res.output) {
+          const parts = res.output.trim().split(',');
+          const nTot = parseFloat(parts[0]);
+          const gTot = parseFloat(parts[1]);
+          if (!isNaN(nTot)) {
+            metrics.pollution.nauvis_total = Math.round(nTot * 10) / 10;
+          }
+          if (!isNaN(gTot)) {
+            metrics.pollution.gleba_total = Math.round(gTot * 10) / 10;
+          }
+        }
+      } catch {
+        // Ignore RCON failures
+      }
+    }
+
+    if (metrics.research?.name && rt.serverPath) {
+      const resolved = resolveTechnologyTitle(
+        rt.serverPath,
+        metrics.research.name,
+        uiLang || 'en',
+      );
+      if (resolved) {
+        return {
+          ...metrics,
+          research: {
+            ...metrics.research,
+            localised_name: resolved,
+          },
+        };
+      }
+    }
+
+    return metrics;
+  }
+
+  getLatestCompanionMetrics(id: string): CompanionLiveMetrics | null {
+    return this.latestCompanionMetrics.get(id) ?? null;
   }
 }

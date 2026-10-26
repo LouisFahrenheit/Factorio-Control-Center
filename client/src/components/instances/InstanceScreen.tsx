@@ -300,6 +300,21 @@ export function InstanceScreen({
     setInstanceMsgTimed: instances.setInstanceMsgTimed,
   });
 
+  useEffect(() => {
+    try {
+      const targetId = sessionStorage.getItem('fcc_open_edit_instance');
+      if (targetId && rows.length > 0) {
+        sessionStorage.removeItem('fcc_open_edit_instance');
+        const target = rows.find((r) => String(r.id) === targetId);
+        if (target) {
+          instanceEditor.openEdit(target);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [rows, instanceEditor]);
+
   const hasServers = rows.length > 0;
   const activeMaintTasks = useMemo(
     () => maintenance.tasks.filter((task) => !!task.active).length,

@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
-import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from 'fs';
 import { basename, join } from 'path';
 import { tmpdir } from 'os';
 import { FccConfigService } from '../../config/fcc-config.service';
@@ -9,7 +16,6 @@ import { ModPortalService } from '../mod-portal/mod-portal.service';
 import { RuntimeService } from '../runtime.service';
 import {
   OpResult,
-  copyFileUnique,
   ensureModListEntry,
   gameVersion,
   hasSpaceAge,
@@ -386,22 +392,57 @@ export class ModsOpsService {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     if (!existsSync(tmpPath)) return { ok: false, error: 'tmp_not_found' };
-    const final = copyFileUnique(
-      tmpPath,
-      sel.pm.modsDir,
-      basename(name || tmpPath),
-    );
-    const zipPath = join(sel.pm.modsDir, final);
-    const modName = modNameFromZip(final);
-    const manifest = readModManifest(zipPath);
-    if (!manifest || typeof manifest !== 'object' || !manifest.name) {
-      rmSync(zipPath, { force: true });
-      return { ok: false, error: 'invalid_mod_archive', mod_name: modName };
+    const manifest = readModManifest(tmpPath);
+    if (
+      !manifest ||
+      typeof manifest !== 'object' ||
+      typeof manifest.name !== 'string' ||
+      !manifest.name.trim() ||
+      typeof manifest.version !== 'string' ||
+      !manifest.version.trim()
+    ) {
+      const fallbackName = modNameFromZip(basename(name || tmpPath));
+      return {
+        ok: false,
+        error: 'invalid_mod_archive',
+        mod_name: fallbackName,
+      };
     }
+
+    const modName = manifest.name.trim();
+    const modVersion = manifest.version.trim();
     const serverHasSpaceAge = hasSpaceAge(sel.item.serverPath);
     if (!serverHasSpaceAge && manifestRequiresSpaceAge(manifest)) {
-      rmSync(zipPath, { force: true });
       return { ok: false, error: 'requires_space_age', mod_name: modName };
+    }
+
+    mkdirSync(sel.pm.modsDir, { recursive: true });
+    const final = `${modName}_${modVersion}.zip`;
+    const zipPath = join(sel.pm.modsDir, final);
+
+    copyFileSync(tmpPath, zipPath);
+
+    // Clean up any stale duplicate suffixes like mod_1.0.0_1.zip which cause Factorio to crash on boot
+    try {
+      for (const f of readdirSync(sel.pm.modsDir)) {
+        if (
+          f !== final &&
+          f
+            .toLowerCase()
+            .startsWith(
+              `${modName.toLowerCase()}_${modVersion.toLowerCase()}_`,
+            ) &&
+          f.toLowerCase().endsWith('.zip')
+        ) {
+          rmSync(join(sel.pm.modsDir, f), { force: true });
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    if (this.readRemoveOldZips(sel.item.serverPath)) {
+      this.portal.pruneOldZips(modName, modVersion, sel.pm.modsDir);
     }
     ensureModListEntry(sel.pm, modName, true);
     trackModInstallMeta(sel.item.serverPath, [modName], actor, false);

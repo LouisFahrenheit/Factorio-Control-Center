@@ -18566,6 +18566,11 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   overflow: hidden;
 }
 
+:root[data-theme="dark_space"] .panel-shell > .tab-panels,
+:root[data-theme="ion_storm"] .panel-shell > .tab-panels {
+  overflow: auto;
+}
+
 :root[data-theme="dark_space"] .tab-panels::before, :root[data-theme="ion_storm"] .tab-panels::before {
   content: "";
   position: absolute;
@@ -19478,6 +19483,10 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   position: relative;
   overflow: hidden;
+}
+
+:root[data-theme="vulcanus"] .panel-shell > .tab-panels {
+  overflow: auto;
 }
 
 :root[data-theme="vulcanus"] .tab-panels::before {
