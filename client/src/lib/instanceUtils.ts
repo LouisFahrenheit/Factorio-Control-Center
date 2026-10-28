@@ -19,7 +19,8 @@ export function formatUptime(sec: number | null | undefined, placeholder: string
     String(m).padStart(2, '0') +
     ':' +
     String(s).padStart(2, '0');
-  return d + 'd ' + hms;
+  if (d === 0) return hms;
+  return `${d}:${hms}`;
 }
 
 export function formatInstanceGameVersion(

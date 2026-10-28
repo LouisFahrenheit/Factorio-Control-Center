@@ -25,6 +25,10 @@ interface AppStatusBarProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
+function formatPanelUptime(sec: number | null | undefined): string {
+  return formatUptime(sec, '');
+}
+
 export function AppStatusBar({
   mode,
   user,
@@ -112,19 +116,6 @@ export function AppStatusBar({
                 </span>
               </div>
             </div>
-            <div className="instance-dashboard-stat instance-dashboard-stat--online">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                <AppIcon name="users" size={16} />
-              </span>
-              <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_online_all">
-                  {t('instances_online_all')}
-                </span>
-                <span className="instance-dashboard-stat__value" id="instancesOnlineTop">
-                  {dashboard?.online ?? 0}
-                </span>
-              </div>
-            </div>
             <div className="instance-dashboard-stat instance-dashboard-stat--stopped">
               <span className="instance-dashboard-stat__icon" aria-hidden="true">
                 <AppIcon name="stop" size={18} />
@@ -135,6 +126,19 @@ export function AppStatusBar({
                 </span>
                 <span className="instance-dashboard-stat__value" id="instancesStoppedTop">
                   {dashboard?.stopped ?? 0}
+                </span>
+              </div>
+            </div>
+            <div className="instance-dashboard-stat instance-dashboard-stat--online">
+              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <AppIcon name="users" size={16} />
+              </span>
+              <div className="instance-dashboard-stat__body">
+                <span className="instance-dashboard-stat__label" data-i18n="instances_online_all">
+                  {t('instances_online_all')}
+                </span>
+                <span className="instance-dashboard-stat__value" id="instancesOnlineTop">
+                  {dashboard?.online ?? 0}
                 </span>
               </div>
             </div>
@@ -370,8 +374,8 @@ export function AppStatusBar({
                   </span>
                   <span id="uptimeVal" className="instance-dashboard-stat__value">
                     {status?.server_running
-                      ? formatUptime(status.uptime_seconds, placeholder)
-                      : placeholder}
+                      ? formatPanelUptime(status.uptime_seconds)
+                      : ''}
                   </span>
                 </div>
               </div>
@@ -387,7 +391,7 @@ export function AppStatusBar({
             title={t('web_auth_user_info', user.username || '?', roleText)}
           >
             <span className="instance-dashboard-user__avatar" aria-hidden="true">
-              <AppIcon name="badge" size={18} />
+              <AppIcon name="badge" size={16} />
             </span>
             <div className="instance-dashboard-user__body">
               <span className="instance-dashboard-user__name">{user.username || '?'}</span>

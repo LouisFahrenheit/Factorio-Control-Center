@@ -19,12 +19,12 @@ describe('instanceUtils lib', () => {
       expect(formatUptime(-10, '—')).toBe('—');
     });
 
-    it('formats seconds into days and hh:mm:ss', () => {
-      expect(formatUptime(0, '-')).toBe('0d 00:00:00');
-      expect(formatUptime(59, '-')).toBe('0d 00:00:59');
-      expect(formatUptime(3665, '-')).toBe('0d 01:01:05');
+    it('formats seconds into days and hh:mm:ss without leading 0d when under 24h', () => {
+      expect(formatUptime(0, '-')).toBe('00:00:00');
+      expect(formatUptime(59, '-')).toBe('00:00:59');
+      expect(formatUptime(3665, '-')).toBe('01:01:05');
       // 1 day = 86400 sec. 86400 + 7200 + 180 + 4 = 93784
-      expect(formatUptime(93784, '-')).toBe('1d 02:03:04');
+      expect(formatUptime(93784, '-')).toBe('1:02:03:04');
     });
   });
 

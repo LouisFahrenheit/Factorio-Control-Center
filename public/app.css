@@ -4959,9 +4959,9 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .instance-status-pill--running {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: #4ade80;
+  background: color-mix(in srgb, #2ecc71 14%, var(--bg-main) 50%, var(--bg-widget) 40%);
+  border-color: color-mix(in srgb, #2ecc71 45%, transparent);
 }
 
 .instance-status-pill--stopped {
@@ -5003,37 +5003,36 @@ table.data.data--modpacks tbody tr:hover td {
 .instance-card__meta-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--text) 78%, var(--text-muted) 22%);
   font-family: var(--font-mono, monospace);
   letter-spacing: -0.01em;
 }
 
 .instance-card__meta-icon {
-  opacity: 0.7;
+  opacity: 0.8;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .instance-card__meta-rcon {
-  font-size: 0.72rem;
-  opacity: 0.65;
-  font-weight: 500;
+  display: none;
 }
 
 .instance-card__version-pill {
   display: inline-flex;
   align-items: center;
-  padding: 1px 7px;
+  padding: 2.5px 8px;
   border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 650;
   font-family: var(--font-mono, monospace);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  color: color-mix(in srgb, var(--text) 78%, var(--text-muted) 22%);
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-data) 40%);
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition: all 0.16s ease;
 }
 
@@ -5042,9 +5041,10 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .instance-card__version-pill--clickable:hover {
-  background: color-mix(in srgb, var(--accent) 24%, transparent);
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
+  color: var(--text, #fff);
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-data) 60%);
+  border-color: color-mix(in srgb, var(--border) 90%, transparent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   transform: translateY(-1px);
 }
 
@@ -5091,13 +5091,13 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .instance-card__stat-tile--active-players .instance-card__stat-icon {
-  color: #4ade80 !important;
-  opacity: 1 !important;
+  color: var(--text-muted);
+  opacity: 0.75;
 }
 
 .instance-card__stat-tile--active-players .instance-card__stat-value {
-  color: #4ade80 !important;
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4) !important;
+  color: var(--text);
+  text-shadow: none;
 }
 
 .instance-card__stat-tile--active-players:hover {

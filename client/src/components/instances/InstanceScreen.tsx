@@ -421,7 +421,7 @@ export function InstanceScreen({
               onClick={() => activateTab('public')}
             >
               <span className="sub-tabs__tab-inner">
-                <AppIcon name="lan" size={18} />
+                <AppIcon name="public_page" size={18} />
                 {t('instances_tab_public') || 'Public Page'}
               </span>
             </button>

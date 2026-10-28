@@ -3864,7 +3864,20 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 .instance-dashboard-top .instance-dashboard-stat {
   min-width: 76px;
-  padding: 6px 12px 6px 10px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 5px 10px 5px 8px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--ram {
+  min-width: 126px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--disk {
+  min-width: 132px;
 }
 
 .instance-dashboard-top .instance-dashboard-stat__icon {
@@ -3908,6 +3921,203 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   margin: 0 2px;
 }
 
+/* ── Panel Top Dashboard (Unified Aesthetics with Instances Dashboard) ── */
+
+.panel-dashboard-top {
+  display: inline-flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.panel-dashboard-top .instance-dashboard-stat {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 5px 10px 5px 8px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+}
+
+/* Stabilized card dimensions: prevent any resizing/jumping on status and content transitions */
+.panel-dashboard-top .panel-dashboard-stat--name {
+  min-width: 140px;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--status {
+  flex: 0 0 152px;
+  width: 152px;
+  min-width: 152px;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__label {
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.05em !important;
+  line-height: 1.2;
+  min-height: 1.2em;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--meta:first-of-type {
+  flex: 0 0 144px;
+  width: 144px;
+  min-width: 144px;
+}
+
+/* Keep LAN PUB RUV flags on a single neat line so the card never expands vertically */
+.panel-dashboard-top .panel-dashboard-stat--flags {
+  flex: 0 0 174px;
+  width: 174px;
+  min-width: 174px;
+}
+
+.panel-dashboard-top .panel-dashboard-flags {
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  gap: 4px !important;
+}
+
+.panel-dashboard-top .panel-dashboard-flag {
+  min-width: 1.85rem !important;
+  padding: 2px 6px !important;
+  font-size: 0.65em !important;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--meta:last-of-type {
+  flex: 0 0 98px;
+  width: 98px;
+  min-width: 98px;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--online {
+  flex: 0 0 168px;
+  width: 168px;
+  min-width: 168px;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--uptime {
+  flex: 0 0 168px;
+  width: 168px;
+  min-width: 168px;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center;
+  text-align: center !important;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__label {
+  width: 100%;
+  text-align: center !important;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__value {
+  width: 100%;
+  text-align: center !important;
+  display: block;
+  min-height: 1.05em;
+  font-size: 1.05em !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* All instance stats in panel top share the calm graphite badge style from instances dashboard */
+.panel-dashboard-top .instance-dashboard-stat .instance-dashboard-stat__icon,
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__icon {
+  color: var(--text-muted, #9ba3af) !important;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%) !important;
+  border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
+  transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+/* Smooth hover brightness for secondary icons */
+.panel-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
+  color: var(--text, #fff) !important;
+  border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
+}
+
+/* High-contrast crisp typography for server name */
+.panel-dashboard-stat--name .instance-dashboard-stat__value {
+  font-weight: 750 !important;
+  color: var(--text, #fff);
+  letter-spacing: -0.01em;
+}
+
+/* Refined "Back to servers" navigation button with balanced Factorio amber accent */
+.status-bar--panel .status-bar__back.instance-dashboard-stat {
+  min-width: 90px !important;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 5px 10px 5px 8px !important;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-dark) 70%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.16) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+}
+
+.status-bar--panel .status-bar__back--nav .instance-dashboard-stat__icon {
+  color: var(--accent, #da8216) !important;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%) !important;
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--border) 74%) !important;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
+}
+
+.status-bar--panel .status-bar__back--nav .instance-dashboard-stat__value {
+  color: var(--text, #fff) !important;
+  font-weight: 700 !important;
+  transition: color 0.18s ease !important;
+}
+
+.status-bar--panel .status-bar__back--nav:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-dark) 45%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 10px color-mix(in srgb, var(--accent) 18%, transparent) !important;
+}
+
+.status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__icon {
+  color: var(--accent-selected, #e59b2a) !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-main) 86%) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+}
+
+.status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__value {
+  color: var(--accent-selected, #e59b2a) !important;
+}
+
+.status-bar--panel .status-bar__back--nav:active {
+  transform: translateY(1px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-dark) 55%) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+
 .monitoring-promo-banner {
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease !important;
 }
@@ -3915,4 +4125,122 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .monitoring-promo-banner:hover {
   border-color: rgba(255, 255, 255, 0.18) !important;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+}
+
+/* ── Redesigned Stylish User Profile Badge (Calm & Integrated) ── */
+.instance-dashboard-user {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box;
+  padding: 5px 12px 5px 8px !important;
+  gap: 10px !important;
+  border-radius: 9px;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
+      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
+    ) !important;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 0 rgba(0, 0, 0, 0.14) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.instance-dashboard-user:hover {
+  border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 2px 10px rgba(0, 0, 0, 0.22) !important;
+}
+
+.instance-dashboard-user__avatar {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  flex: 0 0 auto;
+  color: var(--text-muted, #9ba3af) !important;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease !important;
+}
+
+.instance-dashboard-user:hover .instance-dashboard-user__avatar {
+  color: var(--text, #fff) !important;
+  border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-data) 40%) !important;
+}
+
+.instance-dashboard-user__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.instance-dashboard-user__name {
+  font-size: 0.9em !important;
+  font-weight: 700 !important;
+  line-height: 1.15;
+  color: var(--text, #fff) !important;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.instance-dashboard-user__role.access-users-role {
+  align-self: flex-start;
+  font-size: 0.65em !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  line-height: 1.2 !important;
+  color: var(--text-muted, #9ba3af) !important;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-data) 35%) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
+  transition: color 0.18s ease, border-color 0.18s ease !important;
+}
+
+.instance-dashboard-user:hover .instance-dashboard-user__role.access-users-role {
+  color: var(--text, #fff) !important;
+  border-color: color-mix(in srgb, var(--border) 65%, transparent) !important;
+}
+
+/* Ensure right toolbar matches exact 44px status bar height */
+.status-bar .instance-dashboard-toolbar {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box;
+  padding: 5px 8px !important;
+}
+
+/* Running instance status pill using active players tile emerald palette */
+.instance-status-pill--running {
+  color: #4ade80 !important;
+  background: color-mix(in srgb, #2ecc71 14%, var(--bg-main) 50%, var(--bg-widget) 40%) !important;
+  border-color: color-mix(in srgb, #2ecc71 45%, transparent) !important;
+}
+
+/* Remove top accent glow bar for running instance cards */
+.instance-card--running .instance-card__glow-bar {
+  display: none !important;
+}
+
+/* Keep active players icon and digits uncolored (neutral) */
+.instance-card__stat-tile--active-players .instance-card__stat-icon {
+  color: var(--text-muted) !important;
+  opacity: 0.75 !important;
+}
+
+.instance-card__stat-tile--active-players .instance-card__stat-value {
+  color: var(--text) !important;
+  text-shadow: none !important;
 }

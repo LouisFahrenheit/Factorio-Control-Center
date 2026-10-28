@@ -47,6 +47,7 @@ export const APP_ICON_URLS = {
   person_add: '/assets/icons/person_add.svg',
   person_off: '/assets/icons/person_off.svg',
   person_shield: '/assets/icons/person_shield.svg',
+  public_page: '/assets/icons/public_page.svg',
   refresh: '/assets/icons/refresh.svg',
   reset: '/assets/icons/reset.svg',
   restart: '/assets/icons/restart.svg',

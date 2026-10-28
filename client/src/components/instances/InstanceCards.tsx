@@ -248,11 +248,8 @@ export function InstanceCards({
               <div className="instance-card__meta-bar">
                 <div className="instance-card__meta-left">
                   <span className="instance-card__meta-chip" title={t('instances_col_server_port')}>
-                    <IconServer size={14} className="instance-card__meta-icon" />
+                    <IconServer size={16} className="instance-card__meta-icon" />
                     <span>{String(it.port || '—')}</span>
-                    {it.rconPort ? (
-                      <span className="instance-card__meta-rcon"> (RCON {it.rconPort})</span>
-                    ) : null}
                   </span>
                   <span
                     className="instance-card__version-pill instance-card__version-pill--clickable"

@@ -1,6 +1,6 @@
 {
   "window_title": "Factorio Control Center",
-  "server_status": "Статус:",
+  "server_status": "Статус",
   "status_stopped": "Остановлен",
   "status_running": "Запущен",
   "status_starting": "Запуск…",
@@ -812,8 +812,8 @@
   "reset_confirm_question": "Продолжить?",
   "players_btn": "Управление игроками",
   "moderation_title": "Модерация",
-  "players_online": "Игроков онлайн:",
-  "server_uptime": "Время работы:",
+  "players_online": "Игроков онлайн",
+  "server_uptime": "Время работы",
   "server_uptime_placeholder": "—",
   "online_now": "Сейчас онлайн",
   "history": "История",
