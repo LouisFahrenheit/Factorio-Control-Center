@@ -1432,6 +1432,7 @@
   "web_user_delete_confirm": "Удалить пользователя \"{0}\"?",
   "web_admin_edit_no_permission": "У вас нет прав редактировать список администраторов.",
   "web_last_admin_forbidden": "Нельзя удалить, отключить или понизить последнего администратора.",
+  "web_user_last_admin_locked": "последний администратор",
   "web_ban_invalid_input": "Недопустимое имя игрока (не более 128 символов, без переводов строк).",
   "players_send_message_placeholder": "Введите сообщение...",
   "players_send_message_btn": "Отправить",

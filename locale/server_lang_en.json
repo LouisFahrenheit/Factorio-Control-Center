@@ -1431,6 +1431,7 @@
   "web_user_delete_confirm": "Delete user \"{0}\"?",
   "web_admin_edit_no_permission": "You do not have permission to edit the admin list.",
   "web_last_admin_forbidden": "Cannot remove, disable, or demote the last administrator account.",
+  "web_user_last_admin_locked": "last administrator",
   "web_ban_invalid_input": "That player name is not valid (max 128 characters, no line breaks).",
   "players_send_message_placeholder": "Enter message...",
   "players_send_message_btn": "Send",
