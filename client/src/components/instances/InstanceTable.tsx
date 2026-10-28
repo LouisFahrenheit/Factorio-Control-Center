@@ -169,6 +169,7 @@ export function InstanceTable({
                 : '';
 
             const rowClass = [
+              isRunning ? 'instance-row--running' : 'instance-row--stopped',
               selectedRowId && String(it.id) === selectedRowId ? 'instance-row-selected' : '',
               isMaintLocked ? 'instance-row--maintenance' : '',
               isMaintManual ? 'instance-row--maintenance-manual' : '',
@@ -279,12 +280,14 @@ export function InstanceTable({
                   >
                     <span
                       className={
-                        'instance-status-text' +
+                        'instance-status-pill ' +
                         (isMaintManual
-                          ? ' instance-status-pill instance-status-pill--maintenance-manual'
+                          ? 'instance-status-pill--maintenance-manual'
                           : isMaintLocked
-                            ? ' instance-status-pill instance-status-pill--maintenance'
-                            : '')
+                            ? 'instance-status-pill--maintenance'
+                            : isRunning
+                              ? 'instance-status-pill--running'
+                              : 'instance-status-pill--stopped')
                       }
                     >
                       {rowStatus}

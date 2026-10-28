@@ -2135,12 +2135,12 @@ body {
 }
 
 /* Ensure monitoring tab is always vertically scrollable across all themes (Dark Space, Ion Storm, Vulcanus, etc.) */
-.panel-shell > .tab-panels:has(#tabPanelMonitoring),
-.panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='dark_space'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='ion_storm'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='vulcanus'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='cryogenics'] .panel-shell > .tab-panels:has(.monitoring-tab) {
+.panel-shell>.tab-panels:has(#tabPanelMonitoring),
+.panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='dark_space'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='ion_storm'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='vulcanus'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='cryogenics'] .panel-shell>.tab-panels:has(.monitoring-tab) {
   overflow-y: auto !important;
 }
 
@@ -2462,11 +2462,9 @@ body {
 
 .integrations-scope-btn--active {
   color: var(--text) !important;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
-    color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%
-  ) !important;
+  background: linear-gradient(165deg,
+      color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
+      color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%) !important;
   border-color: color-mix(in srgb, var(--accent) 36%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -2832,6 +2830,7 @@ body {
   .integrations-override-events-grid {
     grid-template-columns: 1fr;
   }
+
   .integrations-override-chat-input {
     width: 100%;
   }
@@ -3124,6 +3123,7 @@ body {
   .integrations-webhook-card {
     grid-template-columns: auto 1fr auto;
   }
+
   .integrations-webhook-card__secret {
     grid-column: 2 / -1;
   }
@@ -3135,7 +3135,7 @@ body {
   }
 }
 
-/* Mod portal versions picker dialog - Modern Rich Style */
+/* Mod portal versions picker dialog */
 .fu-modal.mod-portal-versions-dialog {
   width: min(860px, 96vw);
   padding: 0;
@@ -3675,6 +3675,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -3729,7 +3730,6 @@ body {
   color: var(--text-primary, #fff) !important;
 }
 
-/* Compact & neat active version selector in mods table */
 #tblModsBody td.mods-col-version {
   overflow: visible !important;
   text-overflow: clip !important;
@@ -3802,7 +3802,7 @@ body {
   font-size: inherit !important;
 }
 
-body > .fu-modal-backdrop.mod-job-backdrop--top {
+body>.fu-modal-backdrop.mod-job-backdrop--top {
   z-index: 10200;
 }
 
@@ -3850,8 +3850,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__value {
   color: var(--error, #ff4d4d) !important;
 }
-
-/* ── Instance Top Dashboard (Polished & Unified with Panel) ── */
 
 .instance-dashboard-top {
   display: inline-flex;
@@ -3921,8 +3919,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   margin: 0 2px;
 }
 
-/* ── Panel Top Dashboard (Unified Aesthetics with Instances Dashboard) ── */
-
 .panel-dashboard-top {
   display: inline-flex;
   align-items: stretch;
@@ -3941,7 +3937,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   max-height: 44px;
 }
 
-/* Stabilized card dimensions: prevent any resizing/jumping on status and content transitions */
 .panel-dashboard-top .panel-dashboard-stat--name {
   min-width: 140px;
 }
@@ -4044,7 +4039,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   white-space: nowrap;
 }
 
-/* All instance stats in panel top share the calm graphite badge style from instances dashboard */
 .panel-dashboard-top .instance-dashboard-stat .instance-dashboard-stat__icon,
 .panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
@@ -4053,20 +4047,17 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
 }
 
-/* Smooth hover brightness for secondary icons */
 .panel-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
 }
 
-/* High-contrast crisp typography for server name */
 .panel-dashboard-stat--name .instance-dashboard-stat__value {
   font-weight: 750 !important;
   color: var(--text, #fff);
   letter-spacing: -0.01em;
 }
 
-/* Refined "Back to servers" navigation button with balanced Factorio amber accent */
 .status-bar--panel .status-bar__back.instance-dashboard-stat {
   min-width: 90px !important;
   flex-shrink: 0;
@@ -4127,7 +4118,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
 }
 
-/* ── Redesigned Stylish User Profile Badge (Calm & Integrated) ── */
 .instance-dashboard-user {
   height: 44px !important;
   min-height: 44px !important;
@@ -4137,11 +4127,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   gap: 10px !important;
   border-radius: 9px;
   background:
-    linear-gradient(
-      165deg,
+    linear-gradient(165deg,
       color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
-    ) !important;
+      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -4229,12 +4217,10 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   border-color: color-mix(in srgb, #2ecc71 45%, transparent) !important;
 }
 
-/* Remove top accent glow bar for running instance cards */
 .instance-card--running .instance-card__glow-bar {
   display: none !important;
 }
 
-/* Keep active players icon and digits uncolored (neutral) */
 .instance-card__stat-tile--active-players .instance-card__stat-icon {
   color: var(--text-muted) !important;
   opacity: 0.75 !important;
@@ -4243,4 +4229,182 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-card__stat-tile--active-players .instance-card__stat-value {
   color: var(--text) !important;
   text-shadow: none !important;
+}
+
+.instance-dashboard-stat__value {
+  color: #ffffff !important;
+}
+
+.instance-dashboard-stat__label {
+  color: #b0b7c4 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Running dot in server name */
+.instance-run-dot--on {
+  background: var(--running, #78c840) !important;
+  box-shadow: 0 0 8px rgba(120, 200, 64, 0.75) !important;
+}
+
+.instance-status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 2px 9px !important;
+  border-radius: 999px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+}
+
+.instance-status-pill--running {
+  color: #4ade80 !important;
+  background: rgba(74, 222, 128, 0.12) !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
+}
+
+.instance-status-pill--running::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+  flex-shrink: 0;
+}
+
+.instance-status-pill--stopped {
+  color: #b0b7c4 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.instance-status-pill--stopped::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #717a88;
+  flex-shrink: 0;
+}
+
+.instance-status-pill--maintenance {
+  color: #ffe8b8 !important;
+  background: rgba(224, 160, 32, 0.16) !important;
+  border: 1px solid rgba(224, 160, 32, 0.35) !important;
+}
+
+.instance-status-pill--maintenance-manual {
+  color: #fff4d0 !important;
+  background: rgba(216, 184, 74, 0.16) !important;
+  border: 1px solid rgba(216, 184, 74, 0.35) !important;
+}
+
+/* Availability / Visibility Flags in server table */
+.instance-access-cell .status-flags,
+.status-flags--side {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.instance-access-cell .status-flag,
+.status-flags--side .status-flag {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 2.15rem !important;
+  padding: 3px 7px !important;
+  border-radius: 6px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.1 !important;
+  color: color-mix(in srgb, var(--flag-off, #8a8a8a) 82%, var(--text-muted, #aaaaaa) 18%) !important;
+  background: color-mix(in srgb, var(--bg-main, #2a2a2a) 82%, var(--bg-data, #3a3a3a) 18%) !important;
+  border: 1px solid color-mix(in srgb, var(--border, #555555) 70%, transparent) !important;
+  transition:
+    color 0.22s var(--fcc-hover-ease),
+    background-color 0.22s var(--fcc-hover-ease),
+    border-color 0.22s var(--fcc-hover-ease),
+    box-shadow 0.22s var(--fcc-hover-ease) !important;
+}
+
+.instance-access-cell .status-flag--on,
+.status-flags--side .status-flag--on {
+  color: var(--flag-on, #ffffff) !important;
+  background: color-mix(in srgb, var(--flag-on, #ffffff) 14%, var(--bg-main, #2a2a2a) 86%) !important;
+  border-color: color-mix(in srgb, var(--flag-on, #ffffff) 28%, transparent) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--flag-on, #ffffff) 12%, transparent) !important;
+}
+
+.table-wrap,
+.table-wrap--motion-list,
+#instanceTabServers .table-wrap,
+.mods-list-panel__table-wrap {
+  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%) !important;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+table.data thead th,
+table.data.data--instances thead th,
+table#tblInstances thead th,
+table.data.data--mods thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) !important;
+  color: var(--text-muted) !important;
+  font-size: 0.92em !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+}
+
+/* Header sort hover and active states */
+table.data thead th:hover,
+table#tblInstances thead th.instances-sort-th:hover {
+  color: var(--accent-soft) !important;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%) !important;
+}
+
+table.data thead th.instances-sort-th--active,
+table.data thead th.mods-sort-th--active {
+  color: var(--accent-soft) !important;
+}
+
+/* Table Body Rows & Cells */
+table.data tbody tr td,
+table#tblInstances tbody tr td {
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
+  color: var(--text);
+  padding: 9px 12px !important;
+}
+
+/* Table Row Hover */
+table.data tbody tr:hover td,
+table#tblInstances tbody tr:hover td {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-widget) 95%) !important;
+}
+
+/* Selected Row (matching across both tables) */
+#tblInstancesBody tr.instance-row-selected td,
+#tblModsBody tr.mods-row--selected td,
+#tblSavesBody tr.mods-row--selected td {
+  background: color-mix(in srgb, var(--accent, #da8216) 12%, var(--bg-widget) 88%) !important;
+  box-shadow: none !important;
+}
+
+#tblInstancesBody tr.instance-row-selected td:first-child,
+#tblModsBody tr.mods-row--selected td:first-child,
+#tblSavesBody tr.mods-row--selected td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent, #da8216) !important;
+  border-left: none !important;
 }
