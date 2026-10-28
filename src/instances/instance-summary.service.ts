@@ -181,11 +181,18 @@ export class InstanceSummaryService implements OnModuleDestroy {
     hostMemory: HostMemoryInfo;
     hostCpu: HostCpuInfo;
     hostDisk: HostDiskInfo;
+    hostUptime: number;
   } {
     const st = this.instances.load();
     const pending = this.pendingManualResumeIds();
     const total = os.totalmem();
     const free = os.freemem();
+    let hostUptime = 0;
+    try {
+      hostUptime = Math.max(0, Math.floor(os.uptime()));
+    } catch {
+      hostUptime = 0;
+    }
     return {
       ok: true,
       items: st.items.map((it) => this.summarize(it, pending)),
@@ -200,6 +207,7 @@ export class InstanceSummaryService implements OnModuleDestroy {
         cores: os.cpus().length,
       },
       hostDisk: this.getDiskInfo(),
+      hostUptime,
     };
   }
 

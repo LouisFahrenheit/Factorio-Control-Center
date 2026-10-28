@@ -1680,6 +1680,8 @@
   "instances_host_ram_title": "Занято: {} / {} ГБ ({}%). Свободно: {} ГБ",
   "instances_host_disk": "ДИСК",
   "instances_host_disk_title": "Занято на диске: {} / {} ГБ ({}%). Свободно: {} ГБ",
+  "instances_host_uptime": "Время работы",
+  "instances_host_uptime_title": "Время работы хоста: {}",
   "instances_status_ready": "Остановлен",
   "instances_status_missing": "Не найден",
   "instances_status_running": "Запущен",

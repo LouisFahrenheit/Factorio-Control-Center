@@ -3878,6 +3878,10 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   min-width: 132px;
 }
 
+.instance-dashboard-top .instance-dashboard-stat--uptime {
+  min-width: 104px;
+}
+
 .instance-dashboard-top .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
   background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%) !important;

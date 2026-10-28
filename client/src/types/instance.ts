@@ -63,6 +63,7 @@ export interface InstancesListResponse {
   hostMemory?: HostMemoryInfo;
   hostCpu?: HostCpuInfo;
   hostDisk?: HostDiskInfo;
+  hostUptime?: number;
   error?: string;
 }
 

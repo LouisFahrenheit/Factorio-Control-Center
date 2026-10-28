@@ -150,8 +150,15 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         query.data?.hostMemory,
         query.data?.hostCpu,
         query.data?.hostDisk,
+        query.data?.hostUptime,
       ),
-    [rows, query.data?.hostMemory, query.data?.hostCpu, query.data?.hostDisk],
+    [
+      rows,
+      query.data?.hostMemory,
+      query.data?.hostCpu,
+      query.data?.hostDisk,
+      query.data?.hostUptime,
+    ],
   );
 
   const showEndMaintenanceAll = useMemo(

@@ -186,11 +186,19 @@ describe('instanceUtils lib', () => {
         free: 350 * 1024 * 1024 * 1024,
         used: 150 * 1024 * 1024 * 1024,
       };
+      const hostUptime = 123456;
 
-      const dashboard = syncInstancesDashboard(rows, hostMemory, hostCpu, hostDisk);
+      const dashboard = syncInstancesDashboard(
+        rows,
+        hostMemory,
+        hostCpu,
+        hostDisk,
+        hostUptime,
+      );
       expect(dashboard.hostRam).toEqual(hostMemory);
       expect(dashboard.hostCpu).toEqual(hostCpu);
       expect(dashboard.hostDisk).toEqual(hostDisk);
+      expect(dashboard.hostUptime).toBe(123456);
     });
   });
 

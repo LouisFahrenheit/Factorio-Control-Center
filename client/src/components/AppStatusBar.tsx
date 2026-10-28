@@ -17,6 +17,7 @@ interface AppStatusBarProps {
     hostRam?: HostMemoryInfo;
     hostCpu?: HostCpuInfo;
     hostDisk?: HostDiskInfo;
+    hostUptime?: number;
   };
   onLogout: () => void;
   onServers?: () => void;
@@ -142,7 +143,10 @@ export function AppStatusBar({
                 </span>
               </div>
             </div>
-            {dashboard?.hostCpu || dashboard?.hostRam || dashboard?.hostDisk ? (
+            {dashboard?.hostCpu ||
+            dashboard?.hostRam ||
+            dashboard?.hostDisk ||
+            typeof dashboard?.hostUptime === 'number' ? (
               <div className="instance-dashboard-top__divider" aria-hidden="true" />
             ) : null}
             {dashboard?.hostCpu ? (() => {
@@ -254,6 +258,31 @@ export function AppStatusBar({
                       id="instancesDiskTop"
                     >
                       {usedGb} / {totalGb} <span className="instance-dashboard-stat__unit">GB</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })() : null}
+            {typeof dashboard?.hostUptime === 'number' && dashboard.hostUptime >= 0 ? (() => {
+              const uptimeFormatted = formatUptime(dashboard.hostUptime, placeholder);
+              const uptimeTitle = t('instances_host_uptime_title', uptimeFormatted);
+              return (
+                <div
+                  className="instance-dashboard-stat instance-dashboard-stat--uptime"
+                  title={uptimeTitle}
+                >
+                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                    <AppIcon name="history" size={16} />
+                  </span>
+                  <div className="instance-dashboard-stat__body">
+                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_uptime">
+                      {t('instances_host_uptime')}
+                    </span>
+                    <span
+                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                      id="instancesUptimeTop"
+                    >
+                      {uptimeFormatted}
                     </span>
                   </div>
                 </div>

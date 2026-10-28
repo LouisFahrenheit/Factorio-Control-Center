@@ -110,6 +110,7 @@ export interface InstancesDashboardStats {
   hostRam?: HostMemoryInfo;
   hostCpu?: HostCpuInfo;
   hostDisk?: HostDiskInfo;
+  hostUptime?: number;
 }
 
 export function formatRamGb(bytes: number | undefined): string {
@@ -122,6 +123,7 @@ export function syncInstancesDashboard(
   hostMemory?: HostMemoryInfo,
   hostCpu?: HostCpuInfo,
   hostDisk?: HostDiskInfo,
+  hostUptime?: number,
 ): InstancesDashboardStats {
   let onlineTotal = 0;
   let runningCount = 0;
@@ -141,5 +143,6 @@ export function syncInstancesDashboard(
     ...(hostMemory ? { hostRam: hostMemory } : {}),
     ...(hostCpu ? { hostCpu } : {}),
     ...(hostDisk ? { hostDisk } : {}),
+    ...(typeof hostUptime === 'number' && hostUptime >= 0 ? { hostUptime } : {}),
   };
 }

@@ -1679,6 +1679,8 @@
   "instances_host_ram_title": "Used: {} / {} GB ({}%). Free: {} GB",
   "instances_host_disk": "DISK",
   "instances_host_disk_title": "Disk used: {} / {} GB ({}%). Free: {} GB",
+  "instances_host_uptime": "UPTIME",
+  "instances_host_uptime_title": "Host uptime: {}",
   "instances_status_ready": "Stopped",
   "instances_status_missing": "Missing",
   "instances_status_running": "Running",
