@@ -4408,3 +4408,57 @@ table#tblInstances tbody tr:hover td {
   box-shadow: inset 3px 0 0 var(--accent, #da8216) !important;
   border-left: none !important;
 }
+
+/* ==========================================================================
+   Ambient Grid Background (Classic Theme Only)
+   ========================================================================== */
+
+/* 1. Global Viewport Background Grid (underlay for the entire application) */
+:root:not([data-theme]) #root::before,
+:root[data-theme='fcc_classic'] #root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 20%, black 0%, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 20%, black 0%, black 60%, transparent 100%);
+  opacity: 0.75;
+}
+
+:root:not([data-theme]) #root:has(#loginScreen)::before,
+:root[data-theme='fcc_classic'] #root:has(#loginScreen)::before {
+  display: none !important;
+}
+
+/* 2. Main Workspace & Panels Background Grid */
+:root:not([data-theme]) .panel-shell,
+:root:not([data-theme]) #instanceScreen.instance-screen,
+:root[data-theme='fcc_classic'] .panel-shell,
+:root[data-theme='fcc_classic'] #instanceScreen.instance-screen {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
+      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
+  background-size: 24px 24px, 24px 24px, 100% 100% !important;
+  background-attachment: fixed, fixed, scroll !important;
+  background-repeat: repeat, repeat, no-repeat !important;
+}
+
+:root:not([data-theme]) .tab-panels,
+:root[data-theme='fcc_classic'] .tab-panels {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  background-attachment: fixed !important;
+  background-repeat: repeat !important;
+  background-color: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%) !important;
+}
