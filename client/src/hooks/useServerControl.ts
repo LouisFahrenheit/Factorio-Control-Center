@@ -44,7 +44,13 @@ export function useServerControl(
     queryKey: ['config', 'server', selectedId],
     queryFn: () => {
       const qs = selectedId ? `?instance_id=${encodeURIComponent(selectedId)}` : '';
-      return api<{ ip?: string; port?: string; save?: string; latest_label?: string }>(`/api/config/server${qs}`);
+      return api<{
+        ip?: string;
+        port?: string;
+        save?: string;
+        latest_label?: string;
+        host_ips?: string[];
+      }>(`/api/config/server${qs}`);
     },
     enabled: enabled && !!selectedId,
   });
@@ -79,6 +85,10 @@ export function useServerControl(
 
   const inst = instances.find((x) => String(x.id) === selectedId);
   const cfg = configQuery.data;
+  const hostIps = useMemo(() => {
+    const list = cfg?.host_ips;
+    return Array.isArray(list) ? list : [];
+  }, [cfg?.host_ips]);
 
   // Keep launch save in sync when instances or config query updates
   const currentLaunchSave = inst?.launchSave || cfg?.save || latestLabel;
@@ -399,6 +409,7 @@ export function useServerControl(
   return {
     ip,
     setIp,
+    hostIps,
     port,
     setPort,
     ipError,

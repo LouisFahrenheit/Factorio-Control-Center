@@ -42,6 +42,7 @@ import {
   getModDetailsCached,
   modPackagePathsForInternalName,
 } from '../../ops/mod-display-titles.util';
+import { listHostIPv4 } from '../../http/lan-address.util';
 import { ApiBridgeService } from '../api-bridge.service';
 
 @ApiTags('System')
@@ -83,6 +84,21 @@ export class SystemController {
           : 'unix',
       is_docker,
       docker_volumes,
+      host_ips: listHostIPv4(),
+    };
+  }
+
+  @Get('host-ips')
+  @ApiOperation({
+    summary: 'List host network IPv4 addresses',
+    description:
+      'Returns list of non-loopback IPv4 addresses available on the host machine',
+  })
+  @ApiResponse({ status: 200, description: 'List of host IPv4 addresses' })
+  hostIps() {
+    return {
+      ok: true,
+      host_ips: listHostIPv4(),
     };
   }
 

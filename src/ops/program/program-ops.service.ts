@@ -20,6 +20,7 @@ import {
   isValidGamePort,
   resolveGameBindIp,
 } from '../../common/network-validation';
+import { listHostIPv4 } from '../../http/lan-address.util';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
 
 const RUNTIME_TOUCH_KEYS = new Set([
@@ -442,6 +443,7 @@ export class ProgramOpsService {
       port: String(selected.port || '34197').trim() || '34197',
       save: String(selected.launchSave || 'latest').trim() || 'latest',
       latest_label: 'latest',
+      host_ips: listHostIPv4(),
     };
   }
 

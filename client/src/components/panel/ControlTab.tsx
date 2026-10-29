@@ -13,6 +13,7 @@ import { PANEL_BLOCK_VARIANTS, PANEL_TAB_VARIANTS, listWrapVariants } from '../.
 import { saveDisplayLabel } from '../../lib/saveUtils';
 import { webEffectsReduced } from '../../theme/webEffects';
 import { AppIcon } from '../AppIcon';
+import { ServerIpCombobox } from '../ServerIpCombobox';
 import { FactorioUpdateModal } from './FactorioUpdateModal';
 import { ServerLogHistoryModal } from './ServerLogHistoryModal';
 
@@ -251,25 +252,30 @@ export function ControlTab({
                 <span className="control-tab__compact-label" data-i18n="ip_label">
                   {t('ip_label')}
                 </span>
-                <input
-                  type="text"
+                <ServerIpCombobox
                   id="inpIp"
                   className="input control-tab__compact-input control-tab__compact-input--ip"
-                  autoComplete="off"
-                  spellCheck={false}
                   maxLength={45}
                   value={control.ip}
+                  hostIps={control.hostIps}
+                  placement="bottom"
                   disabled={control.busy}
-                  aria-invalid={showIpError}
-                  aria-describedby={showIpError ? 'inpIpError' : undefined}
+                  ariaInvalid={showIpError}
+                  ariaDescribedby={showIpError ? 'inpIpError' : undefined}
                   onBlur={() => {
                     setIpTouched(true);
                     void control.saveNetworkConfig();
                   }}
-                  onChange={(e) => {
-                    control.setIp(e.target.value);
-                    control.scheduleNetworkSave(e.target.value, control.port);
+                  onChange={(val) => {
+                    control.setIp(val);
+                    control.scheduleNetworkSave(val, control.port);
                   }}
+                  onSelectOption={(val) => {
+                    control.setIp(val);
+                    setIpTouched(true);
+                    void control.saveStartupConfig(val, undefined, undefined);
+                  }}
+                  t={t}
                 />
               </label>
               <label

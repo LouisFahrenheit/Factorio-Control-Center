@@ -46,3 +46,15 @@ export function listLanIPv4(): string[] {
 export function listPublicIPv4(): string[] {
   return listNonLoopbackIPv4().filter((addr) => !isPrivateIPv4(addr));
 }
+
+/** All non-loopback host IPv4 addresses, sorted with private LAN/public first, APIPA last. */
+export function listHostIPv4(): string[] {
+  const all = listNonLoopbackIPv4();
+  return [...all].sort((a, b) => {
+    const aApipa = a.startsWith('169.254.');
+    const bApipa = b.startsWith('169.254.');
+    if (aApipa && !bApipa) return 1;
+    if (!aApipa && bApipa) return -1;
+    return a.localeCompare(b, undefined, { numeric: true });
+  });
+}

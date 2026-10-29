@@ -1,4 +1,9 @@
-import { isPrivateIPv4, listLanIPv4, listPublicIPv4 } from './lan-address.util';
+import {
+  isPrivateIPv4,
+  listHostIPv4,
+  listLanIPv4,
+  listPublicIPv4,
+} from './lan-address.util';
 
 describe('lan-address.util', () => {
   describe('isPrivateIPv4', () => {
@@ -38,12 +43,14 @@ describe('lan-address.util', () => {
     });
   });
 
-  describe('listLanIPv4 and listPublicIPv4', () => {
+  describe('listLanIPv4, listPublicIPv4, and listHostIPv4', () => {
     it('returns arrays of strings without throwing', () => {
       const lan = listLanIPv4();
       const pub = listPublicIPv4();
+      const host = listHostIPv4();
       expect(Array.isArray(lan)).toBe(true);
       expect(Array.isArray(pub)).toBe(true);
+      expect(Array.isArray(host)).toBe(true);
     });
   });
 });

@@ -135,6 +135,13 @@ describe('SystemController', () => {
       expect(res.ok).toBe(true);
       expect(typeof res.version).toBe('string');
       expect(typeof res.host_os).toBe('string');
+      expect(Array.isArray(res.host_ips)).toBe(true);
+    });
+
+    it('hostIps returns host_ips list', () => {
+      const res = controller.hostIps();
+      expect(res.ok).toBe(true);
+      expect(Array.isArray(res.host_ips)).toBe(true);
     });
 
     it('localeBootstrap returns bootstrap configuration', async () => {

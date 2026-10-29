@@ -4,6 +4,7 @@ import type { AppIconName } from '../../lib/appIcons';
 import { CancelButton } from '../CancelButton';
 import { FccSwitch } from '../FccSwitch';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
+import { ServerIpCombobox } from '../ServerIpCombobox';
 import type { InstanceEditorApi } from '../../hooks/useInstanceEditor';
 
 interface InstanceEditorModalProps {
@@ -161,16 +162,14 @@ export function InstanceEditorModal({ editor, t }: InstanceEditorModalProps) {
                   <div className="instance-editor-card__body">
                     <div className="instance-editor-net-grid">
                       <div className="instance-editor-net-col">
-                        <label className="instance-editor-field instance-editor-field--compact" htmlFor="instanceEditorIp">
+                        <label className="instance-editor-field instance-editor-field--compact instance-editor-field--ip" htmlFor="instanceEditorIp">
                           <span className="instance-editor-field__label">{t('instances_server_ip_label')}</span>
-                          <input
-                            type="text"
+                          <ServerIpCombobox
                             id="instanceEditorIp"
                             className="input input--net-text instance-editor-field__input"
-                            autoComplete="off"
-                            spellCheck={false}
                             value={form.ip}
-                            onChange={(e) => setForm((f) => ({ ...f, ip: e.target.value }))}
+                            onChange={(val) => setForm((f) => ({ ...f, ip: val }))}
+                            t={t}
                           />
                         </label>
                         <label
