@@ -28,6 +28,7 @@ export interface InstanceItem {
   modJobRunning?: boolean;
   autoEnterPanel?: boolean;
   launchSave?: string;
+  activeSave?: string;
   serverPath?: string;
   ip?: string;
   rconPassword?: string;

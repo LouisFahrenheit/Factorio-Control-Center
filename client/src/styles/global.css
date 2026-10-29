@@ -4413,6 +4413,34 @@ table#tblInstances tbody tr:hover td {
   border-left: none !important;
 }
 
+/* Instance Save Column */
+td.instance-save-cell {
+  max-width: 260px;
+  min-width: 120px;
+}
+
+.instance-save-text {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  transition: color 0.15s ease;
+}
+
+.instance-save-text:hover {
+  color: var(--text);
+}
+
+.instance-save-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ==========================================================================
    Ambient Grid Background (Classic Theme Only)
    ========================================================================== */

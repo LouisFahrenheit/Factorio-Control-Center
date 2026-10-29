@@ -5,6 +5,7 @@ export type InstanceSortColumn =
   | 'port'
   | 'rconPort'
   | 'version'
+  | 'save'
   | 'mods'
   | 'online'
   | 'uptime'
@@ -54,6 +55,8 @@ export function filterInstanceRows(
       it.port,
       it.rconPort,
       it.gameVersion,
+      it.activeSave,
+      it.launchSave,
       it.serverPath,
       it.ip,
       status,
@@ -88,6 +91,12 @@ export function sortInstanceRows(
       case 'version':
         cmp = compareText(String(a.gameVersion || ''), String(b.gameVersion || ''));
         break;
+      case 'save': {
+        const as = String(a.activeSave || a.launchSave || '');
+        const bs = String(b.activeSave || b.launchSave || '');
+        cmp = compareText(as, bs);
+        break;
+      }
       case 'mods':
         cmp = compareNumber(Number(a.modsCount) || 0, Number(b.modsCount) || 0);
         break;

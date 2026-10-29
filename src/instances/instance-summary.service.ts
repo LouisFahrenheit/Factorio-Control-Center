@@ -69,6 +69,7 @@ export interface InstanceSummaryRow {
   experimentalUpdates: boolean;
   collectGameMetrics: boolean;
   launchSave: string;
+  activeSave: string;
   modJobRunning: boolean;
   isPublic: boolean;
   publicDescription: string;
@@ -384,6 +385,22 @@ export class InstanceSummaryService implements OnModuleDestroy {
     const settings = this.readServerSettingsCached(sp);
     const enabledMods = this.enabledModNames(sp);
 
+    const isRunning = !!(rt?.proc && rt.proc.exitCode === null);
+    let activeSave = '';
+    if (isRunning && rt?.saveName) {
+      activeSave = rt.saveName;
+    } else {
+      const configuredSave =
+        String(item.launchSave || 'latest').trim() || 'latest';
+      if (configuredSave !== 'latest') {
+        activeSave = configuredSave;
+      } else {
+        const pm = new PathManager(sp);
+        const latest = pm.latestSave();
+        activeSave = latest || configuredSave;
+      }
+    }
+
     return {
       id: item.id,
       name: item.name,
@@ -410,6 +427,7 @@ export class InstanceSummaryService implements OnModuleDestroy {
       experimentalUpdates: !!item.experimentalUpdates,
       collectGameMetrics: !!item.collectGameMetrics,
       launchSave: String(item.launchSave || 'latest').trim() || 'latest',
+      activeSave,
       modJobRunning: this.modJobs.isRunningForInstance(iid),
       isPublic: !!item.isPublic,
       publicDescription: String(item.publicDescription || ''),

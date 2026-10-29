@@ -12,12 +12,14 @@ import { useUserShowServerListModBadges } from '../../hooks/useUserShowServerLis
 import { useUserShowServerListSpaceAgeBadge } from '../../hooks/useUserShowServerListSpaceAgeBadge';
 import { webEffectsReduced } from '../../theme/webEffects';
 import { AppIcon } from '../AppIcon';
+import { saveDisplayLabel } from '../../lib/saveUtils';
 import { InstanceGameVersionCell } from './InstanceGameVersionCell';
 import { InstanceListBadges } from './InstanceListBadges';
 import type { InstanceItem } from '../../types/instance';
 
 const SORTABLE_COLUMNS: { key: InstanceSortColumn; labelKey: string }[] = [
   { key: 'name', labelKey: 'instances_col_name' },
+  { key: 'save', labelKey: 'instances_col_save' },
   { key: 'port', labelKey: 'instances_col_server_port' },
   { key: 'rconPort', labelKey: 'instances_col_rcon_port' },
   { key: 'version', labelKey: 'instances_col_version' },
@@ -129,8 +131,9 @@ export function InstanceTable({
         <thead>
           <tr>
             <SortableTh col={SORTABLE_COLUMNS[0]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
+            <SortableTh col={SORTABLE_COLUMNS[1]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
             <th data-i18n="instances_col_access">{t('instances_col_access')}</th>
-            {SORTABLE_COLUMNS.slice(1).map((col) => (
+            {SORTABLE_COLUMNS.slice(2).map((col) => (
               <SortableTh
                 key={col.key}
                 col={col}
@@ -158,6 +161,15 @@ export function InstanceTable({
             const isMaintManual = instanceMaintenanceManualMode(it, getEffectiveStatus);
             const isMaintRow = isMaintLocked || isMaintManual;
             const nameText = String(it.name || '');
+            const saveNameRaw = it.activeSave || it.launchSave || '';
+            const isConfiguredLatest = it.launchSave === 'latest';
+            const isSaveLatest = saveNameRaw === 'latest';
+            const saveDisplayName = isSaveLatest ? t('latest') : saveDisplayLabel(saveNameRaw);
+            const saveFullTitle = isSaveLatest
+              ? t('latest')
+              : isConfiguredLatest && it.activeSave
+                ? `${it.activeSave} (${t('latest')})`
+                : saveNameRaw;
             const uptimeText =
               typeof it.uptimeSeconds === 'number' && it.uptimeSeconds >= 0
                 ? formatUptime(it.uptimeSeconds, placeholder)
@@ -254,6 +266,15 @@ export function InstanceTable({
                       )}
                     </span>
                   </span>
+                </td>
+                <td className="instance-save-cell">
+                  {saveDisplayName ? (
+                    <span className="instance-save-text" title={saveFullTitle}>
+                      <span className="instance-save-name">{saveDisplayName}</span>
+                    </span>
+                  ) : (
+                    <span className="muted">—</span>
+                  )}
                 </td>
                 <td className="instance-access-cell">
                   <span className="status-flags status-flags--side">
