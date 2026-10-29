@@ -8,6 +8,9 @@ import {
   buildUniqueQuickSaveName,
   versionEqual,
   buildSaveModCompareRows,
+  getSaveKind,
+  getSaveTypeBadgeLabel,
+  sortSaveRows,
 } from './saveUtils';
 
 describe('saveUtils lib', () => {
@@ -32,7 +35,9 @@ describe('saveUtils lib', () => {
     });
 
     it('filters rows by save name or label matching query', () => {
-      expect(filterSaveRows(rows, 'alpha')).toEqual([{ name: 'alpha_world.zip' }]);
+      expect(filterSaveRows(rows, 'alpha')).toEqual([
+        { name: 'alpha_world.zip' },
+      ]);
       expect(filterSaveRows(rows, 'TEST')).toEqual([{ name: 'beta_test.zip' }]);
       expect(filterSaveRows(rows, 'nonexistent')).toEqual([]);
     });
@@ -160,7 +165,11 @@ describe('saveUtils lib', () => {
           factorio_version: '2.0.15',
           mods: [
             { name: 'base', version: '2.0.15' },
-            { name: 'flib', display_name: 'Factorio Library', version: '0.14.0' },
+            {
+              name: 'flib',
+              display_name: 'Factorio Library',
+              version: '0.14.0',
+            },
             { name: 'obsolete-mod', version: '1.0.0' },
           ],
         },
@@ -204,6 +213,97 @@ describe('saveUtils lib', () => {
       const newMod = result.rows.find((r) => r.name === 'new-server-mod');
       expect(newMod).toBeDefined();
       expect(newMod?.nameClass).toBe('save-mod-name--not-in-save');
+    });
+  });
+
+  describe('getSaveKind', () => {
+    it('identifies autosaves', () => {
+      expect(getSaveKind('_autosave1.zip')).toBe('autosave');
+      expect(getSaveKind('_autosave4')).toBe('autosave');
+    });
+
+    it('identifies backups', () => {
+      expect(getSaveKind('backup_20260604225657.zip')).toBe('backup');
+      expect(getSaveKind('my_backup_world')).toBe('backup');
+    });
+
+    it('identifies regular saves', () => {
+      expect(getSaveKind('world.zip')).toBe('save');
+      expect(getSaveKind('Тестовый мир')).toBe('save');
+    });
+  });
+
+  describe('getSaveTypeBadgeLabel', () => {
+    const t = (key: string) => {
+      if (key === 'control_save_badge_autosave') return 'Автосейв';
+      if (key === 'control_save_badge_backup') return 'Бэкап';
+      if (key === 'control_save_badge_save') return 'Сейв';
+      return key;
+    };
+
+    it('returns empty string for isLatest', () => {
+      expect(getSaveTypeBadgeLabel('any_name', t, true)).toBe('');
+    });
+
+    it('returns proper localized labels for each kind', () => {
+      expect(getSaveTypeBadgeLabel('_autosave1', t)).toBe('Автосейв');
+      expect(getSaveTypeBadgeLabel('backup_123', t)).toBe('Бэкап');
+      expect(getSaveTypeBadgeLabel('main_game', t)).toBe('Сейв');
+    });
+  });
+
+  describe('sortSaveRows', () => {
+    const rows = [
+      { name: 'zeta.zip', mtime: 100 },
+      { name: '_autosave1.zip', mtime: 300 },
+      { name: 'backup_2026.zip', mtime: 200 },
+      { name: 'alpha.zip', mtime: 400 },
+    ];
+
+    it('sorts by name ascending and descending', () => {
+      const asc = sortSaveRows(rows, 'name', true);
+      expect(asc.map((r) => r.name)).toEqual([
+        '_autosave1.zip',
+        'alpha.zip',
+        'backup_2026.zip',
+        'zeta.zip',
+      ]);
+
+      const desc = sortSaveRows(rows, 'name', false);
+      expect(desc.map((r) => r.name)).toEqual([
+        'zeta.zip',
+        'backup_2026.zip',
+        'alpha.zip',
+        '_autosave1.zip',
+      ]);
+    });
+
+    it('sorts by mtime ascending and descending', () => {
+      const asc = sortSaveRows(rows, 'mtime', true);
+      expect(asc.map((r) => r.name)).toEqual([
+        'zeta.zip',
+        'backup_2026.zip',
+        '_autosave1.zip',
+        'alpha.zip',
+      ]);
+
+      const desc = sortSaveRows(rows, 'mtime', false);
+      expect(desc.map((r) => r.name)).toEqual([
+        'alpha.zip',
+        '_autosave1.zip',
+        'backup_2026.zip',
+        'zeta.zip',
+      ]);
+    });
+
+    it('sorts by type ascending and descending', () => {
+      const asc = sortSaveRows(rows, 'type', true);
+      // Autosaves first, backups next, saves last
+      expect(asc[0].name).toBe('_autosave1.zip');
+      expect(asc[1].name).toBe('backup_2026.zip');
+
+      const desc = sortSaveRows(rows, 'type', false);
+      expect(desc[desc.length - 1].name).toBe('_autosave1.zip');
     });
   });
 });

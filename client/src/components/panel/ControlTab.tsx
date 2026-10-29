@@ -1,5 +1,12 @@
 import { motion } from 'motion/react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import type { FactorioUpdateApi } from '../../hooks/useFactorioUpdate';
 import type { ServerLogHistoryApi } from '../../hooks/useServerLogHistory';
 import type { useServerControl } from '../../hooks/useServerControl';
@@ -9,11 +16,15 @@ import {
   hasActiveSelectionInside,
   scrollLogIfFollowing,
 } from '../../lib/logUtils';
-import { PANEL_BLOCK_VARIANTS, PANEL_TAB_VARIANTS, listWrapVariants } from '../../lib/motionPresets';
-import { saveDisplayLabel } from '../../lib/saveUtils';
+import {
+  PANEL_BLOCK_VARIANTS,
+  PANEL_TAB_VARIANTS,
+  listWrapVariants,
+} from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
 import { AppIcon } from '../AppIcon';
 import { ServerIpCombobox } from '../ServerIpCombobox';
+import { ServerSaveSelect } from '../ServerSaveSelect';
 import { FactorioUpdateModal } from './FactorioUpdateModal';
 import { ServerLogHistoryModal } from './ServerLogHistoryModal';
 
@@ -34,7 +45,9 @@ function loadRconHistory(instanceId?: string): string[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed.filter((item): item is string => typeof item === 'string');
+        return parsed.filter(
+          (item): item is string => typeof item === 'string',
+        );
       }
     }
     // Fallback: check global legacy history if instance history is empty
@@ -43,7 +56,9 @@ function loadRconHistory(instanceId?: string): string[] {
       if (legacyRaw) {
         const parsed = JSON.parse(legacyRaw);
         if (Array.isArray(parsed)) {
-          return parsed.filter((item): item is string => typeof item === 'string');
+          return parsed.filter(
+            (item): item is string => typeof item === 'string',
+          );
         }
       }
     }
@@ -55,7 +70,10 @@ function loadRconHistory(instanceId?: string): string[] {
 
 function saveRconHistory(history: string[], instanceId?: string): void {
   try {
-    localStorage.setItem(getRconStorageKey(instanceId), JSON.stringify(history));
+    localStorage.setItem(
+      getRconStorageKey(instanceId),
+      JSON.stringify(history),
+    );
   } catch {
     /* ignore */
   }
@@ -89,7 +107,9 @@ export function ControlTab({
   const blockVariants = reduced ? undefined : PANEL_BLOCK_VARIANTS;
   const sectionVariants = reduced ? undefined : PANEL_TAB_VARIANTS;
   const [rconInput, setRconInput] = useState('');
-  const [history, setHistory] = useState<string[]>(() => loadRconHistory(instanceId));
+  const [history, setHistory] = useState<string[]>(() =>
+    loadRconHistory(instanceId),
+  );
   const [historyIndex, setHistoryIndex] = useState(-1);
   const draftRef = useRef('');
 
@@ -249,7 +269,10 @@ export function ControlTab({
                 htmlFor="inpIp"
                 title={showIpError ? ipErrorMsg : undefined}
               >
-                <span className="control-tab__compact-label" data-i18n="ip_label">
+                <span
+                  className="control-tab__compact-label"
+                  data-i18n="ip_label"
+                >
                   {t('ip_label')}
                 </span>
                 <ServerIpCombobox
@@ -286,7 +309,10 @@ export function ControlTab({
                 htmlFor="inpPort"
                 title={showPortError ? portErrorMsg : undefined}
               >
-                <span className="control-tab__compact-label" data-i18n="port_label">
+                <span
+                  className="control-tab__compact-label"
+                  data-i18n="port_label"
+                >
                   {t('port_label')}
                 </span>
                 <input
@@ -312,27 +338,23 @@ export function ControlTab({
                   }}
                 />
               </label>
-              <label className="control-tab__compact-field control-tab__compact-field--save" htmlFor="selSave">
-                <span className="control-tab__compact-label">{t('control_save_label')}</span>
-                <select
+              <div className="control-tab__compact-field control-tab__compact-field--save">
+                <span className="control-tab__compact-label">
+                  {t('control_save_label')}
+                </span>
+                <ServerSaveSelect
                   id="selSave"
-                  className="input control-tab__compact-input"
                   value={control.save}
+                  latestLabel={control.latestLabel}
+                  saves={control.saves}
                   disabled={control.busy}
-                  onChange={(e) => {
-                    const val = e.target.value;
+                  onChange={(val) => {
                     control.setSave(val);
                     void control.saveStartupConfig(undefined, undefined, val);
                   }}
-                >
-                  <option value={control.latestLabel}>{t('latest') || control.latestLabel}</option>
-                  {control.saves.map((s) => (
-                    <option key={s.name} value={s.name}>
-                      {saveDisplayLabel(s.name || '')}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  t={t}
+                />
+              </div>
               <button
                 type="button"
                 className="btn btn--toolbar-icon control-tab__launch-refresh"
@@ -363,7 +385,11 @@ export function ControlTab({
             <div className="control-tab__console-row">
               {canCommands && (
                 <div className="control-tab__rcon">
-                  <label htmlFor="inpControlRcon" className="control-tab__field-label" data-i18n="console_label">
+                  <label
+                    htmlFor="inpControlRcon"
+                    className="control-tab__field-label"
+                    data-i18n="console_label"
+                  >
                     {t('console_label')}
                   </label>
                   <input
@@ -428,8 +454,11 @@ export function ControlTab({
                 id="btnKill"
                 data-i18n="kill_btn"
                 disabled={
-                  !(control.running || control.kind === 'starting' || control.kind === 'stopping') ||
-                  control.maintLocked
+                  !(
+                    control.running ||
+                    control.kind === 'starting' ||
+                    control.kind === 'stopping'
+                  ) || control.maintLocked
                 }
                 onClick={() => void control.kill().catch(() => {})}
               >
@@ -462,11 +491,15 @@ export function ControlTab({
                 type="button"
                 className={
                   'btn btn--with-icon control-tab__action-btn' +
-                  (factorioUpdate.updateAvailable ? ' btn--update-available' : '')
+                  (factorioUpdate.updateAvailable
+                    ? ' btn--update-available'
+                    : '')
                 }
                 id="btnFactorioUpdate"
                 data-i18n="about_check_factorio_updates"
-                disabled={control.busy || blockUpdates || factorioUpdate.checking}
+                disabled={
+                  control.busy || blockUpdates || factorioUpdate.checking
+                }
                 onClick={() => void factorioUpdate.openUpdateFlow()}
               >
                 <AppIcon name="update" size={16} />
@@ -476,7 +509,10 @@ export function ControlTab({
           </div>
         </motion.section>
 
-        <motion.section className="panel panel--control-log control-tab__log" variants={blockVariants}>
+        <motion.section
+          className="panel panel--control-log control-tab__log"
+          variants={blockVariants}
+        >
           <div className="panel__body">
             <pre
               id="managerLog"

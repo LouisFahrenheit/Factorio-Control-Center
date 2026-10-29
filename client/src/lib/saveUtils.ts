@@ -5,11 +5,58 @@ export function saveDisplayLabel(fileName: string): string {
   return String(fileName || '').replace(/\.zip$/i, '');
 }
 
-export function filterSaveRows<T extends { name: string }>(rows: T[], query: string): T[] {
-  const q = String(query || '').trim().toLowerCase();
+export type SaveKind = 'autosave' | 'backup' | 'save';
+
+export function getSaveKind(name: string): SaveKind {
+  const clean = String(name || '')
+    .trim()
+    .toLowerCase();
+  if (clean.startsWith('_autosave')) {
+    return 'autosave';
+  }
+  if (clean.startsWith('backup_') || clean.includes('backup')) {
+    return 'backup';
+  }
+  return 'save';
+}
+
+export function getSaveTypeBadgeLabel(
+  name: string,
+  t: (key: string, ...args: (string | number)[]) => string,
+  isLatest = false,
+): string {
+  if (isLatest) {
+    return '';
+  }
+  const kind = getSaveKind(name);
+  if (kind === 'autosave') {
+    const val = t('control_save_badge_autosave');
+    return !val || val === 'control_save_badge_autosave' ? 'Автосейв' : val;
+  }
+  if (kind === 'backup') {
+    const val = t('control_save_badge_backup');
+    return !val || val === 'control_save_badge_backup' ? 'Бэкап' : val;
+  }
+  const val = t('control_save_badge_save');
+  return !val || val === 'control_save_badge_save' ? 'Сейв' : val;
+}
+
+export function filterSaveRows<T extends { name: string }>(
+  rows: T[],
+  query: string,
+): T[] {
+  const q = String(query || '')
+    .trim()
+    .toLowerCase();
   if (!q) return rows;
   return rows.filter((row) => {
-    const hay = [row.name || '', saveDisplayLabel(row.name)].join(' ').toLowerCase();
+    const hay = [
+      row.name || '',
+      saveDisplayLabel(row.name),
+      getSaveKind(row.name),
+    ]
+      .join(' ')
+      .toLowerCase();
     return hay.includes(q);
   });
 }
@@ -42,9 +89,11 @@ export function localizeCreateSaveError(
 ): string {
   const k = String(err || '').trim();
   if (k === 'invalid_name') return t('saves_manager_upload_invalid_name');
-  if (k === 'invalid_save_archive') return t('saves_manager_upload_invalid_archive');
+  if (k === 'invalid_save_archive')
+    return t('saves_manager_upload_invalid_archive');
   if (k === 'invalid_save_zip') return t('saves_manager_upload_invalid_zip');
-  if (k === 'invalid_format' || k === 'wrong_kind') return t('map_gen_preset_import_invalid');
+  if (k === 'invalid_format' || k === 'wrong_kind')
+    return t('map_gen_preset_import_invalid');
   if (k === 'exists') return t('saves_manager_upload_exists');
   if (k === 'rename_failed') return t('create_save_rename_failed');
   const loc = t(k);
@@ -60,12 +109,14 @@ export function localizeSaveUploadError(
 
 /** Strip characters invalid in save file names (Unicode letters kept). */
 function sanitizeSaveStem(stem: string): string {
-  return stem
-    // eslint-disable-next-line no-control-regex
-    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 120);
+  return (
+    stem
+      // eslint-disable-next-line no-control-regex
+      .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120)
+  );
 }
 
 /** Human-readable auto name stem (no .zip). */
@@ -107,7 +158,11 @@ export function versionEqual(a: string, b: string): boolean {
   const sb = String(b || '').trim();
   if (!sa || !sb) return false;
   if (sa === sb) return true;
-  const parse3 = (s: string) => s.split('.').slice(0, 3).map((x) => parseInt(x, 10) || 0);
+  const parse3 = (s: string) =>
+    s
+      .split('.')
+      .slice(0, 3)
+      .map((x) => parseInt(x, 10) || 0);
   const pa = parse3(sa);
   const pb = parse3(sb);
   return pa.length === pb.length && pa.every((x, i) => x === pb[i]);
@@ -119,6 +174,54 @@ export interface SaveRow {
   is_running_active?: boolean;
 }
 
+export type SaveSortColumn = 'name' | 'type' | 'mtime';
+
+export function sortSaveRows<T extends SaveRow>(
+  rows: T[],
+  column: SaveSortColumn,
+  asc: boolean,
+  t?: (key: string, ...args: (string | number)[]) => string,
+): T[] {
+  const sorted = [...rows];
+  sorted.sort((a, b) => {
+    let cmp = 0;
+    if (column === 'name') {
+      const la = saveDisplayLabel(a.name || '');
+      const lb = saveDisplayLabel(b.name || '');
+      cmp = la.localeCompare(lb, undefined, {
+        sensitivity: 'base',
+        numeric: true,
+      });
+    } else if (column === 'type') {
+      const ka = t ? getSaveTypeBadgeLabel(a.name, t) : getSaveKind(a.name);
+      const kb = t ? getSaveTypeBadgeLabel(b.name, t) : getSaveKind(b.name);
+      cmp = ka.localeCompare(kb, undefined, { sensitivity: 'base' });
+      if (cmp === 0) {
+        const la = saveDisplayLabel(a.name || '');
+        const lb = saveDisplayLabel(b.name || '');
+        cmp = la.localeCompare(lb, undefined, {
+          sensitivity: 'base',
+          numeric: true,
+        });
+      }
+    } else if (column === 'mtime') {
+      const ta = Number(a.mtime) || 0;
+      const tb = Number(b.mtime) || 0;
+      cmp = ta - tb;
+      if (cmp === 0) {
+        const la = saveDisplayLabel(a.name || '');
+        const lb = saveDisplayLabel(b.name || '');
+        cmp = la.localeCompare(lb, undefined, {
+          sensitivity: 'base',
+          numeric: true,
+        });
+      }
+    }
+    return asc ? cmp : -cmp;
+  });
+  return sorted;
+}
+
 export interface SaveModCompareRow {
   name: string;
   display_name: string;
@@ -127,17 +230,30 @@ export interface SaveModCompareRow {
   nameClass: string;
 }
 
-const BUILTIN_MODS = new Set(['base', 'elevated-rails', 'quality', 'recycler', 'space-age']);
+const BUILTIN_MODS = new Set([
+  'base',
+  'elevated-rails',
+  'quality',
+  'recycler',
+  'space-age',
+]);
 const HIDDEN_SAVE_MOD_NAMES = new Set(['base']);
 
 export function buildSaveModCompareRows(
   insp: {
-    header?: { factorio_version?: string; mods?: { name?: string; display_name?: string; version?: string }[] };
+    header?: {
+      factorio_version?: string;
+      mods?: { name?: string; display_name?: string; version?: string }[];
+    };
   },
   modList: { data?: { mods?: { name?: string; enabled?: boolean }[] } },
-  modsAll: { mods?: { name?: string; display_name?: string; local_version?: string }[]; game_version?: string },
+  modsAll: {
+    mods?: { name?: string; display_name?: string; local_version?: string }[];
+    game_version?: string;
+  },
 ): { factorioVersion: string; rows: SaveModCompareRow[] } {
-  const factorioVersion = String(insp?.header?.factorio_version || '').trim() || '-';
+  const factorioVersion =
+    String(insp?.header?.factorio_version || '').trim() || '-';
   const saveMods = new Map<string, string>();
   const saveDisplay = new Map<string, string>();
   (insp?.header?.mods || []).forEach((m) => {
@@ -177,7 +293,9 @@ export function buildSaveModCompareRows(
 
     let nameClass = '';
     if (saveVer && onServer) {
-      nameClass = versionEqual(saveVer, diskVer) ? 'save-mod-name--ok' : 'save-mod-name--ver-diff';
+      nameClass = versionEqual(saveVer, diskVer)
+        ? 'save-mod-name--ok'
+        : 'save-mod-name--ver-diff';
     } else if (!saveVer && onServer) {
       nameClass = 'save-mod-name--not-in-save';
     } else if (saveVer && !onServer) {
