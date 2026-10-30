@@ -1,5 +1,9 @@
-import { IconLayoutGrid, IconList } from '@tabler/icons-react';
-import { AppIcon } from '../AppIcon';
+import {
+  IconLayoutGrid,
+  IconList,
+  IconUserPlus,
+  IconHelp,
+} from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
 import type { UserAccessViewMode } from '../../lib/userPrefs';
 
@@ -12,9 +16,10 @@ interface AccessUsersBarProps {
   onStatusFilterChange: (value: string) => void;
   viewMode: UserAccessViewMode;
   onViewModeChange: (mode: UserAccessViewMode) => void;
-  onRefresh: () => void;
   shownCount: number;
   totalCount: number;
+  onCreate?: () => void;
+  onOpenHelp?: () => void;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
@@ -27,9 +32,10 @@ export function AccessUsersBar({
   onStatusFilterChange,
   viewMode,
   onViewModeChange,
-  onRefresh,
   shownCount,
   totalCount,
+  onCreate,
+  onOpenHelp,
   t,
 }: AccessUsersBarProps) {
   const isFiltered =
@@ -38,6 +44,7 @@ export function AccessUsersBar({
 
   return (
     <div className="access-users-bar" role="toolbar" aria-label={t('instances_tab_access')}>
+      {/* 1. Поиск */}
       <SearchField
         id="accessUsersSearchInput"
         className="access-users-bar__search"
@@ -48,6 +55,7 @@ export function AccessUsersBar({
         onChange={(e) => onSearchChange(e.target.value)}
       />
 
+      {/* 2. Фильтры */}
       <div className="access-users-bar__filters">
         <select
           id="accessUsersRoleFilter"
@@ -76,22 +84,26 @@ export function AccessUsersBar({
         </select>
       </div>
 
+      {/* 3. Счетчик отфильтрованных записей */}
+      {isFiltered ? (
+        <span className="access-users-bar__count">
+          {t('instances_search_count', shownCount, totalCount)}
+        </span>
+      ) : null}
+
+      {/* 4. Кнопки (Создать, Вид, Справка в конце) */}
       <div className="access-users-bar__actions">
-        <button
-          type="button"
-          className="btn btn--toolbar-icon access-users-bar__refresh"
-          id="btnAccessUsersRefresh"
-          title={t('update_list_btn')}
-          aria-label={t('update_list_btn')}
-          onClick={() => {
-            onSearchChange('');
-            onRoleFilterChange('all');
-            onStatusFilterChange('all');
-            onRefresh();
-          }}
-        >
-          <AppIcon name="refresh" size={16} />
-        </button>
+        {onCreate && (
+          <button
+            type="button"
+            className="btn access-users-bar__create-btn"
+            id="btnAccessUserCreate"
+            onClick={onCreate}
+          >
+            <IconUserPlus size={17} />
+            <span>{t('web_user_create_btn') || 'Создать пользователя'}</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -103,13 +115,20 @@ export function AccessUsersBar({
         >
           {viewMode === 'table' ? <IconLayoutGrid size={18} /> : <IconList size={18} />}
         </button>
-      </div>
 
-      {isFiltered ? (
-        <span className="access-users-bar__count">
-          {t('instances_search_count', shownCount, totalCount)}
-        </span>
-      ) : null}
+        {onOpenHelp && (
+          <button
+            type="button"
+            className="btn btn--toolbar-icon access-users-bar__help-btn"
+            id="btnWebAccessHelp"
+            title={t('web_access_help_btn')}
+            aria-label={t('web_access_help_btn')}
+            onClick={onOpenHelp}
+          >
+            <IconHelp size={18} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

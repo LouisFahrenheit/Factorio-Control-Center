@@ -486,38 +486,6 @@ export function InstanceScreen({
             </button>
           )}
         </div>
-        {activeTab === 'access' && (
-          <div
-            className="instance-servers-toolbar"
-            role="toolbar"
-            aria-label={t('instances_tab_access')}
-          >
-            <div className="instance-servers-toolbar__segment">
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn"
-                id="btnWebUserCreate"
-                data-i18n-title="web_user_create_btn"
-                title={t('web_user_create_btn')}
-                aria-label={t('web_user_create_btn')}
-                onClick={() => webUsers.openCreate()}
-              >
-                <AppIcon name="person_add" size={20} />
-              </button>
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn"
-                id="btnWebAccessHelp"
-                data-i18n-title="web_access_help_btn"
-                title={t('web_access_help_btn')}
-                aria-label={t('web_access_help_btn')}
-                onClick={() => setAccessHelpOpen(true)}
-              >
-                <AppIcon name="help" size={20} />
-              </button>
-            </div>
-          </div>
-        )}
         {activeTab === 'maintenance' && (
           <div
             className="instance-servers-toolbar"
@@ -769,7 +737,11 @@ export function InstanceScreen({
             />
           )}
           {activeTab === 'access' && (
-            <InstanceAccessTab webUsers={webUsers} t={t} />
+            <InstanceAccessTab
+              webUsers={webUsers}
+              onOpenHelp={() => setAccessHelpOpen(true)}
+              t={t}
+            />
           )}
           {activeTab === 'public' && (
             <InstancePublicTab

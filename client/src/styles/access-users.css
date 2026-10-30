@@ -8,6 +8,7 @@
   gap: 0;
   min-height: 0;
   flex: 1 1 auto;
+  height: 100%;
 }
 
 #webUsersSection {
@@ -15,6 +16,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
 }
 
 .access-layout {
@@ -22,7 +24,16 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   gap: 12px;
+}
+
+.access-layout__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
 }
 
 /* ── 2FA Icon ────────────────────────────────────────────────────────── */
@@ -52,6 +63,27 @@
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+}
+
+.access-users-bar__create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.access-users-bar__create-btn:hover {
+  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--text);
 }
 
 .access-users-bar__search {
@@ -84,7 +116,8 @@
   flex: 0 0 auto;
 }
 
-.access-users-bar__view-toggle-btn {
+.access-users-bar__view-toggle-btn,
+.access-users-bar__help-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +130,8 @@
   transition: all 0.15s ease;
 }
 
-.access-users-bar__view-toggle-btn:hover {
+.access-users-bar__view-toggle-btn:hover,
+.access-users-bar__help-btn:hover {
   color: var(--text);
   border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-input) 90%);
@@ -241,18 +275,29 @@
 /* ── Table Layout ────────────────────────────────────────────────────── */
 
 .access-users-table-wrap {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
+  height: 100%;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
   background: color-mix(in srgb, var(--bg-data) 88%, var(--bg-widget) 12%);
+  position: relative;
+  overflow: hidden;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.access-users-table-wrap--entering {
+.access-users-table-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.access-users-table-wrap--entering .access-users-table-container {
   overflow-y: hidden !important;
 }
 
@@ -266,52 +311,199 @@ table.access-users-table thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  padding: 12px 16px;
-  background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  font-size: 0.78rem;
-  font-weight: 700;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+  font-size: 0.84rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
   text-align: left;
 }
 
+table.access-users-table thead th.access-sort-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+table.access-users-table thead th.access-sort-th:hover {
+  color: var(--text);
+  background: color-mix(
+    in srgb,
+    var(--accent) 8%,
+    var(--bg-widget) 92%
+  ) !important;
+}
+
+table.access-users-table thead th.access-sort-th--active {
+  color: var(--accent-soft) !important;
+}
+
+table.access-users-table thead th.access-sort-th--active::after {
+  content: '';
+  display: inline-block;
+  width: 0.42em;
+  height: 0.42em;
+  margin-left: 0.45em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  opacity: 0.9;
+  vertical-align: middle;
+}
+
+table.access-users-table thead th.access-sort-th--asc::after {
+  transform: rotate(-135deg) translateY(1px);
+}
+
 table.access-users-table tbody tr.access-users-row {
   cursor: pointer;
-  transition: background 0.14s ease;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
 }
 
 table.access-users-table tbody tr.access-users-row td {
-  padding: 12px 16px;
+  padding: 13px 18px;
   border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 75%, transparent);
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
   background: transparent;
   vertical-align: middle;
 }
 
 table.access-users-table tbody tr.access-users-row:hover td {
-  background: var(--fcc-row-hover-bg);
+  background: color-mix(
+    in srgb,
+    var(--accent, #e58e26) 6%,
+    var(--bg-widget) 94%
+  );
 }
 
 table.access-users-table tbody tr.access-users-row--selected td {
-  background: var(--fcc-row-hover-selected-bg);
+  background: color-mix(
+    in srgb,
+    var(--accent, #da8216) 12%,
+    var(--bg-widget) 88%
+  ) !important;
+  box-shadow: none !important;
+}
+
+table.access-users-table tbody tr.access-users-row--selected td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent, #da8216) !important;
+  border-left: none !important;
 }
 
 .access-user-table-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.access-user-avatar-wrap {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-user-status-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  border: 2px solid var(--bg-widget);
+  transition: all 0.2s ease;
+}
+
+.access-user-status-dot--on {
+  background: #20c997;
+  box-shadow: 0 0 6px #20c997;
+}
+
+.access-user-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .access-users-row__name {
   font-weight: 600;
   font-size: 0.98rem;
   color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.access-user-2fa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.70rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--text) 8%, var(--bg-widget) 92%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text-muted);
+}
+
+.access-users-role-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.access-users-role-text--disabled {
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+.access-users-chip-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.access-users-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.access-users-chip--full-access {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+}
+
+.access-users-chip-muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .access-users-row--disabled {
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 .access-users-table__col-actions {
@@ -323,16 +515,34 @@ table.access-users-table tbody tr.access-users-row--selected td {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  justify-content: flex-end;
 }
 
 .access-users-table__action-btn {
-  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.access-users-table__action-btn--danger:hover:not(:disabled) {
-  color: #ff7070;
-  background: color-mix(in srgb, var(--error) 18%, transparent);
+.access-users-table__action-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  transform: translateY(-1px);
+}
+
+.access-users-table__action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .access-users-table__action-btn--activate {
@@ -342,6 +552,117 @@ table.access-users-table tbody tr.access-users-row--selected td {
 .access-users-table__action-btn--reset-2fa:hover:not(:disabled) {
   color: #9ec8ff;
   background: color-mix(in srgb, #4a78b8 18%, transparent);
+}
+
+.access-users-table__action-btn--danger:hover:not(:disabled) {
+  color: #ff7070;
+  background: color-mix(in srgb, var(--error, #e03131) 18%, transparent);
+  border-color: color-mix(in srgb, var(--error, #e03131) 45%, transparent);
+}
+
+/* ── Pinned Pagination ───────────────────────────────────────────────── */
+
+.access-users-pagination {
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.access-users-pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.access-users-pagination-info {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.access-users-page-size-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.access-users-page-size-label {
+  font-size: 0.80rem;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+.access-users-page-size-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  min-width: 26px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.access-users-page-size-btn:hover {
+  background: color-mix(in srgb, var(--text) 10%, var(--bg-widget) 90%);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text) 25%, transparent);
+}
+
+.access-users-page-size-btn--active {
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) !important;
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
+}
+
+.access-users-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.access-users-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.access-users-page-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.access-users-page-btn--active {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%) !important;
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent) !important;
+}
+
+.access-users-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ── Cards Grid Layout ───────────────────────────────────────────────── */
@@ -1020,5 +1341,76 @@ table.access-users-table tbody tr.access-users-row--selected td {
 
   .web-user-editor-modal .access-perm-groups {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── 2K / Large Screen Responsive Media Queries ───────────────────────── */
+@media (min-width: 2000px) {
+  table.access-users-table thead th {
+    padding: 16px 22px;
+    font-size: 0.95rem;
+  }
+
+  table.access-users-table tbody tr.access-users-row td {
+    padding: 18px 22px;
+    font-size: 1.05rem;
+  }
+
+  .access-user-avatar-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+  }
+
+  .access-user-avatar-wrap svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .access-users-row__name {
+    font-size: 1.12rem;
+  }
+
+  .access-users-role-text {
+    font-size: 0.96rem;
+  }
+
+  .access-users-chip {
+    padding: 5px 12px;
+    font-size: 0.9rem;
+  }
+
+  .access-users-table__action-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .access-users-table__action-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .access-users-pagination {
+    padding: 14px 24px;
+  }
+
+  .access-users-pagination-info {
+    font-size: 0.98rem;
+  }
+
+  .access-users-page-size-label {
+    font-size: 0.92rem;
+  }
+
+  .access-users-page-size-btn {
+    height: 28px;
+    min-width: 32px;
+    font-size: 0.88rem;
+  }
+
+  .access-users-page-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.92rem;
   }
 }

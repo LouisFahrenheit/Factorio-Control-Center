@@ -13,10 +13,11 @@ import { WebUserRowMenu } from './WebUserRowMenu';
 
 interface InstanceAccessTabProps {
   webUsers: WebUsersApi;
+  onOpenHelp?: () => void;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
+export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTabProps) {
   const [viewMode, setViewMode] = useUserAccessViewMode();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -97,9 +98,10 @@ export function InstanceAccessTab({ webUsers, t }: InstanceAccessTabProps) {
             onStatusFilterChange={setStatusFilter}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
-            onRefresh={() => void webUsers.refresh()}
             shownCount={filteredUsers.length}
             totalCount={totalCount}
+            onCreate={webUsers.openCreate}
+            onOpenHelp={onOpenHelp}
             t={t}
           />
 
