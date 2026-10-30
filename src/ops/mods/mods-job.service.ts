@@ -344,7 +344,8 @@ export class ModsJobService {
 
       this.state.phase = 'done';
     } catch (e) {
-      if (String(e) === 'cancelled') {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg === 'cancelled' || String(e) === 'cancelled') {
         this.state.phase = 'cancelled';
       } else {
         this.failJobError(e);
