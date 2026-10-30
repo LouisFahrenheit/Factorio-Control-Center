@@ -252,6 +252,10 @@
     0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
+.access-users-table-wrap--entering {
+  overflow-y: hidden !important;
+}
+
 table.access-users-table {
   width: 100%;
   border-collapse: separate;

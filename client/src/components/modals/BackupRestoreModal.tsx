@@ -1,5 +1,5 @@
 import { Modal } from '@mantine/core';
-import { AppIcon } from '../AppIcon';
+import { IconAlertTriangle, IconArchive, IconRotateClockwise } from '@tabler/icons-react';
 import type { BackupEntry, RestoreMode } from '../../hooks/useBackup';
 
 interface BackupRestoreModalProps {
@@ -46,7 +46,7 @@ export function BackupRestoreModal({
       size={520}
       title={
         <span className="backup-restore-modal__header-title">
-          <AppIcon name="warning" size={20} className="backup-restore-modal__header-icon" />
+          <IconAlertTriangle size={20} className="backup-restore-modal__header-icon" />
           <span>{t('backup_restore_confirm_title')}</span>
         </span>
       }
@@ -62,13 +62,13 @@ export function BackupRestoreModal({
         <p className="backup-restore-modal__msg">{t('backup_restore_confirm_msg')}</p>
 
         <div className="backup-restore-modal__file-badge">
-          <AppIcon name="folder_zip" size={20} className="backup-restore-modal__file-icon" />
+          <IconArchive size={20} className="backup-restore-modal__file-icon" />
           <span className="backup-restore-modal__file-name">{target.filename}</span>
         </div>
 
         {/* Предупреждение о перезапуске */}
         <div className="backup-restore-modal__callout">
-          <AppIcon name="warning" size={18} className="backup-restore-modal__callout-icon" />
+          <IconAlertTriangle size={18} className="backup-restore-modal__callout-icon" />
           <span className="backup-restore-modal__callout-text">
             {t('backup_restore_restart_warn')}
           </span>
@@ -114,7 +114,7 @@ export function BackupRestoreModal({
             className="btn btn--danger btn--with-icon"
             onClick={onConfirm}
           >
-            <AppIcon name="restore" size={16} />
+            <IconRotateClockwise size={16} />
             <span>{t('backup_restore_btn')}</span>
           </button>
         </div>

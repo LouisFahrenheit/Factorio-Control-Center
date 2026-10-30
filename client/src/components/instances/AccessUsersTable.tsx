@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import type { MouseEvent } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { AppIcon } from '../AppIcon';
 import {
   listUserInstanceLabels,
@@ -45,10 +45,19 @@ export function AccessUsersTable({
 }: AccessUsersTableProps) {
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(0);
+  const [isEntering, setIsEntering] = useState(!reduced);
+
+  useEffect(() => {
+    if (!isEntering) return;
+    const timer = window.setTimeout(() => {
+      setIsEntering(false);
+    }, 750);
+    return () => window.clearTimeout(timer);
+  }, [isEntering]);
 
   return (
     <motion.div
-      className="table-wrap table-wrap--motion-list access-users-table-wrap"
+      className={`table-wrap table-wrap--motion-list access-users-table-wrap ${isEntering ? 'access-users-table-wrap--entering' : ''}`}
       variants={wrapVariants}
       initial={reduced ? false : 'hidden'}
       animate={reduced ? undefined : 'show'}
@@ -78,6 +87,7 @@ export function AccessUsersTable({
           variants={reduced ? undefined : LIST_CONTAINER_VARIANTS}
           initial={reduced ? false : 'hidden'}
           animate={reduced ? undefined : 'show'}
+          onAnimationComplete={() => setIsEntering(false)}
         >
           {users.map((u) => {
             const enabled = u.enabled !== false;
