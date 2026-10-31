@@ -875,7 +875,9 @@ body {
 table#tblBackups thead th.backup-sort-th {
   cursor: pointer;
   user-select: none;
-  transition: color 0.18s ease, background-color 0.18s ease;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
 }
 
 table#tblBackups thead th.backup-sort-th:hover {
@@ -944,11 +946,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-widget) 30%
-  );
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
   color: var(--text-muted);
   border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   flex-shrink: 0;
@@ -1056,7 +1054,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   gap: 5px;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -1150,7 +1148,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   }
 
   .backup-tab__file-date {
-    font-size: 1.10rem;
+    font-size: 1.1rem;
   }
 
   .backup-tab__file-name {
@@ -1309,7 +1307,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-modal__header {
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
   padding: 16px 20px;
 }
 
@@ -1567,7 +1566,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   opacity: 0.5;
   pointer-events: none;
   filter: grayscale(0.25);
-  transition: opacity 0.2s ease, filter 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
 }
 
 /* ── Auto Parameters Grid ───────────────────────────────────────── */
@@ -1608,7 +1609,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   background: color-mix(in srgb, var(--bg-main) 85%, var(--bg-widget) 15%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
   overflow: hidden;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .backup-auto-param-card__input-wrap:focus-within {
@@ -1870,7 +1873,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-size-label {
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   opacity: 0.85;
 }
@@ -1899,7 +1902,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-size-btn--active {
-  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 18%,
+    var(--bg-widget) 82%
+  ) !important;
   color: var(--accent) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
 }
@@ -1934,7 +1941,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-btn--active {
-  background: color-mix(in srgb, var(--text) 18%, var(--bg-widget) 82%) !important;
+  background: color-mix(
+    in srgb,
+    var(--text) 18%,
+    var(--bg-widget) 82%
+  ) !important;
   color: var(--text) !important;
   border-color: color-mix(in srgb, var(--text) 30%, transparent) !important;
 }
@@ -4749,7 +4760,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .instance-dashboard-top .instance-dashboard-stat {
-  min-width: 76px;
   flex-shrink: 0;
   box-sizing: border-box;
   padding: 5px 10px 5px 8px;
@@ -4758,16 +4768,52 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   max-height: 44px;
 }
 
+.instance-dashboard-top .instance-dashboard-stat--total {
+  flex: 0 0 104px;
+  width: 104px;
+  min-width: 104px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--running {
+  flex: 0 0 118px;
+  width: 118px;
+  min-width: 118px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--stopped {
+  flex: 0 0 140px;
+  width: 140px;
+  min-width: 140px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--online {
+  flex: 0 0 104px;
+  width: 104px;
+  min-width: 104px;
+}
+
+.instance-dashboard-top .instance-dashboard-stat--cpu {
+  flex: 0 0 104px;
+  width: 104px;
+  min-width: 104px;
+}
+
 .instance-dashboard-top .instance-dashboard-stat--ram {
-  min-width: 126px;
+  flex: 0 0 180px;
+  width: 180px;
+  min-width: 180px;
 }
 
 .instance-dashboard-top .instance-dashboard-stat--disk {
-  min-width: 132px;
+  flex: 0 0 204px;
+  width: 204px;
+  min-width: 204px;
 }
 
 .instance-dashboard-top .instance-dashboard-stat--uptime {
-  min-width: 104px;
+  flex: 0 0 180px;
+  width: 180px;
+  min-width: 180px;
 }
 
 .instance-dashboard-top .instance-dashboard-stat__icon {
@@ -4793,12 +4839,14 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-top .instance-dashboard-stat__value {
   font-size: 1.16em;
   font-weight: 750;
+  font-variant-numeric: tabular-nums;
 }
 
 .instance-dashboard-top .instance-dashboard-stat__value--compact-stat {
   font-size: 1.05em !important;
   font-weight: 700 !important;
   letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
 }
 
 .instance-dashboard-top .instance-dashboard-stat__unit {
@@ -6230,4 +6278,3 @@ table.data thead th.saves-sort-th--asc::after {
   min-width: 30px;
   border-radius: 5px;
 }
-
