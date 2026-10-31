@@ -8,6 +8,7 @@ describe('backupDbBeforeStartup', () => {
   let dbPath: string;
 
   beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fcc-db-backup-test-'));
     dbPath = path.join(tempDir, 'fcc_database.sqlite');
   });
