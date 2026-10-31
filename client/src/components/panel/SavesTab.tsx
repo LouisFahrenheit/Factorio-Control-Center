@@ -239,7 +239,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
               type="text"
               id="inpSavesFilter"
               className="saves-actions__filter"
-              placeholder={t('saves_manager_filter_placeholder')}
+              placeholder={t('search_placeholder')}
               autoComplete="off"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}

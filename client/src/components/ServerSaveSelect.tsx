@@ -264,8 +264,8 @@ export function ServerSaveSelect({
                 className="server-save-select__search-input"
                 placeholder={resolveText(
                   t,
-                  'control_save_search_placeholder',
-                  'Поиск сохранения...',
+                  'search_placeholder',
+                  'Поиск...',
                 )}
                 value={search}
                 spellCheck={false}

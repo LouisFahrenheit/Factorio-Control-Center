@@ -18,8 +18,8 @@ interface BackupBarProps {
   autoEnabled: boolean;
   creating: boolean;
   uploading: boolean;
-  totalCount: number;
-  filteredCount: number;
+  totalCount?: number;
+  filteredCount?: number;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
@@ -35,12 +35,8 @@ export function BackupBar({
   autoEnabled,
   creating,
   uploading,
-  totalCount,
-  filteredCount,
   t,
 }: BackupBarProps) {
-  const isFiltered = (search.trim().length > 0 || typeFilter !== 'all') && filteredCount !== totalCount;
-
   return (
     <div className="access-users-bar backup-bar" role="toolbar" aria-label={t('backup_list_title')}>
       {/* 1. Поиск */}
@@ -48,7 +44,7 @@ export function BackupBar({
         type="search"
         id="backupSearchInput"
         className="access-users-bar__search"
-        placeholder={t('search') || 'Поиск по имени, дате или тегу...'}
+        placeholder={t('search_placeholder')}
         autoComplete="off"
         spellCheck={false}
         value={search}
@@ -74,28 +70,21 @@ export function BackupBar({
       {/* 3. Кнопка обновления */}
       <button
         type="button"
-        className="btn btn--toolbar-icon"
+        className="btn access-users-bar__refresh-btn"
         id="btnBackupRefresh"
         title={t('web_refresh')}
         aria-label={t('web_refresh')}
         onClick={onRefresh}
       >
-        <IconRefresh size={16} />
+        <IconRefresh size={18} />
       </button>
 
-      {/* 4. Счетчик если фильтр активен */}
-      {isFiltered ? (
-        <span className="access-users-bar__count">
-          {t('instances_search_count', filteredCount, totalCount) || `${filteredCount} / ${totalCount}`}
-        </span>
-      ) : null}
-
-      {/* 5. Кнопки действий */}
+      {/* 4. Кнопки действий */}
       <div className="access-users-bar__actions">
         <button
           type="button"
           id="btnBackupCreateOpen"
-          className="btn btn--secondary btn--with-icon"
+          className="btn access-users-bar__create-btn"
           disabled={creating}
           onClick={onOpenCreate}
         >
@@ -106,7 +95,7 @@ export function BackupBar({
             </>
           ) : (
             <>
-              <IconPlus size={16} />
+              <IconPlus size={17} />
               <span>{t('backup_create_title')}</span>
             </>
           )}
@@ -115,11 +104,11 @@ export function BackupBar({
         <button
           type="button"
           id="btnBackupAutoSettings"
-          className="btn btn--secondary btn--with-icon"
+          className="btn access-users-bar__create-btn"
           onClick={onOpenAutoSettings}
           title={t('backup_auto_title')}
         >
-          <IconClock size={16} />
+          <IconClock size={17} />
           <span>{t('backup_auto_title')}</span>
           {autoEnabled && (
             <span
@@ -133,7 +122,7 @@ export function BackupBar({
         <button
           type="button"
           id="btnBackupUpload"
-          className="btn btn--secondary btn--with-icon"
+          className="btn access-users-bar__create-btn"
           disabled={uploading}
           onClick={onTriggerUpload}
           title={t('backup_upload_btn')}
@@ -145,7 +134,7 @@ export function BackupBar({
             </>
           ) : (
             <>
-              <IconUpload size={16} />
+              <IconUpload size={17} />
               <span>{t('backup_upload_btn')}</span>
             </>
           )}

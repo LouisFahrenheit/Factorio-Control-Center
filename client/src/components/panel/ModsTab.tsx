@@ -246,7 +246,7 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                 type="text"
                 id="modsSearchInput"
                 className="mods-toolbar__search"
-                placeholder={t('mods_search_placeholder')}
+                placeholder={t('search_placeholder')}
                 autoComplete="off"
                 value={mods.search}
                 onChange={(e) => mods.setSearch(e.target.value)}

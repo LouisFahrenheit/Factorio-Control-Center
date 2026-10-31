@@ -449,11 +449,7 @@ export function MaintenanceTaskTable({
         <div className="access-users-pagination">
           <div className="access-users-pagination-left">
             <span className="access-users-pagination-info">
-              {t(
-                'instances_search_count',
-                `${startIndex}–${endIndex}`,
-                sortedTasks.length,
-              )}
+              {startIndex}–{endIndex} of {sortedTasks.length}
             </span>
 
             <div className="access-users-page-size-picker">

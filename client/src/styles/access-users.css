@@ -80,10 +80,15 @@
   transition: all 0.16s ease;
 }
 
-.access-users-bar__create-btn:hover {
+.access-users-bar__create-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--text);
+}
+
+.access-users-bar__create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .access-users-bar__search {
@@ -116,12 +121,18 @@
   flex: 0 0 auto;
 }
 
+.access-users-bar__refresh-btn,
 .access-users-bar__view-toggle-btn,
 .access-users-bar__help-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 8px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
+  box-sizing: border-box;
   border-radius: 6px;
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -130,23 +141,21 @@
   transition: all 0.15s ease;
 }
 
-.access-users-bar__view-toggle-btn:hover,
-.access-users-bar__help-btn:hover {
+.access-users-bar__refresh-btn:hover:not(:disabled),
+.access-users-bar__view-toggle-btn:hover:not(:disabled),
+.access-users-bar__help-btn:hover:not(:disabled) {
   color: var(--text);
   border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-input) 90%);
 }
 
-.access-users-bar__count {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--bg-widget) 80%, var(--bg-main) 20%);
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  white-space: nowrap;
+.access-users-bar__refresh-btn:disabled,
+.access-users-bar__view-toggle-btn:disabled,
+.access-users-bar__help-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
+
 
 /* ── Status Dot ──────────────────────────────────────────────────────── */
 

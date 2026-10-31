@@ -265,7 +265,7 @@ export default function ModSettingsPage() {
                     <div className="mod-settings-page__filter">
                       <SearchField
                         id="inpModSettingsFilter"
-                        placeholder={t('mod_settings_filter_placeholder')}
+                        placeholder={t('search_placeholder')}
                         autoComplete="off"
                         value={modSettings.filter}
                         onChange={(e) => modSettings.setFilter(e.target.value)}

@@ -56,6 +56,23 @@ describe('instanceListUtils', () => {
       expect(res).toHaveLength(1);
       expect(res[0].id).toBe('3');
     });
+
+    it('filters by statusFilter', () => {
+      const statusRows: InstanceItem[] = [
+        { id: '1', name: 'Server A', status: 'running' },
+        { id: '2', name: 'Server B', status: 'ready' },
+        { id: '3', name: 'Server C', status: 'maintenance' },
+      ];
+      const getStatus = (it: InstanceItem) => String(it.status || 'ready');
+
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'running')).toHaveLength(1);
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'running')[0].id).toBe('1');
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'ready')).toHaveLength(1);
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'ready')[0].id).toBe('2');
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'maintenance')).toHaveLength(1);
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'maintenance')[0].id).toBe('3');
+      expect(filterInstanceRows(statusRows, '', getStatus, dummyT, 'all')).toHaveLength(3);
+    });
   });
 
   describe('sortInstanceRows with save column', () => {

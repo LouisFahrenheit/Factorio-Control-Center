@@ -111,7 +111,7 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               type="text"
               id="cmdSearch"
               className="commands-tab__search"
-              placeholder={t('cmd_search_placeholder')}
+              placeholder={t('search_placeholder')}
               autoComplete="off"
               value={commands.search}
               onChange={(e) => commands.setSearch(e.target.value)}

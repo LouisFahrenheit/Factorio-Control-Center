@@ -118,6 +118,7 @@ export function InstanceScreen({
   const [serversHelpOpen, setServersHelpOpen] = useState(false);
   const [maintenanceHelpOpen, setMaintenanceHelpOpen] = useState(false);
   const [serverSearch, setServerSearch] = useState('');
+  const [serverStatusFilter, setServerStatusFilter] = useState('all');
   const [sortColumn, setSortColumn] = useState<InstanceSortColumn>('name');
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useUserServerListViewMode();
@@ -258,8 +259,15 @@ export function InstanceScreen({
   } = instances;
 
   const filteredRows = useMemo(
-    () => filterInstanceRows(rows, serverSearch, getEffectiveStatus, t),
-    [rows, serverSearch, getEffectiveStatus, t],
+    () =>
+      filterInstanceRows(
+        rows,
+        serverSearch,
+        getEffectiveStatus,
+        t,
+        serverStatusFilter,
+      ),
+    [rows, serverSearch, getEffectiveStatus, t, serverStatusFilter],
   );
 
   const displayRows = useMemo(
@@ -480,91 +488,6 @@ export function InstanceScreen({
             </button>
           )}
         </div>
-        {activeTab === 'servers' && (
-          <div
-            className="instance-servers-toolbar"
-            role="toolbar"
-            aria-label={t('instances_tab_servers')}
-          >
-            <div className="instance-servers-toolbar__segment">
-              <button
-                type="button"
-                className={
-                  'instance-servers-toolbar__btn' +
-                  (!hasServers ? ' btn--update-available' : '')
-                }
-                id="btnInstanceAdd"
-                data-i18n-title="instances_add_btn"
-                title={t('instances_add_btn')}
-                aria-label={t('instances_add_btn')}
-                onClick={() => instanceEditor.openAdd()}
-              >
-                <AppIcon name="add" size={20} />
-              </button>
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn"
-                id="btnInstancesHelp"
-                data-i18n-title="instances_help_btn"
-                title={t('instances_help_btn')}
-                aria-label={t('instances_help_btn')}
-                onClick={() => setServersHelpOpen(true)}
-              >
-                <AppIcon name="help" size={20} />
-              </button>
-            </div>
-            <div className="instance-servers-toolbar__segment">
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn"
-                id="btnInstanceStartAll"
-                data-i18n-title="instances_start_all_btn"
-                title={t('instances_start_all_btn')}
-                aria-label={t('instances_start_all_btn')}
-                onClick={() => startAll().catch(handleError)}
-              >
-                <AppIcon name="start" size={20} />
-              </button>
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn instance-servers-toolbar__btn--danger"
-                id="btnInstanceStopAll"
-                data-i18n-title="instances_stop_all_btn"
-                title={t('instances_stop_all_btn')}
-                aria-label={t('instances_stop_all_btn')}
-                onClick={() => stopAll().catch(handleError)}
-              >
-                <AppIcon name="stop" size={20} />
-              </button>
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn instance-servers-toolbar__btn--danger"
-                id="btnInstanceKillAll"
-                data-i18n-title="instances_kill_all_btn"
-                title={t('instances_kill_all_btn')}
-                aria-label={t('instances_kill_all_btn')}
-                onClick={() => killAll().catch(handleError)}
-              >
-                <AppIcon name="kill" size={20} />
-              </button>
-            </div>
-            {showEndMaintenanceAll && (
-              <div className="instance-servers-toolbar__segment">
-                <button
-                  type="button"
-                  className="instance-servers-toolbar__btn"
-                  id="btnInstanceEndMaintenanceAll"
-                  data-i18n-title="instances_end_maintenance_all_btn"
-                  title={t('instances_end_maintenance_all_btn')}
-                  aria-label={t('instances_end_maintenance_all_btn')}
-                  onClick={() => endMaintenanceAll().catch(handleError)}
-                >
-                  <AppIcon name="maintenance" size={20} />
-                </button>
-              </div>
-            )}
-          </div>
-        )}
       </motion.div>
 
       <motion.div
@@ -596,17 +519,32 @@ export function InstanceScreen({
                   <InstanceServersBar
                     search={serverSearch}
                     onSearchChange={setServerSearch}
+                    statusFilter={serverStatusFilter}
+                    onStatusFilterChange={setServerStatusFilter}
                     onRefresh={() => void instances.reload().catch(handleError)}
                     shownCount={displayRows.length}
                     totalCount={rows.length}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
+                    hasServers={hasServers}
+                    onAdd={() => instanceEditor.openAdd()}
+                    onOpenHelp={() => setServersHelpOpen(true)}
+                    onStartAll={() => startAll().catch(handleError)}
+                    onStopAll={() => stopAll().catch(handleError)}
+                    onKillAll={() => killAll().catch(handleError)}
+                    showEndMaintenanceAll={showEndMaintenanceAll}
+                    onEndMaintenanceAll={() =>
+                      endMaintenanceAll().catch(handleError)
+                    }
                     t={t}
                   />
                   {!displayRows.length ? (
                     <InstanceServersNoResults
                       query={serverSearch}
-                      onClear={() => setServerSearch('')}
+                      onClear={() => {
+                        setServerSearch('');
+                        setServerStatusFilter('all');
+                      }}
                       t={t}
                     />
                   ) : viewMode === 'cards' ? (

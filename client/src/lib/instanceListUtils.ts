@@ -44,12 +44,29 @@ export function filterInstanceRows(
   query: string,
   getEffectiveStatus: (item: InstanceItem) => string,
   t: (key: string) => string,
+  statusFilter = 'all',
 ): InstanceItem[] {
   const q = String(query || '').trim().toLowerCase();
-  if (!q) return rows;
+  const filter = String(statusFilter || 'all').trim().toLowerCase();
+
   return rows.filter((it) => {
-    const status = String(getEffectiveStatus(it) || 'ready');
-    const statusText = t('instances_status_' + status).toLowerCase();
+    const rawStatus = String(getEffectiveStatus(it) || 'ready').toLowerCase();
+
+    if (filter !== 'all') {
+      if (filter === 'ready') {
+        if (rawStatus !== 'ready' && rawStatus !== 'stopped') return false;
+      } else if (filter === 'maintenance') {
+        if (rawStatus !== 'maintenance' && rawStatus !== 'maintenance_manual') {
+          return false;
+        }
+      } else if (rawStatus !== filter) {
+        return false;
+      }
+    }
+
+    if (!q) return true;
+
+    const statusText = t('instances_status_' + rawStatus).toLowerCase();
     const haystack = [
       it.name,
       it.port,
@@ -59,7 +76,7 @@ export function filterInstanceRows(
       it.launchSave,
       it.serverPath,
       it.ip,
-      status,
+      rawStatus,
       statusText,
     ]
       .map((x) => String(x || '').toLowerCase())

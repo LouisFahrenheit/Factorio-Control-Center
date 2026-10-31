@@ -172,7 +172,7 @@ export function InstancePeekModal({
                     className="instance-peek-modal__search-input"
                     value={modFilter}
                     onChange={(e) => setModFilter(e.target.value)}
-                    placeholder={t('instances_peek_search_mods')}
+                    placeholder={t('search_placeholder')}
                     autoFocus
                   />
                   {modFilter && (

@@ -86,7 +86,7 @@ export function CommandItemsEditorModal({ editor, t }: CommandItemsEditorModalPr
                 <span>{t('items_editor_search')}</span>
                 <SearchField
                   type="text"
-                  placeholder={t('items_editor_search_placeholder')}
+                  placeholder={t('search_placeholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />

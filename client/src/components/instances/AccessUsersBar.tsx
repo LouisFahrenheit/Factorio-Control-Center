@@ -3,6 +3,7 @@ import {
   IconList,
   IconUserPlus,
   IconHelp,
+  IconRefresh,
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
 import type { UserAccessViewMode } from '../../lib/userPrefs';
@@ -16,8 +17,9 @@ interface AccessUsersBarProps {
   onStatusFilterChange: (value: string) => void;
   viewMode: UserAccessViewMode;
   onViewModeChange: (mode: UserAccessViewMode) => void;
-  shownCount: number;
-  totalCount: number;
+  shownCount?: number;
+  totalCount?: number;
+  onRefresh?: () => void;
   onCreate?: () => void;
   onOpenHelp?: () => void;
   t: (key: string, ...args: (string | number)[]) => string;
@@ -32,28 +34,40 @@ export function AccessUsersBar({
   onStatusFilterChange,
   viewMode,
   onViewModeChange,
-  shownCount,
-  totalCount,
+  onRefresh,
   onCreate,
   onOpenHelp,
   t,
 }: AccessUsersBarProps) {
-  const isFiltered =
-    (search.trim().length > 0 || roleFilter !== 'all' || statusFilter !== 'all') &&
-    shownCount !== totalCount;
-
   return (
     <div className="access-users-bar" role="toolbar" aria-label={t('instances_tab_access')}>
       {/* 1. Поиск */}
       <SearchField
         id="accessUsersSearchInput"
         className="access-users-bar__search"
-        placeholder={t('web_users_search_placeholder')}
+        placeholder={t('search_placeholder')}
         autoComplete="off"
         spellCheck={false}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
       />
+
+      {/* 2. Обновление */}
+      {onRefresh && (
+        <button
+          type="button"
+          className="btn access-users-bar__refresh-btn"
+          id="btnAccessUsersRefresh"
+          title={t('update_list_btn')}
+          aria-label={t('update_list_btn')}
+          onClick={() => {
+            onSearchChange('');
+            onRefresh();
+          }}
+        >
+          <IconRefresh size={18} />
+        </button>
+      )}
 
       {/* 2. Фильтры */}
       <div className="access-users-bar__filters">
@@ -84,14 +98,7 @@ export function AccessUsersBar({
         </select>
       </div>
 
-      {/* 3. Счетчик отфильтрованных записей */}
-      {isFiltered ? (
-        <span className="access-users-bar__count">
-          {t('instances_search_count', shownCount, totalCount)}
-        </span>
-      ) : null}
-
-      {/* 4. Кнопки (Создать, Вид, Справка в конце) */}
+      {/* 3. Кнопки (Создать, Вид, Справка в конце) */}
       <div className="access-users-bar__actions">
         {onCreate && (
           <button

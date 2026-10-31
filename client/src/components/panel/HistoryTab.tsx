@@ -327,7 +327,7 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
               <div id="subTabPanelPlayerHistory" className="sub-tab-panel sub-tab-panel--active" role="tabpanel">
                 <HistoryFilterToolbar
                   searchId="playerHistorySearch"
-                  searchPlaceholder={t('history_player_search_placeholder')}
+                  searchPlaceholder={t('search_placeholder')}
                   search={playerSearch}
                   onSearchChange={setPlayerSearch}
                   categoryId="playerHistoryCategory"
@@ -381,7 +381,7 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
               <div id="subTabPanelServerHistory" className="sub-tab-panel sub-tab-panel--active" role="tabpanel">
                 <HistoryFilterToolbar
                   searchId="serverHistorySearch"
-                  searchPlaceholder={t('history_server_search_placeholder')}
+                  searchPlaceholder={t('search_placeholder')}
                   search={serverSearch}
                   onSearchChange={setServerSearch}
                   categoryId="serverHistoryAction"
@@ -438,7 +438,7 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
               <div id="subTabPanelModsHistory" className="sub-tab-panel sub-tab-panel--active" role="tabpanel">
                 <HistoryFilterToolbar
                   searchId="modsHistorySearch"
-                  searchPlaceholder={t('history_mods_search_placeholder')}
+                  searchPlaceholder={t('search_placeholder')}
                   search={modsSearch}
                   onSearchChange={setModsSearch}
                   categoryId="modsHistoryAction"
@@ -497,7 +497,7 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
               <div id="subTabPanelCommandsHistory" className="sub-tab-panel sub-tab-panel--active" role="tabpanel">
                 <HistoryFilterToolbar
                   searchId="commandsHistorySearch"
-                  searchPlaceholder={t('history_commands_search_placeholder')}
+                  searchPlaceholder={t('search_placeholder')}
                   search={commandsSearch}
                   onSearchChange={setCommandsSearch}
                   categoryId="commandsHistoryAction"

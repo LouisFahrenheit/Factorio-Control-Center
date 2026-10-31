@@ -283,7 +283,7 @@ export function ModPortalVersionsModal({
                     <input
                       type="text"
                       className="input mod-portal-versions__search-input"
-                      placeholder={t('mod_portal_versions_search_placeholder')}
+                      placeholder={t('search_placeholder')}
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />

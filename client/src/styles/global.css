@@ -6202,3 +6202,32 @@ table.data thead th.saves-sort-th--asc::after {
       auto !important;
   }
 }
+
+/* ── Unified Instance Servers Bar ───────────────────────────────────── */
+
+.instance-servers-bar.access-users-bar {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  gap: 8px;
+}
+
+.instance-servers-bar .instance-servers-toolbar__segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.instance-servers-bar .instance-servers-toolbar__btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 5px;
+}
+

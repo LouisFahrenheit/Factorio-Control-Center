@@ -100,6 +100,7 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
             onViewModeChange={setViewMode}
             shownCount={filteredUsers.length}
             totalCount={totalCount}
+            onRefresh={() => void webUsers.refresh()}
             onCreate={webUsers.openCreate}
             onOpenHelp={onOpenHelp}
             t={t}

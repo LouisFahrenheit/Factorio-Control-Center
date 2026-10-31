@@ -24,8 +24,8 @@ interface MaintenanceTasksBarProps {
   serverOptions: MaintenanceServerOption[];
   viewMode: MaintenanceViewMode;
   onViewModeChange: (mode: MaintenanceViewMode) => void;
-  shownCount: number;
-  totalCount: number;
+  shownCount?: number;
+  totalCount?: number;
   activeCount: number;
   onRefresh?: () => void;
   onOpenAdd: () => void;
@@ -44,8 +44,6 @@ export function MaintenanceTasksBar({
   serverOptions,
   viewMode,
   onViewModeChange,
-  shownCount,
-  totalCount,
   activeCount,
   onRefresh,
   onOpenAdd,
@@ -53,12 +51,6 @@ export function MaintenanceTasksBar({
   onOpenHelp,
   t,
 }: MaintenanceTasksBarProps) {
-  const isFiltered =
-    (search.trim().length > 0 ||
-      statusFilter !== 'all' ||
-      serverFilter !== 'all') &&
-    shownCount !== totalCount;
-
   return (
     <div
       className="access-users-bar maintenance-tasks-bar"
@@ -69,7 +61,7 @@ export function MaintenanceTasksBar({
       <SearchField
         id="maintenanceTasksSearchInput"
         className="access-users-bar__search"
-        placeholder={t('maintenance_search_placeholder')}
+        placeholder={t('search_placeholder')}
         autoComplete="off"
         spellCheck={false}
         value={search}
@@ -114,24 +106,17 @@ export function MaintenanceTasksBar({
       {onRefresh && (
         <button
           type="button"
-          className="btn btn--toolbar-icon"
+          className="btn access-users-bar__refresh-btn"
           id="btnMaintRefresh"
           title={t('update_list_btn') || 'Обновить'}
           aria-label={t('update_list_btn') || 'Обновить'}
           onClick={onRefresh}
         >
-          <IconRefresh size={16} />
+          <IconRefresh size={18} />
         </button>
       )}
 
-      {/* 4. Счетчик если фильтр активен */}
-      {isFiltered ? (
-        <span className="access-users-bar__count">
-          {t('instances_search_count', shownCount, totalCount)}
-        </span>
-      ) : null}
-
-      {/* 5. Кнопки действий */}
+      {/* 4. Кнопки действий */}
       <div className="access-users-bar__actions">
         <button
           type="button"
