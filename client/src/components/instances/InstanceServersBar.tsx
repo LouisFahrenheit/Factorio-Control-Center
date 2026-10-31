@@ -1,7 +1,12 @@
 import { IconLayoutGrid, IconList, IconRefresh } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
 import { AppIcon } from '../AppIcon';
-import type { ServerListViewMode } from '../../lib/userPrefs';
+import type {
+  ServerListViewMode,
+  ServerListColumnKey,
+  ServerListColumnVisibility,
+} from '../../lib/userPrefs';
+import { InstanceColumnsDropdown } from './InstanceColumnsDropdown';
 
 interface InstanceServersBarProps {
   search: string;
@@ -13,6 +18,9 @@ interface InstanceServersBarProps {
   totalCount?: number;
   viewMode: ServerListViewMode;
   onViewModeChange: (mode: ServerListViewMode) => void;
+  columns?: ServerListColumnVisibility;
+  onToggleColumn?: (key: ServerListColumnKey, visible: boolean) => void;
+  onResetColumns?: () => void;
   hasServers: boolean;
   onAdd: () => void;
   onOpenHelp: () => void;
@@ -32,6 +40,9 @@ export function InstanceServersBar({
   onRefresh,
   viewMode,
   onViewModeChange,
+  columns,
+  onToggleColumn,
+  onResetColumns,
   hasServers,
   onAdd,
   onOpenHelp,
@@ -164,6 +175,18 @@ export function InstanceServersBar({
             </button>
           </div>
         )}
+
+        {viewMode === 'list' &&
+          columns &&
+          onToggleColumn &&
+          onResetColumns && (
+            <InstanceColumnsDropdown
+              columns={columns}
+              onToggleColumn={onToggleColumn}
+              onReset={onResetColumns}
+              t={t}
+            />
+          )}
 
         <button
           type="button"

@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   readUserServerListViewMode,
   setUserServerListViewMode,
+  readUserServerListColumns,
+  setUserServerListColumns,
+  DEFAULT_SERVER_LIST_COLUMNS,
   USER_PREFS_CHANGED_EVENT,
 } from './userPrefs';
 
@@ -64,3 +67,49 @@ describe('userPrefs - serverListViewMode', () => {
     expect(readUserServerListViewMode()).toBe('list');
   });
 });
+
+describe('userPrefs - serverListColumns', () => {
+  it('returns default column visibility when nothing is saved', () => {
+    expect(readUserServerListColumns()).toEqual(DEFAULT_SERVER_LIST_COLUMNS);
+  });
+
+  it('saves and reads custom column visibility', () => {
+    let eventFired = false;
+    const target = new EventTarget();
+    Object.defineProperty(globalThis, 'window', {
+      value: target,
+      writable: true,
+      configurable: true,
+    });
+
+    target.addEventListener(USER_PREFS_CHANGED_EVENT, () => {
+      eventFired = true;
+    });
+
+    const customCols = {
+      ...DEFAULT_SERVER_LIST_COLUMNS,
+      port: false,
+      rconPort: false,
+    };
+
+    setUserServerListColumns(customCols);
+    expect(readUserServerListColumns()).toEqual(customCols);
+    expect(eventFired).toBe(true);
+  });
+
+  it('falls back gracefully on invalid JSON in storage', () => {
+    localStorage.setItem('fcc_user_server_list_columns', 'not valid json');
+    expect(readUserServerListColumns()).toEqual(DEFAULT_SERVER_LIST_COLUMNS);
+  });
+
+  it('ignores invalid property types and preserves defaults', () => {
+    localStorage.setItem(
+      'fcc_user_server_list_columns',
+      JSON.stringify({ port: 'not-a-boolean', mods: false }),
+    );
+    const cols = readUserServerListColumns();
+    expect(cols.port).toBe(true);
+    expect(cols.mods).toBe(false);
+  });
+});
+

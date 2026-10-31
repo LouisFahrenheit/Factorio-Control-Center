@@ -2,6 +2,10 @@ import { motion } from 'motion/react';
 import { useRef, type MouseEvent, type RefObject } from 'react';
 import { formatUptime, instanceMaintenanceManualMode } from '../../lib/instanceUtils';
 import type { InstanceSortColumn } from '../../lib/instanceListUtils';
+import type {
+  ServerListColumnKey,
+  ServerListColumnVisibility,
+} from '../../lib/userPrefs';
 import {
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,
@@ -75,6 +79,7 @@ interface InstanceTableProps {
   onSortColumn: (col: InstanceSortColumn) => void;
   onRowClick: (item: InstanceItem, rowEl: HTMLTableRowElement, ev: MouseEvent) => void;
   onRowDoubleClick: (item: InstanceItem, ev: MouseEvent) => void;
+  columns?: ServerListColumnVisibility;
   tableWrapRef?: RefObject<HTMLDivElement | null>;
   t: (key: string, ...args: (string | number)[]) => string;
 }
@@ -90,10 +95,13 @@ export function InstanceTable({
   onSortColumn,
   onRowClick,
   onRowDoubleClick,
+  columns,
   tableWrapRef,
   t,
 }: InstanceTableProps) {
   const placeholder = t('server_uptime_placeholder');
+  const isColVisible = (key: ServerListColumnKey) =>
+    columns ? columns[key] !== false : true;
   const { ready: listIconsReady, isAvailable: isListIconAvailable } = useServerListIconsProbe();
   const showModBadges = useUserShowServerListModBadges();
   const showSABadge = useUserShowServerListSpaceAgeBadge();
@@ -131,18 +139,24 @@ export function InstanceTable({
         <thead>
           <tr>
             <SortableTh col={SORTABLE_COLUMNS[0]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
-            <SortableTh col={SORTABLE_COLUMNS[1]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
-            <th data-i18n="instances_col_access">{t('instances_col_access')}</th>
-            {SORTABLE_COLUMNS.slice(2).map((col) => (
-              <SortableTh
-                key={col.key}
-                col={col}
-                sortColumn={sortColumn}
-                sortAsc={sortAsc}
-                onSortColumn={onSortColumn}
-                t={t}
-              />
-            ))}
+            {isColVisible('save') && (
+              <SortableTh col={SORTABLE_COLUMNS[1]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
+            )}
+            {isColVisible('access') && (
+              <th data-i18n="instances_col_access">{t('instances_col_access')}</th>
+            )}
+            {SORTABLE_COLUMNS.slice(2).map((col) =>
+              isColVisible(col.key as ServerListColumnKey) ? (
+                <SortableTh
+                  key={col.key}
+                  col={col}
+                  sortColumn={sortColumn}
+                  sortAsc={sortAsc}
+                  onSortColumn={onSortColumn}
+                  t={t}
+                />
+              ) : null
+            )}
           </tr>
         </thead>
         <motion.tbody
@@ -267,54 +281,62 @@ export function InstanceTable({
                     </span>
                   </span>
                 </td>
-                <td className="instance-save-cell">
-                  {saveDisplayName ? (
-                    <span className="instance-save-text" title={saveFullTitle}>
-                      <span className="instance-save-name">{saveDisplayName}</span>
+                {isColVisible('save') && (
+                  <td className="instance-save-cell">
+                    {saveDisplayName ? (
+                      <span className="instance-save-text" title={saveFullTitle}>
+                        <span className="instance-save-name">{saveDisplayName}</span>
+                      </span>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
+                  </td>
+                )}
+                {isColVisible('access') && (
+                  <td className="instance-access-cell">
+                    <span className="status-flags status-flags--side">
+                      <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>LAN</span>
+                      <span className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}>PUB</span>
+                      <span className={'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')}>
+                        RUV
+                      </span>
                     </span>
-                  ) : (
-                    <span className="muted">—</span>
-                  )}
-                </td>
-                <td className="instance-access-cell">
-                  <span className="status-flags status-flags--side">
-                    <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>LAN</span>
-                    <span className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}>PUB</span>
-                    <span className={'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')}>
-                      RUV
-                    </span>
-                  </span>
-                </td>
-                <td>{String(it.port || '')}</td>
-                <td>{String(it.rconPort || '')}</td>
-                <td>
-                  <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
-                </td>
-                <td>{modsText}</td>
-                <td>{String(it.onlineCount || 0)}</td>
-                <td>{uptimeText}</td>
-                <td>
-                  <span
-                    className={
-                      'instance-status-line' + (isMaintRow ? ' instance-status-line--maintenance' : '')
-                    }
-                  >
+                  </td>
+                )}
+                {isColVisible('port') && <td>{String(it.port || '')}</td>}
+                {isColVisible('rconPort') && <td>{String(it.rconPort || '')}</td>}
+                {isColVisible('version') && (
+                  <td>
+                    <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
+                  </td>
+                )}
+                {isColVisible('mods') && <td>{modsText}</td>}
+                {isColVisible('online') && <td>{String(it.onlineCount || 0)}</td>}
+                {isColVisible('uptime') && <td>{uptimeText}</td>}
+                {isColVisible('status') && (
+                  <td>
                     <span
                       className={
-                        'instance-status-pill ' +
-                        (isMaintManual
-                          ? 'instance-status-pill--maintenance-manual'
-                          : isMaintLocked
-                            ? 'instance-status-pill--maintenance'
-                            : isRunning
-                              ? 'instance-status-pill--running'
-                              : 'instance-status-pill--stopped')
+                        'instance-status-line' + (isMaintRow ? ' instance-status-line--maintenance' : '')
                       }
                     >
-                      {rowStatus}
+                      <span
+                        className={
+                          'instance-status-pill ' +
+                          (isMaintManual
+                            ? 'instance-status-pill--maintenance-manual'
+                            : isMaintLocked
+                              ? 'instance-status-pill--maintenance'
+                              : isRunning
+                                ? 'instance-status-pill--running'
+                                : 'instance-status-pill--stopped')
+                        }
+                      >
+                        {rowStatus}
+                      </span>
                     </span>
-                  </span>
-                </td>
+                  </td>
+                )}
               </motion.tr>
             );
           })}

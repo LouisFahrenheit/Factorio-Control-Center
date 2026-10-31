@@ -163,3 +163,60 @@ export function setUserMaintenanceViewMode(mode: MaintenanceViewMode): void {
     /* ignore */
   }
 }
+
+const SERVER_LIST_COLUMNS_KEY = 'fcc_user_server_list_columns';
+
+export type ServerListColumnKey =
+  | 'save'
+  | 'access'
+  | 'port'
+  | 'rconPort'
+  | 'version'
+  | 'mods'
+  | 'online'
+  | 'uptime'
+  | 'status';
+
+export type ServerListColumnVisibility = Record<ServerListColumnKey, boolean>;
+
+export const DEFAULT_SERVER_LIST_COLUMNS: ServerListColumnVisibility = {
+  save: true,
+  access: true,
+  port: true,
+  rconPort: true,
+  version: true,
+  mods: true,
+  online: true,
+  uptime: true,
+  status: true,
+};
+
+export function readUserServerListColumns(): ServerListColumnVisibility {
+  try {
+    if (typeof localStorage === 'undefined') return { ...DEFAULT_SERVER_LIST_COLUMNS };
+    const raw = localStorage.getItem(SERVER_LIST_COLUMNS_KEY);
+    if (!raw) return { ...DEFAULT_SERVER_LIST_COLUMNS };
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed !== 'object' || parsed === null) return { ...DEFAULT_SERVER_LIST_COLUMNS };
+    const result: ServerListColumnVisibility = { ...DEFAULT_SERVER_LIST_COLUMNS };
+    for (const key of Object.keys(DEFAULT_SERVER_LIST_COLUMNS) as ServerListColumnKey[]) {
+      if (typeof parsed[key] === 'boolean') {
+        result[key] = parsed[key];
+      }
+    }
+    return result;
+  } catch {
+    return { ...DEFAULT_SERVER_LIST_COLUMNS };
+  }
+}
+
+export function setUserServerListColumns(cols: ServerListColumnVisibility): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(SERVER_LIST_COLUMNS_KEY, JSON.stringify(cols));
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+

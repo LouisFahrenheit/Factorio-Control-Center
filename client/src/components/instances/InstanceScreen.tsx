@@ -61,6 +61,7 @@ import {
   InstanceServersNoResults,
 } from './InstanceServersEmpty';
 import { useUserServerListViewMode } from '../../hooks/useUserServerListViewMode';
+import { useUserServerListColumns } from '../../hooks/useUserServerListColumns';
 import { InstanceMonitoringTab } from './InstanceMonitoringTab';
 import { BackupTab } from './BackupTab';
 import { useBackup } from '../../hooks/useBackup';
@@ -122,6 +123,11 @@ export function InstanceScreen({
   const [sortColumn, setSortColumn] = useState<InstanceSortColumn>('name');
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useUserServerListViewMode();
+  const {
+    columns: listColumns,
+    setColumn: setListColumn,
+    resetColumns: resetListColumns,
+  } = useUserServerListColumns();
   const tableWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -526,6 +532,9 @@ export function InstanceScreen({
                     totalCount={rows.length}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
+                    columns={listColumns}
+                    onToggleColumn={setListColumn}
+                    onResetColumns={resetListColumns}
                     hasServers={hasServers}
                     onAdd={() => instanceEditor.openAdd()}
                     onOpenHelp={() => setServersHelpOpen(true)}
@@ -589,6 +598,7 @@ export function InstanceScreen({
                       onSortColumn={onSortColumn}
                       onRowClick={onRowClick}
                       onRowDoubleClick={onRowDoubleClick}
+                      columns={listColumns}
                       tableWrapRef={tableWrapRef}
                       t={t}
                     />

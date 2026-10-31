@@ -1684,6 +1684,8 @@
   "instances_col_online": "Online",
   "instances_col_uptime": "Uptime",
   "instances_col_status": "Status",
+  "instances_customize_columns": "Customize columns",
+  "instances_columns_reset": "Default",
   "instances_total_servers": "Total",
   "instances_running_servers": "Running",
   "instances_stopped_servers": "Stopped",
