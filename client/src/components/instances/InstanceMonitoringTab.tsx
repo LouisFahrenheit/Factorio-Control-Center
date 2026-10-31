@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useQueries, keepPreviousData } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { IconActivity, IconBug, IconCloudFog } from '@tabler/icons-react';
@@ -46,16 +46,16 @@ type MetricKey =
   | 'pollutionGlebaAbsorbed';
 
 const COLORS = [
-  'var(--mantine-color-blue-filled)',
-  'var(--mantine-color-teal-filled)',
-  'var(--mantine-color-orange-filled)',
-  'var(--mantine-color-pink-filled)',
-  'var(--mantine-color-cyan-filled)',
-  'var(--mantine-color-grape-filled)',
-  'var(--mantine-color-yellow-filled)',
-  'var(--mantine-color-red-filled)',
-  'var(--mantine-color-indigo-filled)',
-  'var(--mantine-color-lime-filled)',
+  '#38bdf8', // Sky
+  '#34d399', // Emerald
+  '#fbbf24', // Amber
+  '#f472b6', // Pink
+  '#a78bfa', // Purple
+  '#fb923c', // Orange
+  '#4ade80', // Lime
+  '#f87171', // Red
+  '#2dd4bf', // Teal
+  '#818cf8', // Indigo
 ];
 
 export function InstanceMonitoringTab({
@@ -72,6 +72,15 @@ export function InstanceMonitoringTab({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [hoveredLegendId, setHoveredLegendId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleServerSelectChange = (serverId: string) => {
+    if (serverId === 'all') {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set([serverId]));
+    }
+    setHoverIndex(null);
+  };
 
   const handleLegendClick = (instId: string, ev: React.MouseEvent) => {
     const idStr = String(instId);
@@ -132,6 +141,7 @@ export function InstanceMonitoringTab({
     key: MetricKey;
     label: string;
     icon: React.ReactNode;
+    badge?: string;
   }[] = useMemo(
     () => [
       {
@@ -158,6 +168,7 @@ export function InstanceMonitoringTab({
         key: 'espm',
         label: t('metric_espm') || 'ESPM',
         icon: <AppIcon name="science" size={14} />,
+        badge: 'E',
       },
       {
         key: 'players',
@@ -173,31 +184,37 @@ export function InstanceMonitoringTab({
         key: 'evolution',
         label: `${t('metric_evolution') || 'Эволюция кусак (%)'} (${t('metric_evolution_nauvis') || 'Наувис'})`,
         icon: <IconBug size={14} />,
+        badge: 'N',
       },
       {
         key: 'evolutionGleba',
         label: `${t('metric_evolution') || 'Эволюция кусак (%)'} (${t('metric_evolution_gleba') || 'Глеба'})`,
         icon: <IconBug size={14} />,
+        badge: 'G',
       },
       {
         key: 'pollution',
         label: `${t('metric_pollution_production') || t('metric_pollution') || 'Загрязнение'} (${t('metric_evolution_nauvis') || 'Наувис'})`,
         icon: <IconCloudFog size={14} />,
+        badge: 'N',
       },
       {
         key: 'pollutionAbsorbed',
         label: `${t('metric_pollution_absorption') || 'Поглощение'} (${t('metric_evolution_nauvis') || 'Наувис'})`,
         icon: <IconCloudFog size={14} />,
+        badge: 'N↓',
       },
       {
         key: 'pollutionGleba',
         label: `${t('metric_pollution_production') || t('metric_pollution') || 'Загрязнение'} (${t('metric_evolution_gleba') || 'Глеба'})`,
         icon: <IconCloudFog size={14} />,
+        badge: 'G',
       },
       {
         key: 'pollutionGlebaAbsorbed',
         label: `${t('metric_pollution_absorption') || 'Поглощение'} (${t('metric_evolution_gleba') || 'Глеба'})`,
         icon: <IconCloudFog size={14} />,
+        badge: 'G↓',
       },
     ],
     [t],
@@ -367,9 +384,39 @@ export function InstanceMonitoringTab({
     return resampledQueriesData.some((rqd) => rqd.points.length > 0);
   }, [resampledQueriesData]);
 
-  // Chart coordinates
-  const width = 1000;
-  const height = 300;
+  const chartWrapRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({
+    width: 1000,
+    height: 330,
+  });
+
+  useEffect(() => {
+    const el = chartWrapRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const w = Math.round(entry.contentRect.width);
+      const h = Math.round(entry.contentRect.height);
+      if (w > 100 && h > 100) {
+        setDimensions({
+          width: Math.max(700, w),
+          height: Math.max(260, h),
+        });
+      }
+    });
+
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Dynamic chart coordinates based on measured container size
+  const width = dimensions.width;
+  const height = dimensions.height;
   const paddingLeft = 110;
   const paddingRight = 45;
   const paddingTop = 20;
@@ -482,19 +529,21 @@ export function InstanceMonitoringTab({
 
     setHoverIndex(idx);
 
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (containerRect) {
-      const isRightHalf =
-        ev.clientX - containerRect.left > containerRect.width / 2;
+    const cardRect = containerRef.current?.getBoundingClientRect();
+    if (cardRect) {
+      const isRightHalf = ev.clientX - cardRect.left > cardRect.width / 2;
       const tooltipX = isRightHalf
-        ? ev.clientX - containerRect.left - 245
-        : ev.clientX - containerRect.left + 15;
-      const tooltipY = ev.clientY - containerRect.top - 120;
+        ? Math.max(10, ev.clientX - cardRect.left - 245)
+        : Math.min(cardRect.width - 245, ev.clientX - cardRect.left + 15);
+      const tooltipY = Math.max(
+        10,
+        Math.min(cardRect.height - 180, ev.clientY - cardRect.top - 60),
+      );
       setTooltipPos({ x: tooltipX, y: tooltipY });
     }
   }
 
-  const gridTicks = 5;
+  const gridTicks = width > 1600 ? 7 : 5;
   const timeLabels = useMemo(() => {
     const { left, duration } = timeWindow;
     const labels = [];
@@ -529,7 +578,7 @@ export function InstanceMonitoringTab({
       labels.push({ x, text });
     }
     return labels;
-  }, [timeWindow, range, chartWidth]);
+  }, [timeWindow, range, chartWidth, gridTicks]);
 
   // Construct active points lists sorted by value for tooltip presentation
   const tooltipRows = useMemo(() => {
@@ -566,139 +615,104 @@ export function InstanceMonitoringTab({
 
   return (
     <div
+      id="instanceTabMonitoring"
       ref={containerRef}
-      className="monitoring-tab animate-show"
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-      }}
+      className="sub-tab-panel sub-tab-panel--active instance-monitoring-tab animate-show"
+      role="tabpanel"
     >
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}
+      {/* ── Toolbar: Metric Select, Server Filter, Refresh, Range Switcher ── */}
+      <div
+        className="access-users-bar instance-monitoring-bar"
+        role="toolbar"
+        aria-label={t('instances_tab_monitoring')}
       >
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {metricOptions.map((opt) => {
-            const isActive = metricKey === opt.key;
-            return (
-              <button
-                key={opt.key}
-                type="button"
-                className="btn btn--compact"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: isActive
-                    ? 'color-mix(in srgb, var(--accent) 16%, var(--mantine-color-dark-6))'
-                    : 'var(--mantine-color-dark-6)',
-                  color: isActive
-                    ? 'var(--accent-selected, #f1be64)'
-                    : 'var(--mantine-color-text)',
-                  border: isActive
-                    ? '1px solid color-mix(in srgb, var(--accent) 45%, transparent)'
-                    : '1px solid var(--mantine-color-dark-4)',
-                  boxShadow: isActive
-                    ? '0 0 10px color-mix(in srgb, var(--accent) 18%, transparent)'
-                    : 'none',
-                  borderRadius: '6px',
-                  padding: '6px 12px',
-                  fontSize: '0.82rem',
-                  fontWeight: isActive ? 600 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onClick={() => {
-                  setMetricKey(opt.key);
-                  setHoverIndex(null);
-                }}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    color: isActive ? 'var(--accent)' : 'var(--mantine-color-dimmed)',
+        <div className="instance-monitoring-bar__filters">
+          {/* 1. Переключатель метрик (иконки) */}
+          <div
+            className="instance-monitoring-metric-group"
+            role="group"
+            aria-label={t('monitoring_metric_label')}
+          >
+            {metricOptions.map((opt) => {
+              const isActive = metricKey === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  id={`btnMetric_${opt.key}`}
+                  className={
+                    'instance-monitoring-metric-btn' +
+                    (isActive ? ' instance-monitoring-metric-btn--active' : '')
+                  }
+                  title={opt.label}
+                  aria-label={opt.label}
+                  onClick={() => {
+                    setMetricKey(opt.key);
+                    setHoverIndex(null);
                   }}
                 >
                   {opt.icon}
-                </span>
-                <span>{opt.label}</span>
-              </button>
-            );
-          })}
+                  {opt.badge && (
+                    <span className="instance-monitoring-metric-btn__badge">
+                      {opt.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 2. Фильтр серверов */}
+          <select
+            id="instanceMonitoringServerSelect"
+            className="input access-users-bar__select instance-monitoring-bar__select"
+            value={selectedIds.size === 1 ? Array.from(selectedIds)[0] : 'all'}
+            onChange={(e) => handleServerSelectChange(e.target.value)}
+            aria-label={t('instances_tab_servers')}
+          >
+            <option value="all">
+              {t('instances_filter_all_servers') || 'Все серверы'} (
+              {instances.length})
+            </option>
+            {instances.map((inst) => (
+              <option key={String(inst.id)} value={String(inst.id)}>
+                {inst.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div
-          className="btn-group"
-          style={{
-            display: 'flex',
-            background: 'var(--mantine-color-dark-6)',
-            borderRadius: '6px',
-            padding: '4px',
-          }}
-        >
-          {rangeOptions.map((opt) => (
-            <button
-              key={opt.key}
-              type="button"
-              className="btn btn--compact"
-              style={{
-                position: 'relative',
-                background: 'transparent',
-                color:
-                  range === opt.key
-                    ? 'var(--accent-selected, #f1be64)'
-                    : 'var(--mantine-color-text)',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-                fontWeight: range === opt.key ? 600 : 500,
-                transition: 'color 0.2s ease',
-              }}
-              onClick={() => {
-                setRange(opt.key);
-                setHoverIndex(null);
-              }}
-            >
-              {range === opt.key && (
-                <motion.div
-                  layoutId="instanceActiveRangeHighlight"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background:
-                      'color-mix(in srgb, var(--accent) 20%, var(--mantine-color-dark-5))',
-                    border:
-                      '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
-                    borderRadius: '4px',
-                    zIndex: 1,
+        {/* 4. Переключатель диапазона времени (справа) */}
+        <div className="instance-monitoring-bar__actions">
+          <div
+            className="instance-monitoring-range"
+            role="group"
+            aria-label={t('range_label')}
+          >
+            {rangeOptions.map((opt) => {
+              const isRangeActive = range === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  className={
+                    'instance-monitoring-range__btn' +
+                    (isRangeActive
+                      ? ' instance-monitoring-range__btn--active'
+                      : '')
+                  }
+                  onClick={() => {
+                    setRange(opt.key);
+                    setHoverIndex(null);
                   }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 380,
-                    damping: 30,
-                  }}
-                />
-              )}
-              <span style={{ position: 'relative', zIndex: 2 }}>
-                {opt.label}
-              </span>
-            </button>
-          ))}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </header>
+      </div>
 
       {isLoading ? (
         <TabLoadingPlaceholder
@@ -706,95 +720,28 @@ export function InstanceMonitoringTab({
           label={t('tab_data_loading') || 'Загрузка данных...'}
         />
       ) : !hasData ? (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '300px',
-            background: 'var(--mantine-color-dark-7)',
-            borderRadius: '8px',
-            border: '1px dashed var(--mantine-color-dark-4)',
-            padding: '24px',
-            color: 'var(--mantine-color-dimmed)',
-          }}
-        >
-          <span style={{ fontSize: '1.1rem', marginBottom: '8px' }}>
+        <div className="instance-monitoring-empty">
+          <span className="instance-monitoring-empty__title">
             {t('no_metrics_title') || 'Нет данных'}
           </span>
-          <span
-            style={{
-              fontSize: '0.85rem',
-              textAlign: 'center',
-              maxWidth: '400px',
-            }}
-          >
+          <span className="instance-monitoring-empty__desc">
             {t('no_active_servers_metrics') ||
               'Нет доступных серверов с историей метрик для отображения.'}
           </span>
         </div>
       ) : (
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            background: 'var(--mantine-color-dark-7)',
-            border: '1px solid var(--mantine-color-dark-4)',
-            borderRadius: '8px',
-            padding: '16px',
-          }}
-        >
-          <header
-            style={{
-              marginBottom: '14px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '10px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  color: 'var(--accent)',
-                  flexShrink: 0,
-                }}
-              >
+        <div className="instance-monitoring-card">
+          <header className="instance-monitoring-card__header">
+            <div className="instance-monitoring-card__title-box">
+              <span className="instance-monitoring-card__icon">
                 {activeMetricOption.icon}
               </span>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  color: 'var(--mantine-color-text)',
-                }}
-              >
+              <h3 className="instance-monitoring-card__title">
                 {activeMetricOption.label}
               </h3>
             </div>
-            <div
-              style={{
-                fontSize: '0.82rem',
-                color: 'var(--mantine-color-dimmed)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--accent)',
-                }}
-              />
+            <div className="instance-monitoring-card__meta">
+              <span className="instance-monitoring-card__meta-dot" />
               <span>
                 {selectedIds.size > 0
                   ? `${selectedIds.size} / ${instances.length} ${t('servers_selected_count') || 'выбрано'}`
@@ -804,32 +751,22 @@ export function InstanceMonitoringTab({
           </header>
 
           <div
-            style={{ position: 'relative', width: '100%', overflowX: 'auto' }}
+            ref={chartWrapRef}
+            className="instance-monitoring-card__chart-wrap"
           >
             <svg
               viewBox={`0 0 ${width} ${height}`}
-              style={{
-                width: '100%',
-                height: 'auto',
-                minWidth: '700px',
-                display: 'block',
-                overflow: 'visible',
-              }}
+              className="instance-monitoring-chart-svg"
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoverIndex(null)}
             >
               <defs>
                 {visiblePathsData.map((d) => {
                   const color =
-                    instanceColors[String(d.instance.id)] ||
-                    'var(--mantine-color-blue-filled)';
+                    instanceColors[String(d.instance.id)] || '#38bdf8';
                   const isSolo = visiblePathsData.length === 1;
                   const isHovered = hoveredLegendId === String(d.instance.id);
-                  const topOpacity = isHovered
-                    ? 0.35
-                    : isSolo
-                      ? 0.3
-                      : 0.18;
+                  const topOpacity = isHovered ? 0.35 : isSolo ? 0.3 : 0.18;
                   return (
                     <linearGradient
                       key={`grad-${d.instance.id}`}
@@ -861,15 +798,16 @@ export function InstanceMonitoringTab({
                       y1={y}
                       x2={width - paddingRight}
                       y2={y}
-                      stroke="var(--mantine-color-dark-4)"
+                      stroke="var(--border-dark, rgba(255, 255, 255, 0.08))"
                       strokeWidth="1"
                       strokeDasharray="4 4"
                     />
                     <text
                       x={paddingLeft - 8}
                       y={y + 4}
-                      fill="var(--mantine-color-dimmed)"
+                      fill="var(--text-muted, #8b949e)"
                       fontSize="11"
+                      fontFamily="inherit"
                       textAnchor="end"
                     >
                       {valueFormatter(gridVal)}
@@ -884,7 +822,7 @@ export function InstanceMonitoringTab({
                 y1={height - paddingBottom}
                 x2={width - paddingRight}
                 y2={height - paddingBottom}
-                stroke="var(--mantine-color-dark-4)"
+                stroke="var(--border-dark, rgba(255, 255, 255, 0.12))"
                 strokeWidth="1.5"
               />
 
@@ -894,15 +832,16 @@ export function InstanceMonitoringTab({
                   key={idx}
                   x={lbl.x}
                   y={height - 15}
-                  fill="var(--mantine-color-dimmed)"
+                  fill="var(--text-muted, #8b949e)"
                   fontSize="12"
+                  fontFamily="inherit"
                   textAnchor="middle"
                 >
                   {lbl.text}
                 </text>
               ))}
 
-              {/* Area fills under curves ("тень от линий вниз") */}
+              {/* Area fills under curves */}
               {visiblePathsData.map((d) => {
                 if (!d.areaPath) return null;
                 const isHovered = hoveredLegendId === String(d.instance.id);
@@ -923,8 +862,7 @@ export function InstanceMonitoringTab({
               {visiblePathsData.map((d) => {
                 if (!d.pathStr) return null;
                 const color =
-                  instanceColors[String(d.instance.id)] ||
-                  'var(--mantine-color-blue-filled)';
+                  instanceColors[String(d.instance.id)] || '#38bdf8';
                 const isHovered = hoveredLegendId === String(d.instance.id);
                 const strokeWidth = isHovered ? 3.5 : 2.5;
                 const opacity = hoveredLegendId ? (isHovered ? 1 : 0.35) : 1;
@@ -959,9 +897,10 @@ export function InstanceMonitoringTab({
                       (hoverIndex / (targetPointsCount - 1)) * chartWidth
                     }
                     y2={height - paddingBottom}
-                    stroke="var(--mantine-color-dark-3)"
+                    stroke="var(--accent)"
                     strokeWidth="1.5"
-                    strokeDasharray="2 2"
+                    strokeDasharray="3 3"
+                    opacity={0.8}
                   />
 
                   {/* Dots for each server */}
@@ -969,8 +908,7 @@ export function InstanceMonitoringTab({
                     const pt = d.points[hoverIndex];
                     if (!pt) return null;
                     const color =
-                      instanceColors[String(d.instance.id)] ||
-                      'var(--mantine-color-blue-filled)';
+                      instanceColors[String(d.instance.id)] || '#38bdf8';
                     const isHovered = hoveredLegendId === String(d.instance.id);
                     return (
                       <circle
@@ -978,7 +916,7 @@ export function InstanceMonitoringTab({
                         cx={pt.x}
                         cy={pt.y}
                         r={isHovered ? 7 : 6}
-                        fill="var(--mantine-color-dark-9)"
+                        fill="var(--bg-widget)"
                         stroke={color}
                         strokeWidth={isHovered ? 3 : 2.5}
                       />
@@ -992,34 +930,13 @@ export function InstanceMonitoringTab({
           {/* Interactive Multi-Server Tooltip */}
           {hoverIndex !== null && activeTimestamp && tooltipRows.length > 0 && (
             <div
+              className="instance-monitoring-tooltip"
               style={{
-                position: 'absolute',
                 left: tooltipPos.x,
                 top: tooltipPos.y,
-                backgroundColor: 'rgba(26, 27, 30, 0.95)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid var(--mantine-color-dark-4)',
-                borderRadius: '6px',
-                padding: '10px 14px',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
-                pointerEvents: 'none',
-                zIndex: 100,
-                minWidth: '220px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px',
-                fontSize: '0.82rem',
               }}
             >
-              <div
-                style={{
-                  fontWeight: 600,
-                  color: 'var(--mantine-color-white)',
-                  borderBottom: '1px solid var(--mantine-color-dark-4)',
-                  paddingBottom: '4px',
-                  marginBottom: '2px',
-                }}
-              >
+              <div className="instance-monitoring-tooltip__time">
                 {new Date(activeTimestamp).toLocaleString([], {
                   day: '2-digit',
                   month: '2-digit',
@@ -1027,60 +944,25 @@ export function InstanceMonitoringTab({
                   minute: '2-digit',
                 })}
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  maxHeight: '200px',
-                  overflowY: 'auto',
-                }}
-              >
+              <div className="instance-monitoring-tooltip__rows">
                 {tooltipRows.map((row) => (
                   <div
                     key={String(row.instance.id)}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '12px',
-                    }}
+                    className="instance-monitoring-tooltip__row"
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
+                    <div className="instance-monitoring-tooltip__item">
                       <span
-                        style={{
-                          display: 'inline-block',
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: row.color,
-                        }}
+                        className="instance-monitoring-tooltip__dot"
+                        style={{ backgroundColor: row.color }}
                       />
                       <span
-                        style={{
-                          color: 'var(--mantine-color-text)',
-                          maxWidth: '120px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
+                        className="instance-monitoring-tooltip__name"
+                        title={row.instance.name}
                       >
                         {row.instance.name}
                       </span>
                     </div>
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        color: 'var(--mantine-color-white)',
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
+                    <span className="instance-monitoring-tooltip__val">
                       {valueFormatter(row.value)}
                     </span>
                   </div>
@@ -1088,109 +970,64 @@ export function InstanceMonitoringTab({
               </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Legend Block below chart */}
-      {hasData && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <footer
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              padding: '12px 16px',
-              background: 'var(--mantine-color-dark-7)',
-              borderRadius: '8px',
-              border: '1px solid var(--mantine-color-dark-4)',
-            }}
-          >
-            {instances.map((inst) => {
-              const hasHistory = resampledQueriesData.some(
-                (rqd) =>
-                  String(rqd.instance.id) === String(inst.id) &&
-                  rqd.points.length > 0,
-              );
-              if (!hasHistory) return null;
-              const isSelected =
-                selectedIds.size === 0 || selectedIds.has(String(inst.id));
-              const isHovered = hoveredLegendId === String(inst.id);
-              const color =
-                instanceColors[String(inst.id)] ||
-                'var(--mantine-color-blue-filled)';
-              return (
-                <div
-                  key={String(inst.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    background: isHovered
-                      ? 'var(--mantine-color-dark-5)'
-                      : isSelected && selectedIds.size > 0
-                        ? 'rgba(255, 255, 255, 0.05)'
-                        : 'transparent',
-                    border: isHovered
-                      ? '1px solid var(--mantine-color-dark-3)'
-                      : '1px solid transparent',
-                    opacity: isSelected ? 1 : 0.35,
-                    transition: 'all 0.15s ease',
-                    userSelect: 'none',
-                  }}
-                  onMouseEnter={() => setHoveredLegendId(String(inst.id))}
-                  onMouseLeave={() => setHoveredLegendId(null)}
-                  onClick={(ev) => handleLegendClick(String(inst.id), ev)}
-                  title={
-                    t('legend_help') || 'Клик — соло, Ctrl+Клик — мультивыбор'
-                  }
-                >
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      backgroundColor: isSelected
-                        ? color
-                        : 'var(--mantine-color-dark-4)',
-                      transition: 'background-color 0.2s ease',
-                      boxShadow: isSelected ? `0 0 6px ${color}` : 'none',
-                    }}
-                  />
-                  <span
-                    style={{
-                      color: isSelected
-                        ? 'var(--mantine-color-text)'
-                        : 'var(--mantine-color-dimmed)',
-                      fontWeight: isSelected ? 600 : 500,
-                    }}
-                  >
-                    {inst.name}
+          {/* Card Footer: Legend & Help Hint integrated into card */}
+          {hasData && (
+            <footer className="instance-monitoring-card__footer">
+              <div className="instance-monitoring-card__legend-row">
+                <div className="instance-monitoring-legend__list">
+                  {instances.map((inst) => {
+                    const hasHistory = resampledQueriesData.some(
+                      (rqd) =>
+                        String(rqd.instance.id) === String(inst.id) &&
+                        rqd.points.length > 0,
+                    );
+                    if (!hasHistory) return null;
+                    const isSelected =
+                      selectedIds.size === 0 ||
+                      selectedIds.has(String(inst.id));
+                    const color = instanceColors[String(inst.id)] || '#38bdf8';
+                    return (
+                      <div
+                        key={String(inst.id)}
+                        className={
+                          'instance-monitoring-chip' +
+                          (isSelected
+                            ? ' instance-monitoring-chip--active'
+                            : ' instance-monitoring-chip--dimmed')
+                        }
+                        onMouseEnter={() => setHoveredLegendId(String(inst.id))}
+                        onMouseLeave={() => setHoveredLegendId(null)}
+                        onClick={(ev) => handleLegendClick(String(inst.id), ev)}
+                        title={
+                          t('legend_help') ||
+                          'Клик — соло, Ctrl+Клик — мультивыбор'
+                        }
+                      >
+                        <span
+                          className="instance-monitoring-chip__dot"
+                          style={{
+                            backgroundColor: isSelected
+                              ? color
+                              : 'var(--text-muted)',
+                            boxShadow: isSelected ? `0 0 6px ${color}` : 'none',
+                          }}
+                        />
+                        <span>{inst.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="instance-monitoring-legend__hint">
+                  <AppIcon name="help" size={14} />
+                  <span>
+                    {t('legend_help') ||
+                      'Клик по серверу в легенде — показать только его. Ctrl + Клик — выбрать несколько.'}
                   </span>
                 </div>
-              );
-            })}
-          </footer>
-          <div
-            style={{
-              fontSize: '0.78rem',
-              color: 'var(--mantine-color-dimmed)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              paddingLeft: '4px',
-            }}
-          >
-            <AppIcon name="help" size={14} />
-            <span>
-              {t('legend_help') ||
-                'Клик по серверу в легенде — показать только его. Ctrl + Клик — выбрать несколько.'}
-            </span>
-          </div>
+              </div>
+            </footer>
+          )}
         </div>
       )}
     </div>
