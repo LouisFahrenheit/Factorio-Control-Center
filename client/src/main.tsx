@@ -18,6 +18,7 @@ import './styles/upload-progress.css';
 import './styles/access-users.css';
 import './styles/maintenance.css';
 import './styles/monitoring.css';
+import './styles/public-tab.css';
 
 applyEffectiveTheme();
 initDynamicFavicon();
