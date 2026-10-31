@@ -100,9 +100,7 @@ export function InstanceScreen({
   const { reload: reloadLocale } = useLocale();
   const reduced = webEffectsReduced();
   const [activeTab, setActiveTab] = useState<InstanceTabKey>('servers');
-  const [maintInnerTab, setMaintInnerTab] = useState<'tasks' | 'reports'>(
-    'tasks',
-  );
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState<InstanceItem | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -316,10 +314,6 @@ export function InstanceScreen({
   }, [rows, instanceEditor]);
 
   const hasServers = rows.length > 0;
-  const activeMaintTasks = useMemo(
-    () => maintenance.tasks.filter((task) => !!task.active).length,
-    [maintenance.tasks],
-  );
 
   const serversListEnterKey = useMemo(() => {
     if (activeTab !== 'servers') return 'off';
@@ -486,58 +480,6 @@ export function InstanceScreen({
             </button>
           )}
         </div>
-        {activeTab === 'maintenance' && (
-          <div
-            className="instance-servers-toolbar"
-            role="toolbar"
-            aria-label={t('instances_tab_maintenance')}
-          >
-            {maintInnerTab === 'tasks' && (
-              <>
-                <div className="instance-servers-toolbar__segment">
-                  <button
-                    type="button"
-                    className="instance-servers-toolbar__btn"
-                    id="btnMaintAdd"
-                    data-i18n-title="maintenance_add_btn"
-                    title={t('maintenance_add_btn')}
-                    aria-label={t('maintenance_add_btn')}
-                    onClick={() => maintenanceTaskEditor.openAdd()}
-                  >
-                    <AppIcon name="add" size={20} />
-                  </button>
-                </div>
-                <div className="instance-servers-toolbar__segment">
-                  <button
-                    type="button"
-                    className="instance-servers-toolbar__btn instance-servers-toolbar__btn--danger"
-                    id="btnMaintDeactivateAll"
-                    data-i18n-title="maintenance_deactivate_all_btn"
-                    title={t('maintenance_deactivate_all_btn')}
-                    aria-label={t('maintenance_deactivate_all_btn')}
-                    disabled={activeMaintTasks === 0}
-                    onClick={() => maintenance.deactivateAllTasks()}
-                  >
-                    <AppIcon name="stop" size={20} />
-                  </button>
-                </div>
-              </>
-            )}
-            <div className="instance-servers-toolbar__segment">
-              <button
-                type="button"
-                className="instance-servers-toolbar__btn"
-                id="btnMaintenanceHelp"
-                data-i18n-title="maintenance_help_btn"
-                title={t('maintenance_help_btn')}
-                aria-label={t('maintenance_help_btn')}
-                onClick={() => setMaintenanceHelpOpen(true)}
-              >
-                <AppIcon name="help" size={20} />
-              </button>
-            </div>
-          </div>
-        )}
         {activeTab === 'servers' && (
           <div
             className="instance-servers-toolbar"
@@ -684,7 +626,9 @@ export function InstanceScreen({
                         quickAction(String(it.id), 'stop').catch(handleError);
                       }}
                       onRestart={(it) => {
-                        quickAction(String(it.id), 'restart').catch(handleError);
+                        quickAction(String(it.id), 'restart').catch(
+                          handleError,
+                        );
                       }}
                       onEdit={(it) => {
                         instanceEditor.openEdit(it);
@@ -725,7 +669,7 @@ export function InstanceScreen({
               maintenance={maintenance}
               instances={rows}
               taskEditor={maintenanceTaskEditor}
-              onInnerTabChange={setMaintInnerTab}
+              onOpenHelp={() => setMaintenanceHelpOpen(true)}
               t={t}
             />
           )}

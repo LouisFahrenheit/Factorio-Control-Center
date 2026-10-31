@@ -140,3 +140,26 @@ export function setUserAccessViewMode(mode: UserAccessViewMode): void {
   }
 }
 
+const MAINTENANCE_VIEW_MODE_KEY = 'fcc_user_maintenance_view_mode';
+export type MaintenanceViewMode = 'cards' | 'table';
+
+export function readUserMaintenanceViewMode(): MaintenanceViewMode {
+  try {
+    if (typeof localStorage === 'undefined') return 'cards';
+    const raw = localStorage.getItem(MAINTENANCE_VIEW_MODE_KEY);
+    if (raw === 'cards' || raw === 'table') return raw;
+  } catch {
+    /* ignore */
+  }
+  return 'cards';
+}
+
+export function setUserMaintenanceViewMode(mode: MaintenanceViewMode): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(MAINTENANCE_VIEW_MODE_KEY, mode);
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}

@@ -1,0 +1,188 @@
+/* ==========================================================================
+   Factorio Control Center — Maintenance Redesign Styles
+   ========================================================================== */
+
+#instanceTabMaintenance.sub-tab-panel--active {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.maintenance-tab__header {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+}
+
+.maintenance-tab__header .sub-tabs,
+.maintenance-tab__header .maintenance-inner-tabs {
+  margin: 0;
+}
+
+.maintenance-tasks-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  gap: 12px;
+}
+
+.maintenance-tasks-layout__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+/* ── Toolbar & Action Buttons ────────────────────────────────────────── */
+
+.maintenance-tasks-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.maintenance-tasks-bar__deactivate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 7px;
+  transition: all 0.16s ease;
+}
+
+.maintenance-tasks-bar__deactivate-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--error, #e03131) 18%, transparent);
+  border-color: color-mix(in srgb, var(--error, #e03131) 45%, transparent);
+  color: #ff8080;
+}
+
+/* ── Maintenance Cards ───────────────────────────────────────────────── */
+
+.maintenance-card-item {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 220px;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.18s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.maintenance-card-item:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.32),
+    0 0 10px rgba(var(--accent-rgb), 0.08);
+}
+
+.maintenance-card-item--inactive {
+  opacity: 0.75;
+}
+
+.maintenance-card-time-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.maintenance-card-icon-sub {
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.maintenance-card-next-fire-val {
+  font-size: 0.84rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── Maintenance Table ───────────────────────────────────────────────── */
+
+.maintenance-table-wrap {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.maintenance-table-wrap table.access-users-table thead th,
+.maintenance-table-wrap table.access-users-table tbody td {
+  text-align: left;
+}
+
+.maintenance-table__col-status {
+  width: 130px;
+}
+
+.maintenance-table-status-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.maintenance-table__col-schedule {
+  text-align: left;
+}
+
+.maintenance-table-schedule-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 3px;
+}
+
+.maintenance-table-schedule-title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.88rem;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.maintenance-table-time-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.maintenance-table__col-next-fire {
+  min-width: 260px;
+  white-space: nowrap;
+}
+
+.maintenance-table-next-fire-cell {
+  display: inline-block;
+  font-size: 0.86rem;
+  color: var(--text);
+  white-space: nowrap;
+}
