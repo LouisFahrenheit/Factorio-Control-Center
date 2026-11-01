@@ -20,6 +20,7 @@ import './styles/maintenance.css';
 import './styles/monitoring.css';
 import './styles/public-tab.css';
 import './styles/settings-tab.css';
+import './styles/circuit-wire.css';
 
 applyEffectiveTheme();
 initDynamicFavicon();

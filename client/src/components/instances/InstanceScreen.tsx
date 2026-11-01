@@ -63,6 +63,7 @@ import {
 import { useUserServerListViewMode } from '../../hooks/useUserServerListViewMode';
 import { useUserServerListColumns } from '../../hooks/useUserServerListColumns';
 import { InstanceMonitoringTab } from './InstanceMonitoringTab';
+import { CircuitWireConnection } from './CircuitWireConnection';
 import { BackupTab } from './BackupTab';
 import { useBackup } from '../../hooks/useBackup';
 import {
@@ -337,15 +338,21 @@ export function InstanceScreen({
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const mainTabIndicator = useSlidingTabIndicator(mainTabsRef, activeTab);
+  const instanceScreenRef = useRef<HTMLElement>(null);
 
   return (
     <motion.section
       id="instanceScreen"
+      ref={instanceScreenRef}
       className="panel instance-screen"
       variants={reduced ? undefined : SCREEN_SECTION_VARIANTS}
       initial={reduced ? false : 'hidden'}
       animate={reduced ? undefined : 'show'}
     >
+      <CircuitWireConnection
+        activeTab={activeTab}
+        containerRef={instanceScreenRef}
+      />
       <motion.div
         className="instance-screen__header"
         variants={reduced ? undefined : SCREEN_HEADER_VARIANTS}

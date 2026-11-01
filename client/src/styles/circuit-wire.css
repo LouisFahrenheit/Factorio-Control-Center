@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Factorio Control Center — Circuit Wire Connection Styles
+   ========================================================================== */
+
+.instance-screen {
+  position: relative;
+}
+
+.circuit-wire-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+  overflow: visible;
+}
+
+.circuit-wire__group {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.65));
+}
+
+.circuit-wire__wire {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 16%, var(--bg-widget) 84%);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 1;
+  animation: circuit-wire-draw 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.circuit-wire__sheen {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.6;
+  animation: circuit-wire-draw 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.circuit-wire__pulse {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent, #da8216) 72%, #ffffff 28%);
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 16 2000;
+  filter: drop-shadow(0 0 2.5px rgba(218, 130, 22, 0.55));
+}
+
+.circuit-wire__terminal--start {
+  animation: circuit-wire-pin 0.15s ease-out forwards;
+}
+
+.circuit-wire__terminal--end {
+  animation: circuit-wire-pin 0.15s ease-out 0.26s both;
+}
+
+@keyframes circuit-wire-draw {
+  from {
+    stroke-dashoffset: var(--wire-length, 600px);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes circuit-wire-pin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-wire__pulse {
+    display: none !important;
+  }
+  .circuit-wire__wire,
+  .circuit-wire__sheen,
+  .circuit-wire__terminal {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
+
+:root[data-web-disable-effects="1"] .circuit-wire__pulse {
+  display: none !important;
+}
+
+:root[data-web-disable-effects="1"] .circuit-wire__wire,
+:root[data-web-disable-effects="1"] .circuit-wire__sheen,
+:root[data-web-disable-effects="1"] .circuit-wire__terminal {
+  animation: none;
+  stroke-dasharray: none;
+}
