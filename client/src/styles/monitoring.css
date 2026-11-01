@@ -223,6 +223,55 @@
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.instance-monitoring-card__meta-dot--pulsing {
+  animation: monitoring-dot-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes monitoring-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+    box-shadow: 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+}
+
+.instance-monitoring-card__loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: monitoring-bar-slide 1.2s infinite ease-in-out;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  z-index: 5;
+}
+
+@keyframes monitoring-bar-slide {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .instance-monitoring-card__chart-wrap {

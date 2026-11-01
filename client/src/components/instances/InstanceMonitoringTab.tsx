@@ -1,10 +1,16 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import {
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import { useQueries, keepPreviousData } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { IconActivity, IconBug, IconCloudFog } from '@tabler/icons-react';
 import { api } from '../../api/client';
 import { AppIcon } from '../AppIcon';
-import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import type { InstanceItem } from '../../types/instance';
 
 interface MetricPoint {
@@ -121,7 +127,24 @@ export function InstanceMonitoringTab({
     })),
   });
 
-  const isLoading = queries.some((q) => q.isLoading);
+  // Retain last valid metrics data to prevent empty-data flashes during range fetches
+  const lastValidDataRef = useRef<Map<string, MetricPoint[]>>(new Map());
+  queries.forEach((q, qIdx) => {
+    const inst = instances[qIdx];
+    if (inst && q.data && q.data.length > 0) {
+      lastValidDataRef.current.set(String(inst.id), q.data);
+    }
+  });
+
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  useEffect(() => {
+    if (queries.some((q) => q.data && q.data.length > 0)) {
+      setHasLoadedOnce(true);
+    }
+  }, [queries]);
+
+  const isFetching = queries.some((q) => q.isFetching);
+  const isInitialLoading = !hasLoadedOnce && queries.some((q) => q.isLoading);
 
   const rangeOptions: { key: RangeOption; label: string }[] = useMemo(
     () => [
@@ -232,8 +255,12 @@ export function InstanceMonitoringTab({
   // Find the latest timestamp across all metrics to align the right edge of the chart
   const timeWindow = useMemo(() => {
     let maxTime = 0;
-    queries.forEach((q) => {
-      const data = q.data || [];
+    queries.forEach((q, qIdx) => {
+      const inst = instances[qIdx];
+      const data =
+        q.data ||
+        (inst ? lastValidDataRef.current.get(String(inst.id)) : undefined) ||
+        [];
       if (data.length > 0) {
         const tVal = new Date(data[data.length - 1].timestamp).getTime();
         if (tVal > maxTime) maxTime = tVal;
@@ -270,7 +297,7 @@ export function InstanceMonitoringTab({
     }
     const left = new Date(right.getTime() - leftMs);
     return { left, right, duration: leftMs };
-  }, [range, queries]);
+  }, [range, queries, instances]);
 
   const valueFormatter = useCallback(
     (val: number) => {
@@ -305,7 +332,10 @@ export function InstanceMonitoringTab({
   const resampledQueriesData = useMemo(() => {
     return queries.map((q, qIdx) => {
       const inst = instances[qIdx];
-      const data = q.data || [];
+      const data =
+        q.data ||
+        (inst ? lastValidDataRef.current.get(String(inst.id)) : undefined) ||
+        [];
       if (data.length === 0) return { instance: inst, points: [] };
 
       let resampled: MetricPoint[] = [];
@@ -388,10 +418,33 @@ export function InstanceMonitoringTab({
   const [dimensions, setDimensions] = useState<{
     width: number;
     height: number;
-  }>({
-    width: 1000,
-    height: 330,
+  }>(() => {
+    if (typeof window !== 'undefined') {
+      return {
+        width: Math.max(700, window.innerWidth - 60),
+        height: 330,
+      };
+    }
+    return { width: 1000, height: 330 };
   });
+
+  // Immediate synchronous measurement on mount to prevent 1000px layout stretch
+  useLayoutEffect(() => {
+    const el = chartWrapRef.current || containerRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      if (w > 100) {
+        setDimensions((prev) => {
+          const nextW = Math.max(700, w);
+          const nextH = Math.max(260, h > 100 ? h : 330);
+          if (prev.width === nextW && prev.height === nextH) return prev;
+          return { width: nextW, height: nextH };
+        });
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const el = chartWrapRef.current;
@@ -402,10 +455,12 @@ export function InstanceMonitoringTab({
       if (!entry) return;
       const w = Math.round(entry.contentRect.width);
       const h = Math.round(entry.contentRect.height);
-      if (w > 100 && h > 100) {
-        setDimensions({
-          width: Math.max(700, w),
-          height: Math.max(260, h),
+      if (w > 100) {
+        setDimensions((prev) => {
+          const nextW = Math.max(700, w);
+          const nextH = Math.max(260, h > 100 ? h : 330);
+          if (prev.width === nextW && prev.height === nextH) return prev;
+          return { width: nextW, height: nextH };
         });
       }
     });
@@ -714,12 +769,7 @@ export function InstanceMonitoringTab({
         </div>
       </div>
 
-      {isLoading ? (
-        <TabLoadingPlaceholder
-          variant="dashboard"
-          label={t('tab_data_loading') || 'Загрузка данных...'}
-        />
-      ) : !hasData ? (
+      {!hasData && !isInitialLoading ? (
         <div className="instance-monitoring-empty">
           <span className="instance-monitoring-empty__title">
             {t('no_metrics_title') || 'Нет данных'}
@@ -731,6 +781,12 @@ export function InstanceMonitoringTab({
         </div>
       ) : (
         <div className="instance-monitoring-card">
+          {isFetching && (
+            <div
+              className="instance-monitoring-card__loading-bar"
+              aria-hidden="true"
+            />
+          )}
           <header className="instance-monitoring-card__header">
             <div className="instance-monitoring-card__title-box">
               <span className="instance-monitoring-card__icon">
@@ -741,11 +797,20 @@ export function InstanceMonitoringTab({
               </h3>
             </div>
             <div className="instance-monitoring-card__meta">
-              <span className="instance-monitoring-card__meta-dot" />
+              <span
+                className={
+                  'instance-monitoring-card__meta-dot' +
+                  (isFetching
+                    ? ' instance-monitoring-card__meta-dot--pulsing'
+                    : '')
+                }
+              />
               <span>
-                {selectedIds.size > 0
-                  ? `${selectedIds.size} / ${instances.length} ${t('servers_selected_count') || 'выбрано'}`
-                  : `${instances.length} ${t('all_servers_label') || 'все серверы'}`}
+                {isInitialLoading
+                  ? t('tab_data_loading') || 'Загрузка данных...'
+                  : selectedIds.size > 0
+                    ? `${selectedIds.size} / ${instances.length} ${t('servers_selected_count') || 'выбрано'}`
+                    : `${instances.length} ${t('all_servers_label') || 'все серверы'}`}
               </span>
             </div>
           </header>
@@ -840,6 +905,30 @@ export function InstanceMonitoringTab({
                   {lbl.text}
                 </text>
               ))}
+
+              {/* Initial loading smooth placeholder wave */}
+              {isInitialLoading && (
+                <motion.path
+                  d={`M ${paddingLeft} ${paddingTop + chartHeight * 0.55} Q ${
+                    paddingLeft + chartWidth * 0.25
+                  } ${paddingTop + chartHeight * 0.38}, ${
+                    paddingLeft + chartWidth * 0.5
+                  } ${paddingTop + chartHeight * 0.5} T ${
+                    width - paddingRight
+                  } ${paddingTop + chartHeight * 0.45}`}
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="2"
+                  strokeDasharray="6 6"
+                  opacity={0.4}
+                  animate={{ opacity: [0.2, 0.65, 0.2] }}
+                  transition={{
+                    duration: 1.6,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                />
+              )}
 
               {/* Area fills under curves */}
               {visiblePathsData.map((d) => {
