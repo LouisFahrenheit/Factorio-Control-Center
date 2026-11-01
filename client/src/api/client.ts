@@ -72,8 +72,13 @@ export async function api<T = Record<string, unknown>>(
       httpError && !/^(Forbidden|Unauthorized)$/i.test(httpError)
         ? httpError
         : undefined;
+    const isSessionExpired =
+      res.status === 401 ||
+      (typeof nestMessage === 'string' &&
+        /missing.*token|invalid.*token/i.test(nestMessage));
     const err =
       specificError ||
+      (isSessionExpired ? 'session_expired' : undefined) ||
       nestMessage ||
       (res.status === 403 ? 'invalid_credentials' : undefined) ||
       httpError ||
@@ -93,6 +98,9 @@ const LOGIN_DENIED_KEYS: Record<string, string> = {
 
 const AUTH_ERROR_MAP: Record<string, string> = {
   ...LOGIN_DENIED_KEYS,
+  session_expired: 'api_error_session_expired',
+  'Missing bearer token': 'api_error_session_expired',
+  'Invalid token': 'api_error_session_expired',
   burst_limit_exceeded: 'auth_rate_limit_locked',
   too_many_attempts: 'auth_rate_limit_locked',
 };

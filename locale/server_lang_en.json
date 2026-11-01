@@ -1841,6 +1841,7 @@
   "api_error_save_failed": "Failed to save.",
   "api_error_create_failed": "Create operation failed.",
   "api_error_list_failed": "Failed to load list.",
+  "api_error_session_expired": "Session expired or authorization required. Please sign in again.",
   "instances_tab_public": "Public Page",
   "public_page_settings": "Public Page Settings",
   "public_page_appearance_title": "Page Appearance",

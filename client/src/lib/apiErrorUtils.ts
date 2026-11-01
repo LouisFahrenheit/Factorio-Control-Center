@@ -38,12 +38,20 @@ const API_ERROR_I18N: Record<string, string> = {
   save_failed: 'api_error_save_failed',
   create_failed: 'api_error_create_failed',
   list_failed: 'api_error_list_failed',
+  session_expired: 'api_error_session_expired',
   factorio_credentials_invalid: 'program_factorio_credentials_invalid',
   factorio_credentials_incomplete: 'program_factorio_credentials_incomplete',
 };
 
 /** Instance/API errors that use a different locale key than the error code. */
 const ERROR_ALIASES: Record<string, string> = {
+  'Missing bearer token': 'api_error_session_expired',
+  missing_bearer_token: 'api_error_session_expired',
+  'Invalid token': 'api_error_session_expired',
+  invalid_token: 'api_error_session_expired',
+  session_expired: 'api_error_session_expired',
+  unauthorized: 'api_error_session_expired',
+  Unauthorized: 'api_error_session_expired',
   no_saves: 'cannot_start_no_save',
   save_not_found: 'cannot_start_no_save',
   port_in_use: 'instances_error_port_in_use',

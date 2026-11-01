@@ -10,7 +10,7 @@ import {
 } from '../lib/networkValidation';
 import { feedbackMsg } from '../lib/apiFeedback';
 import { modConfirm } from '../lib/modErrorUtils';
-import { notifyApiError, notifyNetworkFetchError } from '../lib/networkErrors';
+import { notifyApiError, notifyNetworkFetchError, resolveApiErrorMessage } from '../lib/networkErrors';
 import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import { resolveStatusKind, type PanelStatus } from '../types/panel';
 import type { InstanceItem } from '../types/instance';
@@ -128,7 +128,7 @@ export function useServerControl(
     } catch (e) {
       if (seq !== logSeqRef.current) return;
       if (notifyNetworkFetchError(t('console_label'), e, t)) return;
-      setLogLines([String(e instanceof Error ? e.message : e)]);
+      setLogLines([resolveApiErrorMessage(e, t)]);
     }
   }, [enabled, selectedId, t]);
 
@@ -388,7 +388,7 @@ export function useServerControl(
           feedbackMsg(rconTitle, r.response || r.output || 'OK');
         }
       } catch (e) {
-        feedbackMsg(rconTitle, e instanceof Error ? e.message : String(e), true, false, t);
+        feedbackMsg(rconTitle, resolveApiErrorMessage(e, t), true, false, t);
       }
     },
     [running, t, qc],

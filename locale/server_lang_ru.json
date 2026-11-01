@@ -1841,6 +1841,7 @@
   "api_error_save_failed": "Не удалось сохранить.",
   "api_error_create_failed": "Не удалось выполнить создание.",
   "api_error_list_failed": "Не удалось загрузить список.",
+  "api_error_session_expired": "Сессия завершена или требуется авторизация. Войдите в систему повторно.",
   "instances_tab_public": "Публичная страница",
   "public_page_settings": "Настройки публичной страницы",
   "public_page_appearance_title": "Оформление страницы",
