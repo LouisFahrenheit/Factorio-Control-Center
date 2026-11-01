@@ -1,0 +1,637 @@
+/* ==========================================================================
+   Factorio Control Center — Settings Tab (Panel Style, Spacious Layout)
+   ========================================================================== */
+
+#instanceTabSettings.sub-tab-panel--active,
+#instanceTabSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  flex: 1 1 auto;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-align: left;
+}
+
+/* ── Global Reset for Settings: eradicate legacy .panel__body center inheritance ── */
+
+#instanceTabSettings,
+#instanceTabSettings *,
+#instanceTabSettings *::before,
+#instanceTabSettings *::after {
+  box-sizing: border-box;
+}
+
+#instanceTabSettings label,
+#instanceTabSettings p,
+#instanceTabSettings span,
+#instanceTabSettings h1,
+#instanceTabSettings h2,
+#instanceTabSettings h3,
+#instanceTabSettings h4,
+#instanceTabSettings .input,
+#instanceTabSettings select,
+#instanceTabSettings textarea {
+  text-align: left !important;
+}
+
+/* ── Sub-tabs Header Bar ─────────────────────────────────────────────── */
+
+.settings-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.settings-tab__sub-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Settings Scrollable Sub-panel ───────────────────────────────────── */
+
+.settings-sub-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  padding: 4px 6px 24px 2px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* ── Spacious Full-Width Dashboard Grid ───────────────────────────────── */
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  align-items: start;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.settings-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-card--span-2 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1024px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Modern Settings Card (FCC Widget Style) ─────────────────────────── */
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 12px rgba(0, 0, 0, 0.22);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+  text-align: left;
+}
+
+.settings-card:hover {
+  border-color: color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.settings-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--bg-widget) 75%, var(--bg-main) 25%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.settings-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  user-select: none;
+  text-align: left;
+}
+
+.settings-card__title svg {
+  color: var(--accent);
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+
+.settings-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.settings-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.settings-card__hint {
+  font-size: 0.84rem;
+  line-height: 1.48;
+  color: var(--text-muted);
+  margin: 0;
+  text-align: left !important;
+}
+
+.settings-card__footnote {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  opacity: 0.85;
+  margin: 0;
+  text-align: left !important;
+}
+
+/* Card Section Divider */
+.settings-card__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  text-align: left;
+}
+
+.settings-card__section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+  text-align: left !important;
+}
+
+/* ── Spacious Toggle Row (Title + Description on Left, Switch on Right) ── */
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+  text-align: left;
+}
+
+.settings-toggle-row:hover {
+  background: color-mix(in srgb, var(--bg-main) 55%, transparent);
+  border-color: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.settings-toggle-row__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+  cursor: pointer;
+  text-align: left !important;
+}
+
+.settings-toggle-row__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  cursor: pointer;
+  user-select: none;
+  text-align: left !important;
+}
+
+.settings-toggle-row__hint {
+  font-size: 0.79rem;
+  line-height: 1.42;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left !important;
+}
+
+.settings-toggle-row .fcc-switch {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* ── 2-Column Responsive Form Fields Row ──────────────────────────────── */
+
+.settings-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .settings-row-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Responsive Sync Tiles Grid ──────────────────────────────────────── */
+
+.settings-sync-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-sync-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.settings-sync-tile:hover {
+  background: color-mix(in srgb, var(--bg-main) 65%, transparent);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.settings-sync-tile__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+  cursor: pointer;
+  text-align: left !important;
+}
+
+.settings-sync-tile__label svg {
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+/* ── Logs Grid & Viewers Strip ───────────────────────────────────────── */
+
+.settings-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-card__actions-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+/* ── Form Fields ─────────────────────────────────────────────────────── */
+
+.settings-fields-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 0;
+  text-align: left;
+}
+
+.settings-field--fixed-small {
+  flex: 0 0 120px;
+  max-width: 140px;
+}
+
+.settings-field--fixed-medium {
+  flex: 0 0 160px;
+  max-width: 180px;
+}
+
+.settings-field--grow {
+  flex: 2 1 240px;
+}
+
+.settings-field__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  user-select: none;
+  text-align: left !important;
+}
+
+.settings-field .input,
+.settings-field select.input,
+.settings-field select,
+.settings-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 0.88rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: left !important;
+}
+
+/* Input group with attached button */
+.settings-input-group {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-input-group .input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settings-input-eye-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.settings-input-eye-wrap .input {
+  padding-right: 38px;
+}
+
+.settings-input-eye-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+  padding: 0;
+}
+
+.settings-input-eye-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+/* ── Live Bind Status Pill ───────────────────────────────────────────── */
+
+.settings-bind-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono, monospace);
+  color: #38bdf8;
+  background: color-mix(in srgb, #38bdf8 15%, var(--bg-main) 85%);
+  border: 1px solid color-mix(in srgb, #38bdf8 45%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, #38bdf8 18%, transparent);
+  white-space: nowrap;
+  line-height: 1.4;
+  vertical-align: middle;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
+}
+
+.settings-bind-pill:hover {
+  background: color-mix(in srgb, #38bdf8 20%, var(--bg-main) 80%);
+  border-color: color-mix(in srgb, #38bdf8 65%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, #38bdf8 28%, transparent);
+}
+
+.settings-bind-pill code {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.settings-bind-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  flex-shrink: 0;
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.settings-bind-pill__dot--listening {
+  background: #22c55e;
+  box-shadow:
+    0 0 6px #22c55e,
+    0 0 10px rgba(34, 197, 94, 0.35);
+  animation: pulse-dot 2.2s infinite ease-in-out;
+}
+
+.settings-bind-pill__dot--stopped {
+  background: var(--text-dim, #71717a);
+  box-shadow: none;
+  animation: none;
+}
+
+.settings-bind-pill--stopped {
+  background: color-mix(in srgb, var(--border) 16%, var(--bg-main) 84%);
+  border-color: color-mix(in srgb, var(--border) 40%, transparent);
+  color: var(--text-muted);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 6px #22c55e;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.85;
+    box-shadow:
+      0 0 8px #22c55e,
+      0 0 14px rgba(34, 197, 94, 0.45);
+  }
+}
+
+/* ── Footer Actions Rows ─────────────────────────────────────────────── */
+
+.settings-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  margin-top: 2px;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-card__footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* ── Docker Callout Alert ────────────────────────────────────────────── */
+
+.settings-docker-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  background: color-mix(
+    in srgb,
+    var(--status-warning, #f59e0b) 12%,
+    var(--bg-main) 88%
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--status-warning, #f59e0b) 35%, transparent);
+  color: var(--status-warning, #f59e0b);
+  text-align: left;
+}
+
+/* ── Unified Settings Buttons (Matching Server List / FCC Standard) ─── */
+
+#instanceTabSettings .btn:not(.sub-tabs__tab) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1.2;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.1s ease;
+}
+
+#instanceTabSettings .btn:not(.sub-tabs__tab):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+#instanceTabSettings .btn:not(.sub-tabs__tab):active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#instanceTabSettings .btn:not(.sub-tabs__tab):disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#instanceTabSettings .btn:not(.sub-tabs__tab) svg {
+  color: var(--text-muted);
+  transition: color 0.16s ease;
+}
+
+#instanceTabSettings .btn:not(.sub-tabs__tab):hover:not(:disabled) svg {
+  color: var(--accent);
+}

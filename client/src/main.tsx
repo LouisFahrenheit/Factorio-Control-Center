@@ -19,6 +19,7 @@ import './styles/access-users.css';
 import './styles/maintenance.css';
 import './styles/monitoring.css';
 import './styles/public-tab.css';
+import './styles/settings-tab.css';
 
 applyEffectiveTheme();
 initDynamicFavicon();
