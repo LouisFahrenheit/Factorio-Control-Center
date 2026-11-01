@@ -2,23 +2,32 @@
    Factorio Control Center — Maintenance Redesign Styles
    ========================================================================== */
 
-#instanceTabMaintenance.sub-tab-panel--active {
+#instanceTabMaintenance.sub-tab-panel--active,
+#instanceTabMaintenance {
   display: flex;
   flex-direction: column;
   gap: 0;
   min-height: 0;
   flex: 1 1 auto;
   height: 100%;
+  text-align: left;
 }
 
 .maintenance-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   flex: 0 0 auto;
   margin-bottom: 12px;
+  width: 100%;
+  text-align: left;
 }
 
 .maintenance-tab__header .sub-tabs,
-.maintenance-tab__header .maintenance-inner-tabs {
+.maintenance-tab__header .maintenance-inner-tabs,
+.maintenance-tab__sub-tabs {
   margin: 0;
+  align-self: flex-start;
 }
 
 .maintenance-tasks-layout {

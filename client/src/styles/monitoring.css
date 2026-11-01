@@ -30,10 +30,11 @@
   flex-wrap: wrap;
   gap: 8px;
   flex: 0 0 auto;
-  background: var(--bg-widget);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .instance-monitoring-bar__filters {
@@ -47,8 +48,8 @@
   height: 34px;
   padding: 0 10px;
   font-size: 0.85rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-input) 90%, var(--bg-widget) 10%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   border-radius: 6px;
   color: var(--text);
   cursor: pointer;
@@ -72,9 +73,9 @@
 .instance-monitoring-metric-group {
   display: inline-flex;
   align-items: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-radius: 7px;
   padding: 2px;
   gap: 2px;
 }
@@ -122,9 +123,9 @@
 .instance-monitoring-range {
   display: inline-flex;
   align-items: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-radius: 7px;
   padding: 2px;
   gap: 2px;
 }
@@ -158,11 +159,15 @@
 .instance-monitoring-card {
   position: relative;
   width: 100%;
-  background: var(--bg-widget);
-  border: 1px solid var(--border);
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
+  );
+  border: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent);
   border-radius: 8px;
   padding: 14px 18px 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -396,8 +401,12 @@
   align-items: center;
   justify-content: center;
   min-height: 320px;
-  background: var(--bg-widget);
-  border: 1px dashed var(--border);
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
+  );
+  border: 1px dashed color-mix(in srgb, var(--border-dark) 82%, transparent);
   border-radius: 8px;
   padding: 40px 24px;
   color: var(--text-muted);
