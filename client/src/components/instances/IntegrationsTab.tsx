@@ -355,10 +355,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['config', 'notifications'] });
-      notifyOk(t('notif_saved_success') || 'Notification settings saved.');
+      notifyOk(t('settings_subtab_integrations') || 'Integrations', t('notif_saved_success') || 'Notification settings saved.');
     },
     onError: () => {
-      notifyErr(t('notif_save_err') || 'Failed to save notification settings.');
+      notifyErr(t('settings_subtab_integrations') || 'Integrations', t('notif_save_err') || 'Failed to save notification settings.');
     },
   });
 
@@ -376,10 +376,10 @@ export function IntegrationsTab({ instances, t }: IntegrationsTabProps) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['instance', overrideServerId, 'notifications'] });
-      notifyOk(t('notif_saved_success') || 'Notification settings saved.');
+      notifyOk(t('settings_subtab_integrations') || 'Integrations', t('notif_saved_success') || 'Notification settings saved.');
     },
     onError: () => {
-      notifyErr(t('notif_save_err') || 'Failed to save notification settings.');
+      notifyErr(t('settings_subtab_integrations') || 'Integrations', t('notif_save_err') || 'Failed to save notification settings.');
     },
   });
 

@@ -231,13 +231,13 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         const saveSetting = String(cfg.save || '').trim() || latestLabel;
         const wantsLatest = saveSetting === latestLabel || saveSetting.toLowerCase() === 'latest';
         if (!savesList.length) {
-          notifyWarn(t('cannot_start_no_save'), undefined);
+          notifyWarn(t('start_btn'), t('cannot_start_no_save'));
           return;
         }
         if (!wantsLatest) {
           const okName = savesList.some((r) => r && String(r.name || '') === saveSetting);
           if (!okName) {
-            notifyWarn(t('cannot_start_no_save'), undefined);
+            notifyWarn(t('start_btn'), t('cannot_start_no_save'));
             return;
           }
         }

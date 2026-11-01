@@ -4,7 +4,7 @@ import { modals } from '@mantine/modals';
 import { api } from '../api/client';
 import { feedbackErr } from '../lib/apiFeedback';
 import { isNetworkFetchError, notifyApiError, notifyNetworkFetchError } from '../lib/networkErrors';
-import { notifyErr, notifyOk } from '../lib/notify';
+import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import type { InstanceItem } from '../types/instance';
 import type {
   MaintenanceReport,
@@ -151,7 +151,7 @@ export function useMaintenance(
   const deactivateAllTasks = useCallback(() => {
     const activeTasks = tasks.filter((task) => !!task.active);
     if (!activeTasks.length) {
-      notifyErr(t('instances_tab_maintenance'), t('maintenance_deactivate_all_none'));
+      notifyWarn(t('instances_tab_maintenance'), t('maintenance_deactivate_all_none'));
       return;
     }
     modals.openConfirmModal({

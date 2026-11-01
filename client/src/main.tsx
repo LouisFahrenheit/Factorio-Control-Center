@@ -9,6 +9,7 @@ import { applyEffectiveTheme } from './theme/themes';
 import { initDynamicFavicon } from './theme/dynamicFavicon';
 import '../../public/app.css';
 import './styles/global.css';
+import './styles/toast.css';
 import './styles/cryo-snow.css';
 import './styles/login.css';
 import './styles/login-granted.css';

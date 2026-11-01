@@ -70,11 +70,11 @@ export function useBackup(
     async (opts: BackupCreateOptions) => {
       setCreating(true);
       try {
-        await api("/api/backup/create", {
+        const res = await api<{ ok?: boolean; entry?: BackupEntry }>("/api/backup/create", {
           method: "POST",
           body: JSON.stringify(opts),
         });
-        notifyOk(t("backup_created_ok"));
+        notifyOk(t("backup_created_ok"), res?.entry?.filename);
         reload();
       } catch (e) {
         notifyApiError(t("backup_create_err"), e, t);
@@ -112,7 +112,7 @@ export function useBackup(
     async (entry: BackupEntry) => {
       try {
         await api(`/api/backup/${encodeURIComponent(entry.id)}`, { method: "DELETE" });
-        notifyOk(t("backup_deleted_ok"));
+        notifyOk(t("backup_deleted_ok"), entry.filename);
         reload();
       } catch (e) {
         notifyApiError(t("backup_delete_err"), e, t);
@@ -219,7 +219,7 @@ export function useBackup(
           throw batchRes.errors[0].error;
         }
 
-        notifyOk(t("backup_upload_ok"));
+        notifyOk(t("backup_upload_ok"), file.name);
         reload();
       } catch (e) {
         notifyApiError(t("backup_upload_err"), e, t);

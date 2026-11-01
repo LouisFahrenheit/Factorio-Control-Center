@@ -130,7 +130,7 @@ export function useModSettings(
       });
       setMissingFile(false);
       setDirty(false);
-      notifyOk(t('mod_settings_editor_title'), t('save_btn'));
+      notifyOk(t('mod_settings_editor_title'), t('mod_settings_saved'));
       await reload(true);
     } catch (e) {
       if (isNetworkFetchError(e)) {

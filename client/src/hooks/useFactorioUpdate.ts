@@ -4,7 +4,7 @@ import { api } from '../api/client';
 import { modConfirm } from '../lib/modErrorUtils';
 import { buildPickVersionList, collectReleaseVersions, fuLocalizeError } from '../lib/factorioUpdateUtils';
 import { notifyApiError } from '../lib/networkErrors';
-import { notifyErr, notifyOk } from '../lib/notify';
+import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import type { FactorioPickState, FactorioUpdateCheck, FactorioUpdateStatus } from '../types/factorioUpdate';
 
 type FuMode = 'closed' | 'pick' | 'progress';
@@ -178,11 +178,11 @@ export function useFactorioUpdate(
   const openUpdateFlow = useCallback(async () => {
     const title = t('about_check_factorio_updates');
     if (serverBusy) {
-      notifyErr(title, t('about_factorio_update_stop_server'));
+      notifyWarn(title, t('about_factorio_update_stop_server'));
       return;
     }
     if (blockUpdates) {
-      notifyErr(title, t('updates_blocked_by_instance_setting'));
+      notifyWarn(title, t('updates_blocked_by_instance_setting'));
       return;
     }
     setChecking(true);

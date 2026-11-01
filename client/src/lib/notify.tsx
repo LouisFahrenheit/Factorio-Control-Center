@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconAlertTriangle, IconX } from '@tabler/icons-react';
 import { getToastAutoCloseMs } from './userPrefs';
@@ -20,9 +21,11 @@ function toastClassNames(variant: 'ok' | 'err' | 'warn') {
 }
 
 function toastOptions() {
+  const ms = getToastAutoCloseMs();
   return {
-    autoClose: getToastAutoCloseMs(),
+    autoClose: ms,
     withBorder: false,
+    style: { '--toast-duration': `${ms}ms` } as CSSProperties,
   };
 }
 
@@ -57,6 +60,6 @@ export function notifyWarn(title: string, message?: string) {
 }
 
 export function notifyFromError(err: unknown, title: string) {
-  const msg = err instanceof Error ? err.message : title;
-  notifyErr(title, msg);
+  const msg = err instanceof Error ? err.message : typeof err === 'string' && err ? err : undefined;
+  notifyErr(title, msg !== title ? msg : undefined);
 }

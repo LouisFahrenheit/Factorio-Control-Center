@@ -278,7 +278,7 @@ export function useServerControl(
       return;
     }
     if (!saves.length && (save === latestLabel || save === 'latest')) {
-      notifyWarn(t('cannot_start_no_save'));
+      notifyWarn(t('start_btn'), t('cannot_start_no_save'));
       return;
     }
     const cfgResp = await saveStartupConfig();
@@ -328,13 +328,13 @@ export function useServerControl(
   const saveGame = useCallback(async () => {
     const r = await api<{ ok?: boolean; error?: string }>('/api/server/save', { method: 'POST' });
     if (r?.ok === false) throw new Error(String(r.error || 'save_failed'));
-    notifyOk(t('save_btn'), t('updated_successfully'));
+    notifyOk(t('save_btn'), t('save_game_done_msg'));
   }, [t]);
 
   const backup = useCallback(async () => {
     const r = await api<{ ok?: boolean; error?: string }>('/api/server/backup', { method: 'POST' });
     if (r?.ok === false) throw new Error(String(r.error || 'backup_failed'));
-    notifyOk(t('backup_btn'), t('updated_successfully'));
+    notifyOk(t('backup_btn'), t('backup_manual_created_msg'));
   }, [t]);
 
   const restart = useCallback(async () => {

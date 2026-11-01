@@ -1,0 +1,251 @@
+/* ==========================================================================
+   Factorio Control Center — Toast / Notification Styles
+   ========================================================================== */
+
+/* ── Keyframes ─────────────────────────────────────────────────────────── */
+
+@keyframes fcc-toast-timer {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* ── Notifications container ───────────────────────────────────────────── */
+
+/* Mantine mounts a fixed-position box per position key. */
+.fcc-notifications {
+    --notifications-container-width: 440px;
+    --notifications-z-index: 12100;
+    pointer-events: none;
+}
+
+.fcc-notifications[data-position='top-right'] {
+    top: 16px !important;
+    right: 16px !important;
+}
+
+/* ── Toast root ────────────────────────────────────────────────────────── */
+
+.fcc-notifications .mantine-Notification-root,
+.fcc-toast {
+    /* Accent color cascades down to all accent-derived values */
+    --toast-accent: var(--accent);
+    /* Duration synced to user setting via CSS var set inline or defaults to 5s */
+    --toast-duration: 5s;
+
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+
+    min-width: min(380px, calc(100vw - 32px));
+    max-width: min(440px, calc(100vw - 32px));
+    margin-bottom: 10px;
+
+    /* Extra bottom padding so content never overlaps the 3px timer bar */
+    padding: 14px 14px 18px 20px !important;
+    border-radius: 12px !important;
+
+    /* Layered border: tinted with accent for immediate status recognition */
+    border: 1px solid color-mix(in srgb, var(--border-dark) 70%, var(--toast-accent) 30%) !important;
+
+    /* Industrial panel gradient — same visual language as FCC panel surfaces */
+    background: linear-gradient(160deg,
+            color-mix(in srgb, var(--bg-widget) 88%, white 12%) 0%,
+            color-mix(in srgb, var(--bg-main) 82%, var(--bg-widget) 18%) 100%) !important;
+
+    /* Depth: inner top highlight + deep drop shadow + accent ambient glow */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 12px 32px rgba(0, 0, 0, 0.50),
+        0 0 0 1px rgba(0, 0, 0, 0.12),
+        0 0 20px color-mix(in srgb, var(--toast-accent) 8%, transparent) !important;
+
+    backdrop-filter: blur(12px);
+    color: var(--text) !important;
+    --notification-color: transparent !important;
+
+    transition:
+        box-shadow 0.22s ease,
+        border-color 0.22s ease !important;
+}
+
+/* Hover: enhance border glow — visual cue that the timer is paused */
+.fcc-notifications .mantine-Notification-root:hover,
+.fcc-toast:hover {
+    border-color: color-mix(in srgb, var(--border-dark) 45%, var(--toast-accent) 55%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 14px 36px rgba(0, 0, 0, 0.56),
+        0 0 0 1px rgba(0, 0, 0, 0.14),
+        0 0 28px color-mix(in srgb, var(--toast-accent) 18%, transparent) !important;
+}
+
+/* ── Left accent bar ───────────────────────────────────────────────────── */
+
+.fcc-toast::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    bottom: 12px;
+    /* stops just above the timer bar area */
+    left: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg,
+            color-mix(in srgb, var(--toast-accent) 92%, white 8%) 0%,
+            var(--toast-accent) 50%,
+            color-mix(in srgb, var(--toast-accent) 65%, transparent) 100%);
+    box-shadow:
+        0 0 8px color-mix(in srgb, var(--toast-accent) 60%, transparent),
+        0 0 20px color-mix(in srgb, var(--toast-accent) 28%, transparent);
+}
+
+/* ── Timer progress bar (bottom of toast) ─────────────────────────────── */
+
+.fcc-toast::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 0 0 12px 12px;
+
+    /* Animated width: 100% → 0% over the toast duration */
+    animation: fcc-toast-timer var(--toast-duration, 5s) linear forwards;
+
+    /* Gradient with glowing leading edge */
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--toast-accent) 35%, transparent) 0%,
+            var(--toast-accent) 65%,
+            color-mix(in srgb, var(--toast-accent) 92%, white 8%) 100%);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--toast-accent) 75%, transparent);
+}
+
+/* Pause the timer animation while hovering */
+.fcc-toast:hover::after {
+    animation-play-state: paused;
+}
+
+/* ── Variant accent colors ─────────────────────────────────────────────── */
+
+.fcc-toast--ok {
+    --toast-accent: var(--running);
+}
+
+.fcc-toast--err {
+    --toast-accent: var(--error);
+}
+
+.fcc-toast--warn {
+    --toast-accent: var(--starting, #da8216);
+}
+
+/* ── Body layout ───────────────────────────────────────────────────────── */
+
+.fcc-toast__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 4px;
+}
+
+/* ── Title ─────────────────────────────────────────────────────────────── */
+
+.fcc-toast__title {
+    font-size: calc(var(--ui-font-size, 12pt) * 1.05);
+    font-weight: 680;
+    letter-spacing: 0.012em;
+    line-height: 1.3;
+    /* Subtle accent tint for instant status recognition */
+    color: color-mix(in srgb, var(--text) 84%, var(--toast-accent) 16%) !important;
+}
+
+/* ── Description ───────────────────────────────────────────────────────── */
+
+.fcc-toast__description {
+    margin-top: 4px;
+    font-size: calc(var(--ui-font-size, 12pt) * 0.95);
+    line-height: 1.5;
+    color: var(--text-muted) !important;
+    white-space: pre-line;
+}
+
+.fcc-toast__description:empty {
+    display: none;
+}
+
+/* ── Icon badge ────────────────────────────────────────────────────────── */
+
+.fcc-toast__icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 36px !important;
+    height: 36px !important;
+    margin-right: 0 !important;
+    margin-inline-end: 0 !important;
+    margin-top: 1px;
+    /* optical alignment with title baseline */
+
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--toast-accent) 16%, var(--bg-main) 84%) !important;
+    border: 1px solid color-mix(in srgb, var(--toast-accent) 34%, transparent);
+    color: color-mix(in srgb, var(--toast-accent) 92%, white 8%) !important;
+
+    /* Inner highlight + soft ambient glow around the icon */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        0 0 12px color-mix(in srgb, var(--toast-accent) 22%, transparent);
+}
+
+/* ── Close button ──────────────────────────────────────────────────────── */
+
+.fcc-toast__close {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 7px !important;
+    flex-shrink: 0;
+    color: var(--text-muted) !important;
+    transition:
+        background-color 0.16s ease,
+        color 0.16s ease,
+        transform 0.12s ease !important;
+}
+
+.fcc-toast__close:hover {
+    background: color-mix(in srgb, var(--text) 12%, transparent) !important;
+    color: var(--text) !important;
+}
+
+.fcc-toast__close:active {
+    transform: scale(0.90);
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fcc-notifications .mantine-Notification-root,
+    .fcc-toast,
+    .fcc-toast__close {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* Show a static bar instead of animated timer */
+    .fcc-toast::after {
+        animation: none !important;
+        width: 100%;
+        opacity: 0.30;
+    }
+}

@@ -439,7 +439,7 @@ export function InstancePublicTab({
       );
       await instancesApi.reload();
       notifyOk(
-        t('updated_successfully') || 'Обновлено',
+        t('instances_tab_public') || 'Публичная страница',
         makePublic
           ? t('public_all_enabled_msg') ||
               'Все серверы теперь отображаются на публичной странице'
@@ -467,7 +467,7 @@ export function InstancePublicTab({
         }),
       });
       await instancesApi.reload();
-      notifyOk(t('updated_successfully') || 'Настройки сохранены');
+      notifyOk(item.name || t('instances_tab_public'), t('updated_successfully') || 'Настройки сохранены');
     } catch (e) {
       instancesApi.handleError(e);
       throw e;

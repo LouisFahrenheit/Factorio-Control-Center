@@ -52,7 +52,7 @@ export function notifyApiError(
 ): void {
   if (notifyNetworkFetchError(title, err, t, opts)) return;
   const msg = resolveApiErrorMessage(err, t);
-  if (msg) notifyErr(title, msg);
+  notifyErr(title, msg || undefined);
 }
 
 /** Show a debounced toast for connectivity failures; returns true if handled. */

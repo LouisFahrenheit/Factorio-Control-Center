@@ -98,7 +98,7 @@ body {
   width: 100%;
 }
 
-.fcc-workspace-view > .app {
+.fcc-workspace-view>.app {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -130,67 +130,39 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item,
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item {
-    animation: fcc-context-menu-item-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)
-      backwards;
+
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item,
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item {
+    animation: fcc-context-menu-item-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(1),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(1) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(1),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(1) {
     animation-delay: 0.03s;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(2),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(2) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(2),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(2) {
     animation-delay: 0.05s;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(3),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(3) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(3),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(3) {
     animation-delay: 0.07s;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(4),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(4) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(4),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(4) {
     animation-delay: 0.09s;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(5),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(5) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(5),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(5) {
     animation-delay: 0.11s;
   }
 
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .instance-row-menu__item:nth-child(n + 6),
-  :root:not([data-web-disable-effects])
-    .fcc-context-menu
-    .maintenance-row-menu__item:nth-child(n + 6) {
+  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(n + 6),
+  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(n + 6) {
     animation-delay: 0.13s;
   }
 }
@@ -222,11 +194,9 @@ body {
 
 .btn--toolbar-icon:hover:not(:disabled):not(.is-locked) {
   background: var(--fcc-btn-bg-hover);
-  border-color: color-mix(
-    in srgb,
-    var(--accent) 28%,
-    var(--fcc-btn-border) 72%
-  );
+  border-color: color-mix(in srgb,
+      var(--accent) 28%,
+      var(--fcc-btn-border) 72%);
 }
 
 .fcc-switch {
@@ -238,7 +208,7 @@ body {
   user-select: none;
 }
 
-.fcc-switch > input[type='checkbox'] {
+.fcc-switch>input[type='checkbox'] {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -250,7 +220,7 @@ body {
   border: 0;
 }
 
-.fcc-switch > input[type='checkbox']:checked::after {
+.fcc-switch>input[type='checkbox']:checked::after {
   content: none;
 }
 
@@ -282,22 +252,22 @@ body {
     background-color 0.22s var(--fcc-hover-ease);
 }
 
-.fcc-switch > input:checked + .fcc-switch__track {
+.fcc-switch>input:checked+.fcc-switch__track {
   background: color-mix(in srgb, var(--accent) 42%, var(--bg-input) 58%);
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border-dark) 45%);
 }
 
-.fcc-switch > input:checked + .fcc-switch__track .fcc-switch__thumb {
+.fcc-switch>input:checked+.fcc-switch__track .fcc-switch__thumb {
   transform: translateX(18px);
   background: var(--accent-selected, var(--accent));
 }
 
-.fcc-switch > input:focus-visible + .fcc-switch__track {
+.fcc-switch>input:focus-visible+.fcc-switch__track {
   outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 
-.fcc-switch > input:disabled + .fcc-switch__track {
+.fcc-switch>input:disabled+.fcc-switch__track {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -316,7 +286,7 @@ body {
   user-select: none;
 }
 
-.fcc-check > input[type='checkbox'] {
+.fcc-check>input[type='checkbox'] {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -360,7 +330,7 @@ body {
     opacity 0.18s var(--fcc-hover-ease);
 }
 
-.fcc-check > input:checked + .fcc-check__box {
+.fcc-check>input:checked+.fcc-check__box {
   background: color-mix(in srgb, var(--accent) 42%, var(--bg-input) 58%);
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border-dark) 45%);
   box-shadow:
@@ -368,17 +338,17 @@ body {
     0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.fcc-check > input:checked + .fcc-check__box .fcc-check__mark {
+.fcc-check>input:checked+.fcc-check__box .fcc-check__mark {
   opacity: 1;
   transform: translate(-50%, -62%) rotate(45deg) scale(1);
 }
 
-.fcc-check > input:focus-visible + .fcc-check__box {
+.fcc-check>input:focus-visible+.fcc-check__box {
   outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 
-.fcc-check > input:disabled + .fcc-check__box {
+.fcc-check>input:disabled+.fcc-check__box {
   opacity: 0.55;
 }
 
@@ -398,142 +368,10 @@ body {
   gap: 6px;
 }
 
-/* Mantine toast/modal polish — Mantine mounts a fixed box per position; only style top-right. */
-.fcc-notifications {
-  --notifications-container-width: 440px;
-  --notifications-z-index: 12100;
-  pointer-events: none;
-}
-
-.fcc-notifications[data-position='top-right'] {
-  top: 16px !important;
-  right: 16px !important;
-}
-
-.fcc-notifications .mantine-Notification-root,
-.fcc-toast {
-  --toast-accent: var(--accent);
-  pointer-events: auto;
-  position: relative;
-  overflow: hidden;
-  gap: 12px;
-  min-width: min(380px, calc(100vw - 32px));
-  max-width: min(440px, calc(100vw - 32px));
-  margin-bottom: 10px;
-  padding: 14px 14px 14px 18px !important;
-  border-radius: 12px !important;
-  border: 1px solid
-    color-mix(in srgb, var(--border-dark) 82%, var(--toast-accent) 18%) !important;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--bg-widget) 90%, white 10%) 0%,
-    color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
-  ) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 10px 28px rgba(0, 0, 0, 0.34),
-    0 0 0 1px rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(10px);
-  color: var(--text) !important;
-  --notification-color: transparent !important;
-}
-
-.fcc-toast::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: 0;
-  width: 4px;
-  border-radius: 0 4px 4px 0;
-  background: var(--toast-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--toast-accent) 42%, transparent);
-}
-
-.fcc-toast--ok {
-  --toast-accent: var(--running);
-}
-
-.fcc-toast--err {
-  --toast-accent: var(--error);
-}
-
-.fcc-toast--warn {
-  --toast-accent: var(--starting);
-}
-
-.fcc-toast__body {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-right: 4px;
-}
-
-.fcc-toast__title {
-  font-size: calc(var(--ui-font-size, 12pt) * 1.04);
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  line-height: 1.35;
-  color: var(--text) !important;
-}
-
-.fcc-toast__description {
-  margin-top: 3px;
-  font-size: calc(var(--ui-font-size, 12pt) * 0.96);
-  line-height: 1.45;
-  color: var(--text-muted) !important;
-  white-space: pre-line;
-}
-
-.fcc-toast__description:empty {
-  display: none;
-}
-
-.fcc-toast__icon {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 36px !important;
-  height: 36px !important;
-  margin-right: 0 !important;
-  margin-inline-end: 0 !important;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: color-mix(
-    in srgb,
-    var(--toast-accent) 14%,
-    var(--bg-main) 86%
-  ) !important;
-  border: 1px solid color-mix(in srgb, var(--toast-accent) 28%, transparent);
-  color: color-mix(in srgb, var(--toast-accent) 88%, white 12%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.fcc-toast__close {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 8px !important;
-  color: var(--text-muted) !important;
-  transition:
-    background-color 0.18s var(--fcc-hover-ease),
-    color 0.18s var(--fcc-hover-ease),
-    transform 0.14s var(--fcc-hover-ease);
-}
-
-.fcc-toast__close:hover {
-  background: color-mix(in srgb, var(--text) 10%, transparent) !important;
-  color: var(--text) !important;
-}
-
-.fcc-toast__close:active {
-  transform: scale(0.94);
-}
-
 .fcc-modal {
-  background: color-mix(
-    in srgb,
-    var(--bg-widget) 90%,
-    var(--bg-main) 10%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-widget) 90%,
+      var(--bg-main) 10%) !important;
   border: 1px solid var(--border-dark) !important;
   border-radius: 8px !important;
   box-shadow:
@@ -544,8 +382,7 @@ body {
 
 .fcc-modal .mantine-Modal-header {
   background: color-mix(in srgb, var(--bg-main) 52%, var(--bg-widget) 48%);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
   padding: 12px 16px;
 }
 
@@ -647,7 +484,7 @@ body {
   line-height: 1.5;
 }
 
-.fcc-confirm-modal__callout-list li + li {
+.fcc-confirm-modal__callout-list li+li {
   margin-top: 4px;
 }
 
@@ -679,8 +516,7 @@ body {
 .backup-restore-modal__header {
   padding: 14px 16px 12px;
   background: color-mix(in srgb, var(--bg-main) 52%, var(--bg-widget) 48%);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
 }
 
 .backup-restore-modal__header-title {
@@ -796,21 +632,17 @@ body {
 }
 
 .backup-restore-modal__option:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--accent, #e58e26) 50%,
-    var(--border-dark) 50%
-  );
+  border-color: color-mix(in srgb,
+      var(--accent, #e58e26) 50%,
+      var(--border-dark) 50%);
   background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
 }
 
 .backup-restore-modal__option--selected {
   border-color: var(--accent, #e58e26) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent, #e58e26) 12%,
-    var(--bg-widget) 88%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent, #e58e26) 12%,
+      var(--bg-widget) 88%) !important;
 }
 
 .backup-restore-modal__radio {
@@ -867,8 +699,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-muted);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
 }
 
@@ -882,11 +713,9 @@ table#tblBackups thead th.backup-sort-th {
 
 table#tblBackups thead th.backup-sort-th:hover {
   color: var(--text);
-  background: color-mix(
-    in srgb,
-    var(--accent) 8%,
-    var(--bg-widget) 92%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 8%,
+      var(--bg-widget) 92%) !important;
 }
 
 table#tblBackups thead th.backup-sort-th--active {
@@ -914,16 +743,13 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   cursor: pointer;
   user-select: none;
   transition: background-color 0.15s ease;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
 }
 
 .backup-tab__row:hover {
-  background: color-mix(
-    in srgb,
-    var(--accent, #e58e26) 6%,
-    var(--bg-widget) 94%
-  );
+  background: color-mix(in srgb,
+      var(--accent, #e58e26) 6%,
+      var(--bg-widget) 94%);
 }
 
 .backup-tab__cell {
@@ -1107,21 +933,17 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__action-btn--restore:hover {
-  background: color-mix(
-    in srgb,
-    var(--accent, #e58e26) 20%,
-    var(--bg-widget) 80%
-  );
+  background: color-mix(in srgb,
+      var(--accent, #e58e26) 20%,
+      var(--bg-widget) 80%);
   color: var(--accent, #e58e26);
   border-color: var(--accent, #e58e26);
 }
 
 .backup-tab__action-btn--danger:hover {
-  background: color-mix(
-    in srgb,
-    var(--error, #e05030) 20%,
-    var(--bg-widget) 80%
-  );
+  background: color-mix(in srgb,
+      var(--error, #e05030) 20%,
+      var(--bg-widget) 80%);
   color: var(--error, #e05030);
   border-color: var(--error, #e05030);
 }
@@ -1248,11 +1070,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 #tblBackupsBody tr.backup-tab__row--selected td,
 .backup-tab__row--selected td {
-  background: color-mix(
-    in srgb,
-    var(--accent, #da8216) 12%,
-    var(--bg-widget) 88%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent, #da8216) 12%,
+      var(--bg-widget) 88%) !important;
   box-shadow: none !important;
 }
 
@@ -1307,8 +1127,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-modal__header {
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   padding: 16px 20px;
 }
 
@@ -1710,8 +1529,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__card-header {
   padding: 10px 14px;
   background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1778,11 +1596,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__number-wrap {
   display: inline-flex;
   align-items: center;
-  background: color-mix(
-    in srgb,
-    var(--bg-input, #1e1e1e) 90%,
-    var(--bg-main) 10%
-  );
+  background: color-mix(in srgb,
+      var(--bg-input, #1e1e1e) 90%,
+      var(--bg-main) 10%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   border-radius: 6px;
   overflow: hidden;
@@ -1902,11 +1718,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-size-btn--active {
-  background: color-mix(
-    in srgb,
-    var(--accent) 18%,
-    var(--bg-widget) 82%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 18%,
+      var(--bg-widget) 82%) !important;
   color: var(--accent) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
 }
@@ -1941,11 +1755,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-btn--active {
-  background: color-mix(
-    in srgb,
-    var(--text) 18%,
-    var(--bg-widget) 82%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--text) 18%,
+      var(--bg-widget) 82%) !important;
   color: var(--text) !important;
   border-color: color-mix(in srgb, var(--text) 30%, transparent) !important;
 }
@@ -2123,16 +1935,12 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-deps-confirm__list-wrap--conflict {
-  border-color: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 26%,
-    var(--border-dark) 74%
-  );
-  background: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 4%,
-    var(--bg-main) 96%
-  );
+  border-color: color-mix(in srgb,
+      var(--warning, #e3941c) 26%,
+      var(--border-dark) 74%);
+  background: color-mix(in srgb,
+      var(--warning, #e3941c) 4%,
+      var(--bg-main) 96%);
 }
 
 .mod-deps-confirm__item--conflict {
@@ -2140,29 +1948,21 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
-  border-color: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 22%,
-    var(--border-dark) 78%
-  );
-  background: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 5%,
-    var(--bg-widget) 95%
-  );
+  border-color: color-mix(in srgb,
+      var(--warning, #e3941c) 22%,
+      var(--border-dark) 78%);
+  background: color-mix(in srgb,
+      var(--warning, #e3941c) 5%,
+      var(--bg-widget) 95%);
 }
 
 .mod-deps-confirm__item--conflict:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 38%,
-    var(--border-dark) 62%
-  );
-  background: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 9%,
-    var(--bg-widget) 91%
-  );
+  border-color: color-mix(in srgb,
+      var(--warning, #e3941c) 38%,
+      var(--border-dark) 62%);
+  background: color-mix(in srgb,
+      var(--warning, #e3941c) 9%,
+      var(--bg-widget) 91%);
 }
 
 .mod-deps-confirm__list--conflicts {
@@ -2179,11 +1979,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: color-mix(
-    in srgb,
-    var(--warning, #e3941c) 18%,
-    var(--bg-main) 82%
-  );
+  background: color-mix(in srgb,
+      var(--warning, #e3941c) 18%,
+      var(--bg-main) 82%);
   border: 1px solid color-mix(in srgb, var(--warning, #e3941c) 42%, transparent);
   color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
 }
@@ -2423,21 +2221,16 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   gap: 12px;
   padding: 14px 16px 12px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 88%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%) 0%,
-    color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%) 100%
-  );
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%) 0%,
+      color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%) 100%);
 }
 
 .mod-update-all-flow__header-icon {
   flex: 0 0 auto;
   color: var(--accent-selected);
-  filter: drop-shadow(
-    0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)
-  );
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 35%, transparent));
 }
 
 .mod-update-all-flow__header-text {
@@ -2533,7 +2326,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-.mod-update-all-flow__mod-list li + li {
+.mod-update-all-flow__mod-list li+li {
   margin-top: 4px;
 }
 
@@ -2724,7 +2517,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     border-color 0.15s ease;
 }
 
-.mods-from-save-dialog__row + .mods-from-save-dialog__row {
+.mods-from-save-dialog__row+.mods-from-save-dialog__row {
   margin-top: 2px;
 }
 
@@ -2805,7 +2598,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
   }
 
-  .mods-from-save-dialog__row + .mods-from-save-dialog__row {
+  .mods-from-save-dialog__row+.mods-from-save-dialog__row {
     margin-top: 6px;
   }
 
@@ -2825,13 +2618,6 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fcc-notifications .mantine-Notification-root,
-  .fcc-toast,
-  .fcc-toast__close {
-    animation: none !important;
-    transition: none !important;
-  }
-
   .sub-tabs__tab--default-creds-alert {
     animation: none !important;
   }
@@ -2845,11 +2631,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   padding: 11px 14px;
   border-bottom: 1px solid color-mix(in srgb, var(--error) 42%, transparent);
   color: #ffe8e0;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--error) 28%, #2a1210 72%) 0%,
-    color-mix(in srgb, var(--error) 18%, var(--bg-widget) 82%) 100%
-  );
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--error) 28%, #2a1210 72%) 0%,
+      color-mix(in srgb, var(--error) 18%, var(--bg-widget) 82%) 100%);
   font-size: 0.95em;
   font-weight: 600;
   line-height: 1.45;
@@ -2877,6 +2661,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 @keyframes instances-access-tab-blink {
+
   0%,
   100% {
     border-color: var(--border-dark);
@@ -2899,11 +2684,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .history-row--failed:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--error) 8%,
-    var(--bg-data, #3a3a3a)
-  ) !important;
+  background-color: color-mix(in srgb,
+      var(--error) 8%,
+      var(--bg-data, #3a3a3a)) !important;
 }
 
 .monitoring-grid {
@@ -2917,18 +2700,18 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     grid-template-columns: 1fr 1fr;
   }
 
-  .monitoring-grid > *:last-child:nth-child(odd) {
+  .monitoring-grid>*:last-child:nth-child(odd) {
     grid-column: span 2;
   }
 }
 
 /* Ensure monitoring tab is always vertically scrollable across all themes (Dark Space, Ion Storm, Vulcanus, etc.) */
-.panel-shell > .tab-panels:has(#tabPanelMonitoring),
-.panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='dark_space'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='ion_storm'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='vulcanus'] .panel-shell > .tab-panels:has(.monitoring-tab),
-:root[data-theme='cryogenics'] .panel-shell > .tab-panels:has(.monitoring-tab) {
+.panel-shell>.tab-panels:has(#tabPanelMonitoring),
+.panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='dark_space'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='ion_storm'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='vulcanus'] .panel-shell>.tab-panels:has(.monitoring-tab),
+:root[data-theme='cryogenics'] .panel-shell>.tab-panels:has(.monitoring-tab) {
   overflow-y: auto !important;
 }
 
@@ -3018,33 +2801,19 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   background: transparent;
 }
 
-#instanceTabIntegrations
-  .settings-table__row:not(:last-child)
-  .settings-table__label,
-#instanceTabIntegrations
-  .settings-table__row:not(:last-child)
-  .settings-table__control,
-#instanceTabIntegrations
-  .settings-table__row:not(:last-child)
-  .settings-table__action,
-#instanceTabIntegrations
-  .settings-table__row:not(:last-child)
-  .settings-table__footnote,
-#instanceTabIntegrations
-  .settings-table__row:not(:last-child)
-  .settings-table__inline-cell {
+#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__label,
+#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__control,
+#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__action,
+#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__footnote,
+#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__inline-cell {
   border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
 }
 
-#instanceTabIntegrations
-  .instance-settings-tables__minor
-  .settings-table__label {
+#instanceTabIntegrations .instance-settings-tables__minor .settings-table__label {
   width: 44%;
 }
 
-#instanceTabIntegrations
-  .instance-settings-tables__minor
-  .settings-table__control {
+#instanceTabIntegrations .instance-settings-tables__minor .settings-table__control {
   width: 56%;
 }
 
@@ -3264,11 +3033,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .integrations-scope-btn--active {
   color: var(--text) !important;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
-    color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%
-  ) !important;
+  background: linear-gradient(165deg,
+      color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
+      color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%) !important;
   border-color: color-mix(in srgb, var(--accent) 36%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -3438,11 +3205,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   border-radius: 6px;
   font-size: calc(var(--ui-font-size) * 0.88);
   font-weight: 550;
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-widget) 30%
-  );
+  background-color: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-widget) 30%);
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   color: var(--text);
   cursor: pointer;
@@ -3454,11 +3219,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .integrations-override-select:hover {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 60%,
-    var(--bg-widget) 40%
-  );
+  background-color: color-mix(in srgb,
+      var(--bg-main) 60%,
+      var(--bg-widget) 40%);
 }
 
 .integrations-override-select:focus {
@@ -3753,11 +3516,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: calc(var(--ui-font-size) * 0.84) !important;
   font-weight: 700 !important;
   border-radius: 4px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 75%,
-    var(--bg-widget) 25%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 75%,
+      var(--bg-widget) 25%) !important;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
   color: var(--text) !important;
 }
@@ -3973,8 +3734,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 95%, var(--bg-main) 5%);
 }
 
@@ -4211,10 +3971,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-portal-versions__row:hover {
-  background: var(
-    --fcc-row-hover-bg,
-    color-mix(in srgb, var(--accent) 7%, var(--bg-data) 93%)
-  );
+  background: var(--fcc-row-hover-bg,
+      color-mix(in srgb, var(--accent) 7%, var(--bg-data) 93%));
 }
 
 .mod-portal-versions__row--recommended {
@@ -4222,11 +3980,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-portal-versions__row--installed {
-  background: color-mix(
-    in srgb,
-    var(--accent-selected, #f1be64) 6%,
-    transparent
-  );
+  background: color-mix(in srgb,
+      var(--accent-selected, #f1be64) 6%,
+      transparent);
 }
 
 .mod-portal-versions__ver-cell {
@@ -4358,11 +4114,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__installed-tag {
   color: var(--running, #78c840);
-  background: color-mix(
-    in srgb,
-    var(--running, #78c840) 12%,
-    var(--bg-main) 88%
-  );
+  background: color-mix(in srgb,
+      var(--running, #78c840) 12%,
+      var(--bg-main) 88%);
   border: 1px solid color-mix(in srgb, var(--running, #78c840) 28%, transparent);
   font-weight: 600 !important;
   cursor: default;
@@ -4381,11 +4135,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__install-btn:hover:not(:disabled) {
   background: var(--fcc-btn-bg-hover) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--accent, #da8216) 30%,
-    var(--fcc-btn-border) 70%
-  ) !important;
+  border-color: color-mix(in srgb,
+      var(--accent, #da8216) 30%,
+      var(--fcc-btn-border) 70%) !important;
   color: var(--text) !important;
 }
 
@@ -4410,11 +4162,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   justify-content: center !important;
   border-radius: 6px !important;
   color: var(--running, #78c840);
-  background: color-mix(
-    in srgb,
-    var(--running, #78c840) 14%,
-    var(--bg-main) 86%
-  );
+  background: color-mix(in srgb,
+      var(--running, #78c840) 14%,
+      var(--bg-main) 86%);
   border: 1px solid color-mix(in srgb, var(--running, #78c840) 30%, transparent);
   box-sizing: border-box !important;
   flex-shrink: 0;
@@ -4446,11 +4196,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__activate-btn:hover:not(:disabled) {
   color: var(--accent, #da8216);
-  border-color: color-mix(
-    in srgb,
-    var(--accent, #da8216) 45%,
-    var(--fcc-btn-border) 55%
-  ) !important;
+  border-color: color-mix(in srgb,
+      var(--accent, #da8216) 45%,
+      var(--fcc-btn-border) 55%) !important;
   background: var(--fcc-btn-bg-hover) !important;
 }
 
@@ -4479,11 +4227,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__delete-btn:hover:not(:disabled) {
   color: #ff5555;
-  border-color: color-mix(
-    in srgb,
-    #ff5555 45%,
-    var(--fcc-btn-border) 55%
-  ) !important;
+  border-color: color-mix(in srgb,
+      #ff5555 45%,
+      var(--fcc-btn-border) 55%) !important;
   background: var(--fcc-btn-bg-hover) !important;
 }
 
@@ -4618,11 +4364,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-weight: inherit !important;
   letter-spacing: inherit !important;
   color: var(--text, #ffffff) !important;
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-widget) 30%
-  ) !important;
+  background-color: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-widget) 30%) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaaaaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 7px center !important;
@@ -4640,14 +4384,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 #tblModsBody select.mods-version-select:hover:not(:disabled) {
   border-color: var(--accent, #da8216) !important;
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 50%,
-    var(--bg-widget) 50%
-  ) !important;
+  background-color: color-mix(in srgb,
+      var(--bg-main) 50%,
+      var(--bg-widget) 50%) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f1be64' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-  box-shadow: 0 0 4px
-    color-mix(in srgb, var(--accent, #da8216) 25%, transparent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--accent, #da8216) 25%, transparent);
 }
 
 #tblModsBody select.mods-version-select:focus {
@@ -4673,7 +4414,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: inherit !important;
 }
 
-body > .fu-modal-backdrop.mod-job-backdrop--top {
+body>.fu-modal-backdrop.mod-job-backdrop--top {
   z-index: 10200;
 }
 
@@ -4694,71 +4435,39 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 /* ── Instance Dashboard Host CPU, RAM & DISK Alerts ─────── */
 
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-warn
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-warn
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-warn
-  .instance-dashboard-stat__icon {
+.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__icon {
   color: var(--starting, #ffb833) !important;
-  background: color-mix(
-    in srgb,
-    var(--starting, #ffb833) 14%,
-    var(--bg-main) 86%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--starting, #ffb833) 30%,
-    transparent
-  ) !important;
+  background: color-mix(in srgb,
+      var(--starting, #ffb833) 14%,
+      var(--bg-main) 86%) !important;
+  border-color: color-mix(in srgb,
+      var(--starting, #ffb833) 30%,
+      transparent) !important;
 }
 
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-warn
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-warn
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-warn
-  .instance-dashboard-stat__value {
+.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__value {
   color: var(--starting, #ffb833);
 }
 
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-danger
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-danger
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-danger
-  .instance-dashboard-stat__icon {
+.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__icon,
+.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__icon {
   color: var(--error, #ff4d4d) !important;
-  background: color-mix(
-    in srgb,
-    var(--error, #ff4d4d) 16%,
-    var(--bg-main) 84%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--error, #ff4d4d) 32%,
-    transparent
-  ) !important;
+  background: color-mix(in srgb,
+      var(--error, #ff4d4d) 16%,
+      var(--bg-main) 84%) !important;
+  border-color: color-mix(in srgb,
+      var(--error, #ff4d4d) 32%,
+      transparent) !important;
 }
 
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-danger
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-danger
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-danger
-  .instance-dashboard-stat__value {
+.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__value,
+.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__value {
   color: var(--error, #ff4d4d) !important;
 }
 
@@ -4830,20 +4539,16 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 .instance-dashboard-top .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-data) 30%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-data) 30%) !important;
   border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease;
 }
 
-.instance-dashboard-top
-  .instance-dashboard-stat:hover
-  .instance-dashboard-stat__icon {
+.instance-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
 }
@@ -4907,9 +4612,7 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   min-width: 152px;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--status
-  .instance-dashboard-stat__body {
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -4917,16 +4620,12 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   justify-content: center;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--status
-  .instance-dashboard-stat__label {
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__label {
   line-height: 1.2;
   white-space: nowrap;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--status
-  .instance-dashboard-stat__value {
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__value {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4979,9 +4678,7 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   min-width: 168px;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--uptime
-  .instance-dashboard-stat__body {
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -4991,16 +4688,12 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   text-align: center !important;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--uptime
-  .instance-dashboard-stat__label {
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__label {
   width: 100%;
   text-align: center !important;
 }
 
-.panel-dashboard-top
-  .panel-dashboard-stat--uptime
-  .instance-dashboard-stat__value {
+.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__value {
   width: 100%;
   text-align: center !important;
   display: block;
@@ -5012,15 +4705,11 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .panel-dashboard-top .instance-dashboard-stat .instance-dashboard-stat__icon,
-.panel-dashboard-top
-  .panel-dashboard-stat--status
-  .instance-dashboard-stat__icon {
+.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-data) 30%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-data) 30%) !important;
   border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
@@ -5028,9 +4717,7 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
     background-color 0.18s ease;
 }
 
-.panel-dashboard-top
-  .instance-dashboard-stat:hover
-  .instance-dashboard-stat__icon {
+.panel-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
 }
@@ -5049,11 +4736,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   height: 44px;
   min-height: 44px;
   max-height: 44px;
-  border-color: color-mix(
-    in srgb,
-    var(--accent) 30%,
-    var(--border-dark) 70%
-  ) !important;
+  border-color: color-mix(in srgb,
+      var(--accent) 30%,
+      var(--border-dark) 70%) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.16) !important;
@@ -5065,16 +4750,12 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 .status-bar--panel .status-bar__back--nav .instance-dashboard-stat__icon {
   color: var(--accent, #da8216) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-data) 30%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--accent) 26%,
-    var(--border) 74%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-data) 30%) !important;
+  border-color: color-mix(in srgb,
+      var(--accent) 26%,
+      var(--border) 74%) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease,
@@ -5088,11 +4769,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .status-bar--panel .status-bar__back--nav:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--accent) 55%,
-    var(--border-dark) 45%
-  ) !important;
+  border-color: color-mix(in srgb,
+      var(--accent) 55%,
+      var(--border-dark) 45%) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 2px 10px color-mix(in srgb, var(--accent) 18%, transparent) !important;
@@ -5100,27 +4779,21 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 .status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__icon {
   color: var(--accent-selected, #e59b2a) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 14%,
-    var(--bg-main) 86%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 14%,
+      var(--bg-main) 86%) !important;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
 }
 
-.status-bar--panel
-  .status-bar__back--nav:hover
-  .instance-dashboard-stat__value {
+.status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__value {
   color: var(--accent-selected, #e59b2a) !important;
 }
 
 .status-bar--panel .status-bar__back--nav:active {
   transform: translateY(1px);
-  border-color: color-mix(
-    in srgb,
-    var(--accent) 45%,
-    var(--border-dark) 55%
-  ) !important;
+  border-color: color-mix(in srgb,
+      var(--accent) 45%,
+      var(--border-dark) 55%) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -5133,11 +4806,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 
 .monitoring-promo-banner:hover {
   border-color: rgba(255, 255, 255, 0.18) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  ) !important;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%) !important;
 }
 
 .instance-dashboard-user {
@@ -5148,11 +4819,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   padding: 5px 12px 5px 8px !important;
   gap: 10px !important;
   border-radius: 9px;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
-    color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
-  ) !important;
+  background: linear-gradient(165deg,
+      color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
+      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -5175,11 +4844,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   border-radius: 8px !important;
   flex: 0 0 auto;
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-data) 30%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 70%,
+      var(--bg-data) 30%) !important;
   border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition:
@@ -5191,11 +4858,9 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-user:hover .instance-dashboard-user__avatar {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 60%,
-    var(--bg-data) 40%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 60%,
+      var(--bg-data) 40%) !important;
 }
 
 .instance-dashboard-user__body {
@@ -5227,19 +4892,16 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   border-radius: 4px !important;
   line-height: 1.2 !important;
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 65%,
-    var(--bg-data) 35%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 65%,
+      var(--bg-data) 35%) !important;
   border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease !important;
 }
 
-.instance-dashboard-user:hover
-  .instance-dashboard-user__role.access-users-role {
+.instance-dashboard-user:hover .instance-dashboard-user__role.access-users-role {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 65%, transparent) !important;
 }
@@ -5256,12 +4918,10 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 /* Running instance status pill using active players tile emerald palette */
 .instance-status-pill--running {
   color: #4ade80 !important;
-  background: color-mix(
-    in srgb,
-    #2ecc71 14%,
-    var(--bg-main) 50%,
-    var(--bg-widget) 40%
-  ) !important;
+  background: color-mix(in srgb,
+      #2ecc71 14%,
+      var(--bg-main) 50%,
+      var(--bg-widget) 40%) !important;
   border-color: color-mix(in srgb, #2ecc71 45%, transparent) !important;
 }
 
@@ -5371,16 +5031,12 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   line-height: 1.1 !important;
-  color: color-mix(
-    in srgb,
-    var(--flag-off, #8a8a8a) 82%,
-    var(--text-muted, #aaaaaa) 18%
-  ) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main, #2a2a2a) 82%,
-    var(--bg-data, #3a3a3a) 18%
-  ) !important;
+  color: color-mix(in srgb,
+      var(--flag-off, #8a8a8a) 82%,
+      var(--text-muted, #aaaaaa) 18%) !important;
+  background: color-mix(in srgb,
+      var(--bg-main, #2a2a2a) 82%,
+      var(--bg-data, #3a3a3a) 18%) !important;
   border: 1px solid color-mix(in srgb, var(--border, #555555) 70%, transparent) !important;
   transition:
     color 0.22s var(--fcc-hover-ease),
@@ -5392,29 +5048,22 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-access-cell .status-flag--on,
 .status-flags--side .status-flag--on {
   color: var(--flag-on, #ffffff) !important;
-  background: color-mix(
-    in srgb,
-    var(--flag-on, #ffffff) 14%,
-    var(--bg-main, #2a2a2a) 86%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--flag-on, #ffffff) 28%,
-    transparent
-  ) !important;
-  box-shadow: 0 0 10px
-    color-mix(in srgb, var(--flag-on, #ffffff) 12%, transparent) !important;
+  background: color-mix(in srgb,
+      var(--flag-on, #ffffff) 14%,
+      var(--bg-main, #2a2a2a) 86%) !important;
+  border-color: color-mix(in srgb,
+      var(--flag-on, #ffffff) 28%,
+      transparent) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--flag-on, #ffffff) 12%, transparent) !important;
 }
 
 .table-wrap,
 .table-wrap--motion-list,
 #instanceTabServers .table-wrap,
 .mods-list-panel__table-wrap {
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 62%,
+      var(--bg-widget) 38%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent) !important;
   border-radius: 8px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
@@ -5427,18 +5076,15 @@ table.data.data--mods thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(
-    in srgb,
-    var(--bg-widget) 92%,
-    var(--bg-main) 8%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-widget) 92%,
+      var(--bg-main) 8%) !important;
   color: var(--text-muted) !important;
   font-size: 0.92em !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
@@ -5446,11 +5092,9 @@ table.data.data--mods thead th {
 table.data thead th:hover,
 table#tblInstances thead th.instances-sort-th:hover {
   color: var(--accent-soft) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 8%,
-    var(--bg-widget) 92%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 8%,
+      var(--bg-widget) 92%) !important;
 }
 
 table.data thead th.instances-sort-th--active,
@@ -5462,8 +5106,7 @@ table.data thead th.saves-sort-th--active {
 /* Table Body Rows & Cells */
 table.data tbody tr td,
 table#tblInstances tbody tr td {
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
   color: var(--text);
   padding: 9px 12px !important;
 }
@@ -5471,22 +5114,18 @@ table#tblInstances tbody tr td {
 /* Table Row Hover */
 table.data tbody tr:hover td,
 table#tblInstances tbody tr:hover td {
-  background: color-mix(
-    in srgb,
-    var(--accent) 5%,
-    var(--bg-widget) 95%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 5%,
+      var(--bg-widget) 95%) !important;
 }
 
 /* Selected Row (matching across both tables) */
 #tblInstancesBody tr.instance-row-selected td,
 #tblModsBody tr.mods-row--selected td,
 #tblSavesBody tr.mods-row--selected td {
-  background: color-mix(
-    in srgb,
-    var(--accent, #da8216) 12%,
-    var(--bg-widget) 88%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent, #da8216) 12%,
+      var(--bg-widget) 88%) !important;
   box-shadow: none !important;
 }
 
@@ -5542,18 +5181,14 @@ td.instance-save-cell {
     linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
   background-size: 24px 24px;
   background-attachment: fixed;
-  mask-image: radial-gradient(
-    ellipse 95% 85% at 50% 20%,
-    black 0%,
-    black 60%,
-    transparent 100%
-  );
-  -webkit-mask-image: radial-gradient(
-    ellipse 95% 85% at 50% 20%,
-    black 0%,
-    black 60%,
-    transparent 100%
-  );
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 20%,
+      black 0%,
+      black 60%,
+      transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 20%,
+      black 0%,
+      black 60%,
+      transparent 100%);
   opacity: 0.75;
 }
 
@@ -5570,11 +5205,9 @@ td.instance-save-cell {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
-    ) !important;
+      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
   background-size:
     24px 24px,
     24px 24px,
@@ -5591,11 +5224,9 @@ td.instance-save-cell {
   background-size: 24px 24px !important;
   background-attachment: fixed !important;
   background-repeat: repeat !important;
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 58%,
-    var(--bg-widget) 42%
-  ) !important;
+  background-color: color-mix(in srgb,
+      var(--bg-main) 58%,
+      var(--bg-widget) 42%) !important;
 }
 
 /* Server IP Combobox */
@@ -5788,8 +5419,7 @@ td.instance-save-cell {
   color: var(--text-muted);
   padding: 4px 8px 6px;
   user-select: none;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
@@ -5968,8 +5598,7 @@ td.instance-save-cell {
   text-transform: uppercase;
   color: var(--text-muted);
   padding: 2px 6px 4px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
@@ -6172,13 +5801,10 @@ table.data thead th.saves-sort-th--asc::after {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--bg-widget) 70%, var(--bg-main) 30%) 0%,
-    color-mix(in srgb, var(--bg-widget) 45%, var(--bg-main) 55%) 100%
-  );
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--bg-widget) 70%, var(--bg-main) 30%) 0%,
+      color-mix(in srgb, var(--bg-widget) 45%, var(--bg-main) 55%) 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   min-height: 50px;
 }
 
@@ -6189,11 +5815,9 @@ table.data thead th.saves-sort-th--asc::after {
   flex: 1 1 auto;
   min-width: 0;
   padding: 5px 12px 5px 10px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 60%,
-    var(--bg-widget) 40%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 60%,
+      var(--bg-widget) 40%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   border-left: 3.5px solid var(--accent) !important;
   border-radius: 6px !important;
@@ -6258,8 +5882,7 @@ table.data thead th.saves-sort-th--asc::after {
 @media (min-width: 720px) {
   .control-tab__launch-grid {
     grid-template-columns:
-      minmax(7rem, 0.8fr) minmax(7.5rem, 9.5rem) minmax(0, 1.65fr)
-      auto !important;
+      minmax(7rem, 0.8fr) minmax(7.5rem, 9.5rem) minmax(0, 1.65fr) auto !important;
   }
 }
 
@@ -6317,8 +5940,7 @@ table.data thead th.saves-sort-th--asc::after {
   transform: translateY(1px);
 }
 
-.instance-servers-bar
-  .instance-servers-toolbar__btn--danger:hover:not(:disabled) {
+.instance-servers-bar .instance-servers-toolbar__btn--danger:hover:not(:disabled) {
   background: color-mix(in srgb, #e03131 28%, transparent);
   color: #ff9090;
 }
@@ -6375,8 +5997,7 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center;
   justify-content: space-between;
   padding: 4px 6px 6px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
