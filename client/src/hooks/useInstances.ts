@@ -220,7 +220,19 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         return;
       }
 
-      if (action === 'kill' && !(await modConfirm(t('confirm_kill_msg'), t))) return;
+      if (action === 'kill') {
+        const ok = await modConfirm(
+          t('confirm_kill_msg'),
+          t,
+          t('confirm_kill_title') || t('kill_btn'),
+          {
+            variant: 'danger',
+            confirmLabel: t('kill_btn'),
+            confirmIconName: 'kill',
+          },
+        );
+        if (!ok) return;
+      }
 
       if (action === 'start') {
         const qs = new URLSearchParams({ instance_id: iid });

@@ -405,7 +405,11 @@ body {
 }
 
 .fcc-modal--confirm {
-  width: min(520px, 92vw);
+  --modal-size: auto !important;
+  flex: 0 1 auto !important;
+  width: max-content !important;
+  max-width: min(540px, 94vw) !important;
+  min-width: min(380px, 92vw) !important;
 }
 
 .fcc-modal--confirm .fcc-confirm-modal__header {
@@ -505,7 +509,60 @@ body {
 }
 
 .fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-root {
-  min-width: 96px;
+  min-width: 104px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section svg {
+  flex-shrink: 0;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn svg {
+  color: var(--text-muted);
+  transition: color 0.16s ease;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn:hover:not(:disabled) .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn:hover:not(:disabled) svg {
+  color: var(--accent);
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger {
+  background: color-mix(in srgb, #e03131 22%, var(--bg-widget) 78%) !important;
+  border: 1px solid color-mix(in srgb, #ff4d4d 60%, var(--border-dark) 40%) !important;
+  color: #ffb4b4 !important;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger svg {
+  color: #ffb4b4 !important;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, #e03131 38%, var(--bg-widget) 62%) !important;
+  border-color: #ff4d4d !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 2px 10px rgba(224, 49, 49, 0.40),
+    0 0 8px rgba(255, 77, 77, 0.25) !important;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) svg {
+  color: #ffffff !important;
 }
 
 /* ── Backup Restore Modal ─────────────────────────────────────── */

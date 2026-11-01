@@ -311,7 +311,17 @@ export function useServerControl(
   }, [qc, selectedId, instanceName, t]);
 
   const kill = useCallback(async () => {
-    if (!(await modConfirm(t('confirm_kill_msg'), t))) return;
+    const ok = await modConfirm(
+      t('confirm_kill_msg'),
+      t,
+      t('confirm_kill_title') || t('kill_btn'),
+      {
+        variant: 'danger',
+        confirmLabel: t('kill_btn'),
+        confirmIconName: 'kill',
+      },
+    );
+    if (!ok) return;
     const r = await api<{ ok?: boolean; error?: string }>('/api/server/kill', {
       method: 'POST',
       body: JSON.stringify({ instance_id: selectedId || undefined }),

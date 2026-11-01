@@ -2,6 +2,8 @@
 import { createElement, type ReactNode } from 'react';
 import { modals } from '@mantine/modals';
 import { IconAlertTriangle } from '@tabler/icons-react';
+import { AppIcon } from '../components/AppIcon';
+import type { AppIconName } from './appIcons';
 
 export type FccConfirmVariant = 'default' | 'danger';
 
@@ -11,6 +13,11 @@ export type OpenFccConfirmOptions = {
   confirmLabel: string;
   cancelLabel: string;
   variant?: FccConfirmVariant;
+  size?: string | number;
+  confirmIcon?: ReactNode;
+  confirmIconName?: AppIconName;
+  cancelIcon?: ReactNode;
+  cancelIconName?: AppIconName;
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
 };
@@ -92,8 +99,34 @@ export function openFccConfirmModal(options: OpenFccConfirmOptions): string {
   const variant = options.variant || 'default';
   const confirmClass = variant === 'danger' ? 'btn btn--danger' : 'btn btn--primary';
 
+  let confirmIcon: ReactNode = undefined;
+  if (options.confirmIcon !== undefined) {
+    confirmIcon = options.confirmIcon;
+  } else if (options.confirmIconName) {
+    confirmIcon = createElement(AppIcon, { name: options.confirmIconName, size: 15 });
+  } else if (variant === 'danger') {
+    confirmIcon = createElement(IconAlertTriangle, {
+      size: 15,
+      stroke: 2,
+      'aria-hidden': true,
+    });
+  } else {
+    confirmIcon = createElement(AppIcon, { name: 'check', size: 15 });
+  }
+
+  let cancelIcon: ReactNode = undefined;
+  if (options.cancelIcon !== undefined) {
+    cancelIcon = options.cancelIcon;
+  } else if (options.cancelIconName) {
+    cancelIcon = createElement(AppIcon, { name: options.cancelIconName, size: 15 });
+  } else {
+    cancelIcon = createElement(AppIcon, { name: 'close', size: 15 });
+  }
+
   return modals.openConfirmModal({
     title: confirmTitle(options.title, variant),
+    centered: true,
+    size: options.size || 'auto',
     classNames: {
       content: 'fcc-modal fcc-modal--confirm',
       header: 'fcc-confirm-modal__header',
@@ -105,10 +138,19 @@ export function openFccConfirmModal(options: OpenFccConfirmOptions): string {
       variant,
     }),
     labels: { confirm: options.confirmLabel, cancel: options.cancelLabel },
-    cancelProps: { className: 'btn', variant: 'default' },
-    confirmProps: { className: confirmClass, variant: 'default' },
+    cancelProps: {
+      className: 'btn',
+      variant: 'default',
+      leftSection: cancelIcon ?? undefined,
+    },
+    confirmProps: {
+      className: confirmClass,
+      variant: 'default',
+      leftSection: confirmIcon ?? undefined,
+    },
     groupProps: { className: 'fcc-confirm-modal__actions' },
     onConfirm: options.onConfirm,
     onCancel: options.onCancel,
+    onClose: options.onCancel,
   });
 }

@@ -1,5 +1,6 @@
-import { createElement } from 'react';
-import { modals } from '@mantine/modals';
+import type { ReactNode } from 'react';
+import type { AppIconName } from './appIcons';
+import { openFccConfirmModal, type FccConfirmVariant } from './fccConfirmModal';
 import { isNetworkFetchError, resolveApiErrorMessage } from './networkErrors';
 import type { ModInstallPlan } from '../types/modJob';
 
@@ -99,17 +100,31 @@ export function modConfirm(
   message: string,
   t: (key: string, ...args: (string | number)[]) => string,
   title?: string,
+  options?: {
+    variant?: FccConfirmVariant;
+    size?: string | number;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    confirmIcon?: ReactNode;
+    confirmIconName?: AppIconName;
+    cancelIcon?: ReactNode;
+    cancelIconName?: AppIconName;
+  },
 ): Promise<boolean> {
   return new Promise((resolve) => {
-    modals.openConfirmModal({
+    openFccConfirmModal({
       title: title || t('confirm_title'),
-      children: createElement('p', { style: { whiteSpace: 'pre-wrap' } }, message),
-      labels: { confirm: t('ok'), cancel: t('cancel') },
-      confirmProps: { className: 'btn btn--primary' },
-      cancelProps: { className: 'btn' },
+      message,
+      confirmLabel: options?.confirmLabel || t('ok'),
+      cancelLabel: options?.cancelLabel || t('cancel'),
+      variant: options?.variant || 'default',
+      size: options?.size,
+      confirmIcon: options?.confirmIcon,
+      confirmIconName: options?.confirmIconName,
+      cancelIcon: options?.cancelIcon,
+      cancelIconName: options?.cancelIconName,
       onConfirm: () => resolve(true),
       onCancel: () => resolve(false),
-      onClose: () => resolve(false),
     });
   });
 }
