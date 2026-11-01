@@ -89,13 +89,13 @@
   }
 }
 
-:root[data-web-disable-effects="1"] .circuit-wire__pulse {
+:root[data-web-disable-effects='1'] .circuit-wire__pulse {
   display: none !important;
 }
 
-:root[data-web-disable-effects="1"] .circuit-wire__wire,
-:root[data-web-disable-effects="1"] .circuit-wire__sheen,
-:root[data-web-disable-effects="1"] .circuit-wire__terminal {
+:root[data-web-disable-effects='1'] .circuit-wire__wire,
+:root[data-web-disable-effects='1'] .circuit-wire__sheen,
+:root[data-web-disable-effects='1'] .circuit-wire__terminal {
   animation: none;
   stroke-dasharray: none;
 }

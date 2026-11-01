@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { IconUpload } from '@tabler/icons-react';
+import { IconRefresh, IconUpload } from '@tabler/icons-react';
 import type { SavesApi } from '../../hooks/useSaves';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
@@ -255,7 +255,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                 void saves.reload();
               }}
             >
-              <AppIcon name="refresh" size={16} />
+              <IconRefresh size={18} />
             </button>
             <button
               type="button"

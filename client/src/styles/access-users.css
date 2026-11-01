@@ -69,6 +69,9 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
   padding: 6px 14px;
   font-size: 0.88rem;
   font-weight: 600;
@@ -76,6 +79,7 @@
   background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
   color: var(--text);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
   cursor: pointer;
   transition: all 0.16s ease;
 }
@@ -84,16 +88,28 @@
   background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.access-users-bar__create-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .access-users-bar__create-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .access-users-bar__search {
   flex: 1 1 200px;
   min-width: 170px;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
 }
 
 .access-users-bar__filters {
@@ -103,14 +119,35 @@
   flex: 0 0 auto;
 }
 
+select.access-users-bar__select,
 .access-users-bar__select {
-  padding: 5px 8px;
-  font-size: 0.85rem;
-  border-radius: 6px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  font-size: 0.88rem;
+  line-height: 32px;
+  border-radius: 7px;
   background: var(--bg-input);
   border: 1px solid var(--border);
   color: var(--text);
   cursor: pointer;
+  vertical-align: middle;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.access-users-bar__select:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border) 60%);
+}
+
+.access-users-bar__select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
 }
 
 .access-users-bar__actions {
@@ -123,7 +160,9 @@
 
 .access-users-bar__refresh-btn,
 .access-users-bar__view-toggle-btn,
-.access-users-bar__help-btn {
+.access-users-bar__help-btn,
+.btn.instance-servers-bar__columns-btn,
+.instance-servers-bar__columns-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -133,29 +172,46 @@
   min-height: 34px;
   padding: 0;
   box-sizing: border-box;
-  border-radius: 6px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  color: var(--text);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s ease;
 }
 
 .access-users-bar__refresh-btn:hover:not(:disabled),
 .access-users-bar__view-toggle-btn:hover:not(:disabled),
-.access-users-bar__help-btn:hover:not(:disabled) {
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-input) 90%);
+.access-users-bar__help-btn:hover:not(:disabled),
+.btn.instance-servers-bar__columns-btn:hover:not(:disabled),
+.instance-servers-bar__columns-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.access-users-bar__refresh-btn:active:not(:disabled),
+.access-users-bar__view-toggle-btn:active:not(:disabled),
+.access-users-bar__help-btn:active:not(:disabled),
+.btn.instance-servers-bar__columns-btn:active:not(:disabled),
+.instance-servers-bar__columns-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .access-users-bar__refresh-btn:disabled,
 .access-users-bar__view-toggle-btn:disabled,
-.access-users-bar__help-btn:disabled {
+.access-users-bar__help-btn:disabled,
+.btn.instance-servers-bar__columns-btn:disabled,
+.instance-servers-bar__columns-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
-
 
 /* ── Status Dot ──────────────────────────────────────────────────────── */
 
@@ -335,7 +391,9 @@ table.access-users-table thead th {
 table.access-users-table thead th.access-sort-th {
   cursor: pointer;
   user-select: none;
-  transition: color 0.18s ease, background-color 0.18s ease;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
 }
 
 table.access-users-table thead th.access-sort-th:hover {
@@ -462,7 +520,7 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   gap: 4px;
   padding: 1px 6px;
   border-radius: 4px;
-  font-size: 0.70rem;
+  font-size: 0.7rem;
   font-weight: 700;
   background: color-mix(in srgb, var(--text) 8%, var(--bg-widget) 92%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
@@ -601,7 +659,7 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 }
 
 .access-users-page-size-label {
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   opacity: 0.85;
 }
@@ -630,7 +688,11 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 }
 
 .access-users-page-size-btn--active {
-  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 18%,
+    var(--bg-widget) 82%
+  ) !important;
   color: var(--accent) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
 }
@@ -664,7 +726,11 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 }
 
 .access-users-page-btn--active {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 22%,
+    var(--bg-widget) 78%
+  ) !important;
   color: var(--accent) !important;
   border-color: color-mix(in srgb, var(--accent) 60%, transparent) !important;
 }

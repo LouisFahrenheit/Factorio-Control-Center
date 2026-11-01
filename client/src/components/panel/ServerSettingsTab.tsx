@@ -1,5 +1,6 @@
 import type { ServerSettingsApi } from '../../hooks/useServerSettings';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
+import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
@@ -12,7 +13,11 @@ interface ServerSettingsTabProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: ServerSettingsTabProps) {
+export function ServerSettingsTab({
+  settings,
+  canRevealSecrets = false,
+  t,
+}: ServerSettingsTabProps) {
   return (
     <>
       <div
@@ -26,21 +31,24 @@ export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: Ser
             <div className="server-settings-tab__actions">
               <button
                 type="button"
-                className="btn btn--with-icon"
+                className="btn btn--toolbar-icon"
                 id="btnServerSettingsReload"
                 data-i18n="saves_manager_refresh"
+                title={t('saves_manager_refresh')}
+                aria-label={t('saves_manager_refresh')}
                 disabled={settings.locked || settings.loading}
                 onClick={() => void settings.reload()}
               >
-                <AppIcon name="refresh" size={16} />
-                {t('saves_manager_refresh')}
+                <IconRefresh size={18} />
               </button>
               <button
                 type="button"
                 className="btn btn--with-icon"
                 id="btnServerSettingsDownload"
                 data-i18n="server_settings_download_btn"
-                disabled={settings.locked || settings.loading || settings.fileMissing}
+                disabled={
+                  settings.locked || settings.loading || settings.fileMissing
+                }
                 onClick={() => void settings.download()}
               >
                 <AppIcon name="download" size={16} />
@@ -86,7 +94,9 @@ export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: Ser
                 className={`btn btn--with-icon${settings.isDirty ? ' btn--update-available' : ''}`}
                 id="btnServerSettingsSave"
                 data-i18n="save_btn"
-                disabled={settings.locked || settings.loading || settings.fileMissing}
+                disabled={
+                  settings.locked || settings.loading || settings.fileMissing
+                }
                 onClick={() => void settings.save()}
               >
                 <AppIcon name="save" size={16} />
@@ -107,9 +117,15 @@ export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: Ser
               )}
             </div>
           </header>
-          <div id="serverSettingsForm" className="server-settings-tab__body settings-form">
+          <div
+            id="serverSettingsForm"
+            className="server-settings-tab__body settings-form"
+          >
             {settings.loading ? (
-              <TabLoadingPlaceholder variant="form" label={t('tab_data_loading')} />
+              <TabLoadingPlaceholder
+                variant="form"
+                label={t('tab_data_loading')}
+              />
             ) : (
               <ServerSettingsForm
                 data={settings.formData}
@@ -126,19 +142,40 @@ export function ServerSettingsTab({ settings, canRevealSecrets = false, t }: Ser
         </div>
       </div>
 
-      <ModalBackdrop open={settings.uploadOpen} onClose={settings.cancelUpload} id="serverSettingsUploadBackdrop">
-        <div className="fu-modal" role="dialog" aria-modal="true" aria-labelledby="serverSettingsUploadHeading">
-          <div className="fu-modal__header" id="serverSettingsUploadHeading" data-i18n="warning_title">
+      <ModalBackdrop
+        open={settings.uploadOpen}
+        onClose={settings.cancelUpload}
+        id="serverSettingsUploadBackdrop"
+      >
+        <div
+          className="fu-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="serverSettingsUploadHeading"
+        >
+          <div
+            className="fu-modal__header"
+            id="serverSettingsUploadHeading"
+            data-i18n="warning_title"
+          >
             {t('warning_title')}
           </div>
           <div className="fu-modal__body">
-            <p id="serverSettingsUploadText" data-i18n="server_settings_upload_confirm">
+            <p
+              id="serverSettingsUploadText"
+              data-i18n="server_settings_upload_confirm"
+            >
               {t('server_settings_upload_confirm')}
             </p>
           </div>
           <div className="fu-modal__footer">
             <CancelButton onClick={settings.cancelUpload} t={t} />
-            <button type="button" className="btn btn--primary" onClick={() => void settings.confirmUpload()} data-i18n="confirm">
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => void settings.confirmUpload()}
+              data-i18n="confirm"
+            >
               {t('confirm') !== 'confirm' ? t('confirm') : 'OK'}
             </button>
           </div>

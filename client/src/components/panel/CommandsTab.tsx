@@ -1,9 +1,13 @@
 import type { CommandRow } from '../../lib/commandUtils';
 import type { CommandEditorApi } from '../../hooks/useCommandEditor';
+import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
 import type { CommandsApi } from '../../hooks/useCommands';
-import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
+import {
+  TabLoadingPlaceholder,
+  tabInitialLoad,
+} from '../TabLoadingPlaceholder';
 
 function CommandParams({
   row,
@@ -25,7 +29,11 @@ function CommandParams({
       {!!cmd.has_player && (
         <div className="commands-tab__field">
           <label className="commands-tab__field-label">{t('player')}</label>
-          <select className="input" value={params.player || ''} onChange={(e) => setParam('player', e.target.value)}>
+          <select
+            className="input"
+            value={params.player || ''}
+            onChange={(e) => setParam('player', e.target.value)}
+          >
             {!onlinePlayers.length && <option value="" />}
             {onlinePlayers.map((p) => (
               <option key={p} value={p}>
@@ -37,8 +45,14 @@ function CommandParams({
       )}
       {!!cmd.has_boolean && (
         <div className="commands-tab__field">
-          <label className="commands-tab__field-label">{t('cmd_param_boolean')}</label>
-          <select className="input input--narrow" value={params.value || 'true'} onChange={(e) => setParam('value', e.target.value)}>
+          <label className="commands-tab__field-label">
+            {t('cmd_param_boolean')}
+          </label>
+          <select
+            className="input input--narrow"
+            value={params.value || 'true'}
+            onChange={(e) => setParam('value', e.target.value)}
+          >
             <option value="true">true</option>
             <option value="false">false</option>
           </select>
@@ -46,20 +60,29 @@ function CommandParams({
       )}
       {!cmd.has_boolean && !!cmd.has_value && (
         <div className="commands-tab__field">
-          <label className="commands-tab__field-label">{t('cmd_param_value')}</label>
-          <input className="input" value={params.value || ''} onChange={(e) => setParam('value', e.target.value)} />
+          <label className="commands-tab__field-label">
+            {t('cmd_param_value')}
+          </label>
+          <input
+            className="input"
+            value={params.value || ''}
+            onChange={(e) => setParam('value', e.target.value)}
+          />
         </div>
       )}
       {!!cmd.has_item && (
         <div className="commands-tab__field">
-          <label className="commands-tab__field-label">{t('cmd_param_item')}</label>
+          <label className="commands-tab__field-label">
+            {t('cmd_param_item')}
+          </label>
           <select
             className="input"
             value={params.item || ''}
             onChange={(e) => {
               setParam('item', e.target.value);
               const items = cmd.items as Record<string, unknown> | undefined;
-              if (items && items[e.target.value] != null) setParam('count', String(items[e.target.value]));
+              if (items && items[e.target.value] != null)
+                setParam('count', String(items[e.target.value]));
             }}
           >
             {Object.keys((cmd.items as object) || {}).map((it) => (
@@ -72,14 +95,26 @@ function CommandParams({
       )}
       {!!cmd.has_count && (
         <div className="commands-tab__field">
-          <label className="commands-tab__field-label">{t('cmd_param_count')}</label>
-          <input className="input" value={params.count || '1'} onChange={(e) => setParam('count', e.target.value)} />
+          <label className="commands-tab__field-label">
+            {t('cmd_param_count')}
+          </label>
+          <input
+            className="input"
+            value={params.count || '1'}
+            onChange={(e) => setParam('count', e.target.value)}
+          />
         </div>
       )}
       {!!cmd.has_quality && (
         <div className="commands-tab__field">
-          <label className="commands-tab__field-label">{t('cmd_param_quality')}</label>
-          <select className="input" value={params.quality || 'normal'} onChange={(e) => setParam('quality', e.target.value)}>
+          <label className="commands-tab__field-label">
+            {t('cmd_param_quality')}
+          </label>
+          <select
+            className="input"
+            value={params.quality || 'normal'}
+            onChange={(e) => setParam('quality', e.target.value)}
+          >
             {['normal', 'uncommon', 'rare', 'epic', 'legendary'].map((q) => (
               <option key={q} value={q}>
                 {q}
@@ -100,10 +135,18 @@ interface CommandsTabProps {
 
 export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
   const selectedName = commands.selected?.name || '—';
-  const initialLoading = tabInitialLoad(commands.loading, commands.grouped.length > 0);
+  const initialLoading = tabInitialLoad(
+    commands.loading,
+    commands.grouped.length > 0,
+  );
 
   return (
-    <div id="tabPanelCommands" className="tab-panel tab-panel--active commands-tab" role="tabpanel" aria-labelledby="tabBtnCommands">
+    <div
+      id="tabPanelCommands"
+      className="tab-panel tab-panel--active commands-tab"
+      role="tabpanel"
+      aria-labelledby="tabBtnCommands"
+    >
       <div className="commands-tab__layout commands-layout">
         <section className="commands-tab__card commands-tab__card--list commands-list">
           <header className="commands-tab__toolbar commands-list__toolbar">
@@ -119,15 +162,16 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
             <div className="commands-tab__toolbar-actions">
               <button
                 type="button"
-                className="btn btn--with-icon"
+                className="btn btn--toolbar-icon"
                 id="btnCmdRefresh"
+                title={t('update_list_btn') || t('saves_manager_refresh')}
+                aria-label={t('update_list_btn') || t('saves_manager_refresh')}
                 onClick={() => {
                   commands.setSearch('');
                   void commands.reload();
                 }}
               >
-                <AppIcon name="refresh" size={16} />
-                {t('saves_manager_refresh')}
+                <IconRefresh size={18} />
               </button>
               <button
                 type="button"
@@ -143,30 +187,38 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
           </header>
           <div className="commands-tab__grid-wrap">
             {initialLoading ? (
-              <TabLoadingPlaceholder variant="grid" label={t('tab_data_loading')} />
+              <TabLoadingPlaceholder
+                variant="grid"
+                label={t('tab_data_loading')}
+              />
             ) : (
-            <div id="cmdList" className="commands-grid">
-              {commands.grouped.map((group) => (
-                <section key={group.categoryKey} className="commands-group">
-                  <h4 className="commands-group__title">{group.categoryName}</h4>
-                  <div className="commands-group__items">
-                    {group.items.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        className={
-                          'commands-item' + (commands.selected?.id === r.id ? ' commands-item--selected' : '')
-                        }
-                        title={r.description}
-                        onClick={() => commands.setSelectedId(r.id)}
-                      >
-                        <div className="commands-item__name">{r.name}</div>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
+              <div id="cmdList" className="commands-grid">
+                {commands.grouped.map((group) => (
+                  <section key={group.categoryKey} className="commands-group">
+                    <h4 className="commands-group__title">
+                      {group.categoryName}
+                    </h4>
+                    <div className="commands-group__items">
+                      {group.items.map((r) => (
+                        <button
+                          key={r.id}
+                          type="button"
+                          className={
+                            'commands-item' +
+                            (commands.selected?.id === r.id
+                              ? ' commands-item--selected'
+                              : '')
+                          }
+                          title={r.description}
+                          onClick={() => commands.setSelectedId(r.id)}
+                        >
+                          <div className="commands-item__name">{r.name}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
             )}
           </div>
         </section>
@@ -177,7 +229,11 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               <h2 id="cmdTitle" className="commands-tab__editor-title">
                 {selectedName}
               </h2>
-              {commands.selected ? <span className="commands-tab__badge commands-tab__badge--accent">RCON</span> : null}
+              {commands.selected ? (
+                <span className="commands-tab__badge commands-tab__badge--accent">
+                  RCON
+                </span>
+              ) : null}
             </div>
             <p id="cmdDesc" className="commands-tab__editor-desc hint">
               {commands.selected?.description || ''}
@@ -195,7 +251,10 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               />
             )}
 
-            <label htmlFor="cmdPreview" className="commands-tab__preview-label commands-editor__preview-label">
+            <label
+              htmlFor="cmdPreview"
+              className="commands-tab__preview-label commands-editor__preview-label"
+            >
               {t('cmd_preview_label')}
             </label>
             <textarea
@@ -208,14 +267,19 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
           </div>
 
           <footer className="commands-tab__editor-footer commands-editor__actions">
-            <label className="commands-tab__quiet-toggle commands-editor__quiet-toggle" htmlFor="cbCmdQuiet">
+            <label
+              className="commands-tab__quiet-toggle commands-editor__quiet-toggle"
+              htmlFor="cbCmdQuiet"
+            >
               <input
                 type="checkbox"
                 id="cbCmdQuiet"
                 checked={commands.quiet}
                 onChange={(e) => commands.setQuiet(e.target.checked)}
               />
-              <span data-i18n="cmd_quiet_mode_cb">{t('cmd_quiet_mode_cb')}</span>
+              <span data-i18n="cmd_quiet_mode_cb">
+                {t('cmd_quiet_mode_cb')}
+              </span>
             </label>
             <button
               type="button"

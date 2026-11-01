@@ -22,6 +22,7 @@ import {
   listWrapVariants,
 } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
+import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { ServerIpCombobox } from '../ServerIpCombobox';
 import { ServerSaveSelect } from '../ServerSaveSelect';
@@ -365,7 +366,7 @@ export function ControlTab({
                 disabled={control.busy}
                 onClick={() => void control.reloadSaves()}
               >
-                <AppIcon name="refresh" size={18} />
+                <IconRefresh size={18} />
               </button>
             </div>
             {(showIpError || showPortError) && (

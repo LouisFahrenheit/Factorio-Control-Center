@@ -5,6 +5,7 @@ import { AppLoadingShell } from '../components/AppLoadingShell';
 import { TabLoadingPlaceholder } from '../components/TabLoadingPlaceholder';
 import { AppStatusBar } from '../components/AppStatusBar';
 import { AboutModal } from '../components/modals/AboutModal';
+import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../components/AppIcon';
 import { SearchField } from '../components/SearchField';
 import { UserSettingsModal } from '../components/modals/UserSettingsModal';
@@ -23,7 +24,10 @@ import {
   schemaProgressPercent,
   sectionLabelKey,
 } from '../lib/modSettingsUtils';
-import { MOD_SETTINGS_UI_SECTIONS, type ModSettingsUiSection } from '../types/modSettings';
+import {
+  MOD_SETTINGS_UI_SECTIONS,
+  type ModSettingsUiSection,
+} from '../types/modSettings';
 import { resolveStatusKind } from '../types/panel';
 
 const SECTION_ICONS: Record<ModSettingsUiSection, AppIconName> = {
@@ -60,7 +64,11 @@ export default function ModSettingsPage() {
     panelKind === 'stopping' ||
     panelKind === 'maintenance';
 
-  const modSettings = useModSettings(ready && !!selectedId && userHasTab(user, 'mods'), serverBusy, t);
+  const modSettings = useModSettings(
+    ready && !!selectedId && userHasTab(user, 'mods'),
+    serverBusy,
+    t,
+  );
 
   const goBack = useCallback(() => {
     sessionStorage.setItem('fcc_open_panel_tab', 'mods');
@@ -89,7 +97,10 @@ export default function ModSettingsPage() {
     modals.openConfirmModal({
       title: t('mod_settings_unsaved_title'),
       children: t('mod_settings_unsaved_msg'),
-      labels: { confirm: t('mod_settings_unsaved_leave_btn'), cancel: t('cancel') },
+      labels: {
+        confirm: t('mod_settings_unsaved_leave_btn'),
+        cancel: t('cancel'),
+      },
       confirmProps: { className: 'btn btn--danger' },
       onConfirm: () => goBack(),
     });
@@ -101,7 +112,9 @@ export default function ModSettingsPage() {
         section,
         labelKey: sectionLabelKey(section),
         icon: SECTION_ICONS[section],
-        count: modSettings.doc ? Object.keys(modSettings.doc.data[section] || {}).length : 0,
+        count: modSettings.doc
+          ? Object.keys(modSettings.doc.data[section] || {}).length
+          : 0,
       })),
     [modSettings.doc],
   );
@@ -152,18 +165,24 @@ export default function ModSettingsPage() {
                 <div className="mod-settings-page__actions">
                   <button
                     type="button"
-                    className="btn btn--compact btn--with-icon"
+                    className="btn btn--toolbar-icon"
+                    title={t('saves_manager_refresh')}
+                    aria-label={t('saves_manager_refresh')}
                     disabled={modSettings.loading}
                     onClick={() => void modSettings.reload(true)}
                   >
-                    <AppIcon name="refresh" size={16} />
-                    {t('saves_manager_refresh')}
+                    <IconRefresh size={18} />
                   </button>
                   <button
                     type="button"
                     className="btn btn--with-icon"
                     id="btnModSettingsSave"
-                    disabled={modSettings.readOnly || modSettings.loading || modSettings.saving || !modSettings.dirty}
+                    disabled={
+                      modSettings.readOnly ||
+                      modSettings.loading ||
+                      modSettings.saving ||
+                      !modSettings.dirty
+                    }
                     onClick={() => void modSettings.save()}
                   >
                     <AppIcon name="save" size={16} />
@@ -206,7 +225,10 @@ export default function ModSettingsPage() {
                         onClick={() => {
                           setHintDismissed(true);
                           try {
-                            localStorage.setItem('fcc_mod_settings_hint_dismissed', '1');
+                            localStorage.setItem(
+                              'fcc_mod_settings_hint_dismissed',
+                              '1',
+                            );
                           } catch {
                             /* ignore */
                           }
@@ -224,33 +246,54 @@ export default function ModSettingsPage() {
                   <div className="mod-settings-progress__track">
                     <div
                       className="mod-settings-progress__bar"
-                      style={{ width: progressPct == null ? '100%' : `${Math.max(4, progressPct)}%` }}
+                      style={{
+                        width:
+                          progressPct == null
+                            ? '100%'
+                            : `${Math.max(4, progressPct)}%`,
+                      }}
                     />
                   </div>
-                  <p className="mod-settings-progress__label">{progressLabel}</p>
+                  <p className="mod-settings-progress__label">
+                    {progressLabel}
+                  </p>
                 </div>
               ) : null}
 
               {modSettings.loading && !modSettings.doc ? (
-                <TabLoadingPlaceholder variant="form" label={t('tab_data_loading')} className="mod-settings-page__loading" />
+                <TabLoadingPlaceholder
+                  variant="form"
+                  label={t('tab_data_loading')}
+                  className="mod-settings-page__loading"
+                />
               ) : modSettings.error ? (
                 <div className="mod-settings-page__banners">
                   <p className="mod-settings-page__banner mod-settings-page__banner--error">
                     <AppIcon name="info" size={16} />
-                    <span>{t('mod_settings_load_error', localizeModSettingsError(modSettings.error, t))}</span>
+                    <span>
+                      {t(
+                        'mod_settings_load_error',
+                        localizeModSettingsError(modSettings.error, t),
+                      )}
+                    </span>
                   </p>
                 </div>
               ) : modSettings.doc ? (
                 <div className="mod-settings-page__content">
                   <div className="mod-settings-page__toolbar">
-                    <div className="sub-tabs mod-settings-page__tabs" role="tablist">
+                    <div
+                      className="sub-tabs mod-settings-page__tabs"
+                      role="tablist"
+                    >
                       {sectionTabs.map(({ section, labelKey, icon, count }) => (
                         <button
                           key={section}
                           type="button"
                           className={
                             'sub-tabs__tab btn--with-icon' +
-                            (modSettings.activeSection === section ? ' sub-tabs__tab--active' : '')
+                            (modSettings.activeSection === section
+                              ? ' sub-tabs__tab--active'
+                              : '')
                           }
                           role="tab"
                           aria-selected={modSettings.activeSection === section}
@@ -258,7 +301,11 @@ export default function ModSettingsPage() {
                         >
                           <AppIcon name={icon} size={16} />
                           {t(labelKey)}
-                          {count > 0 ? <span className="mod-settings-page__tab-badge">{count}</span> : null}
+                          {count > 0 ? (
+                            <span className="mod-settings-page__tab-badge">
+                              {count}
+                            </span>
+                          ) : null}
                         </button>
                       ))}
                     </div>
@@ -292,7 +339,11 @@ export default function ModSettingsPage() {
       </div>
 
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} t={t} />
-      <UserSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} t={t} />
+      <UserSettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        t={t}
+      />
     </div>
   );
 }

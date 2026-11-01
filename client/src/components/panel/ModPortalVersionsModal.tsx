@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
@@ -6,7 +7,10 @@ import { api } from '../../api/client';
 import { formatPanelDateOnly } from '../../lib/datetimeUtils';
 import { openFccConfirmModal } from '../../lib/fccConfirmModal';
 import { getModPortalUrl, parseModInput } from '../../lib/modUtils';
-import type { ModPortalReleaseItem, ModPortalReleasesResponse } from '../../types/modJob';
+import type {
+  ModPortalReleaseItem,
+  ModPortalReleasesResponse,
+} from '../../types/modJob';
 
 interface ModPortalVersionsModalProps {
   open: boolean;
@@ -46,7 +50,9 @@ export function ModPortalVersionsModal({
       if (showSpinner) setLoading(true);
       setError('');
 
-      api<ModPortalReleasesResponse>(`/api/mods/portal-releases/${encodeURIComponent(cleanName)}`)
+      api<ModPortalReleasesResponse>(
+        `/api/mods/portal-releases/${encodeURIComponent(cleanName)}`,
+      )
         .then((res: ModPortalReleasesResponse) => {
           if (res.ok === false) {
             setError(String(res.error || 'fetch_failed'));
@@ -105,7 +111,8 @@ export function ModPortalVersionsModal({
     const q = search.trim().toLowerCase();
     if (!q) return list;
     return list.filter((r) => {
-      const hay = `${r.version} ${r.factorio_version} ${r.file_name || ''}`.toLowerCase();
+      const hay =
+        `${r.version} ${r.factorio_version} ${r.file_name || ''}`.toLowerCase();
       return hay.includes(q);
     });
   }, [data?.releases, search]);
@@ -131,7 +138,11 @@ export function ModPortalVersionsModal({
     if (serverBusy) return;
     openFccConfirmModal({
       title: t('mod_list_remove_mod_btn'),
-      message: t('mod_list_remove_version_confirm', version, data?.title || modId),
+      message: t(
+        'mod_list_remove_version_confirm',
+        version,
+        data?.title || modId,
+      ),
       confirmLabel: t('mod_list_remove_mod_btn'),
       cancelLabel: t('cancel'),
       variant: 'danger',
@@ -170,9 +181,16 @@ export function ModPortalVersionsModal({
       >
         <div className="mod-update-all-flow mod-portal-versions-dialog__flow">
           <div className="mod-update-all-flow__header mod-portal-versions__header">
-            <AppIcon name="history" size={22} className="mod-portal-versions__header-icon" />
+            <AppIcon
+              name="history"
+              size={22}
+              className="mod-portal-versions__header-icon"
+            />
             <div className="mod-update-all-flow__header-text">
-              <span className="mod-update-all-flow__header-title" id="modPortalVersionsHeading">
+              <span
+                className="mod-update-all-flow__header-title"
+                id="modPortalVersionsHeading"
+              >
                 {title}
               </span>
               <div className="mod-portal-versions__header-meta">
@@ -227,7 +245,9 @@ export function ModPortalVersionsModal({
                         : ' mod-portal-versions__stat-value--muted')
                     }
                   >
-                    {data.installed_version ? `v${data.installed_version}` : '—'}
+                    {data.installed_version
+                      ? `v${data.installed_version}`
+                      : '—'}
                   </span>
                 </div>
                 <div className="mods-from-save-dialog__stat mod-portal-versions__stat">
@@ -235,7 +255,9 @@ export function ModPortalVersionsModal({
                     {t('mod_portal_versions_recommended')}
                   </span>
                   <span className="mods-from-save-dialog__stat-value mod-portal-versions__stat-value--rec">
-                    {data.recommended_version ? `v${data.recommended_version}` : '—'}
+                    {data.recommended_version
+                      ? `v${data.recommended_version}`
+                      : '—'}
                   </span>
                 </div>
               </div>
@@ -243,7 +265,11 @@ export function ModPortalVersionsModal({
 
             {loading ? (
               <div className="mod-portal-versions__loading">
-                <AppIcon name="refresh" size={28} className="mod-portal-versions__spinner" />
+                <AppIcon
+                  name="refresh"
+                  size={28}
+                  className="mod-portal-versions__spinner"
+                />
                 <p>{t('mod_portal_versions_loading')}</p>
               </div>
             ) : error ? (
@@ -259,10 +285,15 @@ export function ModPortalVersionsModal({
                       `/api/mods/portal-releases/${encodeURIComponent(cleanName)}`,
                     )
                       .then((res: ModPortalReleasesResponse) => {
-                        if (res.ok === false) setError(String(res.error || 'fetch_failed'));
+                        if (res.ok === false)
+                          setError(String(res.error || 'fetch_failed'));
                         else setData(res);
                       })
-                      .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
+                      .catch((err: unknown) =>
+                        setError(
+                          err instanceof Error ? err.message : String(err),
+                        ),
+                      )
                       .finally(() => setLoading(false));
                   }}
                 >
@@ -279,7 +310,11 @@ export function ModPortalVersionsModal({
               <>
                 <div className="mod-portal-versions__toolbar">
                   <div className="mod-portal-versions__search-box">
-                    <AppIcon name="search" size={16} className="mod-portal-versions__search-icon" />
+                    <AppIcon
+                      name="search"
+                      size={16}
+                      className="mod-portal-versions__search-icon"
+                    />
                     <input
                       type="text"
                       className="input mod-portal-versions__search-input"
@@ -300,7 +335,10 @@ export function ModPortalVersionsModal({
                   </div>
                   <div className="mod-portal-versions__toolbar-actions">
                     <div className="mod-portal-versions__counter">
-                      {t('mod_portal_versions_releases_count', filteredReleases.length)}
+                      {t(
+                        'mod_portal_versions_releases_count',
+                        filteredReleases.length,
+                      )}
                     </div>
                     <button
                       type="button"
@@ -310,7 +348,7 @@ export function ModPortalVersionsModal({
                       disabled={loading || serverBusy}
                       onClick={() => fetchReleases(true)}
                     >
-                      <AppIcon name="refresh" size={15} />
+                      <IconRefresh size={16} />
                     </button>
                   </div>
                 </div>
@@ -335,19 +373,25 @@ export function ModPortalVersionsModal({
                     </thead>
                     <tbody>
                       {filteredReleases.map((rel: ModPortalReleaseItem) => {
-                        const isCurrent = data.installed_version === rel.version;
+                        const isCurrent =
+                          data.installed_version === rel.version;
                         const isInstalled =
                           isCurrent ||
                           (Array.isArray(data.available_versions) &&
                             data.available_versions.includes(rel.version));
-                        const isRecommended = data.recommended_version === rel.version;
+                        const isRecommended =
+                          data.recommended_version === rel.version;
                         return (
                           <tr
                             key={rel.version}
                             className={
                               'mod-portal-versions__row' +
-                              (isCurrent ? ' mod-portal-versions__row--installed' : '') +
-                              (isRecommended ? ' mod-portal-versions__row--recommended' : '')
+                              (isCurrent
+                                ? ' mod-portal-versions__row--installed'
+                                : '') +
+                              (isRecommended
+                                ? ' mod-portal-versions__row--recommended'
+                                : '')
                             }
                           >
                             <td className="mod-portal-versions__td-ver">
@@ -359,16 +403,24 @@ export function ModPortalVersionsModal({
                                   {isRecommended ? (
                                     <span
                                       className="mod-portal-pill mod-portal-pill--icon-only mod-portal-pill--rec"
-                                      title={t('mod_portal_versions_recommended_badge')}
-                                      aria-label={t('mod_portal_versions_recommended_badge')}
+                                      title={t(
+                                        'mod_portal_versions_recommended_badge',
+                                      )}
+                                      aria-label={t(
+                                        'mod_portal_versions_recommended_badge',
+                                      )}
                                     >
                                       <AppIcon name="star" size={15} />
                                     </span>
                                   ) : rel.is_compatible ? (
                                     <span
                                       className="mod-portal-pill mod-portal-pill--icon-only mod-portal-pill--compat"
-                                      title={t('mod_portal_versions_compatible_badge')}
-                                      aria-label={t('mod_portal_versions_compatible_badge')}
+                                      title={t(
+                                        'mod_portal_versions_compatible_badge',
+                                      )}
+                                      aria-label={t(
+                                        'mod_portal_versions_compatible_badge',
+                                      )}
                                     >
                                       <AppIcon name="folder_check" size={14} />
                                     </span>
@@ -376,8 +428,12 @@ export function ModPortalVersionsModal({
                                   {isCurrent ? (
                                     <span
                                       className="mod-portal-pill mod-portal-pill--icon-only mod-portal-pill--current"
-                                      title={t('mod_portal_versions_current_badge')}
-                                      aria-label={t('mod_portal_versions_current_badge')}
+                                      title={t(
+                                        'mod_portal_versions_current_badge',
+                                      )}
+                                      aria-label={t(
+                                        'mod_portal_versions_current_badge',
+                                      )}
                                     >
                                       <AppIcon name="check" size={15} />
                                     </span>
@@ -394,11 +450,15 @@ export function ModPortalVersionsModal({
                                     : 'mod-portal-branch-badge--other')
                                 }
                               >
-                                {rel.factorio_version ? `Factorio ${rel.factorio_version}` : '—'}
+                                {rel.factorio_version
+                                  ? `Factorio ${rel.factorio_version}`
+                                  : '—'}
                               </span>
                             </td>
                             <td className="mod-portal-versions__td-date">
-                              {rel.released_at ? formatPanelDateOnly(rel.released_at) : '—'}
+                              {rel.released_at
+                                ? formatPanelDateOnly(rel.released_at)
+                                : '—'}
                             </td>
                             <td className="mod-portal-versions__td-action">
                               <div className="mod-portal-versions__action-wrap">
@@ -407,8 +467,12 @@ export function ModPortalVersionsModal({
                                     {isCurrent ? (
                                       <span
                                         className="mod-portal-versions__active-mark"
-                                        title={t('mod_portal_versions_active_title')}
-                                        aria-label={t('mod_portal_versions_active_title')}
+                                        title={t(
+                                          'mod_portal_versions_active_title',
+                                        )}
+                                        aria-label={t(
+                                          'mod_portal_versions_active_title',
+                                        )}
                                       >
                                         <AppIcon name="check" size={15} />
                                       </span>
@@ -416,11 +480,18 @@ export function ModPortalVersionsModal({
                                       <button
                                         type="button"
                                         className="btn mod-portal-versions__activate-btn"
-                                        title={t('mod_portal_versions_activate_btn')}
-                                        aria-label={t('mod_portal_versions_activate_btn')}
+                                        title={t(
+                                          'mod_portal_versions_activate_btn',
+                                        )}
+                                        aria-label={t(
+                                          'mod_portal_versions_activate_btn',
+                                        )}
                                         disabled={serverBusy}
                                         onClick={() =>
-                                          handleActivateVersion(data.name || cleanName, rel.version)
+                                          handleActivateVersion(
+                                            data.name || cleanName,
+                                            rel.version,
+                                          )
                                         }
                                       >
                                         <AppIcon name="check" size={15} />
@@ -428,7 +499,11 @@ export function ModPortalVersionsModal({
                                     )}
                                     <span className="mod-portal-versions__action-btn mod-portal-versions__installed-tag">
                                       <AppIcon name="folder_check" size={14} />
-                                      <span>{t('mod_portal_versions_status_installed')}</span>
+                                      <span>
+                                        {t(
+                                          'mod_portal_versions_status_installed',
+                                        )}
+                                      </span>
                                     </span>
                                     <button
                                       type="button"
@@ -436,26 +511,42 @@ export function ModPortalVersionsModal({
                                       title={t('mod_list_remove_mod_btn')}
                                       aria-label={t('mod_list_remove_mod_btn')}
                                       disabled={serverBusy}
-                                      onClick={() => handleDeleteVersion(data.name || cleanName, rel.version)}
+                                      onClick={() =>
+                                        handleDeleteVersion(
+                                          data.name || cleanName,
+                                          rel.version,
+                                        )
+                                      }
                                     >
                                       <AppIcon name="delete" size={15} />
                                     </button>
                                   </>
                                 ) : (
                                   <>
-                                    <span className="mod-portal-versions__btn-spacer" aria-hidden="true" />
+                                    <span
+                                      className="mod-portal-versions__btn-spacer"
+                                      aria-hidden="true"
+                                    />
                                     <button
                                       type="button"
                                       className="btn btn--with-icon mod-portal-versions__action-btn mod-portal-versions__install-btn"
                                       disabled={serverBusy}
                                       onClick={() => {
-                                        onInstall(data.name || cleanName, rel.version);
+                                        onInstall(
+                                          data.name || cleanName,
+                                          rel.version,
+                                        );
                                       }}
                                     >
                                       <AppIcon name="download" size={14} />
-                                      <span>{t('mod_portal_versions_install_btn')}</span>
+                                      <span>
+                                        {t('mod_portal_versions_install_btn')}
+                                      </span>
                                     </button>
-                                    <span className="mod-portal-versions__btn-spacer" aria-hidden="true" />
+                                    <span
+                                      className="mod-portal-versions__btn-spacer"
+                                      aria-hidden="true"
+                                    />
                                   </>
                                 )}
                               </div>

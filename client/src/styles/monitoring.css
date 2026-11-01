@@ -46,11 +46,15 @@
 
 .instance-monitoring-bar__select {
   height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  box-sizing: border-box;
+  line-height: 32px;
   padding: 0 10px;
   font-size: 0.85rem;
   background: color-mix(in srgb, var(--bg-input) 90%, var(--bg-widget) 10%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  border-radius: 6px;
+  border-radius: 7px;
   color: var(--text);
   cursor: pointer;
   outline: none;
@@ -159,11 +163,7 @@
 .instance-monitoring-card {
   position: relative;
   width: 100%;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  );
+  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent);
   border-radius: 8px;
   padding: 14px 18px 10px;
@@ -401,11 +401,7 @@
   align-items: center;
   justify-content: center;
   min-height: 320px;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  );
+  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
   border: 1px dashed color-mix(in srgb, var(--border-dark) 82%, transparent);
   border-radius: 8px;
   padding: 40px 24px;

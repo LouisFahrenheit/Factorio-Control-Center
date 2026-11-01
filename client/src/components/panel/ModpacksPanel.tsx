@@ -1,9 +1,12 @@
 import { useRef, useState, type MouseEvent } from 'react';
-import { IconUpload } from '@tabler/icons-react';
+import { IconRefresh, IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { formatPanelDateOnly } from '../../lib/datetimeUtils';
 import type { ModpacksApi } from '../../hooks/useModpacks';
-import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
+import {
+  TabLoadingPlaceholder,
+  tabInitialLoad,
+} from '../TabLoadingPlaceholder';
 import type { ModpackRow } from '../../types/modpack';
 import { ModpackActivateModal } from './ModpackActivateModal';
 import { ModpackExportModal } from './ModpackExportModal';
@@ -23,7 +26,11 @@ function ModpackModsLoadingRows() {
   return (
     <>
       {Array.from({ length: MODPACK_MODS_LOADING_ROW_COUNT }, (_, i) => (
-        <tr key={i} className="modpack-mod-row modpack-mod-row--loading" aria-hidden="true">
+        <tr
+          key={i}
+          className="modpack-mod-row modpack-mod-row--loading"
+          aria-hidden="true"
+        >
           <td>
             <span className="save-mod-skeleton save-mod-skeleton--name" />
           </td>
@@ -46,7 +53,9 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
   const packCount = modpacks.rows.length;
   const initialLoading = tabInitialLoad(modpacks.loading, packCount > 0);
   const packListTitle =
-    packCount > 0 ? t('modpack_panel_title_count', packCount) : t('modpack_section_title');
+    packCount > 0
+      ? t('modpack_panel_title_count', packCount)
+      : t('modpack_section_title');
 
   const mods = modpacks.details?.mods || [];
   const modsLoading = !!modpacks.selected && modpacks.detailsLoading;
@@ -65,7 +74,9 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
   function onRowClick(row: ModpackRow, ev: MouseEvent) {
     ev.stopPropagation();
     modpacks.setSelected(row.name);
-    const clickedName = !!(ev.target as HTMLElement).closest('td.mods-col-name');
+    const clickedName = !!(ev.target as HTMLElement).closest(
+      'td.mods-col-name',
+    );
     if (clickedName) {
       setMenuName(row.name);
       setMenuPos({ x: ev.clientX + 2, y: ev.clientY + 2 });
@@ -78,7 +89,10 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
   return (
     <div
       id="modpacksPanelRoot"
-      className={'modpacks-panel fcc-drop-target' + (isDraggingOver ? ' is-drag-over' : '')}
+      className={
+        'modpacks-panel fcc-drop-target' +
+        (isDraggingOver ? ' is-drag-over' : '')
+      }
       onDragOver={(ev) => {
         if (ev.dataTransfer.types.includes('Files')) {
           ev.preventDefault();
@@ -122,7 +136,7 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
               aria-label={t('update_list_btn')}
               onClick={() => void modpacks.reload()}
             >
-              <AppIcon name="refresh" size={16} />
+              <IconRefresh size={18} />
             </button>
           </div>
           <span className="mods-toolbar__sep" aria-hidden="true" />
@@ -154,7 +168,9 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
               className="btn btn--with-icon"
               id="btnModpackExport"
               disabled={!modpacks.selected}
-              onClick={() => modpacks.selected && modpacks.exportPack(modpacks.selected)}
+              onClick={() =>
+                modpacks.selected && modpacks.exportPack(modpacks.selected)
+              }
             >
               <AppIcon name="download" size={16} />
               {t('modpack_export_btn')}
@@ -171,7 +187,12 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
                 ev.target.value = '';
               }}
             />
-            <button type="button" className="btn btn--with-icon" id="btnModpackImport" onClick={() => importRef.current?.click()}>
+            <button
+              type="button"
+              className="btn btn--with-icon"
+              id="btnModpackImport"
+              onClick={() => importRef.current?.click()}
+            >
               <AppIcon name="upload" size={16} />
               {t('modpack_import_btn')}
             </button>
@@ -180,7 +201,9 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
           <span
             className={
               'modpacks-toolbar__mode mods-list-panel__badge' +
-              (modpacks.activateUseSymlinks ? ' mods-list-panel__badge--enabled' : '')
+              (modpacks.activateUseSymlinks
+                ? ' mods-list-panel__badge--enabled'
+                : '')
             }
             id="modpackActivateModeLbl"
             title={t('program_modpack_activate_use_symlinks_tip')}
@@ -193,132 +216,177 @@ export function ModpacksPanel({ modpacks, t }: ModpacksPanelProps) {
       </div>
 
       {initialLoading ? (
-        <TabLoadingPlaceholder variant="split" label={t('tab_data_loading')} className="modpacks-tab__loading" />
+        <TabLoadingPlaceholder
+          variant="split"
+          label={t('tab_data_loading')}
+          className="modpacks-tab__loading"
+        />
       ) : (
-      <div className="modpacks-split">
-        <div className="mods-list-panel mods-list-panel--static modpacks-split__main">
-          <div className="mods-list-panel__header">
-            <span className="mods-list-panel__summary-main">
-              <AppIcon name="folder_copy" size={18} className="mods-list-panel__title-icon" aria-hidden />
-              <span className="mods-list-panel__title">{packListTitle}</span>
-              {modpacks.activeName ? (
-                <span className="active-modpack-pill mods-list-panel__modpack-pill">{modpacks.activeName}</span>
-              ) : null}
-            </span>
-            <span className="mods-list-panel__meta">
-              {packCount > 0 ? (
-                <span className="mods-list-panel__badge mods-list-panel__badge--enabled">
-                  {t('modpack_panel_total_count', packCount)}
-                </span>
-              ) : null}
-            </span>
-          </div>
-          <div className="mods-list-panel__body">
-            <div className="table-wrap table-wrap--enter mods-list-panel__table-wrap">
-              <table className="data data--modpacks data--mods" id="tblModpack">
-                <thead>
-                  <tr>
-                    <th>{t('instances_col_name')}</th>
-                    <th>{t('modpack_list_header_mods')}</th>
-                    <th>{t('modpack_list_header_size')}</th>
-                    <th>{t('modpack_list_header_settings')}</th>
-                    <th>{t('modpack_list_header_factorio')}</th>
-                    <th>{t('modpack_list_header_created')}</th>
-                    <th>{t('modpack_list_header_description')}</th>
-                  </tr>
-                </thead>
-                <tbody id="tblModpackBody">
-                  {modpacks.rows.map((p) => {
-                    const isActive = modpacks.activeName && p.name === modpacks.activeName;
-                    const fv = modpacks.formatFactorio(p);
-                    const desc = String(p.description || '').trim();
-                    return (
-                      <tr
-                        key={p.name}
-                        className={modpacks.selected === p.name ? 'mods-row--selected' : undefined}
-                        onClick={(ev) => onRowClick(p, ev)}
-                      >
-                        <td className="mods-col-name">
-                          <span className="instance-name-cell">
-                            <span className={'instance-run-dot' + (isActive ? ' instance-run-dot--on' : '')} />
-                            <span>{p.name}</span>
-                          </span>
-                        </td>
-                        <td className="modpacks-col-count">{p.mods_count != null ? String(p.mods_count) : '-'}</td>
-                        <td className="modpacks-col-size">{modpacks.formatSize(p.size_bytes)}</td>
-                        <td className="modpacks-col-flag">{p.has_mod_settings ? '✓' : '—'}</td>
-                        <td className="modpacks-col-factorio" title={fv}>
-                          {fv}
-                        </td>
-                        <td className="modpacks-col-created">{formatPanelDateOnly(p.created_at, '-')}</td>
-                        <td className="modpacks-col-desc" title={desc || undefined}>
-                          {desc || '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={
-            'mods-list-panel mods-list-panel--static modpacks-split__side' +
-            (modsLoading ? ' mods-list-panel--loading' : '')
-          }
-        >
-          <div className="mods-list-panel__header">
-            <span className="mods-list-panel__summary-main">
-              <AppIcon name="list" size={18} className="mods-list-panel__title-icon" aria-hidden />
-              <span className="mods-list-panel__title" id="modpackDetailsTitle">
-                {modsTitle}
+        <div className="modpacks-split">
+          <div className="mods-list-panel mods-list-panel--static modpacks-split__main">
+            <div className="mods-list-panel__header">
+              <span className="mods-list-panel__summary-main">
+                <AppIcon
+                  name="folder_copy"
+                  size={18}
+                  className="mods-list-panel__title-icon"
+                  aria-hidden
+                />
+                <span className="mods-list-panel__title">{packListTitle}</span>
+                {modpacks.activeName ? (
+                  <span className="active-modpack-pill mods-list-panel__modpack-pill">
+                    {modpacks.activeName}
+                  </span>
+                ) : null}
               </span>
-            </span>
-          </div>
-          <div className="mods-list-panel__body">
-            <div
-              className={
-                'table-wrap table-wrap--enter mods-list-panel__table-wrap modpack-mods-wrap' +
-                (modsLoading ? ' mods-list-panel__table-wrap--loading' : '')
-              }
-              aria-busy={modsLoading}
-              aria-live="polite"
-            >
-              <table className="data data--mods modpack-mods-table">
-                <thead>
-                  <tr>
-                    <th>{t('mod_list_col_name')}</th>
-                    <th>{t('mod_list_col_version')}</th>
-                  </tr>
-                </thead>
-                <tbody id="tblModpackDetailsBody">
-                  {modsLoading ? (
-                    <ModpackModsLoadingRows />
-                  ) : (
-                    <>
-                      {mods.map((m) => (
-                        <tr key={`${m.name}-${m.version}`}>
-                          <td>{m.display_name || m.name}</td>
-                          <td>{m.version || '-'}</td>
-                        </tr>
-                      ))}
-                      {!mods.length && (
-                        <tr>
-                          <td colSpan={2} className="muted">
-                            {modpacks.selected ? '—' : t('modpack_details_no_selection')}
+              <span className="mods-list-panel__meta">
+                {packCount > 0 ? (
+                  <span className="mods-list-panel__badge mods-list-panel__badge--enabled">
+                    {t('modpack_panel_total_count', packCount)}
+                  </span>
+                ) : null}
+              </span>
+            </div>
+            <div className="mods-list-panel__body">
+              <div className="table-wrap table-wrap--enter mods-list-panel__table-wrap">
+                <table
+                  className="data data--modpacks data--mods"
+                  id="tblModpack"
+                >
+                  <thead>
+                    <tr>
+                      <th>{t('instances_col_name')}</th>
+                      <th>{t('modpack_list_header_mods')}</th>
+                      <th>{t('modpack_list_header_size')}</th>
+                      <th>{t('modpack_list_header_settings')}</th>
+                      <th>{t('modpack_list_header_factorio')}</th>
+                      <th>{t('modpack_list_header_created')}</th>
+                      <th>{t('modpack_list_header_description')}</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblModpackBody">
+                    {modpacks.rows.map((p) => {
+                      const isActive =
+                        modpacks.activeName && p.name === modpacks.activeName;
+                      const fv = modpacks.formatFactorio(p);
+                      const desc = String(p.description || '').trim();
+                      return (
+                        <tr
+                          key={p.name}
+                          className={
+                            modpacks.selected === p.name
+                              ? 'mods-row--selected'
+                              : undefined
+                          }
+                          onClick={(ev) => onRowClick(p, ev)}
+                        >
+                          <td className="mods-col-name">
+                            <span className="instance-name-cell">
+                              <span
+                                className={
+                                  'instance-run-dot' +
+                                  (isActive ? ' instance-run-dot--on' : '')
+                                }
+                              />
+                              <span>{p.name}</span>
+                            </span>
+                          </td>
+                          <td className="modpacks-col-count">
+                            {p.mods_count != null ? String(p.mods_count) : '-'}
+                          </td>
+                          <td className="modpacks-col-size">
+                            {modpacks.formatSize(p.size_bytes)}
+                          </td>
+                          <td className="modpacks-col-flag">
+                            {p.has_mod_settings ? '✓' : '—'}
+                          </td>
+                          <td className="modpacks-col-factorio" title={fv}>
+                            {fv}
+                          </td>
+                          <td className="modpacks-col-created">
+                            {formatPanelDateOnly(p.created_at, '-')}
+                          </td>
+                          <td
+                            className="modpacks-col-desc"
+                            title={desc || undefined}
+                          >
+                            {desc || '—'}
                           </td>
                         </tr>
-                      )}
-                    </>
-                  )}
-                </tbody>
-              </table>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={
+              'mods-list-panel mods-list-panel--static modpacks-split__side' +
+              (modsLoading ? ' mods-list-panel--loading' : '')
+            }
+          >
+            <div className="mods-list-panel__header">
+              <span className="mods-list-panel__summary-main">
+                <AppIcon
+                  name="list"
+                  size={18}
+                  className="mods-list-panel__title-icon"
+                  aria-hidden
+                />
+                <span
+                  className="mods-list-panel__title"
+                  id="modpackDetailsTitle"
+                >
+                  {modsTitle}
+                </span>
+              </span>
+            </div>
+            <div className="mods-list-panel__body">
+              <div
+                className={
+                  'table-wrap table-wrap--enter mods-list-panel__table-wrap modpack-mods-wrap' +
+                  (modsLoading ? ' mods-list-panel__table-wrap--loading' : '')
+                }
+                aria-busy={modsLoading}
+                aria-live="polite"
+              >
+                <table className="data data--mods modpack-mods-table">
+                  <thead>
+                    <tr>
+                      <th>{t('mod_list_col_name')}</th>
+                      <th>{t('mod_list_col_version')}</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblModpackDetailsBody">
+                    {modsLoading ? (
+                      <ModpackModsLoadingRows />
+                    ) : (
+                      <>
+                        {mods.map((m) => (
+                          <tr key={`${m.name}-${m.version}`}>
+                            <td>{m.display_name || m.name}</td>
+                            <td>{m.version || '-'}</td>
+                          </tr>
+                        ))}
+                        {!mods.length && (
+                          <tr>
+                            <td colSpan={2} className="muted">
+                              {modpacks.selected
+                                ? '—'
+                                : t('modpack_details_no_selection')}
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       )}
 
       <ModpackRowMenu
