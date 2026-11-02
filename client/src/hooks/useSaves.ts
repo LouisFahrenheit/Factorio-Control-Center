@@ -191,7 +191,10 @@ export function useSaves(
       if (selectedSave === oldName) setSelectedSave(finalName);
       closeRenameDialog();
       await reload();
-      setSavesMsg(t('updated_successfully'), false);
+      setSavesMsg(
+        t('saves_manager_rename_done', saveDisplayLabel(oldName), saveDisplayLabel(finalName)),
+        false,
+      );
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       const text = localizeSaveRenameError(raw, t, nextZip);
@@ -322,7 +325,7 @@ export function useSaves(
         onConfirm: async () => {
           await api(`/api/saves/${encodeURIComponent(name)}`, { method: 'DELETE' });
           await reload();
-          setSavesMsg(t('updated_successfully'), false);
+          setSavesMsg(t('saves_manager_delete_done', saveDisplayLabel(name)), false);
         },
       });
     },
@@ -333,7 +336,7 @@ export function useSaves(
     async (name: string) => {
       await api(`/api/saves/${encodeURIComponent(name)}/duplicate`, { method: 'POST' });
       await reload();
-      setSavesMsg(t('updated_successfully'), false);
+      setSavesMsg(t('saves_manager_duplicate_done', saveDisplayLabel(name)), false);
     },
     [reload, setSavesMsg, t],
   );
@@ -459,7 +462,14 @@ export function useSaves(
       }
 
       if (batchResult.errors.length === 0) {
-        setSavesMsg(t('updated_successfully'), false);
+        if (validFiles.length === 1 && validFiles[0]) {
+          setSavesMsg(
+            t('saves_manager_upload_done_single', saveDisplayLabel(validFiles[0].name)),
+            false,
+          );
+        } else {
+          setSavesMsg(t('saves_manager_upload_done_plural', validFiles.length), false);
+        }
       }
       await reload();
     },

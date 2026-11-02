@@ -43,7 +43,7 @@ import {
 import { readFileAsText } from '../lib/modpackUtils';
 import { pushSeedHistory, readSeedHistory } from '../lib/mapGen/seedHistory';
 import { randomMapSeed } from '../lib/mapGen/sliderScale';
-import { localizeCreateSaveError } from '../lib/saveUtils';
+import { localizeCreateSaveError, saveDisplayLabel } from '../lib/saveUtils';
 import type { MapGenUiState } from '../lib/mapGen/types';
 import { MAP_GEN_PRESET_IDS } from '../lib/mapGen/types';
 
@@ -675,7 +675,7 @@ export function useCreateSave(
       setSaveNameDialogOpen(false);
       closeDialog();
       await onCreated();
-      setSavesMsg(t('updated_successfully'), false);
+      setSavesMsg(t('create_save_done', saveDisplayLabel(saveFileName.trim())), false);
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       setSaveNameError(localizeCreateSaveError(raw, t));
