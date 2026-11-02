@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react';
+import {
+  IconDeviceGamepad2,
+  IconGauge,
+  IconServer,
+  IconSettings,
+  IconShield,
+  IconWorld,
+} from '@tabler/icons-react';
 import type { LocaleStrings } from '../../i18n/locale';
 import { FccSwitch } from '../FccSwitch';
 import {
   CATEGORY_ORDER,
-  LEFT_COLUMN,
-  RIGHT_COLUMN,
   groupFieldsByCategory,
   isDefaultServerTextValue,
   parseSettingFields,
@@ -192,6 +198,23 @@ function renderFieldControl(
   return <input {...inputProps} />;
 }
 
+function getCategoryIcon(cat: SettingCategory) {
+  switch (cat) {
+    case 'general':
+      return <IconServer size={18} />;
+    case 'network':
+      return <IconWorld size={18} />;
+    case 'gameplay':
+      return <IconDeviceGamepad2 size={18} />;
+    case 'performance':
+      return <IconGauge size={18} />;
+    case 'access':
+      return <IconShield size={18} />;
+    default:
+      return <IconSettings size={18} />;
+  }
+}
+
 function renderSection(
   cat: SettingCategory,
   items: SettingField[],
@@ -204,13 +227,17 @@ function renderSection(
   const rowFields = items.filter((f) => !isGameplayBoolField(cat, f));
 
   return (
-    <section key={cat} className="settings-section">
-      <h3 className="settings-section__title">{settingCategoryTitle(cat, t)}</h3>
+    <section key={cat} className={`settings-section settings-section--${cat}`}>
+      <h3 className="settings-section__title">
+        <span className="settings-section__icon" aria-hidden="true">
+          {getCategoryIcon(cat)}
+        </span>
+        <span>{settingCategoryTitle(cat, t)}</span>
+      </h3>
       {rowFields.length > 0 && (
         <div className="settings-rows">
           {rowFields.map((field) => {
             const hint = settingHintForLabel(field.key, field.comments, t, strings);
-            const isSecret = field.key === 'token' || field.key === 'password' || field.key === 'game_password';
             const control = renderFieldControl(
               field,
               values,
@@ -225,23 +252,7 @@ function renderSection(
                 <label className="settings-row__label" title={hint || undefined}>
                   {settingLabel(field.key, t, strings)}
                 </label>
-                <div className="settings-row__control settings-row__control--split">
-                  {isSecret ? (
-                    canRevealSecrets ? (
-                      control
-                    ) : (
-                      <>
-                        <span className="settings-row__lead" />
-                        {control}
-                      </>
-                    )
-                  ) : (
-                    <>
-                      <span className="settings-row__lead" />
-                      <span className="settings-row__field">{control}</span>
-                    </>
-                  )}
-                </div>
+                <div className="settings-row__control">{control}</div>
               </div>
             );
           })}
@@ -274,6 +285,15 @@ function renderSection(
   );
 }
 
+const ORDERED_PAIRS: SettingCategory[] = [
+  'general',
+  'network',
+  'gameplay',
+  'performance',
+  'access',
+  'advanced',
+];
+
 export function ServerSettingsForm(props: ServerSettingsFormProps) {
   const fields = parseSettingFields(props.data);
   const grouped = groupFieldsByCategory(fields);
@@ -283,19 +303,15 @@ export function ServerSettingsForm(props: ServerSettingsFormProps) {
     sections.set(cat, renderSection(cat, grouped.get(cat) || [], props));
   });
 
-  const renderColumn = (order: SettingCategory[]) =>
-    order.map((cat) => sections.get(cat)).filter(Boolean);
-
-  const leftovers = CATEGORY_ORDER.filter(
-    (cat) => !LEFT_COLUMN.includes(cat) && !RIGHT_COLUMN.includes(cat),
-  );
+  const orderedSections = ORDERED_PAIRS.map((cat) => sections.get(cat)).filter(Boolean);
+  const leftovers = CATEGORY_ORDER.filter((cat) => !ORDERED_PAIRS.includes(cat));
+  const leftoverSections = leftovers.map((cat) => sections.get(cat)).filter(Boolean);
 
   return (
     <form className="settings-form-isolate" autoComplete="off" noValidate onSubmit={(e) => e.preventDefault()}>
       <div className="settings-columns">
-        <div className="settings-col">{renderColumn(LEFT_COLUMN)}</div>
-        <div className="settings-col">{renderColumn(RIGHT_COLUMN)}</div>
-        {leftovers.map((cat) => sections.get(cat))}
+        {orderedSections}
+        {leftoverSections}
       </div>
     </form>
   );

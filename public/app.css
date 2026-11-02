@@ -13425,13 +13425,14 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (min-width: 960px) {
   .settings-columns {
     grid-template-columns: 1fr 1fr;
     gap: 14px;
+    align-items: stretch;
   }
 }
 
@@ -13579,13 +13580,16 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
 
 .server-settings-tab__toolbar {
   flex: 0 0 auto;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--bg-data) 84%, var(--bg-widget) 16%);
+  background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 2px 10px rgba(0, 0, 0, 0.14);
+  min-height: 52px;
+  height: 52px;
+  box-sizing: border-box;
 }
 
 .server-settings-tab__actions {
@@ -13599,126 +13603,250 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   animation: factorio-update-btn-accent-pulse 1.4s ease-in-out infinite;
 }
 
-
 .server-settings-tab__body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 2px;
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--bg-main) 88%, black 12%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.server-settings-tab {
+  --sst-row-height: clamp(31px, 3.6vh, 42px);
+  --sst-input-height: clamp(31px, 3.5vh, 40px);
+  --sst-header-height: clamp(35px, 4.1vh, 46px);
+  --sst-label-font: clamp(0.83rem, 0.73rem + 0.22vw, 0.98rem);
+  --sst-header-font: clamp(0.86rem, 0.77rem + 0.22vw, 1.02rem);
+  --sst-row-gap: clamp(3px, 0.52vh, 8px);
+  --sst-card-pad-v: clamp(8px, 1.1vh, 16px);
+  --sst-card-pad-h: clamp(12px, 1vw, 20px);
+  --sst-label-width: clamp(195px, 13vw, 245px);
+  --sst-toolbar-height: clamp(42px, 4.8vh, 52px);
+  --sst-btn-height: clamp(31px, 3.6vh, 38px);
+  --sst-btn-font: clamp(0.82rem, 0.74rem + 0.18vw, 0.92rem);
+  --sst-switch-height: clamp(26px, 3vh, 34px);
+  --sst-switch-font: clamp(0.79rem, 0.71rem + 0.18vw, 0.88rem);
+  --sst-layout-gap: clamp(8px, 1vh, 14px);
 }
 
 .server-settings-tab .settings-section {
-  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border: 1px solid var(--border-dark);
   border-radius: 9px;
-  padding: 8px 10px 10px;
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 1px 0 rgba(0, 0, 0, 0.14);
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg-data);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
   transition:
-    border-color 0.22s var(--fcc-hover-ease),
-    box-shadow 0.22s var(--fcc-hover-ease);
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.server-settings-tab .settings-section:hover {
+  border-color: color-mix(in srgb, var(--border-dark) 80%, var(--accent) 20%);
 }
 
 .server-settings-tab .settings-section__title {
-  margin: 0 0 8px;
-  padding: 0 0 6px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent);
-  font-size: 13pt;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 0 var(--sst-card-pad-h);
+  min-height: var(--sst-header-height);
+  height: var(--sst-header-height);
+  background: var(--bg-widget);
+  border-bottom: 1px solid var(--border-dark);
+  font-size: var(--sst-header-font);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--text);
   line-height: 1.2;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.server-settings-tab .settings-section__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.server-settings-tab .settings-section__icon svg {
+  width: clamp(16px, 1.2vw, 20px);
+  height: clamp(16px, 1.2vw, 20px);
+}
+
+.server-settings-tab .settings-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sst-row-gap);
+  padding: var(--sst-card-pad-v) var(--sst-card-pad-h);
+}
+
+.server-settings-tab .settings-section:has(.settings-bool-grid) .settings-rows {
+  padding-bottom: clamp(4px, 0.6vh, 8px);
 }
 
 .server-settings-tab .settings-row {
-  border-radius: 8px;
-  transition: background-color 0.22s var(--fcc-hover-ease);
+  display: grid;
+  grid-template-columns: var(--sst-label-width) minmax(0, 1fr);
+  gap: clamp(8px, 0.8vw, 14px);
+  align-items: center;
+  min-height: var(--sst-row-height);
+  padding: 1px 4px;
+  border-radius: 5px;
+  transition: background-color 0.12s ease;
 }
 
 .server-settings-tab .settings-row:hover {
-  background: var(--fcc-row-hover-bg);
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .server-settings-tab .settings-row__label {
-  font-weight: 600;
-  color: color-mix(in srgb, var(--text) 92%, var(--text-muted) 8%);
+  font-weight: 550;
+  font-size: var(--sst-label-font);
+  color: var(--text);
+  text-align: left;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.server-settings-tab .settings-row__control > .input,
-.server-settings-tab .settings-row__control > .settings-json,
-.server-settings-tab .settings-row__control--split > .settings-row__field .input,
-.server-settings-tab .settings-row__control--split > .settings-row__field .settings-json,
-.server-settings-tab .settings-row__control > select.input,
-.server-settings-tab .settings-row__control--split > .settings-row__field select.input {
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-main) 72%, var(--bg-widget) 28%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+.server-settings-tab .settings-row__control {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.server-settings-tab .settings-row__control .input,
+.server-settings-tab .settings-row__control select.input {
+  height: var(--sst-input-height);
+  min-height: var(--sst-input-height);
+  max-height: var(--sst-input-height);
+  font-size: var(--sst-label-font);
+  line-height: calc(var(--sst-input-height) - 2px);
+  padding: 0 clamp(9px, 0.8vw, 13px);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid var(--border-dark);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  box-sizing: border-box;
+  width: 100%;
   transition:
-    border-color 0.18s var(--fcc-hover-ease),
-    background-color 0.18s var(--fcc-hover-ease),
-    box-shadow 0.18s var(--fcc-hover-ease);
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.server-settings-tab .settings-row__control > .input:focus,
-.server-settings-tab .settings-row__control > .settings-json:focus,
-.server-settings-tab .settings-row__control--split > .settings-row__field .input:focus,
-.server-settings-tab .settings-row__control--split > .settings-row__field .settings-json:focus,
-.server-settings-tab .settings-row__control > select.input:focus,
-.server-settings-tab .settings-row__control--split > .settings-row__field select.input:focus {
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--border-dark) 68%);
-  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
+.server-settings-tab .settings-row__control .input:focus,
+.server-settings-tab .settings-row__control select.input:focus {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg-main) 55%, var(--bg-widget) 45%);
   outline: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+    inset 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 0 0 1px var(--accent);
 }
 
-.server-settings-tab .settings-json {
-  background: color-mix(in srgb, var(--bg-log) 92%, var(--bg-main) 8%);
-  border-color: color-mix(in srgb, var(--border-dark) 90%, transparent);
-  color: #d0d0d0;
+.server-settings-tab .settings-input-eye-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.server-settings-tab .settings-input-eye-wrap .input {
+  padding-right: calc(var(--sst-input-height) + 2px);
+}
+
+.server-settings-tab .settings-input-eye-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--sst-input-height) - 8px);
+  height: calc(var(--sst-input-height) - 8px);
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.server-settings-tab .settings-input-eye-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.server-settings-tab .settings-input-eye-btn svg {
+  width: clamp(15px, 1.1vw, 18px);
+  height: clamp(15px, 1.1vw, 18px);
+}
+
+.server-settings-tab .settings-bool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sst-row-gap) clamp(12px, 1vw, 20px);
+  padding: clamp(4px, 0.6vh, 10px) var(--sst-card-pad-h) var(--sst-card-pad-v) var(--sst-card-pad-h);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 50%, transparent);
+  margin-top: 2px;
 }
 
 .server-settings-tab .settings-bool-cell {
-  padding: 2px 4px;
-  border-radius: 8px;
-  transition: background-color 0.22s var(--fcc-hover-ease);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--sst-switch-height);
+  padding: 2px 6px;
+  border-radius: 5px;
+  transition: background-color 0.12s ease;
 }
 
 .server-settings-tab .settings-bool-cell:hover {
-  background: var(--fcc-interactive-hover-bg);
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .server-settings-tab .settings-bool-cell__label {
-  font-weight: 650;
+  font-size: var(--sst-switch-font);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .server-settings-tab .settings-visibility-switches {
-  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.2vw, 22px);
+  height: var(--sst-input-height);
 }
 
-.server-settings-tab .settings-row__lead .fcc-pass-field-toggle {
+.server-settings-tab .settings-json {
+  width: 100%;
+  min-height: clamp(70px, 9vh, 110px);
   border-radius: 6px;
-  transition:
-    color 0.18s var(--fcc-hover-ease),
-    background-color 0.18s var(--fcc-hover-ease),
-    border-color 0.18s var(--fcc-hover-ease);
-}
-
-.server-settings-tab .settings-row__lead .fcc-pass-field-toggle:hover {
-  background: var(--fcc-interactive-hover-bg);
-  border-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  padding: 6px 10px;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--sst-switch-font);
+  background: var(--bg-log);
+  border: 1px solid var(--border-dark);
+  color: var(--text);
+  resize: vertical;
 }
 
 .commands-layout {

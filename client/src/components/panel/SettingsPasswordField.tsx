@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 interface SettingsPasswordFieldProps {
   fieldKey: string;
@@ -26,17 +27,13 @@ export function SettingsPasswordField({
   const useTextSec = maskWithTextSecurity === true && canWebkitDisc;
   const showRevealed = canReveal && revealed;
   const inputType = useTextSec ? 'text' : showRevealed ? 'text' : 'password';
-  const wrapClass =
-    'fcc-pass-field-wrap' +
-    (useTextSec ? ' fcc-pass-field--textsec' : '') +
-    (showRevealed ? ' is-revealed' : '');
 
   function toggle() {
     setRevealed((v) => !v);
   }
 
-  const input = (
-    <span className={wrapClass}>
+  return (
+    <div className="settings-input-eye-wrap">
       <input
         type={inputType}
         className="input"
@@ -55,31 +52,20 @@ export function SettingsPasswordField({
         style={useTextSec && !showRevealed ? ({ WebkitTextSecurity: 'disc' } as CSSProperties) : undefined}
         onChange={(e) => onChange(e.target.value)}
       />
-    </span>
-  );
-
-  if (!canReveal) {
-    return <span className="settings-row__field">{input}</span>;
-  }
-
-  return (
-    <>
-      <span className="settings-row__lead">
+      {canReveal && (
         <button
           type="button"
-          className={`fcc-pass-field-toggle${showRevealed ? ' is-on' : ''}`}
+          className="settings-input-eye-btn"
           data-i18n-title="web_login_pass_toggle"
-          title={t('web_login_pass_toggle')}
+          title={showRevealed ? t('web_password_reveal_hide') : t('web_password_reveal_show')}
           aria-label={showRevealed ? t('web_password_reveal_hide') : t('web_password_reveal_show')}
           disabled={disabled}
           onClick={toggle}
         >
-          <span className="fcc-pass-field-toggle-eye" aria-hidden="true">
-            {showRevealed ? '○' : '●'}
-          </span>
+          {showRevealed ? <IconEyeOff size={18} /> : <IconEye size={18} />}
         </button>
-      </span>
-      <span className="settings-row__field">{input}</span>
-    </>
+      )}
+    </div>
   );
 }
+
