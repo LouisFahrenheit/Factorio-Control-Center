@@ -6749,6 +6749,16 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center !important;
   min-width: 0 !important;
   width: 100% !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
+}
+
+.server-settings-tab .settings-row__control > * {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* ── Form Inputs ─────────────────────────────────────────────────────── */
@@ -6784,24 +6794,44 @@ table.data thead th.saves-sort-th--asc::after {
   outline: none !important;
 }
 
-/* ── Password Field with Eye Toggle inside ───────────────────────────── */
+/* ── Password Field with Dice Generator Left and Eye Toggle Right ────── */
 
 .server-settings-tab .settings-input-eye-wrap {
   position: relative !important;
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .server-settings-tab .settings-input-eye-wrap .input {
+  width: 100% !important;
   padding-right: calc(var(--sst-input-height) + 2px) !important;
+}
+
+.server-settings-tab .settings-input-eye-wrap--has-dice .input {
+  padding-left: calc(var(--sst-input-height) + 2px) !important;
+}
+
+.server-settings-tab .settings-input-dice-btn {
+  position: absolute !important;
+  left: 4px !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2 !important;
 }
 
 .server-settings-tab .settings-input-eye-btn {
   position: absolute !important;
   right: 4px !important;
+  left: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
+  z-index: 2 !important;
+}
+
+.server-settings-tab .settings-input-action-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6815,17 +6845,178 @@ table.data thead th.saves-sort-th--asc::after {
   padding: 0 !important;
   transition:
     color 0.15s ease,
-    background-color 0.15s ease;
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
-.server-settings-tab .settings-input-eye-btn:hover {
+.server-settings-tab .settings-input-action-btn:hover {
   color: var(--text) !important;
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
-.server-settings-tab .settings-input-eye-btn svg {
+.server-settings-tab .settings-input-dice-btn:hover {
+  color: var(--accent) !important;
+}
+
+.server-settings-tab .settings-input-dice-btn:active {
+  transform: translateY(-50%) rotate(45deg) scale(0.92) !important;
+}
+
+.server-settings-tab .settings-input-action-btn svg {
   width: clamp(15px, 1.1vw, 18px) !important;
   height: clamp(15px, 1.1vw, 18px) !important;
+}
+
+/* ── Tags Interactive Chips ─────────────────────────────────────────── */
+
+.server-settings-tab .settings-tags-wrap {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 4px !important;
+  height: var(--sst-input-height) !important;
+  min-height: var(--sst-input-height) !important;
+  max-height: var(--sst-input-height) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent !important;
+  padding: 0 6px !important;
+  border-radius: 6px !important;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) !important;
+  border: 1px solid var(--border-dark) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  cursor: text;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.server-settings-tab .settings-tags-wrap::-webkit-scrollbar {
+  height: 3px !important;
+  display: block !important;
+}
+
+.server-settings-tab .settings-tags-wrap::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.server-settings-tab .settings-tags-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-radius: 3px !important;
+}
+
+.server-settings-tab .settings-tags-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--accent) !important;
+}
+
+.server-settings-tab .settings-tags-wrap:focus-within {
+  border-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--bg-main) 55%, var(--bg-widget) 45%) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 0 0 1px var(--accent) !important;
+}
+
+.server-settings-tab .settings-tags-wrap--disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.server-settings-tab .settings-tag-chip {
+  display: inline-flex !important;
+  flex-shrink: 0 !important;
+  align-items: center !important;
+  gap: 3px !important;
+  height: calc(var(--sst-input-height) - 10px) !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border-dark) 68%) !important;
+  border-radius: 4px !important;
+  padding: 0 6px !important;
+  font-size: calc(var(--sst-label-font) - 1.5px) !important;
+  font-weight: 500 !important;
+  color: var(--text) !important;
+  line-height: calc(var(--sst-input-height) - 12px) !important;
+  white-space: nowrap !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  animation: tagAppear 0.15s ease-out;
+}
+
+@keyframes tagAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.server-settings-tab .settings-tag-chip__text {
+  max-width: 160px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.server-settings-tab .settings-tag-chip__del {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 1px !important;
+  margin-left: 1px !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  border-radius: 3px !important;
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.server-settings-tab .settings-tag-chip__del:hover {
+  color: #ff6b6b !important;
+  background: rgba(255, 107, 107, 0.15) !important;
+}
+
+.server-settings-tab .settings-tag-chip__del svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.server-settings-tab .settings-tags-input {
+  flex: 1 0 60px !important;
+  min-width: 60px !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  font-size: var(--sst-label-font) !important;
+  padding: 0 4px !important;
+  height: calc(var(--sst-input-height) - 8px) !important;
+  line-height: calc(var(--sst-input-height) - 8px) !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.server-settings-tab .settings-tags-input::-webkit-search-decoration,
+.server-settings-tab .settings-tags-input::-webkit-search-cancel-button,
+.server-settings-tab .settings-tags-input::-webkit-search-results-button,
+.server-settings-tab .settings-tags-input::-webkit-search-results-decoration {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+.server-settings-tab .settings-tags-input::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.7 !important;
 }
 
 /* ── Visibility Switches ─────────────────────────────────────────────── */

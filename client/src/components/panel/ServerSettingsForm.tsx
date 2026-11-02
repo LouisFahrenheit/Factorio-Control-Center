@@ -21,6 +21,7 @@ import {
   type SettingField,
 } from '../../lib/serverSettingsUtils';
 import { SettingsPasswordField } from './SettingsPasswordField';
+import { SettingsTagsField } from './SettingsTagsField';
 
 interface ServerSettingsFormProps {
   data: Record<string, unknown>;
@@ -107,19 +108,21 @@ function renderFieldControl(
   }
 
   if (key === 'tags') {
-    const tagText = Array.isArray(v) ? v.map((x) => String(x)).join(', ') : String(v ?? '');
+    const tagList = Array.isArray(v)
+      ? v.map((x) => String(x).trim()).filter(Boolean)
+      : typeof v === 'string'
+        ? v.split(',').map((x) => x.trim()).filter(Boolean)
+        : [];
     return (
-      <input
-        className="input"
-        autoComplete="off"
-        data-lpignore="true"
-        data-1p-ignore="true"
-        data-bwignore="true"
-        data-fcc-non-credential="1"
-        placeholder="tag1, tag2, tag3"
-        value={tagText}
+      <SettingsTagsField
+        tags={tagList}
         disabled={disabled}
-        onChange={(e) => onChange(key, e.target.value)}
+        placeholder={
+          t('server_settings_tags_placeholder') !== 'server_settings_tags_placeholder'
+            ? t('server_settings_tags_placeholder')
+            : 'Add tag...'
+        }
+        onChange={(nextTags) => onChange(key, nextTags)}
       />
     );
   }
@@ -159,7 +162,8 @@ function renderFieldControl(
         value={scalarDisplayValue(key, v)}
         disabled={disabled}
         canReveal={!!canRevealSecrets}
-        maskWithTextSecurity={key === 'token'}
+        canGenerate={key === 'game_password'}
+        maskWithTextSecurity={true}
         t={t}
         onChange={(next) => onChange(key, next)}
       />
@@ -308,11 +312,11 @@ export function ServerSettingsForm(props: ServerSettingsFormProps) {
   const leftoverSections = leftovers.map((cat) => sections.get(cat)).filter(Boolean);
 
   return (
-    <form className="settings-form-isolate" autoComplete="off" noValidate onSubmit={(e) => e.preventDefault()}>
+    <div className="settings-form-isolate" role="group" aria-label="Server settings">
       <div className="settings-columns">
         {orderedSections}
         {leftoverSections}
       </div>
-    </form>
+    </div>
   );
 }
