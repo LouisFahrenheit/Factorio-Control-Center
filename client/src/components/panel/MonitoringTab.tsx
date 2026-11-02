@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import {
   IconGauge,
   IconPlayerPause,
+  IconPlayerStop,
   IconPower,
   IconActivity,
   IconBug,
@@ -264,11 +265,23 @@ export function MonitoringTab({
   const showLiveWidget = Boolean(
     serverRunning && liveData?.active && !isModDisabled,
   );
-  const showPromoBanner = Boolean(
-    !showLiveWidget &&
-      (!isModInstalled || isModDisabled) &&
-      (!serverRunning || (liveData !== undefined && !liveData?.active)),
-  );
+
+  const bannerMode = useMemo<
+    'disabled' | 'server_stopped' | 'waiting_data' | 'uninstalled' | null
+  >(() => {
+    if (showLiveWidget) return null;
+    if (!isModInstalled) return 'uninstalled';
+    if (isModDisabled) return 'disabled';
+    if (!serverRunning) return 'server_stopped';
+    if (!liveData?.active) return 'waiting_data';
+    return null;
+  }, [
+    showLiveWidget,
+    isModInstalled,
+    isModDisabled,
+    serverRunning,
+    liveData?.active,
+  ]);
 
   const hasGameMetrics = useMemo(() => {
     if (liveData?.active && !isModDisabled) return true;
@@ -851,12 +864,14 @@ export function MonitoringTab({
                 </div>
               )}
               </motion.div>
-            ) : showPromoBanner ? (
+            ) : bannerMode ? (
               <motion.div
                 onClick={() => {
-                  if (isModDisabled) {
+                  if (bannerMode === 'disabled') {
                     document.getElementById('tabBtnMods')?.click();
-                  } else {
+                  } else if (bannerMode === 'server_stopped') {
+                    document.getElementById('tabBtnControl')?.click();
+                  } else if (bannerMode === 'uninstalled') {
                     window.open(
                       'https://mods.factorio.com/mod/factorio-control-center-metrics',
                       '_blank',
@@ -865,11 +880,13 @@ export function MonitoringTab({
                   }
                 }}
                 title={
-                  isModDisabled
+                  bannerMode === 'disabled'
                     ? t('metrics_mod_disabled_desc') ||
                       'Мод выключен в списке модов сервера'
-                    : t('metrics_mod_promo_tip') ||
-                      'Страница мода на портале Factorio'
+                    : bannerMode === 'uninstalled'
+                      ? t('metrics_mod_promo_tip') ||
+                        'Страница мода на портале Factorio'
+                      : undefined
                 }
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -883,9 +900,10 @@ export function MonitoringTab({
                   padding: '6px 14px',
                   background:
                     'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%)',
-                  border: isModDisabled
-                    ? '1px solid rgba(245, 159, 0, 0.25)'
-                    : '1px solid rgba(255, 255, 255, 0.08)',
+                  border:
+                    bannerMode === 'disabled'
+                      ? '1px solid rgba(245, 159, 0, 0.25)'
+                      : '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '8px',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                   minWidth: '380px',
@@ -894,10 +912,10 @@ export function MonitoringTab({
                   minHeight: '56px',
                   boxSizing: 'border-box',
                   flexShrink: 0,
-                  cursor: 'pointer',
+                  cursor: bannerMode === 'waiting_data' ? 'default' : 'pointer',
                   userSelect: 'none',
                 }}
-                className="monitoring-promo-banner"
+                className={`monitoring-promo-banner monitoring-promo-banner--${bannerMode}`}
               >
                 <div
                   style={{
@@ -913,12 +931,14 @@ export function MonitoringTab({
                       width: 32,
                       height: 32,
                       borderRadius: '6px',
-                      background: isModDisabled
-                        ? 'rgba(245, 159, 0, 0.08)'
-                        : 'rgba(255, 255, 255, 0.04)',
-                      border: isModDisabled
-                        ? '1px solid rgba(245, 159, 0, 0.2)'
-                        : '1px solid rgba(255, 255, 255, 0.06)',
+                      background:
+                        bannerMode === 'disabled'
+                          ? 'rgba(245, 159, 0, 0.08)'
+                          : 'rgba(255, 255, 255, 0.04)',
+                      border:
+                        bannerMode === 'disabled'
+                          ? '1px solid rgba(245, 159, 0, 0.2)'
+                          : '1px solid rgba(255, 255, 255, 0.06)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -926,13 +946,18 @@ export function MonitoringTab({
                     }}
                   >
                     <AppIcon
-                      name={isModDisabled ? 'science_off' : 'science'}
+                      name={
+                        bannerMode === 'disabled' ? 'science_off' : 'science'
+                      }
                       size={18}
                       style={{
-                        color: isModDisabled
-                          ? 'var(--mantine-color-yellow-filled)'
-                          : 'var(--mantine-color-cyan-filled)',
-                        opacity: isModDisabled ? 0.9 : 0.8,
+                        color:
+                          bannerMode === 'disabled'
+                            ? 'var(--mantine-color-yellow-filled)'
+                            : bannerMode === 'server_stopped'
+                              ? 'var(--accent-soft, #da8216)'
+                              : 'var(--mantine-color-cyan-filled)',
+                        opacity: bannerMode === 'disabled' ? 0.9 : 0.85,
                       }}
                     />
                   </div>
@@ -966,22 +991,37 @@ export function MonitoringTab({
                           fontWeight: 600,
                           padding: '1px 6px',
                           borderRadius: '4px',
-                          background: isModDisabled
-                            ? 'rgba(245, 159, 0, 0.15)'
-                            : 'rgba(255, 255, 255, 0.08)',
-                          border: isModDisabled
-                            ? '1px solid rgba(245, 159, 0, 0.3)'
-                            : undefined,
-                          color: isModDisabled
-                            ? '#fab005'
-                            : 'var(--mantine-color-dimmed)',
+                          background:
+                            bannerMode === 'disabled'
+                              ? 'rgba(245, 159, 0, 0.15)'
+                              : bannerMode === 'server_stopped' ||
+                                  bannerMode === 'waiting_data'
+                                ? 'rgba(32, 201, 151, 0.15)'
+                                : 'rgba(255, 255, 255, 0.08)',
+                          border:
+                            bannerMode === 'disabled'
+                              ? '1px solid rgba(245, 159, 0, 0.3)'
+                              : bannerMode === 'server_stopped' ||
+                                  bannerMode === 'waiting_data'
+                                ? '1px solid rgba(32, 201, 151, 0.3)'
+                                : undefined,
+                          color:
+                            bannerMode === 'disabled'
+                              ? '#fab005'
+                              : bannerMode === 'server_stopped' ||
+                                  bannerMode === 'waiting_data'
+                                ? '#20c997'
+                                : 'var(--mantine-color-dimmed)',
                           letterSpacing: '0.04em',
                           textTransform: 'uppercase',
                         }}
                       >
-                        {isModDisabled
+                        {bannerMode === 'disabled'
                           ? t('metrics_mod_disabled_badge') || 'Отключен'
-                          : t('metrics_mod_promo_badge') || 'Мод'}
+                          : bannerMode === 'server_stopped' ||
+                              bannerMode === 'waiting_data'
+                            ? t('metrics_mod_installed_badge') || 'Активен'
+                            : t('metrics_mod_promo_badge') || 'Мод'}
                       </span>
                     </div>
                     <span
@@ -993,11 +1033,17 @@ export function MonitoringTab({
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {isModDisabled
+                      {bannerMode === 'disabled'
                         ? t('metrics_mod_disabled_desc') ||
                           'Мод выключен в списке модов сервера'
-                        : t('metrics_mod_promo_desc') ||
-                          'Живые исследования, точный UPS, ESPM и загрязнение'}
+                        : bannerMode === 'server_stopped'
+                          ? t('metrics_mod_server_stopped_desc') ||
+                            'Сервер остановлен — живые метрики будут доступны после запуска'
+                          : bannerMode === 'waiting_data'
+                            ? t('metrics_mod_waiting_desc') ||
+                              'Сервер запущен — ожидание данных от мода...'
+                            : t('metrics_mod_promo_desc') ||
+                              'Игровые метрики в реальном времени'}
                     </span>
                   </div>
                 </div>
@@ -1009,25 +1055,64 @@ export function MonitoringTab({
                     gap: '5px',
                     padding: '4px 10px',
                     borderRadius: '6px',
-                    background: isModDisabled
-                      ? 'rgba(245, 159, 0, 0.12)'
-                      : 'rgba(255, 255, 255, 0.04)',
-                    border: isModDisabled
-                      ? '1px solid rgba(245, 159, 0, 0.28)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
-                    color: isModDisabled
-                      ? '#fab005'
-                      : 'var(--mantine-color-text)',
+                    background:
+                      bannerMode === 'disabled'
+                        ? 'rgba(245, 159, 0, 0.12)'
+                        : bannerMode === 'server_stopped'
+                          ? 'rgba(255, 255, 255, 0.04)'
+                          : bannerMode === 'waiting_data'
+                            ? 'rgba(34, 139, 230, 0.12)'
+                            : 'rgba(255, 255, 255, 0.04)',
+                    border:
+                      bannerMode === 'disabled'
+                        ? '1px solid rgba(245, 159, 0, 0.28)'
+                        : bannerMode === 'server_stopped'
+                          ? '1px solid rgba(255, 255, 255, 0.08)'
+                          : bannerMode === 'waiting_data'
+                            ? '1px solid rgba(34, 139, 230, 0.28)'
+                            : '1px solid rgba(255, 255, 255, 0.08)',
+                    color:
+                      bannerMode === 'disabled'
+                        ? '#fab005'
+                        : bannerMode === 'server_stopped'
+                          ? 'var(--mantine-color-dimmed)'
+                          : bannerMode === 'waiting_data'
+                            ? 'var(--mantine-color-blue-filled)'
+                            : 'var(--mantine-color-text)',
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     whiteSpace: 'nowrap',
                     flexShrink: 0,
                   }}
                 >
-                  {isModDisabled ? (
+                  {bannerMode === 'disabled' ? (
                     <>
                       <IconPower size={13} />
                       <span>{t('metrics_mod_enable_btn') || 'Включить'}</span>
+                    </>
+                  ) : bannerMode === 'server_stopped' ? (
+                    <>
+                      <IconPlayerStop size={13} style={{ opacity: 0.7 }} />
+                      <span>
+                        {t('metrics_mod_server_stopped_btn') ||
+                          'Сервер остановлен'}
+                      </span>
+                    </>
+                  ) : bannerMode === 'waiting_data' ? (
+                    <>
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background: 'currentColor',
+                          display: 'inline-block',
+                          opacity: 0.8,
+                        }}
+                      />
+                      <span>
+                        {t('metrics_mod_waiting_btn') || 'Ожидание данных'}
+                      </span>
                     </>
                   ) : (
                     <>
