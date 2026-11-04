@@ -314,6 +314,11 @@ export class DispatchService {
         );
       case 'mod_settings_schema_status':
         return this.modSettingsSchema.status();
+      case 'mod_settings_icon':
+        return {
+          ok: true,
+          buffer: this.modSettingsSchema.getPrototypeIcon(s(kwargs.id, '')),
+        };
       case 'players_summary':
         return this.players.summary();
       case 'sync_bans':

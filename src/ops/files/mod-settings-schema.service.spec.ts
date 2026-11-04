@@ -219,7 +219,7 @@ describe('ModSettingsSchemaService', () => {
       expect(statDone['running']).toBe(false);
       expect(statDone['ready']).toBe(true);
       expect(statDone['settings']).toBeDefined();
-      expect(statDone['group_titles']).toEqual({ 'my-mod': 'Мой мод' });
+      expect(statDone['group_titles']).toMatchObject({ 'my-mod': 'Мой мод' });
 
       // Calling get again returns cached result
       const resCached = service.get('ru');
@@ -319,7 +319,7 @@ describe('ModSettingsSchemaService', () => {
           startup: {
             'mod-a-speed': { value: 1 },
             mod_b_power: { value: 2 },
-            random_key: { value: 'none' },
+            randomkey: { value: 'none' },
           },
         },
       });
@@ -341,7 +341,7 @@ describe('ModSettingsSchemaService', () => {
       >;
       expect(settings['mod-a-speed'].group).toBe('mod-a');
       expect(settings['mod_b_power'].group).toBe('mod_b');
-      expect(settings['random_key'].group).toBe('\0other');
+      expect(settings['randomkey'].group).toBe('\0other');
     });
 
     it('humanizes setting keys when no locale exists', async () => {

@@ -6,6 +6,7 @@ import {
   groupTitle,
   matchesSettingsFilter,
 } from '../../lib/modSettingsUtils';
+import { renderFactorioRichText } from '../../lib/factorioRichText';
 import type { ModSettingsDocument, ModSettingsSection, ModSettingSchemaEntry } from '../../types/modSettings';
 import { SettingField } from './SettingField';
 
@@ -16,6 +17,7 @@ interface ModSettingsSectionPanelProps {
   groupTitles: Record<string, string>;
   filter: string;
   readOnly: boolean;
+  instanceId?: string;
   t: (key: string, ...args: (string | number)[]) => string;
   onChange: (section: ModSettingsSection, key: string, entry: unknown) => void;
 }
@@ -27,6 +29,7 @@ export function ModSettingsSectionPanel({
   groupTitles,
   filter,
   readOnly,
+  instanceId,
   t,
   onChange,
 }: ModSettingsSectionPanelProps) {
@@ -67,8 +70,9 @@ export function ModSettingsSectionPanel({
       {visibleGroups.map(({ groupId, visibleKeys }) => (
         <section key={groupId} className="mod-settings-group">
           <header className="mod-settings-group__header">
-            <AppIcon name="folder_zip" size={18} className="mod-settings-group__icon" />
-            <h3 className="mod-settings-group__title">{groupTitle(groupId, groupTitles, t)}</h3>
+            <h3 className="mod-settings-group__title">
+              {renderFactorioRichText(groupTitle(groupId, groupTitles, t), instanceId)}
+            </h3>
             <span className="mod-settings-group__count">{visibleKeys.length}</span>
           </header>
           <div className="mod-settings-group__body">
@@ -81,6 +85,7 @@ export function ModSettingsSectionPanel({
                   entry={sectionData[key]}
                   meta={settingsMeta[key]}
                   readOnly={readOnly}
+                  instanceId={instanceId}
                   t={t}
                   onChange={onChange}
                 />

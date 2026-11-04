@@ -1,5 +1,13 @@
 import AdmZip from 'adm-zip';
-import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
+import {
+  existsSync,
+  lstatSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  realpathSync,
+  statSync,
+} from 'fs';
 import { basename, dirname, join } from 'path';
 
 export type LocaleSections = Record<string, Record<string, string>>;
@@ -154,15 +162,50 @@ function mergeDataPacksLocalePass(
   }
 }
 
+export function resolveModPackagePath(pkgPath: string): string {
+  if (existsSync(pkgPath)) {
+    try {
+      return realpathSync(pkgPath);
+    } catch {
+      return pkgPath;
+    }
+  }
+  // Try resolving symlink directly if target was moved or relative
+  try {
+    const l = lstatSync(pkgPath);
+    if (l.isSymbolicLink()) {
+      const target = readlinkSync(pkgPath);
+      if (existsSync(target)) return target;
+    }
+  } catch {
+    /* ignore */
+  }
+  // Fallback to data/storage/modpacks
+  const base = basename(pkgPath);
+  const storageDir = join('data', 'storage', 'modpacks');
+  if (existsSync(storageDir)) {
+    try {
+      for (const mp of readdirSync(storageDir)) {
+        const candidate = join(storageDir, mp, 'mods', base);
+        if (existsSync(candidate)) return candidate;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return pkgPath;
+}
+
 const admZipCache = new Map<string, { mtime: number; zip: AdmZip }>();
 
 function getAdmZipCached(zipPath: string): AdmZip | null {
   try {
-    const stat = statSync(zipPath);
-    const cached = admZipCache.get(zipPath);
+    const resolved = resolveModPackagePath(zipPath);
+    const stat = statSync(resolved);
+    const cached = admZipCache.get(resolved);
     if (cached && cached.mtime === stat.mtimeMs) return cached.zip;
-    const zip = new AdmZip(zipPath);
-    admZipCache.set(zipPath, { mtime: stat.mtimeMs, zip });
+    const zip = new AdmZip(resolved);
+    admZipCache.set(resolved, { mtime: stat.mtimeMs, zip });
     if (admZipCache.size > 200) {
       const firstKey = admZipCache.keys().next().value as string | undefined;
       if (firstKey) admZipCache.delete(firstKey);

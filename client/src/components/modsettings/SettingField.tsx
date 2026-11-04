@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FccSwitch } from '../FccSwitch';
 import { choiceLabelText, inferSettingValueKind, isSimpleValueEntry, modSettingValuesEqual, rowShouldUseChoiceCombo } from '../../lib/modSettingsUtils';
+import { renderFactorioRichText, stripFactorioRichText } from '../../lib/factorioRichText';
 import type { ModSettingsSection, ModSettingSchemaEntry } from '../../types/modSettings';
 
 interface SettingFieldProps {
@@ -9,6 +10,7 @@ interface SettingFieldProps {
   entry: unknown;
   meta?: ModSettingSchemaEntry;
   readOnly: boolean;
+  instanceId?: string;
   t: (key: string, ...args: (string | number)[]) => string;
   onChange: (section: ModSettingsSection, key: string, entry: unknown) => void;
 }
@@ -33,19 +35,27 @@ function SettingNameLabel({
   displayName,
   settingKey,
   description,
+  instanceId,
 }: {
   displayName: string;
   settingKey: string;
   description: string;
+  instanceId?: string;
 }) {
-  const tooltip = [description.trim(), settingKey].filter(Boolean).join('\n\n');
+  const cleanDesc = stripFactorioRichText(description).trim();
+  const cleanName = stripFactorioRichText(displayName).trim();
+  const tooltip = [cleanDesc, cleanName !== settingKey ? cleanName : '', settingKey]
+    .filter(Boolean)
+    .join('\n\n');
   return (
     <div className="mod-settings-row__info">
       <div className="mod-settings-row__name" title={tooltip}>
-        {displayName}
+        {renderFactorioRichText(displayName, instanceId)}
       </div>
       {description ? (
-        <div className="mod-settings-row__desc">{description}</div>
+        <div className="mod-settings-row__desc">
+          {renderFactorioRichText(description, instanceId)}
+        </div>
       ) : null}
     </div>
   );
@@ -57,6 +67,7 @@ export function SettingField({
   entry,
   meta,
   readOnly,
+  instanceId,
   t,
   onChange,
 }: SettingFieldProps) {
@@ -84,7 +95,7 @@ export function SettingField({
     const current = isSimpleValueEntry(entry) ? entry.value : undefined;
     return (
       <div className="mod-settings-row">
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control">
           <select
             className="input mod-settings-row__input"
@@ -98,7 +109,7 @@ export function SettingField({
           >
             {allowedChoices.map((choice, idx) => (
               <option key={idx} value={String(idx)}>
-                {choiceLabelText(choice.label, t)}
+                {stripFactorioRichText(choiceLabelText(choice.label, t))}
               </option>
             ))}
           </select>
@@ -111,7 +122,7 @@ export function SettingField({
     const text = jsonDraft || JSON.stringify(entry, null, 2);
     return (
       <div className="mod-settings-row mod-settings-row--json">
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control">
           <textarea
             className="input mod-settings-row__json"
@@ -148,7 +159,7 @@ export function SettingField({
         className="mod-settings-row mod-settings-row--bool"
         onClick={() => !readOnly && setValue(!value)}
       >
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control" onClick={(e) => e.stopPropagation()}>
           <FccSwitch
             id={inputId}
@@ -165,7 +176,7 @@ export function SettingField({
     const n = Number((value as { v?: number })?.v ?? 0);
     return (
       <div className="mod-settings-row">
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control">
           <input
             type="number"
@@ -188,7 +199,7 @@ export function SettingField({
     const rgba = value as { r: number; g: number; b: number; a: number };
     return (
       <div className="mod-settings-row mod-settings-row--color">
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control">
           <div className="mod-settings-row__color">
             <input
@@ -222,7 +233,7 @@ export function SettingField({
     const text = jsonDraft || JSON.stringify(value, null, 2);
     return (
       <div className="mod-settings-row mod-settings-row--json">
-        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+        <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
         <div className="mod-settings-row__control">
           <textarea
             className="input mod-settings-row__json"
@@ -256,7 +267,7 @@ export function SettingField({
   const inputValue = value == null ? '' : String(value);
   return (
     <div className="mod-settings-row">
-      <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} />
+      <SettingNameLabel displayName={displayName} settingKey={settingKey} description={description} instanceId={instanceId} />
       <div className="mod-settings-row__control">
         <input
           type={inputType}

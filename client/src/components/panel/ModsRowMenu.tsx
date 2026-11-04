@@ -61,7 +61,7 @@ export function ModsRowMenu({
           onUpdate();
         }}
       >
-        <AppIcon name="mod_update_" size={16} />
+        <AppIcon name="package_update" size={16} />
         {t('mod_list_update_selected_btn')}
       </button>
       <button

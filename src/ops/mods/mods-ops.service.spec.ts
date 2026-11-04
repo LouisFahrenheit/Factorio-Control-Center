@@ -383,6 +383,64 @@ describe('ModsOpsService', () => {
       expect(status.ok).toBe(true);
       expect(status.total).toBe(1);
     });
+
+    it('does not count 404/not_found mods as failed', async () => {
+      portalMock.fetchFull.mockRejectedValue(new Error('http_404'));
+      mockReadModList.mockReturnValue({
+        mods: [
+          { name: 'base', enabled: true },
+          { name: 'custom_local_mod', enabled: true },
+        ],
+      });
+      portalMock.isBuiltin.mockImplementation(
+        (name: string) => name === 'base',
+      );
+
+      const res = service.checkUpdatesStart();
+      expect(res.ok).toBe(true);
+      expect(res.started).toBe(true);
+      expect(res.total).toBe(1);
+
+      for (let i = 0; i < 30; i++) {
+        const st = service.checkUpdatesStatus();
+        if (!st.running) break;
+        await new Promise((r) => setTimeout(r, 10));
+      }
+
+      const status = service.checkUpdatesStatus();
+      expect(status.running).toBe(false);
+      expect(status.failed).toBe(0);
+      expect(status.done).toBe(1);
+    });
+
+    it('counts real server/network errors as failed', async () => {
+      portalMock.fetchFull.mockRejectedValue(new Error('auth_error'));
+      mockReadModList.mockReturnValue({
+        mods: [
+          { name: 'base', enabled: true },
+          { name: 'flib', enabled: true },
+        ],
+      });
+      portalMock.isBuiltin.mockImplementation(
+        (name: string) => name === 'base',
+      );
+
+      const res = service.checkUpdatesStart();
+      expect(res.ok).toBe(true);
+      expect(res.started).toBe(true);
+      expect(res.total).toBe(1);
+
+      for (let i = 0; i < 30; i++) {
+        const st = service.checkUpdatesStatus();
+        if (!st.running) break;
+        await new Promise((r) => setTimeout(r, 20));
+      }
+
+      const status = service.checkUpdatesStatus();
+      expect(status.running).toBe(false);
+      expect(status.failed).toBe(1);
+      expect(status.done).toBe(1);
+    });
   });
 
   describe('setEnabled and setAllNonBuiltinEnabled', () => {

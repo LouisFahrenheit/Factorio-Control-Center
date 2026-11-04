@@ -18,6 +18,7 @@ import { openModUpdateAllFlow } from '../lib/modUpdateAllFlow';
 import { installConflictsFromPlan, mergeInstallConflicts } from '../lib/modConflictUtils';
 import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { feedbackMsg } from '../lib/apiFeedback';
+import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import { modsArchiveDownloadName, parseContentDispositionFilename } from '../lib/downloadFilename';
 import { useUploadProgress } from '../context/UploadProgressContext';
 import { uploadWithProgress, type UploadProgressInfo } from '../api/uploadWithProgress';
@@ -93,6 +94,16 @@ function modListHasPortalMods(rows: ModRow[]): boolean {
   return rows.some((m) => m && !m.is_builtin);
 }
 
+function isIgnoredCheckError(error?: string): boolean {
+  const err = String(error || '').toLowerCase();
+  return (
+    err === 'http_404' ||
+    err === 'not_found' ||
+    err === 'no_release' ||
+    err === 'builtin'
+  );
+}
+
 /** Automatic portal check at most once per 24h per instance (localStorage). */
 const MODS_PORTAL_CHECK_PERIOD_MS = 24 * 60 * 60 * 1000;
 const MODS_PORTAL_CHECK_TS_PREFIX = 'fcc_mods_portal_check_ts:';
@@ -148,6 +159,7 @@ export function useMods(
   const [fromSaveState, setFromSaveState] = useState<FromSaveState | null>(null);
   const checkPollRef = useRef<number | null>(null);
   const autoCheckRunningRef = useRef(false);
+  const checkIsManualRef = useRef(false);
 
   const openVersionPicker = useCallback(
     (modName?: string) => {
@@ -299,16 +311,29 @@ export function useMods(
         window.clearInterval(checkPollRef.current);
         checkPollRef.current = null;
       }
+      const checkTitle = t('mod_list_check_result_title');
       const err = st?.error ? String(st.error) : '';
+      const isManual = checkIsManualRef.current;
       if (err) {
-        setModsMsg(err, true);
+        notifyErr(checkTitle, err);
       } else if (total > 0) {
-        const failed = Number(st?.failed || 0);
+        let failed = Number(st?.failed || 0);
+        if (st?.results) {
+          failed = Object.values(st.results).filter((r) => !r.ok && !isIgnoredCheckError(r.error)).length;
+        }
         const updates = countAvailableModUpdates(rawRows, st?.results || {});
         if (failed > 0) {
-          setModsMsg(t('mod_list_check_result_summary', String(total), String(updates), String(failed)), true);
+          notifyWarn(
+            checkTitle,
+            t('mod_list_check_result_summary', String(total), String(updates), String(failed)),
+          );
         } else if (updates > 0) {
-          setModsMsg(t('mod_list_check_result_updates_only', String(updates)), false);
+          notifyOk(
+            checkTitle,
+            t('mod_list_check_result_updates_only', String(updates), String(total)),
+          );
+        } else if (isManual) {
+          notifyOk(checkTitle, t('mod_list_check_all_up_to_date', String(total)));
         }
       }
     } catch (e) {
@@ -317,9 +342,10 @@ export function useMods(
         window.clearInterval(checkPollRef.current);
         checkPollRef.current = null;
       }
-      setModsMsg(e instanceof Error ? e.message : String(e), true);
+      const checkTitle = t('mod_list_check_result_title');
+      notifyErr(checkTitle, e instanceof Error ? e.message : String(e));
     }
-  }, [rawRows, setModsMsg, t]);
+  }, [rawRows, t]);
 
   const startModsCheckPolling = useCallback(() => {
     if (checkPollRef.current) window.clearInterval(checkPollRef.current);
@@ -336,12 +362,11 @@ export function useMods(
         if (!manual) modsPortalDailyCheckMarkNow(instanceId);
         return;
       }
+      checkIsManualRef.current = manual;
       if (modsCheckRunning) {
-        setModsMsg(t('about_factorio_update_checking'), false);
         startModsCheckPolling();
         return;
       }
-      setModsMsg(t('about_factorio_update_checking'), false);
       if (rawRows.length) {
         setCheckResults((prev) => {
           const out = { ...prev };
@@ -371,10 +396,11 @@ export function useMods(
         }
       } catch (e) {
         setModsCheckRunning(false);
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        const checkTitle = t('mod_list_check_result_title');
+        notifyErr(checkTitle, localizeModError(e instanceof Error ? e.message : String(e), undefined, t));
       }
     },
-    [blockUpdates, instanceId, modsCheckRunning, rawRows, setModsMsg, startModsCheckPolling, t],
+    [blockUpdates, instanceId, modsCheckRunning, rawRows, startModsCheckPolling, t],
   );
 
   useEffect(() => {

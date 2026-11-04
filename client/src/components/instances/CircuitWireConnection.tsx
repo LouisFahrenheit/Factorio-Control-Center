@@ -26,6 +26,8 @@ interface CircuitWireCoords {
 interface CircuitWireConnectionProps {
   activeTab: string;
   containerRef: RefObject<HTMLElement | null>;
+  mainSelector?: string;
+  subSelector?: string;
 }
 
 function buildOrthogonalPath(
@@ -73,8 +75,13 @@ function buildOrthogonalPath(
 export function CircuitWireConnection({
   activeTab,
   containerRef,
+  mainSelector,
+  subSelector,
 }: CircuitWireConnectionProps) {
-  const hasSubTabs = activeTab === 'maintenance' || activeTab === 'settings';
+  const hasSubTabs =
+    (Boolean(mainSelector) && Boolean(subSelector)) ||
+    activeTab === 'maintenance' ||
+    activeTab === 'settings';
   const [coords, setCoords] = useState<CircuitWireCoords | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const isReduced = webEffectsReduced();
@@ -97,24 +104,32 @@ export function CircuitWireConnection({
       return;
     }
 
-    const panelId =
-      activeTab === 'maintenance'
-        ? 'instanceTabMaintenance'
-        : 'instanceTabSettings';
-    const activePanel = container.querySelector<HTMLElement>(`#${panelId}`);
-    if (!activePanel) {
-      setCoords(null);
-      return;
-    }
+    let mainBtn: HTMLElement | null = null;
+    let subBtn: HTMLElement | null = null;
 
-    const mainBtn = container.querySelector<HTMLElement>(
-      activeTab === 'maintenance'
-        ? '#instanceTabMaintenanceBtn'
-        : '#instanceTabSettingsBtn',
-    );
-    const subBtn = activePanel.querySelector<HTMLElement>(
-      '.sub-tabs .sub-tabs__tab--active',
-    );
+    if (mainSelector && subSelector) {
+      mainBtn = container.querySelector<HTMLElement>(mainSelector);
+      subBtn = container.querySelector<HTMLElement>(subSelector);
+    } else {
+      const panelId =
+        activeTab === 'maintenance'
+          ? 'instanceTabMaintenance'
+          : 'instanceTabSettings';
+      const activePanel = container.querySelector<HTMLElement>(`#${panelId}`);
+      if (!activePanel) {
+        setCoords(null);
+        return;
+      }
+
+      mainBtn = container.querySelector<HTMLElement>(
+        activeTab === 'maintenance'
+          ? '#instanceTabMaintenanceBtn'
+          : '#instanceTabSettingsBtn',
+      );
+      subBtn = activePanel.querySelector<HTMLElement>(
+        '.sub-tabs .sub-tabs__tab--active',
+      );
+    }
 
     if (!mainBtn || !subBtn) {
       setCoords(null);
@@ -152,7 +167,7 @@ export function CircuitWireConnection({
       }
       return { x1, y1, x2, y2, path, length, key };
     });
-  }, [hasSubTabs, activeTab, containerRef]);
+  }, [hasSubTabs, activeTab, containerRef, mainSelector, subSelector]);
 
   useEffect(() => {
     if (!hasSubTabs) {
@@ -161,9 +176,11 @@ export function CircuitWireConnection({
 
     updateCoords();
 
-    const t1 = window.setTimeout(updateCoords, 60);
-    const t2 = window.setTimeout(updateCoords, 180);
-    const t3 = window.setTimeout(updateCoords, 320);
+    const t1 = window.setTimeout(updateCoords, 50);
+    const t2 = window.setTimeout(updateCoords, 150);
+    const t3 = window.setTimeout(updateCoords, 300);
+    const t4 = window.setTimeout(updateCoords, 600);
+    const t5 = window.setTimeout(updateCoords, 1000);
 
     const onResize = () => {
       if (animFrameRef.current !== null) {
@@ -188,6 +205,7 @@ export function CircuitWireConnection({
     }
 
     let observer: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
     if (container) {
       observer = new MutationObserver(() => {
         updateCoords();
@@ -195,14 +213,24 @@ export function CircuitWireConnection({
       observer.observe(container, {
         attributes: true,
         subtree: true,
+        childList: true,
         attributeFilter: ['class', 'aria-selected'],
       });
+
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(() => {
+          onResize();
+        });
+        resizeObserver.observe(container);
+      }
     }
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(t4);
+      clearTimeout(t5);
       if (animFrameRef.current !== null) {
         cancelAnimationFrame(animFrameRef.current);
       }
@@ -212,6 +240,9 @@ export function CircuitWireConnection({
       }
       if (observer) {
         observer.disconnect();
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
       }
     };
   }, [hasSubTabs, updateCoords, containerRef]);

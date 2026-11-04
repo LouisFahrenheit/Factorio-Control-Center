@@ -1,0 +1,417 @@
+/* ==========================================================================
+   Factorio Control Center — Mods Tab
+   ========================================================================== */
+
+#tabPanelMods.tab-panel.tab-panel--active,
+#tabPanelMods {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+#tabPanelMods > .panel.mods-tab__panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  margin-bottom: 0;
+  border-radius: 10px;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 12px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+#tabPanelMods .mods-tab__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  padding: 12px 14px 14px;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+/* ── Mods Toolbar ── */
+
+#tabPanelMods .mods-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 0;
+  padding: 10px 14px;
+  text-align: left;
+  border-radius: 9px;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#tabPanelMods .mods-toolbar__section {
+  display: flex;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+#tabPanelMods .mods-toolbar__section--install {
+  padding-bottom: 10px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+}
+
+#tabPanelMods .mods-toolbar__section--actions {
+  padding-top: 0;
+}
+
+#tabPanelMods .mods-toolbar__sep {
+  display: inline-block;
+  width: 1px;
+  align-self: stretch;
+  min-height: 28px;
+  background: color-mix(
+    in srgb,
+    var(--border-dark) 80%,
+    transparent
+  ) !important;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+#tabPanelMods .mods-toolbar__btn-group {
+  display: inline-flex;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#tabPanelMods .mods-toolbar .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+#tabPanelMods .mods-toolbar__field-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+#tabPanelMods .mods-toolbar__search.input-with-icon {
+  flex: 0 1 200px;
+  min-width: 130px;
+  flex-shrink: 1;
+}
+
+#tabPanelMods .mods-toolbar__grow {
+  flex: 1 1 8px;
+  min-width: 8px;
+}
+
+#tabPanelMods .mods-toolbar__meta-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+#tabPanelMods .mods-toolbar__switch.row__inline-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 3px 6px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 0;
+  transition: opacity 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__switch.row__inline-switch:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#tabPanelMods .mods-toolbar__switch.row__inline-switch:has(input:checked) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#tabPanelMods .mods-toolbar__switch.row__inline-switch:has(input:checked):hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Compact mini-track */
+#tabPanelMods .mods-toolbar__switch .fcc-switch__track {
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-main) 82%, var(--border-dark) 18%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#tabPanelMods .mods-toolbar__switch .fcc-switch__thumb {
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Subtle, polished active state */
+#tabPanelMods .mods-toolbar__switch > input:checked + .fcc-switch__track {
+  background: color-mix(
+    in srgb,
+    var(--accent) 42%,
+    var(--bg-main) 58%
+  );
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--border-dark) 35%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+#tabPanelMods
+  .mods-toolbar__switch
+  > input:checked
+  + .fcc-switch__track
+  .fcc-switch__thumb {
+  transform: translateX(14px);
+  background: var(--accent-selected, var(--accent, #f59e0b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+#tabPanelMods .mods-toolbar__switch .row__inline-switch-label {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__switch:hover .row__inline-switch-label {
+  color: var(--text);
+}
+
+#tabPanelMods .mods-toolbar__switch:has(input:checked) .row__inline-switch-label {
+  color: var(--text-secondary, #cbd5e1);
+}
+
+/* ── Status Meta & Badges in Toolbar Row 1 ────────────────────────────── */
+
+#tabPanelMods .mods-toolbar__portal-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+  flex-wrap: nowrap !important;
+}
+
+#tabPanelMods .mods-toolbar__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text-muted);
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: none;
+  transition: all 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__badge--enabled {
+  color: var(--text-muted);
+  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+}
+
+#tabPanelMods .mods-toolbar__badge--enabled span:last-child {
+  color: var(--text-secondary, #cbd5e1);
+}
+
+#tabPanelMods .mods-toolbar__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--running, #22c55e);
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+#tabPanelMods .mods-toolbar__portal-username.factorio-portal-username,
+#tabPanelMods .factorio-portal-username {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: none;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__portal-username.factorio-portal-username:hover,
+#tabPanelMods .factorio-portal-username:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-widget) 85%, var(--bg-main) 15%);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow: none;
+}
+
+#tabPanelMods .mods-toolbar__portal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: none;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__portal-link:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-widget) 85%, var(--bg-main) 15%);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow: none;
+}
+
+#tabPanelMods .mods-toolbar__portal-link .app-icon {
+  opacity: 0.7;
+  transition: opacity 0.18s ease;
+}
+
+#tabPanelMods .mods-toolbar__portal-link:hover .app-icon {
+  opacity: 1;
+}
+
+#tabPanelMods .active-modpack-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: none;
+  animation: none !important;
+}
+
+/* ── Table Wrapper & Full Fill ───────────────────────────────────────── */
+
+#tabPanelMods .mods-tab__table-wrap,
+#tabPanelMods .table-wrap {
+  flex: 1 1 auto;
+  min-height: 140px;
+  height: 100%;
+  overflow: auto;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+#tabPanelMods table.data--mods {
+  width: 100%;
+  margin: 0;
+}
+
+#tabPanelMods table.data--mods thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+}
+
+/* Row animations */
+#tabPanelMods .mods-tab__table-wrap.table-wrap--enter table.data tbody tr {
+  animation: tableRowEnter 0.22s var(--fcc-spring-ease) both;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  #tabPanelMods .mods-tab__body {
+    padding: 10px 10px 12px;
+  }
+
+  #tabPanelMods .mods-toolbar {
+    padding: 8px 10px;
+  }
+}

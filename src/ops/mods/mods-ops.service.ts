@@ -764,8 +764,13 @@ export class ModsOpsService {
           data: pv,
         });
         this.checkState.done += 1;
-        if (pv.ok) this.checkState.ok_count += 1;
-        else this.checkState.failed += 1;
+        if (pv.ok) {
+          this.checkState.ok_count += 1;
+        } else if (this.isPortalMissingMod(pv.error)) {
+          // Mod does not exist on portal or has no portal release - do not treat as failure
+        } else {
+          this.checkState.failed += 1;
+        }
         this.checkState.results[modName] = pv;
       }
     };
@@ -778,6 +783,16 @@ export class ModsOpsService {
       this.checkState.running = false;
       this.checkState.finished_at = Date.now() / 1000;
     }
+  }
+
+  private isPortalMissingMod(error?: string): boolean {
+    const err = String(error || '').toLowerCase();
+    return (
+      err === 'http_404' ||
+      err === 'not_found' ||
+      err === 'no_release' ||
+      err === 'builtin'
+    );
   }
 
   private portalVersionFromCache(

@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  statSync,
+} from 'fs';
+import { basename, join } from 'path';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { InstancesService } from '../../instances/instances.service';
 import {
@@ -11,6 +17,7 @@ import {
   lookupLocaleString,
   modPackagePathsForInternalName,
   resolveModDisplayTitlesBatch,
+  resolveModPackagePath,
 } from '../mod-display-titles.util';
 import { ModSettings, modSettingsToJsonObject } from '../factorio-data-codec';
 import {
@@ -212,7 +219,8 @@ export class ModSettingsSchemaService {
   private modsPackagesFingerprint(modsDir: string, mods: string[]): string {
     const chunks: string[] = [];
     for (const mod of mods) {
-      for (const pkg of modPackagePathsForInternalName(modsDir, mod)) {
+      for (const rawPkg of modPackagePathsForInternalName(modsDir, mod)) {
+        const pkg = resolveModPackagePath(rawPkg);
         try {
           const st = statSync(pkg);
           chunks.push(`${mod}:${st.mtimeMs}:${st.size}`);
@@ -258,7 +266,6 @@ export class ModSettingsSchemaService {
     const modsDir = sel.pm.modsDir;
     const dataDir = join(sel.item.serverPath, 'data');
     const allMods = this.loadAllModsFromModList(modsDir);
-    const enabledMods = this.loadEnabledModsFromModList(modsDir);
     const datKeys = this.loadSettingKeysFromDat(sel.pm.modSettingsDat);
 
     const ownerMod: Record<string, string> = {};
@@ -270,9 +277,9 @@ export class ModSettingsSchemaService {
       descRefs: {},
     };
 
-    const modTotal = enabledMods.length;
-    for (let idx = 0; idx < enabledMods.length; idx += 1) {
-      const mod = enabledMods[idx];
+    const modTotal = allMods.length;
+    for (let idx = 0; idx < allMods.length; idx += 1) {
+      const mod = allMods[idx];
       this.setProgress({
         phase: 'scan',
         mod,
@@ -280,7 +287,8 @@ export class ModSettingsSchemaService {
         mod_total: modTotal,
       });
       await this.yieldThread();
-      for (const pkg of modPackagePathsForInternalName(modsDir, mod)) {
+      for (const rawPkg of modPackagePathsForInternalName(modsDir, mod)) {
+        const pkg = resolveModPackagePath(rawPkg);
         try {
           if (existsSync(pkg) && !pkg.toLowerCase().endsWith('.zip')) {
             for (const luaPath of this.iterSettingsLuaFilesInDirectory(pkg)) {
@@ -297,18 +305,39 @@ export class ModSettingsSchemaService {
               }
             }
           } else if (pkg.toLowerCase().endsWith('.zip')) {
-            const zip = new AdmZip(pkg);
-            for (const member of this.iterSettingsLuaMembersInZip(zip)) {
-              try {
-                ingestSettingsLuaText(
-                  zip.readAsText(member, 'utf8'),
-                  mod,
-                  ownerMod,
-                  allowedValues,
-                  ui,
-                );
-              } catch {
-                /* ignore */
+            const zip = this.openModZipSafe(pkg);
+            if (!zip) continue;
+            for (const ent of zip.getEntries()) {
+              if (ent.isDirectory) continue;
+              if (isSettingsLuaMember(ent.entryName)) {
+                try {
+                  ingestSettingsLuaText(
+                    zip.readAsText(ent, 'utf8'),
+                    mod,
+                    ownerMod,
+                    allowedValues,
+                    ui,
+                  );
+                } catch {
+                  /* ignore */
+                }
+              } else if (ent.entryName.toLowerCase().endsWith('.cfg')) {
+                // Mod locale .cfg files often define [mod-setting-name]
+                try {
+                  const cfgText = zip.readAsText(ent, 'utf8');
+                  let inSettingName = false;
+                  for (const line of cfgText.split(/\r?\n/)) {
+                    const tr = line.trim();
+                    if (tr.startsWith('[') && tr.endsWith(']')) {
+                      inSettingName = tr.toLowerCase() === '[mod-setting-name]';
+                    } else if (inSettingName && tr.includes('=')) {
+                      const k = tr.split('=')[0]?.trim();
+                      if (k && !ownerMod[k]) ownerMod[k] = mod;
+                    }
+                  }
+                } catch {
+                  /* ignore */
+                }
               }
             }
           }
@@ -402,6 +431,11 @@ export class ModSettingsSchemaService {
       uiLang,
       translateModNames: this.config.translateModNames,
     });
+    for (const gid of groupIds) {
+      if (gid !== OTHER_GROUP && !groupTitles[gid]) {
+        groupTitles[gid] = this.humanizeSettingKey(gid);
+      }
+    }
 
     const payload: SchemaPayload = { settings, group_titles: groupTitles };
     this.cache.set(fingerprint, payload);
@@ -417,35 +451,88 @@ export class ModSettingsSchemaService {
   }
 
   private loadAllModsFromModList(modsDir: string): string[] {
-    return this.readModNamesFromListPath(join(modsDir, 'mod-list.json'), false);
+    return this.readModNamesFromDirectoryAndList(modsDir, false);
   }
 
   private loadEnabledModsFromModList(modsDir: string): string[] {
-    return this.readModNamesFromListPath(join(modsDir, 'mod-list.json'), true);
+    return this.readModNamesFromDirectoryAndList(modsDir, true);
   }
 
-  private readModNamesFromListPath(
-    path: string,
+  private readModNamesFromDirectoryAndList(
+    modsDir: string,
     enabledOnly: boolean,
   ): string[] {
-    if (!existsSync(path)) return [];
-    try {
-      const data = JSON.parse(readFileSync(path, 'utf-8')) as {
-        mods?: { name?: string; enabled?: boolean }[];
-      };
-      const out: string[] = [];
-      const seen = new Set<string>();
-      for (const row of data.mods || []) {
-        const n = String(row?.name || '').trim();
-        if (!n || n === 'base' || seen.has(n)) continue;
-        if (enabledOnly && row.enabled === false) continue;
-        seen.add(n);
-        out.push(n);
+    const out: string[] = [];
+    const seen = new Set<string>();
+
+    // 1. Read from mod-list.json
+    const listPath = join(modsDir, 'mod-list.json');
+    if (existsSync(listPath)) {
+      try {
+        const data = JSON.parse(readFileSync(listPath, 'utf-8')) as {
+          mods?: { name?: string; enabled?: boolean }[];
+        };
+        for (const row of data.mods || []) {
+          const n = String(row?.name || '').trim();
+          if (!n || n === 'base' || seen.has(n)) continue;
+          if (enabledOnly && row.enabled === false) continue;
+          seen.add(n);
+          out.push(n);
+        }
+      } catch {
+        /* ignore */
       }
-      return out;
-    } catch {
-      return [];
     }
+
+    // 2. Discover packages present on disk in modsDir
+    if (existsSync(modsDir)) {
+      try {
+        for (const f of readdirSync(modsDir)) {
+          if (
+            f === 'mod-list.json' ||
+            f === 'mod-settings.dat' ||
+            f.startsWith('.')
+          )
+            continue;
+          const name = f
+            .replace(/_\d+(\.\d+)*\.zip$/i, '')
+            .replace(/\.zip$/i, '')
+            .trim();
+          if (!name || name === 'base' || seen.has(name)) continue;
+          seen.add(name);
+          out.push(name);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    return out;
+
+    // 2. Discover packages present on disk in modsDir
+    if (existsSync(modsDir)) {
+      try {
+        for (const f of readdirSync(modsDir)) {
+          if (
+            f === 'mod-list.json' ||
+            f === 'mod-settings.dat' ||
+            f.startsWith('.')
+          )
+            continue;
+          const name = f
+            .replace(/_\d+(\.\d+)*\.zip$/i, '')
+            .replace(/\.zip$/i, '')
+            .trim();
+          if (!name || name === 'base' || seen.has(name)) continue;
+          seen.add(name);
+          out.push(name);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    return out;
   }
 
   private loadSettingKeysFromDat(path: string): string[] {
@@ -537,11 +624,18 @@ export class ModSettingsSchemaService {
     const owner = ownerMod[settingKey];
     if (owner) return owner;
     const skl = settingKey.toLowerCase();
+    const skn = skl.replace(/[\s_-]+/g, '');
+
+    // 1. Direct or normalized match with known mods
     for (const mod of modsSorted) {
       const ml = mod.toLowerCase();
+      const mn = ml.replace(/[\s_-]+/g, '');
       if (skl === ml || skl.startsWith(`${ml}-`) || skl.startsWith(`${ml}_`))
         return mod;
+      if (skn.startsWith(mn)) return mod;
     }
+
+    // 2. Setting key prefix matching a mod directory/zip or mod name
     if (settingKey.includes('-')) {
       const byPrefix = this.settingGroupByKeyPrefixPackages(
         settingKey,
@@ -556,6 +650,35 @@ export class ModSettingsSchemaService {
       modsSorted,
     );
     if (under) return under;
+
+    // 3. Known / common mod aliases and orphaned settings mappings
+    const aliasMap: Record<string, string> = {
+      fcc: 'fcc-metrics',
+      cybersyn: 'Cybersyn',
+      sqt: 'squeak-through-2',
+      igrys: 'machine-upgrades',
+      arig: 'planetaris-arig',
+      compression: 'planetaris-arig',
+      cactus: 'planetaris-arig',
+      condensing: 'condensing-agricultural-tower',
+      'water-harvesting': 'planetaris-arig',
+      'press-is-steam': 'planetaris-arig',
+      qfb: 'ArmouredBiters',
+      'artillery-bombardment': 'artillery-bombardment-remote',
+      'resource-patch-organizer': 'resource-patch-organizer',
+      'planet-hopper': 'planet-hopper',
+      'space-battery': 'space-battery',
+      'space-cargo-wagon': 'space-trains',
+      'space-fluid-wagon': 'space-trains',
+      'space-locomotive': 'space-trains',
+      cerys: 'Cerys-Moon-of-Fulgora',
+      'multiply-costs': 'Accumulator-V2',
+    };
+
+    for (const [pfx, grp] of Object.entries(aliasMap)) {
+      if (skl.includes(pfx)) return grp;
+    }
+
     return OTHER_GROUP;
   }
 
@@ -570,8 +693,11 @@ export class ModSettingsSchemaService {
       const cand = parts.slice(0, end).join('-');
       if (!cand) continue;
       if (modPackagePathsForInternalName(modsDir, cand).length) return cand;
+      const candN = cand.toLowerCase().replace(/[\s_-]+/g, '');
       const foundMod = modsSorted.find(
-        (m) => m.toLowerCase() === cand.toLowerCase(),
+        (m) =>
+          m.toLowerCase() === cand.toLowerCase() ||
+          m.toLowerCase().replace(/[\s_-]+/g, '') === candN,
       );
       if (foundMod) return foundMod;
     }
@@ -590,8 +716,11 @@ export class ModSettingsSchemaService {
       const cand = parts.slice(0, end).join('_');
       if (!cand) continue;
       if (modPackagePathsForInternalName(modsDir, cand).length) return cand;
+      const candN = cand.toLowerCase().replace(/[\s_-]+/g, '');
       const foundMod = modsSorted.find(
-        (m) => m.toLowerCase() === cand.toLowerCase(),
+        (m) =>
+          m.toLowerCase() === cand.toLowerCase() ||
+          m.toLowerCase().replace(/[\s_-]+/g, '') === candN,
       );
       if (foundMod) return foundMod;
     }
@@ -636,6 +765,17 @@ export class ModSettingsSchemaService {
       const kl = key.toLowerCase();
       if (kl.startsWith(`${ol}-`)) push(key.slice(owner.length + 1));
       else if (kl.startsWith(`${ol}_`)) push(key.slice(owner.length + 1));
+      const on = ol.replace(/[\s_-]+/g, '');
+      const kn = kl.replace(/[\s_-]+/g, '');
+      if (kn.startsWith(on) && kn.length > on.length) {
+        // try slicing prefix by words
+        const words = key.split(/[-_\s]+/);
+        const ownerWords = owner.split(/[-_\s]+/);
+        if (words.length > ownerWords.length) {
+          push(words.slice(ownerWords.length).join('-'));
+          push(words.slice(ownerWords.length).join('_'));
+        }
+      }
     }
     return out;
   }
@@ -694,6 +834,51 @@ export class ModSettingsSchemaService {
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  private interpolateLocalePlaceholders(
+    rawText: string,
+    sections: LocaleSections,
+    enSections: LocaleSections,
+  ): string {
+    if (!rawText || !rawText.includes('__')) return rawText;
+
+    return rawText.replace(
+      /__([A-Z_]+)__([^_\s]+(?:-[^_\s]+)*)__/g,
+      (match, typeRaw: string, id: string) => {
+        const type = typeRaw.toLowerCase();
+        let category = '';
+        if (type === 'item') category = 'item-name';
+        else if (type === 'entity') category = 'entity-name';
+        else if (type === 'fluid') category = 'fluid-name';
+        else if (type === 'technology') category = 'technology-name';
+        else if (type === 'recipe') category = 'recipe-name';
+        else if (type === 'equipment') category = 'equipment-name';
+        else if (type === 'tile') category = 'tile-name';
+        else if (type === 'control') category = 'controls';
+
+        let localizedLabel = '';
+        if (category) {
+          localizedLabel =
+            lookupLocaleString(sections, category, id) ||
+            lookupLocaleString(enSections, category, id) ||
+            '';
+        }
+
+        // Check alternate categories or direct lookup
+        if (!localizedLabel) {
+          localizedLabel =
+            lookupLocaleString(sections, 'item-name', id) ||
+            lookupLocaleString(sections, 'entity-name', id) ||
+            lookupLocaleString(enSections, 'item-name', id) ||
+            lookupLocaleString(enSections, 'entity-name', id) ||
+            '';
+        }
+
+        const label = localizedLabel || this.humanizeSettingKey(id);
+        return `[${type}=${id}|${label}]`;
+      },
+    );
+  }
+
   private resolveSettingText(
     key: string,
     ui: LuaSettingUiRefs,
@@ -702,24 +887,47 @@ export class ModSettingsSchemaService {
     owner: string | undefined,
     description: boolean,
   ): string {
+    let resolved = '';
     const refs = description ? ui.descRefs[key] : ui.titleRefs[key];
     if (refs) {
       const got = this.resolveLocRef(sections, refs[0], refs[1]);
-      if (got) return got;
-      const enGot = this.resolveLocRef(enSections, refs[0], refs[1]);
-      if (enGot) return enGot;
+      if (got) resolved = got;
+      else {
+        const enGot = this.resolveLocRef(enSections, refs[0], refs[1]);
+        if (enGot) resolved = enGot;
+      }
     }
 
-    const active = this.lookupSettingLocale(sections, key, owner, description);
-    if (active) return active;
-    const en = this.lookupSettingLocale(enSections, key, owner, description);
-    if (en) return en;
+    if (!resolved) {
+      const active = this.lookupSettingLocale(
+        sections,
+        key,
+        owner,
+        description,
+      );
+      if (active) resolved = active;
+      else {
+        const en = this.lookupSettingLocale(
+          enSections,
+          key,
+          owner,
+          description,
+        );
+        if (en) resolved = en;
+      }
+    }
 
-    const inline = description ? ui.descriptions[key] : ui.titles[key];
-    if (inline && !this.isRawSettingKeyLabel(inline, key)) return inline;
+    if (!resolved) {
+      const inline = description ? ui.descriptions[key] : ui.titles[key];
+      if (inline && !this.isRawSettingKeyLabel(inline, key)) resolved = inline;
+    }
 
-    if (description) return '';
-    return this.humanizeSettingKey(key);
+    if (!resolved) {
+      if (description) return '';
+      resolved = this.humanizeSettingKey(key);
+    }
+
+    return this.interpolateLocalePlaceholders(resolved, sections, enSections);
   }
 
   private settingDisplayName(
@@ -773,5 +981,156 @@ export class ModSettingsSchemaService {
     }
     if (typeof value === 'boolean') return value ? 'yes' : 'no';
     return String(value);
+  }
+
+  private openModZipSafe(filePath: string): AdmZip | null {
+    try {
+      return new AdmZip(filePath);
+    } catch {
+      try {
+        if (existsSync(filePath)) {
+          const real = realpathSync(filePath);
+          return new AdmZip(real);
+        }
+      } catch {
+        /* ignore */
+      }
+      // Check storage/modpacks directory as fallback for symlinks across disks
+      const base = basename(filePath);
+      const storageDir = join('data', 'storage', 'modpacks');
+      if (existsSync(storageDir)) {
+        try {
+          for (const mp of readdirSync(storageDir)) {
+            const candidate = join(storageDir, mp, 'mods', base);
+            if (existsSync(candidate)) {
+              try {
+                return new AdmZip(candidate);
+              } catch {
+                /* ignore */
+              }
+            }
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return null;
+  }
+
+  getPrototypeIcon(id: string): Buffer | null {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return null;
+
+    const clean = String(id || '')
+      .toLowerCase()
+      .trim();
+    if (!clean || /[^a-z0-9_-]/i.test(clean)) return null;
+
+    const dataDir = join(sel.item.serverPath, 'data');
+    const modsDir = sel.pm.modsDir;
+
+    // 1. Vanilla packages check
+    for (const sub of [
+      'base',
+      'space-age',
+      'quality',
+      'elevated-rails',
+      'core',
+    ]) {
+      const candidates = [
+        join(dataDir, sub, 'graphics', 'icons', `${clean}.png`),
+        join(dataDir, sub, 'graphics', 'icons', 'fluid', `${clean}.png`),
+        join(dataDir, sub, 'graphics', 'technology', `${clean}.png`),
+        join(dataDir, sub, 'graphics', 'item-group', `${clean}.png`),
+        join(
+          dataDir,
+          sub,
+          'graphics',
+          'icons',
+          'ammo-category',
+          `${clean}.png`,
+        ),
+        join(dataDir, sub, 'graphics', 'icons', 'signal', `${clean}.png`),
+        join(dataDir, sub, 'graphics', 'icons', 'category', `${clean}.png`),
+      ];
+
+      for (const p of candidates) {
+        if (existsSync(p)) {
+          try {
+            return readFileSync(p);
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+    }
+
+    // 2. Mod zips check: prototype lua definition pointing to icon
+    if (!existsSync(modsDir)) return null;
+
+    let modFiles: string[] = [];
+    try {
+      modFiles = readdirSync(modsDir).filter((f) =>
+        f.toLowerCase().endsWith('.zip'),
+      );
+    } catch {
+      return null;
+    }
+
+    const openedZips: AdmZip[] = [];
+    for (const f of modFiles) {
+      const zip = this.openModZipSafe(join(modsDir, f));
+      if (zip) openedZips.push(zip);
+    }
+
+    if (openedZips.length === 0) return null;
+
+    // Regex support: name="id" ... icon=... with optional Lua concatenation: .. "icons/..."
+    const rx = new RegExp(
+      `name\\s*=\\s*["']${clean}["'][\\s\\S]{1,750}?icon\\s*=\\s*(?:[a-zA-Z0-9_.]+\\s*\\.\\.\\s*)?["']([^"']+)["']`,
+    );
+
+    let foundIconSubpath: string | null = null;
+    for (const zip of openedZips) {
+      for (const e of zip.getEntries()) {
+        if (!e.entryName.endsWith('.lua')) continue;
+        const text = zip.readAsText(e);
+        const m = text.match(rx);
+        if (m && m[1]) {
+          foundIconSubpath = m[1]
+            .replace(/__[a-zA-Z0-9_-]+__\//, '')
+            .replace(/\\/g, '/');
+          break;
+        }
+      }
+      if (foundIconSubpath) break;
+    }
+
+    // Search for foundIconSubpath across ALL opened mod zips (e.g. cargo-ships-graphics)
+    if (foundIconSubpath) {
+      for (const zip of openedZips) {
+        for (const ze of zip.getEntries()) {
+          if (ze.entryName.endsWith(foundIconSubpath)) {
+            return ze.getData();
+          }
+        }
+      }
+    }
+
+    // 3. Fallback: match png file name in mods
+    for (const zip of openedZips) {
+      for (const ze of zip.getEntries()) {
+        if (!ze.entryName.toLowerCase().endsWith('.png')) continue;
+        const base = ze.entryName
+          .split('/')
+          .pop()
+          ?.replace('.png', '')
+          .toLowerCase();
+        if (base === clean) return ze.getData();
+      }
+    }
+
+    return null;
   }
 }

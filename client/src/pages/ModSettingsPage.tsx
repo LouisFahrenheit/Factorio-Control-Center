@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { modals } from '@mantine/modals';
 import { Navigate } from 'react-router';
 import { AppLoadingShell } from '../components/AppLoadingShell';
-import { TabLoadingPlaceholder } from '../components/TabLoadingPlaceholder';
 import { AppStatusBar } from '../components/AppStatusBar';
 import { AboutModal } from '../components/modals/AboutModal';
-import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../components/AppIcon';
 import { SearchField } from '../components/SearchField';
 import { UserSettingsModal } from '../components/modals/UserSettingsModal';
+import { CircuitWireConnection } from '../components/instances/CircuitWireConnection';
 import { ModSettingsSectionPanel } from '../components/modsettings/ModSettingsSectionPanel';
 import { useAuth, userHasTab } from '../hooks/useAuth';
 import { useInstances } from '../hooks/useInstances';
@@ -39,6 +38,7 @@ export default function ModSettingsPage() {
   const t = useT();
   const { ready } = useLocale();
   const { user, logout } = useAuth();
+  const shellRef = useRef<HTMLDivElement>(null);
   const instances = useInstances(true, t);
   const selectedId = String(instances.selectedId || '');
   const selectedInstance = useMemo(
@@ -146,72 +146,56 @@ export default function ModSettingsPage() {
           t={t}
         />
         <main className="workspace__main workspace__main--panel mod-settings-page">
-          <div className="mod-settings-page__shell">
+          <div className="mod-settings-page__shell" ref={shellRef}>
+            <CircuitWireConnection
+              activeTab={modSettings.activeSection}
+              containerRef={shellRef}
+              mainSelector="#tabModSettings"
+              subSelector=".sub-tabs .sub-tabs__tab--active"
+            />
             <section className="mod-settings-page__card">
               <header className="mod-settings-page__topbar">
                 <button
                   type="button"
-                  className="btn btn--compact btn--with-icon mod-settings-page__back"
+                  className="status-bar__back instance-dashboard-stat status-bar__back--nav mod-settings-page__back-btn"
                   id="btnModSettingsBack"
+                  title={t('mods_btn')}
                   onClick={handleBack}
                 >
-                  <AppIcon name="arrow_back" size={16} />
-                  {t('mods_btn')}
+                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                    <AppIcon name="arrow_back" size={16} title={t('mods_btn')} />
+                  </span>
+                  <div className="instance-dashboard-stat__body">
+                    <span className="instance-dashboard-stat__label">
+                      {t('mods_btn')}
+                    </span>
+                    <span className="instance-dashboard-stat__value">
+                      {t('web_back')}
+                    </span>
+                  </div>
                 </button>
-                <h1 className="mod-settings-page__title">
-                  <AppIcon name="edit_document" size={18} />
-                  {t('mod_settings_editor_title')}
-                </h1>
-                <div className="mod-settings-page__actions">
+                <div className="tabs mod-settings-page__header-tabs" role="tablist">
                   <button
                     type="button"
-                    className="btn btn--toolbar-icon"
-                    title={t('saves_manager_refresh')}
-                    aria-label={t('saves_manager_refresh')}
-                    disabled={modSettings.loading}
-                    onClick={() => void modSettings.reload(true)}
+                    className="tabs__tab btn--with-icon tabs__tab--active"
+                    id="tabModSettings"
+                    role="tab"
+                    aria-selected="true"
                   >
-                    <IconRefresh size={18} />
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn--with-icon"
-                    id="btnModSettingsSave"
-                    disabled={
-                      modSettings.readOnly ||
-                      modSettings.loading ||
-                      modSettings.saving ||
-                      !modSettings.dirty
-                    }
-                    onClick={() => void modSettings.save()}
-                  >
-                    <AppIcon name="save" size={16} />
-                    {t('save_btn')}
+                    <span className="tabs__tab-inner">
+                      <AppIcon name="package_settings" size={20} />
+                      {t('mod_settings_editor_title')}
+                    </span>
                   </button>
                 </div>
               </header>
 
-              {serverBusy ||
-              modSettings.dirty ||
-              (!modSettings.schemaLoading && modSettings.schemaCached) ||
-              !hintDismissed ? (
+              {serverBusy || !hintDismissed ? (
                 <div className="mod-settings-page__banners">
                   {serverBusy ? (
                     <p className="mod-settings-page__banner mod-settings-page__banner--warn">
                       <AppIcon name="info" size={16} />
                       <span>{t('server_running_mutate_blocked')}</span>
-                    </p>
-                  ) : null}
-                  {modSettings.dirty ? (
-                    <p className="mod-settings-page__banner mod-settings-page__banner--dirty">
-                      <AppIcon name="edit" size={16} />
-                      <span>{t('mod_settings_unsaved_title')}</span>
-                    </p>
-                  ) : null}
-                  {!modSettings.schemaLoading && modSettings.schemaCached ? (
-                    <p className="mod-settings-page__banner mod-settings-page__banner--info">
-                      <AppIcon name="info" size={16} />
-                      <span>{t('mod_settings_schema_cached_hint')}</span>
                     </p>
                   ) : null}
                   {!hintDismissed ? (
@@ -241,31 +225,25 @@ export default function ModSettingsPage() {
                 </div>
               ) : null}
 
-              {modSettings.schemaLoading ? (
-                <div className="mod-settings-progress" aria-live="polite">
-                  <div className="mod-settings-progress__track">
-                    <div
-                      className="mod-settings-progress__bar"
-                      style={{
-                        width:
-                          progressPct == null
-                            ? '100%'
-                            : `${Math.max(4, progressPct)}%`,
-                      }}
-                    />
+              {modSettings.schemaLoading || (modSettings.loading && !modSettings.doc) ? (
+                <div className="mod-settings-page__loading-state" aria-live="polite">
+                  <div className="mod-settings-progress">
+                    <div className="mod-settings-progress__track">
+                      <div
+                        className="mod-settings-progress__bar"
+                        style={{
+                          width:
+                            progressPct == null
+                              ? '100%'
+                              : `${Math.max(4, progressPct)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mod-settings-progress__label">
+                      {progressLabel}
+                    </p>
                   </div>
-                  <p className="mod-settings-progress__label">
-                    {progressLabel}
-                  </p>
                 </div>
-              ) : null}
-
-              {modSettings.loading && !modSettings.doc ? (
-                <TabLoadingPlaceholder
-                  variant="form"
-                  label={t('tab_data_loading')}
-                  className="mod-settings-page__loading"
-                />
               ) : modSettings.error ? (
                 <div className="mod-settings-page__banners">
                   <p className="mod-settings-page__banner mod-settings-page__banner--error">
@@ -281,6 +259,47 @@ export default function ModSettingsPage() {
               ) : modSettings.doc ? (
                 <div className="mod-settings-page__content">
                   <div className="mod-settings-page__toolbar">
+                    <div className="mod-settings-page__filter">
+                      <SearchField
+                        id="inpModSettingsFilter"
+                        placeholder={t('search_placeholder')}
+                        autoComplete="off"
+                        value={modSettings.filter}
+                        onChange={(e) => modSettings.setFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="mod-settings-page__toolbar-actions">
+                      <button
+                        type="button"
+                        className="btn btn--with-icon"
+                        id="btnModSettingsRefresh"
+                        title={t('saves_manager_refresh')}
+                        disabled={modSettings.loading}
+                        onClick={() => void modSettings.reload(true)}
+                      >
+                        <AppIcon name="refresh" size={16} />
+                        {t('saves_manager_refresh')}
+                      </button>
+                      <button
+                        type="button"
+                        className={
+                          'btn btn--with-icon' +
+                          (modSettings.dirty ? ' btn--update-available' : '')
+                        }
+                        id="btnModSettingsSave"
+                        disabled={
+                          modSettings.readOnly ||
+                          modSettings.loading ||
+                          modSettings.saving ||
+                          !modSettings.dirty
+                        }
+                        onClick={() => void modSettings.save()}
+                      >
+                        <AppIcon name="save" size={16} />
+                        {t('save_btn')}
+                      </button>
+                    </div>
+                    <span className="mod-settings-page__toolbar-sep" aria-hidden="true" />
                     <div
                       className="sub-tabs mod-settings-page__tabs"
                       role="tablist"
@@ -309,15 +328,27 @@ export default function ModSettingsPage() {
                         </button>
                       ))}
                     </div>
-                    <div className="mod-settings-page__filter">
-                      <SearchField
-                        id="inpModSettingsFilter"
-                        placeholder={t('search_placeholder')}
-                        autoComplete="off"
-                        value={modSettings.filter}
-                        onChange={(e) => modSettings.setFilter(e.target.value)}
-                      />
-                    </div>
+                    {modSettings.dirty ? (
+                      <div
+                        className="mod-settings-page__unsaved-widget"
+                        role="status"
+                        aria-live="polite"
+                        title={t('mod_settings_unsaved_title')}
+                      >
+                        <span className="mod-settings-page__unsaved-widget-dot" aria-hidden="true" />
+                        <AppIcon name="edit" size={14} />
+                        <span>{t('mod_settings_unsaved_title')}</span>
+                      </div>
+                    ) : null}
+                    {!modSettings.schemaLoading && modSettings.schemaCached ? (
+                      <span
+                        className="mod-settings-page__cached-badge"
+                        title={t('mod_settings_schema_cached_hint')}
+                      >
+                        <AppIcon name="info" size={13} />
+                        {t('mod_settings_schema_cached_hint')}
+                      </span>
+                    ) : null}
                   </div>
                   <div className="mod-settings-page__body">
                     <ModSettingsSectionPanel
@@ -327,6 +358,7 @@ export default function ModSettingsPage() {
                       groupTitles={modSettings.groupTitles}
                       filter={modSettings.filter}
                       readOnly={modSettings.readOnly}
+                      instanceId={selectedId}
                       t={t}
                       onChange={modSettings.updateEntry}
                     />

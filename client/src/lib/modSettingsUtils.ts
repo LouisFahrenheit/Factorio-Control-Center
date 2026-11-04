@@ -1,3 +1,4 @@
+import { stripFactorioRichText } from './factorioRichText';
 import {
   MOD_SETTINGS_SECTIONS,
   MOD_SETTINGS_OTHER_GROUP,
@@ -147,13 +148,18 @@ export function matchesSettingsFilter(
 ): boolean {
   const ft = filter.trim().toLowerCase();
   if (!ft) return true;
-  const disp = String(meta?.display_name || key).toLowerCase();
+  const rawDisp = String(meta?.display_name || key);
+  const cleanDisp = stripFactorioRichText(rawDisp).toLowerCase();
+  const rawDesc = String(meta?.description || '');
+  const cleanDesc = stripFactorioRichText(rawDesc).toLowerCase();
   const groupId = meta?.group || MOD_SETTINGS_OTHER_GROUP;
-  const gtitle = groupTitle(groupId, groupTitles, t).toLowerCase();
+  const gtitle = stripFactorioRichText(groupTitle(groupId, groupTitles, t)).toLowerCase();
   const gid = groupId === MOD_SETTINGS_OTHER_GROUP ? '' : groupId.toLowerCase();
   return (
     key.toLowerCase().includes(ft) ||
-    disp.includes(ft) ||
+    cleanDisp.includes(ft) ||
+    cleanDesc.includes(ft) ||
+    rawDisp.toLowerCase().includes(ft) ||
     gtitle.includes(ft) ||
     (!!gid && gid.includes(ft))
   );

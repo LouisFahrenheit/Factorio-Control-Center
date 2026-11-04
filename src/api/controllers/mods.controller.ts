@@ -31,6 +31,7 @@ import { tmpdir } from 'os';
 import { extname, join } from 'path';
 import type { Request, Response } from 'express';
 import { AuthGuard, AUTH_USER_KEY } from '../../auth/auth.guard';
+import { Public } from '../../auth/public.decorator';
 import { SessionUser } from '../../common/types';
 import { ApiBridgeService } from '../api-bridge.service';
 
@@ -658,6 +659,38 @@ export class ModsController {
   modSettingsSchemaStatus(@Query('instance_id') instanceId?: string) {
     const iid = this.explicitInstanceId(instanceId);
     return this.bridge.submit('mod_settings_schema_status', {}, iid);
+  }
+
+  @Public()
+  @Get('mod-settings/icon')
+  @ApiOperation({ summary: 'Get game or mod prototype icon image' })
+  @ApiQuery({ name: 'id', description: 'Prototype or item identifier' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'PNG icon stream' })
+  @ApiResponse({ status: 404, description: 'Icon not found' })
+  async modSettingsIcon(
+    @Query('id') id: string,
+    @Res() res: Response,
+    @Query('instance_id') instanceId?: string,
+  ) {
+    const cleanId = String(id || '').trim();
+    if (!cleanId || /[^a-z0-9_-]/i.test(cleanId)) {
+      return res.status(404).end();
+    }
+    const iid = this.explicitInstanceId(instanceId);
+    const result = (await this.bridge.submit(
+      'mod_settings_icon',
+      { id: cleanId },
+      iid,
+    )) as { ok?: boolean; buffer?: Buffer | null };
+
+    if (!result?.buffer || !Buffer.isBuffer(result.buffer)) {
+      return res.status(404).end();
+    }
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    return res.end(result.buffer);
   }
 
   @Get('modpacks')

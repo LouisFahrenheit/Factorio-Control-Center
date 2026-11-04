@@ -6,7 +6,10 @@ import { allowedPanelTabs } from '../../lib/permissions';
 import { SCREEN_HEADER_VARIANTS } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
 import type { AuthUser } from '../../types/instance';
-import { useSlidingTabIndicator, TAB_INDICATOR_ID_ATTR } from '../../hooks/useSlidingTabIndicator';
+import {
+  useSlidingTabIndicator,
+  TAB_INDICATOR_ID_ATTR,
+} from '../../hooks/useSlidingTabIndicator';
 import { AppIcon } from '../AppIcon';
 import { SlidingTabIndicator } from '../SlidingTabHighlight';
 
@@ -14,7 +17,7 @@ const PANEL_TAB_ICONS: Record<PanelTabKey, AppIconName> = {
   main: 'start',
   serverSettings: 'settings',
   saves: 'save',
-  mods: 'list',
+  mods: 'package',
   modpacks: 'folder_copy',
   commands: 'terminal',
   stats: 'users',
@@ -30,7 +33,13 @@ interface PanelTabBarProps {
   t: (key: string) => string;
 }
 
-export function PanelTabBar({ user, active, onChange, animate = true, t }: PanelTabBarProps) {
+export function PanelTabBar({
+  user,
+  active,
+  onChange,
+  animate = true,
+  t,
+}: PanelTabBarProps) {
   const tabs = allowedPanelTabs(user);
   const reduced = webEffectsReduced() || !animate;
   const tablistRef = useRef<HTMLElement>(null);
@@ -52,7 +61,10 @@ export function PanelTabBar({ user, active, onChange, animate = true, t }: Panel
         <button
           key={tab.key}
           type="button"
-          className={'tabs__tab btn--with-icon' + (active === tab.key ? ' tabs__tab--active' : '')}
+          className={
+            'tabs__tab btn--with-icon' +
+            (active === tab.key ? ' tabs__tab--active' : '')
+          }
           role="tab"
           id={tab.btnId}
           aria-controls={tab.panelId}
