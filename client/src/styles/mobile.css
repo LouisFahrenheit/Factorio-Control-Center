@@ -1060,12 +1060,22 @@ body.mobile-has-nav {
   z-index: 1;
   margin: 0;
   padding: 14px 18px 10px;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.72rem;
   font-weight: 700;
+  line-height: 1.35;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   text-align: center;
   color: color-mix(in srgb, var(--text) 88%, var(--accent) 12%);
+  transition: color 0.15s ease;
+}
+
+.mobile-login__card-title--error {
+  color: var(--error, #e55353) !important;
 }
 
 .mobile-login__form {

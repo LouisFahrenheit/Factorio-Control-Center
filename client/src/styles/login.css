@@ -339,15 +339,53 @@
 .login-portal__gate .panel__title {
   margin: 0;
   padding: 0 32px 10px;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.35;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text-dim);
   background: none !important;
   border: none !important;
   text-shadow: none;
+  transition: color 0.15s ease;
+}
+
+.login-portal__gate .panel__title.panel__title--error {
+  color: var(--error, #e55353);
+}
+
+.login-portal__gate .panel__title.panel__title--blink,
+.mobile-login__card-title--blink {
+  animation: login-title-blink 0.5s ease-in-out 1;
+}
+
+@keyframes login-title-blink {
+  0% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+    filter: brightness(1.75);
+    text-shadow:
+      0 0 8px currentColor,
+      0 0 18px currentColor;
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    text-shadow: none;
+  }
+}
+
+:root[data-web-disable-effects='1'] .login-portal__gate .panel__title.panel__title--blink,
+:root[data-web-disable-effects='1'] .mobile-login__card-title--blink {
+  animation: none;
 }
 
 .login-portal__gate .panel__body {

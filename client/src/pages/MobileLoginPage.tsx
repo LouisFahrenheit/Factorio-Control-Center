@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { IconEye, IconEyeOff, IconLock, IconShieldLock, IconUser } from '@tabler/icons-react';
-import { api, isLoginDeniedError, localizeAuthError, setToken } from '../api/client';
+import { api, localizeAuthError, setToken } from '../api/client';
 import { clearLoginBlockers, clearShellAnimations } from '../lib/authUi';
 import { syncThemeBackdrop } from '../theme/themeBackdrop';
 import { markFreshLogin } from '../lib/navFlags';
@@ -29,6 +29,8 @@ export default function MobileLoginPage() {
   const [capsOn, setCapsOn] = useState(false);
   const [authMsg, setAuthMsg] = useState('');
   const [authErr, setAuthErr] = useState(false);
+  const [blinkKey, setBlinkKey] = useState(0);
+  const [titleBlink, setTitleBlink] = useState(false);
   const [busy, setBusy] = useState(false);
   const [hudStat, setHudStat] = useState<'awaiting' | 'denied' | 'granted'>('awaiting');
   const [hudVersion, setHudVersion] = useState('—');
@@ -51,6 +53,13 @@ export default function MobileLoginPage() {
       : hudStat === 'granted'
         ? t('web_login_access_granted')
         : t('web_login_hud_awaiting');
+  const defaultTitle =
+    step === 'setup'
+      ? t('web_setup_title')
+      : step === '2fa'
+        ? t('web_2fa_title')
+        : t('web_login_title');
+  const displayTitle = authMsg.trim() || defaultTitle;
 
   useEffect(() => {
     document.body.classList.add('mobile-mode');
@@ -71,9 +80,20 @@ export default function MobileLoginPage() {
     void fetchAppHealth().then((h) => setHudVersion(formatLoginHudVersion(h)));
   }, [ready]);
 
+  useEffect(() => {
+    if (blinkKey > 0) {
+      setTitleBlink(true);
+      const timer = setTimeout(() => setTitleBlink(false), 550);
+      return () => clearTimeout(timer);
+    }
+  }, [blinkKey]);
+
   function showAuthMsg(text: string, isErr: boolean) {
     setAuthMsg(text);
     setAuthErr(isErr);
+    if (text) {
+      setBlinkKey((k) => k + 1);
+    }
   }
 
   function updateCaps(ev: KeyboardEvent<HTMLInputElement>) {
@@ -152,11 +172,7 @@ export default function MobileLoginPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setHudStat('denied');
-      if (isLoginDeniedError(msg)) {
-        showAuthMsg('', false);
-      } else {
-        showAuthMsg(localizeAuthError(msg, t), true);
-      }
+      showAuthMsg(localizeAuthError(msg, t), true);
     } finally {
       setBusy(false);
     }
@@ -187,11 +203,7 @@ export default function MobileLoginPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setHudStat('denied');
-      if (isLoginDeniedError(msg)) {
-        showAuthMsg('', false);
-      } else {
-        showAuthMsg(localizeAuthError(msg, t), true);
-      }
+      showAuthMsg(localizeAuthError(msg, t), true);
     } finally {
       setBusy(false);
     }
@@ -285,12 +297,11 @@ export default function MobileLoginPage() {
           <span className="mobile-login__corner mobile-login__corner--br" aria-hidden="true" />
           <span className="mobile-login__card-accent" aria-hidden="true" />
 
-          <h2 className="mobile-login__card-title">
-            {step === 'setup'
-              ? t('web_setup_title')
-              : step === '2fa'
-                ? t('web_2fa_title')
-                : t('web_login_title')}
+          <h2
+            className={`mobile-login__card-title${authErr && authMsg ? ' mobile-login__card-title--error' : ''}${titleBlink ? ' mobile-login__card-title--blink' : ''}`}
+            aria-live="polite"
+          >
+            {displayTitle}
           </h2>
 
           {step === 'setup' ? (
@@ -331,7 +342,10 @@ export default function MobileLoginPage() {
                     placeholder={t('web_setup_username_placeholder')}
                     value={username}
                     disabled={busy}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (authMsg) showAuthMsg('', false);
+                    }}
                   />
                 </span>
               </label>
@@ -351,7 +365,10 @@ export default function MobileLoginPage() {
                     placeholder={t('web_setup_password_placeholder')}
                     value={password}
                     disabled={busy}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (authMsg) showAuthMsg('', false);
+                    }}
                     onKeyDown={updateCaps}
                     onKeyUp={updateCaps}
                     onBlur={() => setCapsOn(false)}
@@ -390,7 +407,10 @@ export default function MobileLoginPage() {
                     placeholder={t('web_setup_confirm_placeholder')}
                     value={confirmPassword}
                     disabled={busy}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (authMsg) showAuthMsg('', false);
+                    }}
                     onKeyDown={updateCaps}
                     onKeyUp={updateCaps}
                     onBlur={() => setCapsOn(false)}
@@ -401,16 +421,6 @@ export default function MobileLoginPage() {
               {capsOn ? (
                 <div className="mobile-login__caps" role="status" aria-live="polite">
                   {t('web_login_caps_warning')}
-                </div>
-              ) : null}
-
-              {authMsg ? (
-                <div
-                  className={`mobile-login__msg${authErr ? ' mobile-login__msg--err' : ''}`}
-                  role="status"
-                  aria-live="polite"
-                >
-                  {authMsg}
                 </div>
               ) : null}
 
@@ -442,6 +452,7 @@ export default function MobileLoginPage() {
                     disabled={busy}
                     onChange={(e) => {
                       setUsername(e.target.value);
+                      if (authMsg) showAuthMsg('', false);
                       if (hudStat === 'denied') setHudStat('awaiting');
                     }}
                     onKeyDown={(e) => {
@@ -474,6 +485,7 @@ export default function MobileLoginPage() {
                     disabled={busy}
                     onChange={(e) => {
                       setPassword(e.target.value);
+                      if (authMsg) showAuthMsg('', false);
                       if (hudStat === 'denied') setHudStat('awaiting');
                     }}
                     onKeyDown={(e) => {
@@ -541,6 +553,7 @@ export default function MobileLoginPage() {
                     onChange={(e) => {
                       const val = isRecovery ? e.target.value : e.target.value.replace(/\D/g, '');
                       setTwoFactorCode(val);
+                      if (authMsg) showAuthMsg('', false);
                       if (hudStat === 'denied') setHudStat('awaiting');
                       if (!isRecovery && val.length === 6) {
                         setTimeout(() => void doVerify2fa(val), 50);
@@ -606,12 +619,6 @@ export default function MobileLoginPage() {
           <p className="mobile-login__caps" hidden={!capsOn || step === '2fa'}>
             {t('web_login_caps_warning')}
           </p>
-
-          {authMsg ? (
-            <p className={`mobile-login__msg${authErr ? ' mobile-login__msg--error' : ''}`} aria-live="polite">
-              {authMsg}
-            </p>
-          ) : null}
         </article>
       </main>
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { IconEye, IconEyeOff, IconLock, IconShieldLock, IconUser } from '@tabler/icons-react';
-import { api, isLoginDeniedError, localizeAuthError, setToken } from '../api/client';
+import { api, localizeAuthError, setToken } from '../api/client';
 // Theme picker on login — temporarily hidden (restore import + block below when ready)
 // import { LoginThemePicker } from '../components/LoginThemePicker';
 import { clearLoginBlockers, clearShellAnimations } from '../lib/authUi';
@@ -37,6 +37,8 @@ export default function LoginPage() {
   const [capsOn, setCapsOn] = useState(false);
   const [authMsg, setAuthMsg] = useState('');
   const [authErr, setAuthErr] = useState(false);
+  const [blinkKey, setBlinkKey] = useState(0);
+  const [titleBlink, setTitleBlink] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [hudStat, setHudStat] = useState<'awaiting' | 'denied' | 'granted'>('awaiting');
@@ -60,6 +62,13 @@ export default function LoginPage() {
       : hudStat === 'granted'
         ? t('web_login_access_granted')
         : t('web_login_hud_awaiting');
+  const defaultTitle =
+    step === 'setup'
+      ? t('web_setup_title')
+      : step === '2fa'
+        ? t('web_2fa_title')
+        : t('web_login_title');
+  const displayTitle = authMsg.trim() || defaultTitle;
   const theme = useEffectiveTheme();
   const isCryo = theme === 'cryogenics';
 
@@ -80,9 +89,20 @@ export default function LoginPage() {
     void fetchAppHealth().then((h) => setHudVersion(formatLoginHudVersion(h)));
   }, [ready]);
 
+  useEffect(() => {
+    if (blinkKey > 0) {
+      setTitleBlink(true);
+      const timer = setTimeout(() => setTitleBlink(false), 550);
+      return () => clearTimeout(timer);
+    }
+  }, [blinkKey]);
+
   function showAuthMsg(text: string, isErr: boolean) {
     setAuthMsg(text);
     setAuthErr(isErr);
+    if (text) {
+      setBlinkKey((k) => k + 1);
+    }
   }
 
   function updateCaps(ev: KeyboardEvent<HTMLInputElement>) {
@@ -162,11 +182,7 @@ export default function LoginPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setHudStat('denied');
-      if (isLoginDeniedError(msg)) {
-        showAuthMsg('', false);
-      } else {
-        showAuthMsg(localizeAuthError(msg, t), true);
-      }
+      showAuthMsg(localizeAuthError(msg, t), true);
     } finally {
       setBusy(false);
     }
@@ -197,11 +213,7 @@ export default function LoginPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setHudStat('denied');
-      if (isLoginDeniedError(msg)) {
-        showAuthMsg('', false);
-      } else {
-        showAuthMsg(localizeAuthError(msg, t), true);
-      }
+      showAuthMsg(localizeAuthError(msg, t), true);
     } finally {
       setBusy(false);
     }
@@ -306,12 +318,11 @@ export default function LoginPage() {
         </div>
 
         <section className="panel login-screen__panel login-portal__gate" ref={panelRef}>
-          <h2 className="panel__title">
-            {step === 'setup'
-              ? t('web_setup_title')
-              : step === '2fa'
-                ? t('web_2fa_title')
-                : t('web_login_title')}
+          <h2
+            className={`panel__title${authErr && authMsg ? ' panel__title--error' : ''}${titleBlink ? ' panel__title--blink' : ''}`}
+            aria-live="polite"
+          >
+            {displayTitle}
           </h2>
           <div className="panel__body">
             {step === 'setup' ? (
@@ -359,7 +370,10 @@ export default function LoginPage() {
                           placeholder={t('web_setup_username_placeholder')}
                           value={username}
                           disabled={busy}
-                          onChange={(e) => setUsername(e.target.value)}
+                          onChange={(e) => {
+                            setUsername(e.target.value);
+                            if (authMsg) showAuthMsg('', false);
+                          }}
                         />
                       </span>
                     </span>
@@ -381,7 +395,10 @@ export default function LoginPage() {
                           placeholder={t('web_setup_password_placeholder')}
                           value={password}
                           disabled={busy}
-                          onChange={(e) => setPassword(e.target.value)}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (authMsg) showAuthMsg('', false);
+                          }}
                           onKeyDown={updateCaps}
                           onKeyUp={updateCaps}
                           onBlur={() => setCapsOn(false)}
@@ -422,7 +439,10 @@ export default function LoginPage() {
                           placeholder={t('web_setup_confirm_placeholder')}
                           value={confirmPassword}
                           disabled={busy}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                            if (authMsg) showAuthMsg('', false);
+                          }}
                           onKeyDown={updateCaps}
                           onKeyUp={updateCaps}
                           onBlur={() => setCapsOn(false)}
@@ -470,6 +490,7 @@ export default function LoginPage() {
                           disabled={busy}
                           onChange={(e) => {
                             setUsername(e.target.value);
+                            if (authMsg) showAuthMsg('', false);
                             if (hudStat === 'denied') setHudStat('awaiting');
                           }}
                           onKeyDown={(e) => {
@@ -504,6 +525,7 @@ export default function LoginPage() {
                           disabled={busy}
                           onChange={(e) => {
                             setPassword(e.target.value);
+                            if (authMsg) showAuthMsg('', false);
                             if (hudStat === 'denied') setHudStat('awaiting');
                           }}
                           onKeyDown={(e) => {
@@ -591,6 +613,7 @@ export default function LoginPage() {
                           onChange={(e) => {
                             const val = isRecovery ? e.target.value : e.target.value.replace(/\D/g, '');
                             setTwoFactorCode(val);
+                            if (authMsg) showAuthMsg('', false);
                             if (hudStat === 'denied') setHudStat('awaiting');
                             if (!isRecovery && val.length === 6) {
                               setTimeout(() => void doVerify2fa(val), 50);
@@ -664,11 +687,10 @@ export default function LoginPage() {
 
         <p
           id="authMsg"
-          className={`hint login-screen__auth-msg login-portal__msg${authErr ? ' error' : ''}`}
-          aria-live="polite"
-        >
-          {authMsg}
-        </p>
+          className="login-portal__msg"
+          style={{ display: 'none' }}
+          aria-hidden="true"
+        />
 
         <footer className="login-screen__hud login-portal__foot login-portal__telemetry" aria-hidden="true">
           <div className="login-portal__telemetry-head">
