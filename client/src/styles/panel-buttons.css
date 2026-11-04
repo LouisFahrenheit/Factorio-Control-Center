@@ -217,20 +217,33 @@
 
 .workspace__main--panel #btnFactorioUpdate.btn--update-available:not(:disabled),
 .panel-shell #btnFactorioUpdate.btn--update-available:not(:disabled) {
-  border-color: var(--accent) !important;
   color: color-mix(in srgb, var(--accent) 85%, white 15%) !important;
-  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3) !important;
+  animation: factorio-update-btn-accent-pulse 1.4s ease-in-out infinite !important;
 }
 
 .workspace__main--panel
   #btnFactorioUpdate.btn--update-available:hover:not(:disabled),
 .panel-shell #btnFactorioUpdate.btn--update-available:hover:not(:disabled) {
+  animation: none !important;
+  border-color: var(--accent) !important;
   background: color-mix(
     in srgb,
     var(--accent) 26%,
     var(--bg-widget) 74%
   ) !important;
   box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.45) !important;
+}
+
+@keyframes factorio-update-btn-accent-pulse {
+  0%,
+  100% {
+    border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
+    box-shadow: none;
+  }
+  50% {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35);
+  }
 }
 
 /* ── Modals within or spawned by Panel ───────────────────────────────── */

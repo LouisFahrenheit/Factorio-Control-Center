@@ -78,6 +78,8 @@ export class ProgramOpsService {
       server_settings_default_public_off: wp.server_settings_default_public_off,
       server_settings_apply_global_credentials:
         wp.server_settings_apply_global_credentials,
+      auto_download_missing_startup_deps:
+        wp.auto_download_missing_startup_deps !== false,
       modpack_activate_use_symlinks: this.bool(
         shared.modpack_activate_use_symlinks,
         true,
@@ -201,6 +203,7 @@ export class ProgramOpsService {
       'require_unique_instance_game_ports',
       'server_settings_default_public_off',
       'server_settings_apply_global_credentials',
+      'auto_download_missing_startup_deps',
       'toast_duration_sec',
       'log_rotation_max_mb',
       'log_rotation_interval_hours',
@@ -243,6 +246,7 @@ export class ProgramOpsService {
         key === 'require_unique_instance_game_ports' ||
         key === 'server_settings_default_public_off' ||
         key === 'server_settings_apply_global_credentials' ||
+        key === 'auto_download_missing_startup_deps' ||
         key.startsWith('log_write_') ||
         key === 'log_reformat_timestamps' ||
         key === 'tls_enabled' ||

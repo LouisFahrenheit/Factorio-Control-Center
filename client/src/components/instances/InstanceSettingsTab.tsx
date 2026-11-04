@@ -525,6 +525,15 @@ export function InstanceSettingsTab({
                       }
                     />
                     <SettingsToggleRow
+                      label={t('program_auto_download_missing_startup_deps_cb')}
+                      hint={t('program_auto_download_missing_startup_deps_tip')}
+                      htmlFor="cbSelectorAutoDownloadMissingStartupDeps"
+                      checked={s.auto_download_missing_startup_deps !== false}
+                      onChange={(checked) =>
+                        void settings.setAutoDownloadMissingStartupDeps(checked)
+                      }
+                    />
+                    <SettingsToggleRow
                       label={t('program_require_unique_game_ports_cb')}
                       hint={t('program_require_unique_game_ports_tip')}
                       htmlFor="cbSelectorRequireUniqueGamePorts"

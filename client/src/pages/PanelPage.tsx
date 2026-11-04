@@ -85,6 +85,7 @@ export default function PanelPage() {
     staleTime: 60_000,
   });
   const reformatLogTimestamps = programSettingsQuery.data?.log_reformat_timestamps !== false;
+  const autoDownloadMissingDeps = programSettingsQuery.data?.auto_download_missing_startup_deps !== false;
 
   const onModJobComplete = useCallback(() => {
     void qc.invalidateQueries({ queryKey: ['mods'] });
@@ -163,6 +164,7 @@ export default function PanelPage() {
     modJob,
     activeTab === 'mods' ? mods.removeOldZips : true,
     t,
+    autoDownloadMissingDeps,
   );
 
   const serverRunning = panelKind === 'running';

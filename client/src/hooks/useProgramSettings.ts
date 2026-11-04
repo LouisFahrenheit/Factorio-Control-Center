@@ -126,6 +126,19 @@ export function useProgramSettings(
     [qc, saveField],
   );
 
+  const setAutoDownloadMissingStartupDeps = useCallback(
+    async (checked: boolean) => {
+      setDraft((d) => ({ ...d, auto_download_missing_startup_deps: checked }));
+      try {
+        await saveField({ auto_download_missing_startup_deps: checked });
+        await qc.invalidateQueries({ queryKey: ['program', 'settings'] });
+      } catch {
+        setDraft((d) => ({ ...d, auto_download_missing_startup_deps: !checked }));
+      }
+    },
+    [qc, saveField],
+  );
+
   const setSyncBans = useCallback(
     async (checked: boolean) => {
       setDraft((d) => ({ ...d, sync_bans_across_instances: checked }));
@@ -582,6 +595,7 @@ export function useProgramSettings(
     patchDraft,
     setTlsEnabled,
     setModpackUseSymlinks,
+    setAutoDownloadMissingStartupDeps,
     setSyncBans,
     setSyncAdmins,
     setSyncWhitelist,

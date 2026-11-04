@@ -1,6 +1,7 @@
+import { useLayoutEffect, useRef } from 'react';
 import { AppIcon } from './AppIcon';
 import { roleLabel, userRoleClass } from '../lib/webUserUtils';
-import { formatDashboardGameVersion, resolveStatusKind, statusLabel, type PanelStatus } from '../types/panel';
+import { formatDashboardGameVersion, resolveStatusKind, statusLabel, statusTooltip, type PanelStatus } from '../types/panel';
 import { formatRamGb, formatUptime } from '../lib/instanceUtils';
 import type { AuthUser, HostCpuInfo, HostDiskInfo, HostMemoryInfo } from '../types/instance';
 
@@ -26,8 +27,84 @@ interface AppStatusBarProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-function formatPanelUptime(sec: number | null | undefined): string {
-  return formatUptime(sec, '');
+function formatPanelUptime(sec: number | null | undefined, placeholder: string): string {
+  return formatUptime(sec, placeholder);
+}
+
+function useAutoFitText(text: string, minScale = 0.58) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let rafId: number | null = null;
+    let isFitting = false;
+
+    const fit = () => {
+      if (isFitting) return;
+      isFitting = true;
+
+      try {
+        // Reset any inline font size overrides so we can measure the unconstrained size
+        el.style.removeProperty('--panel-server-name-font-size');
+        el.style.removeProperty('font-size');
+
+        const clientWidth = el.clientWidth;
+        if (clientWidth <= 0) return;
+
+        const scrollWidth = el.scrollWidth;
+        if (scrollWidth <= clientWidth) {
+          // Fits naturally at base CSS font size
+          return;
+        }
+
+        const computed = window.getComputedStyle(el);
+        const baseFontSizePx = parseFloat(computed.fontSize) || 14.72;
+        const minPx = Math.max(8, Math.round(baseFontSizePx * minScale * 10) / 10);
+
+        // Calculate target font size to fit inside clientWidth (with 4% safety margin)
+        const ratio = clientWidth / scrollWidth;
+        let currentPx = Math.max(minPx, Math.floor(baseFontSizePx * ratio * 0.96 * 10) / 10);
+
+        const applyFontSize = (px: number) => {
+          el.style.setProperty('--panel-server-name-font-size', `${px}px`);
+          el.style.setProperty('font-size', `${px}px`, 'important');
+        };
+
+        applyFontSize(currentPx);
+
+        // Fine-tune in small steps if font metrics still slightly overflow
+        while (el.scrollWidth > clientWidth && currentPx > minPx) {
+          currentPx = Math.max(minPx, Math.round((currentPx - 0.3) * 10) / 10);
+          applyFontSize(currentPx);
+        }
+      } finally {
+        isFitting = false;
+      }
+    };
+
+    fit();
+    if (typeof requestAnimationFrame !== 'undefined') {
+      rafId = requestAnimationFrame(fit);
+    }
+
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      void document.fonts.ready.then(() => fit());
+    }
+
+    const onResize = () => fit();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      if (rafId !== null && typeof cancelAnimationFrame !== 'undefined') {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('resize', onResize);
+    };
+  }, [text, minScale]);
+
+  return ref;
 }
 
 export function AppStatusBar({
@@ -45,6 +122,7 @@ export function AppStatusBar({
   const isInstances = mode === 'instances';
   const placeholder = t('server_uptime_placeholder');
   const panelServerName = String(serverName || '').trim() || placeholder;
+  const serverNameRef = useAutoFitText(panelServerName);
   const kind = resolveStatusKind(status);
   const roleText = user ? roleLabel(user.role, t) : '';
   const statusIcon =
@@ -302,6 +380,7 @@ export function AppStatusBar({
                   </span>
                   <span
                     id="panelServerName"
+                    ref={serverNameRef}
                     className="instance-dashboard-stat__value instance-dashboard-stat__value--compact"
                     title={panelServerName}
                   >
@@ -309,7 +388,10 @@ export function AppStatusBar({
                   </span>
                 </div>
               </div>
-              <div className={'instance-dashboard-stat panel-dashboard-stat--status panel-dashboard-stat--' + kind}>
+              <div
+                className={'instance-dashboard-stat panel-dashboard-stat--status panel-dashboard-stat--' + kind}
+                title={status ? statusTooltip(status, t) : undefined}
+              >
                 <span className="instance-dashboard-stat__icon" aria-hidden="true">
                   <AppIcon name={statusIcon} size={16} />
                 </span>
@@ -320,6 +402,7 @@ export function AppStatusBar({
                   <span
                     id="statusLed"
                     className={'instance-dashboard-stat__value panel-dashboard-stat__value panel-dashboard-stat__value--' + kind}
+                    title={status ? statusTooltip(status, t) : undefined}
                   >
                     {status ? statusLabel(status, t) : '—'}
                   </span>
@@ -403,8 +486,8 @@ export function AppStatusBar({
                   </span>
                   <span id="uptimeVal" className="instance-dashboard-stat__value">
                     {status?.server_running
-                      ? formatPanelUptime(status.uptime_seconds)
-                      : ''}
+                      ? formatPanelUptime(status.uptime_seconds, placeholder)
+                      : placeholder}
                   </span>
                 </div>
               </div>

@@ -1853,24 +1853,24 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 /* Mod dependency confirmation (install / update / startup) */
 .fcc-modal--mod-deps {
-  width: min(780px, 96vw);
+  width: min(520px, 94vw);
+  max-height: min(85vh, 640px);
 }
 
-.fcc-modal--mod-deps {
-  width: min(920px, 95vw);
-  max-height: min(88vh, 760px);
+.fcc-modal--mod-deps--split {
+  width: min(780px, 96vw);
 }
 
 .fcc-modal--mod-deps.mantine-Modal-content {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-height: min(88vh, 760px);
+  max-height: min(85vh, 640px);
 }
 
 .fcc-modal--mod-deps .mod-deps-confirm__modal-header {
   flex-shrink: 0;
-  padding-bottom: 10px;
+  padding: 12px 18px 10px;
 }
 
 .fcc-modal--mod-deps .mod-deps-confirm__modal-body {
@@ -1879,17 +1879,19 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  padding-top: 0;
+  padding: 12px 18px 14px;
 }
 
 .mod-deps-confirm__title {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
 .mod-deps-confirm__title-icon {
-  opacity: 0.92;
+  opacity: 0.95;
   color: var(--accent);
 }
 
@@ -1913,7 +1915,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .mod-deps-confirm__columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
@@ -1931,40 +1933,50 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   overflow: hidden;
 }
 
+.mod-deps-confirm__header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
 .mod-deps-confirm__intro,
 .mod-deps-confirm__outro {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.92rem;
-  line-height: 1.4;
+  font-size: 0.88rem;
+  line-height: 1.35;
 }
 
 .mod-deps-confirm__outro {
   flex-shrink: 0;
-  margin-top: 10px;
+  margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 72%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 65%, transparent);
 }
 
 .mod-deps-confirm__meta {
   display: flex;
   align-items: center;
-  margin: 8px 0;
+  margin: 6px 0;
   flex-shrink: 0;
 }
 
 .mod-deps-confirm__count {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 9px 3px 7px;
+  gap: 5px;
+  padding: 2px 7px 2px 6px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--accent) 88%, #fff 12%);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--accent) 92%, #fff 8%);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .mod-deps-confirm__count-icon {
@@ -1972,145 +1984,57 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-deps-confirm__count--conflict {
-  color: color-mix(in srgb, var(--warning, #e3941c) 88%, #fff 12%);
+  color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
   background: color-mix(in srgb, var(--warning, #e3941c) 14%, transparent);
-  border-color: color-mix(in srgb, var(--warning, #e3941c) 34%, transparent);
+  border-color: color-mix(in srgb, var(--warning, #e3941c) 30%, transparent);
 }
 
 .mod-deps-confirm__conflicts--split {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 72%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 65%, transparent);
 }
 
 .mod-deps-confirm__conflicts-intro {
-  margin: 0 0 8px;
-  color: color-mix(in srgb, var(--warning, #e3941c) 72%, var(--text-muted) 28%);
-  font-size: 0.92rem;
-  line-height: 1.4;
+  margin: 0;
+  color: color-mix(in srgb, var(--warning, #e3941c) 75%, var(--text-muted) 25%);
+  font-size: 0.88rem;
+  line-height: 1.35;
   flex-shrink: 0;
-}
-
-.mod-deps-confirm__list-wrap--conflict {
-  border-color: color-mix(in srgb,
-      var(--warning, #e3941c) 26%,
-      var(--border-dark) 74%);
-  background: color-mix(in srgb,
-      var(--warning, #e3941c) 4%,
-      var(--bg-main) 96%);
-}
-
-.mod-deps-confirm__item--conflict {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
-  border-color: color-mix(in srgb,
-      var(--warning, #e3941c) 22%,
-      var(--border-dark) 78%);
-  background: color-mix(in srgb,
-      var(--warning, #e3941c) 5%,
-      var(--bg-widget) 95%);
-}
-
-.mod-deps-confirm__item--conflict:hover {
-  border-color: color-mix(in srgb,
-      var(--warning, #e3941c) 38%,
-      var(--border-dark) 62%);
-  background: color-mix(in srgb,
-      var(--warning, #e3941c) 9%,
-      var(--bg-widget) 91%);
-}
-
-.mod-deps-confirm__list--conflicts {
-  grid-template-columns: 1fr;
-}
-
-.mod-deps-confirm__conflict-mark {
-  position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-  margin-top: 2px;
-  width: 28px;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: color-mix(in srgb,
-      var(--warning, #e3941c) 18%,
-      var(--bg-main) 82%);
-  border: 1px solid color-mix(in srgb, var(--warning, #e3941c) 42%, transparent);
-  color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
-}
-
-.mod-deps-confirm__conflict-mark-icon {
-  opacity: 0.95;
-}
-
-.mod-deps-confirm__conflict-bang {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68rem;
-  font-weight: 800;
-  line-height: 1;
-  color: #fff;
-  background: color-mix(in srgb, var(--warning, #e3941c) 88%, #000 12%);
-  border: 1px solid color-mix(in srgb, #000 20%, transparent);
-}
-
-.mod-deps-confirm__conflict-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
-
-.mod-deps-confirm__name--conflict {
-  color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
-  font-weight: 600;
-}
-
-.mod-deps-confirm__conflict-builtin {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-muted);
 }
 
 .mod-deps-confirm__list-wrap {
-  flex: 1 1 auto;
-  min-height: 120px;
-  max-height: min(440px, 52vh);
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: min(260px, 45vh);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px;
+  padding: 5px;
   margin: 0;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--bg-main) 55%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.mod-deps-confirm__list-wrap--conflict {
+  border-color: color-mix(in srgb, var(--warning, #e3941c) 26%, var(--border-dark) 74%);
+  background: color-mix(in srgb, var(--warning, #e3941c) 4%, var(--bg-main) 96%);
 }
 
 .mod-deps-confirm__list {
   list-style: none;
   margin: 0;
-  padding: 4px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .mod-deps-confirm__columns--single .mod-deps-confirm__list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .mod-deps-confirm__item {
@@ -2118,9 +2042,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 65%, transparent);
   transition:
     border-color 0.15s ease,
@@ -2131,7 +2055,18 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .mod-deps-confirm__item:hover {
   border-color: color-mix(in srgb, var(--accent) 42%, var(--border-dark) 58%);
   background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
-  transform: translateY(-1px);
+}
+
+.mod-deps-confirm__item-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
 }
 
 .mod-deps-confirm__item--checkbox {
@@ -2142,8 +2077,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .mod-deps-confirm__item--checkbox input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
   border: 1.5px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   background: color-mix(in srgb, var(--bg-main) 80%, transparent);
@@ -2165,8 +2100,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-deps-confirm__item--checkbox input[type='checkbox']::before {
   content: '';
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   transform: scale(0);
   transition: 120ms transform ease-in-out;
   background-color: var(--accent);
@@ -2183,27 +2118,19 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   transform: scale(1);
 }
 
-.mod-deps-confirm__item-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  margin-top: 1px;
-  opacity: 0.72;
-  color: var(--accent);
-}
-
 .mod-deps-confirm__name-wrap {
   display: flex;
   flex-direction: column;
   min-width: 0;
   flex: 1 1 auto;
-  gap: 2px;
+  gap: 1px;
 }
 
 .mod-deps-confirm__name {
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
-  line-height: 1.35;
+  line-height: 1.3;
   font-size: 0.86rem;
   font-weight: 500;
   color: var(--text);
@@ -2211,12 +2138,85 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-deps-confirm__technical-name {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   opacity: 0.8;
   overflow-wrap: anywhere;
   word-break: break-word;
-  line-height: 1.25;
+  line-height: 1.2;
+}
+
+.mod-deps-confirm__item--conflict {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 9px;
+  border-color: color-mix(in srgb, var(--warning, #e3941c) 22%, var(--border-dark) 78%);
+  background: color-mix(in srgb, var(--warning, #e3941c) 5%, var(--bg-widget) 95%);
+}
+
+.mod-deps-confirm__item--conflict:hover {
+  border-color: color-mix(in srgb, var(--warning, #e3941c) 38%, var(--border-dark) 62%);
+  background: color-mix(in srgb, var(--warning, #e3941c) 9%, var(--bg-widget) 91%);
+}
+
+.mod-deps-confirm__list--conflicts {
+  grid-template-columns: 1fr;
+}
+
+.mod-deps-confirm__conflict-mark {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--warning, #e3941c) 18%, var(--bg-main) 82%);
+  border: 1px solid color-mix(in srgb, var(--warning, #e3941c) 42%, transparent);
+  color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
+}
+
+.mod-deps-confirm__conflict-mark-icon {
+  opacity: 0.95;
+}
+
+.mod-deps-confirm__conflict-bang {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  background: color-mix(in srgb, var(--warning, #e3941c) 88%, #000 12%);
+  border: 1px solid color-mix(in srgb, #000 20%, transparent);
+}
+
+.mod-deps-confirm__conflict-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mod-deps-confirm__name--conflict {
+  color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
+  font-weight: 600;
+}
+
+.mod-deps-confirm__conflict-builtin {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .mod-deps-confirm__footer {
@@ -2224,14 +2224,98 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
 }
 
 .mod-deps-confirm__footer .btn {
-  min-width: 112px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  min-width: 104px;
+  padding: 6px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1.2;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.1s ease;
+}
+
+.mod-deps-confirm__footer .btn:not(.btn--primary) {
+  background: color-mix(in srgb, var(--bg-main) 42%, var(--bg-widget) 58%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+.mod-deps-confirm__footer .btn:not(.btn--primary):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.mod-deps-confirm__footer .btn:not(.btn--primary):active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.mod-deps-confirm__footer .btn.btn--primary {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.26);
+}
+
+.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 32%, var(--bg-widget) 68%);
+  border-color: color-mix(in srgb, var(--accent) 85%, transparent);
+  color: #fff;
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 0 6px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.mod-deps-confirm__footer .btn.btn--primary:active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 40%, var(--bg-widget) 60%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.38);
+}
+
+.mod-deps-confirm__footer .btn .app-icon,
+.mod-deps-confirm__footer .btn svg {
+  color: var(--text-muted);
+  transition: color 0.16s ease;
+}
+
+.mod-deps-confirm__footer .btn:hover:not(:disabled) .app-icon,
+.mod-deps-confirm__footer .btn:hover:not(:disabled) svg {
+  color: var(--accent);
+}
+
+.mod-deps-confirm__footer .btn.btn--primary .app-icon,
+.mod-deps-confirm__footer .btn.btn--primary svg {
+  color: var(--accent);
+}
+
+.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) .app-icon,
+.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) svg {
+  color: #fff;
 }
 
 @media (max-width: 768px) {
@@ -2241,7 +2325,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   }
 
   .mod-deps-confirm__list-wrap {
-    max-height: 220px;
+    max-height: 200px;
   }
 
   .mod-deps-confirm__footer {
@@ -2252,6 +2336,18 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     width: 100%;
     min-width: 0;
   }
+}
+
+/* Mod operation / update progress modal */
+.server-update-dialog__step-badge {
+  color: var(--text-muted) !important;
+  background: color-mix(in srgb, var(--bg-widget) 85%, var(--bg-main) 15%) !important;
+  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
+}
+
+.server-update-dialog__status-card--done {
+  border-color: color-mix(in srgb, var(--border-dark) 84%, transparent) !important;
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%) !important;
 }
 
 /* Update-all mods: unified multi-step flow */
@@ -4650,6 +4746,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   min-width: 0;
 }
 
+/* ==========================================================================
+   Шапка панели инстанса: размеры карточек статуса и параметров сервера
+   ========================================================================== */
+
+/* Общая высота и внутренние отступы для всех карточек в шапке панели */
 .panel-dashboard-top .instance-dashboard-stat {
   flex-shrink: 0;
   box-sizing: border-box;
@@ -4659,14 +4760,41 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   max-height: 44px;
 }
 
+/* 1. Карточка «СЕРВЕР» (название сервера)
+   Здесь регулируется размер карточки сервера.
+   По умолчанию: min-width: 140px. При желании можно задать фиксированную ширину
+   (например, flex: 0 0 200px; width: 200px; min-width: 200px;) или max-width.
+   Если название сервера не умещается в карточку, шрифт автоматически уменьшается. */
 .panel-dashboard-top .panel-dashboard-stat--name {
   min-width: 140px;
 }
 
+.panel-dashboard-top .panel-dashboard-stat--name .instance-dashboard-stat__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--name .instance-dashboard-stat__value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--panel-server-name-font-size, 0.92em) !important;
+  font-weight: 750 !important;
+  color: var(--text, #fff);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+/* 2. Карточка «СТАТУС» (текущее состояние: Запущен, Остановлен, Обслуживание и др.) */
 .panel-dashboard-top .panel-dashboard-stat--status {
-  flex: 0 0 152px;
-  width: 152px;
-  min-width: 152px;
+  flex: 0 0 170px;
+  width: 170px;
+  min-width: 170px;
 }
 
 .panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__body {
@@ -4692,13 +4820,25 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   min-height: 1.2em;
 }
 
+/* Цвет статуса: зеленый при запуске (как в списке серверов), красный при ошибке (иконка остается нейтральной) */
+.panel-dashboard-top .panel-dashboard-stat--status.panel-dashboard-stat--running .instance-dashboard-stat__value,
+.panel-dashboard-top .panel-dashboard-stat--status .panel-dashboard-stat__value--running {
+  color: #4ade80 !important;
+}
+
+.panel-dashboard-top .panel-dashboard-stat--status.panel-dashboard-stat--error .instance-dashboard-stat__value,
+.panel-dashboard-top .panel-dashboard-stat--status .panel-dashboard-stat__value--error {
+  color: var(--error, #ff4d4d) !important;
+}
+
+/* 3. Карточка «IP:ПОРТ» (сетевой bind адрес и порт сервера) */
 .panel-dashboard-top .panel-dashboard-stat--meta:first-of-type {
   flex: 0 0 144px;
   width: 144px;
   min-width: 144px;
 }
 
-/* Keep LAN PUB RUV flags on a single neat line so the card never expands vertically */
+/* 4. Карточка «ВИДИМОСТЬ» (переключатели флагов видимости: LAN / PUB / RUV) */
 .panel-dashboard-top .panel-dashboard-stat--flags {
   flex: 0 0 174px;
   width: 174px;
@@ -4717,18 +4857,21 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   font-size: 0.65em !important;
 }
 
+/* 5. Карточка «ВЕРСИЯ» (номер версии Factorio) */
 .panel-dashboard-top .panel-dashboard-stat--meta:last-of-type {
   flex: 0 0 98px;
   width: 98px;
   min-width: 98px;
 }
 
+/* 6. Карточка «ИГРОКОВ ОНЛАЙН» (счетчик подключенных игроков) */
 .panel-dashboard-top .panel-dashboard-stat--online {
   flex: 0 0 168px;
   width: 168px;
   min-width: 168px;
 }
 
+/* 7. Карточка «ВРЕМЯ РАБОТЫ» (аптайм сервера) */
 .panel-dashboard-top .panel-dashboard-stat--uptime {
   flex: 0 0 168px;
   width: 168px;
@@ -5157,11 +5300,9 @@ table.data thead th.saves-sort-th:hover,
 table.data thead th.instances-sort-th:hover,
 table.data thead th.mods-sort-th:hover {
   color: var(--text) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 8%,
-    var(--bg-widget) 92%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 8%,
+      var(--bg-widget) 92%) !important;
 }
 
 table#tblInstances thead th.instances-sort-th--active,
@@ -5867,11 +6008,9 @@ table.data thead th.saves-sort-th {
 
 table.data thead th.saves-sort-th:hover {
   color: var(--text) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 8%,
-    var(--bg-widget) 92%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 8%,
+      var(--bg-widget) 92%) !important;
 }
 
 table.data thead th.saves-sort-th--active {
@@ -5902,8 +6041,7 @@ table.data thead th.saves-sort-th--asc::after {
   gap: 12px;
   padding: 9px 12px;
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 78%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
   min-height: 52px;
   height: 52px;
   box-sizing: border-box;
@@ -5921,11 +6059,9 @@ table.data thead th.saves-sort-th--asc::after {
   max-height: 34px !important;
   box-sizing: border-box;
   padding: 0 12px 0 10px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 60%,
-    var(--bg-widget) 40%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 60%,
+      var(--bg-widget) 40%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   border-left: 3.5px solid var(--accent) !important;
   border-radius: 6px !important;
@@ -5996,18 +6132,13 @@ table.data thead th.saves-sort-th--asc::after {
 
 .saves-mods-badge--ok {
   color: var(--online-green, #6a9a5c);
-  background: color-mix(
-    in srgb,
-    var(--online-green, #6a9a5c) 14%,
-    var(--bg-main) 86%
-  );
-  border-color: color-mix(
-    in srgb,
-    var(--online-green, #6a9a5c) 36%,
-    transparent
-  );
-  box-shadow: 0 0 6px
-    color-mix(in srgb, var(--online-green, #6a9a5c) 16%, transparent);
+  background: color-mix(in srgb,
+      var(--online-green, #6a9a5c) 14%,
+      var(--bg-main) 86%);
+  border-color: color-mix(in srgb,
+      var(--online-green, #6a9a5c) 36%,
+      transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--online-green, #6a9a5c) 16%, transparent);
 }
 
 .saves-mods-badge--warn {
@@ -6088,8 +6219,7 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center;
   gap: 8px;
   padding: 9px 12px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 78%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
   min-height: 52px;
   height: 52px;
@@ -6164,11 +6294,9 @@ table.data thead th.saves-sort-th--asc::after {
   min-height: 0;
   border: none !important;
   border-radius: 0 !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 62%,
+      var(--bg-widget) 38%) !important;
   box-shadow: none !important;
   overflow: auto;
 }
@@ -6177,18 +6305,15 @@ table.data thead th.saves-sort-th--asc::after {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(
-    in srgb,
-    var(--bg-widget) 92%,
-    var(--bg-main) 8%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-widget) 92%,
+      var(--bg-main) 8%) !important;
   color: var(--text-muted) !important;
   font-size: 0.92em !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
@@ -6261,6 +6386,7 @@ table.data thead th.saves-sort-th--asc::after {
     flex-direction: column;
     overflow-y: auto;
   }
+
   .saves-tab__toolbar {
     flex-wrap: wrap;
     min-height: auto;
@@ -6753,7 +6879,7 @@ table.data thead th.saves-sort-th--asc::after {
   box-sizing: border-box !important;
 }
 
-.server-settings-tab .settings-row__control > * {
+.server-settings-tab .settings-row__control>* {
   width: 100% !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
@@ -6951,6 +7077,7 @@ table.data thead th.saves-sort-th--asc::after {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

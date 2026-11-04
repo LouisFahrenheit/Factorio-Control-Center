@@ -17715,11 +17715,11 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   padding: 0 10px;
   border-radius: 999px;
   font-size: 0.78em;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--accent-selected);
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-main) 88%);
-  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-widget) 85%, var(--bg-main) 15%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
 }
 
 .server-update-dialog__step-track {
@@ -17759,8 +17759,8 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .server-update-dialog__status-card--done {
-  border-color: color-mix(in srgb, var(--running) 28%, var(--border-dark) 72%);
-  background: color-mix(in srgb, var(--running) 7%, var(--bg-widget) 93%);
+  border-color: color-mix(in srgb, var(--border-dark) 84%, transparent);
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
 }
 
 .server-update-dialog__status-card--error {

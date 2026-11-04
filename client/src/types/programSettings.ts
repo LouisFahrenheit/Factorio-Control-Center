@@ -7,6 +7,7 @@ export interface ProgramSettings {
   require_unique_instance_game_ports?: boolean;
   server_settings_default_public_off?: boolean;
   server_settings_apply_global_credentials?: boolean;
+  auto_download_missing_startup_deps?: boolean;
   language?: string;
   available_languages?: string[];
   theme?: string;

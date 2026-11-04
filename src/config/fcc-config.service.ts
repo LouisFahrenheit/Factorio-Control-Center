@@ -27,6 +27,7 @@ export interface WebPanelIni {
   require_unique_instance_game_ports: boolean;
   server_settings_default_public_off: boolean;
   server_settings_apply_global_credentials: boolean;
+  auto_download_missing_startup_deps: boolean;
   log_rotation_max_mb: number;
   log_rotation_interval_hours: number;
   log_rotation_backup_count: number;
@@ -197,6 +198,11 @@ export class FccConfigService implements OnModuleInit {
       server_settings_apply_global_credentials: overrideBool(
         'server_settings_apply_global_credentials',
         'SERVER_SETTINGS_APPLY_GLOBAL_CREDENTIALS',
+        true,
+      ),
+      auto_download_missing_startup_deps: overrideBool(
+        'auto_download_missing_startup_deps',
+        'AUTO_DOWNLOAD_MISSING_STARTUP_DEPS',
         true,
       ),
       log_rotation_max_mb: overrideNum(

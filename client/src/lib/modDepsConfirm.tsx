@@ -2,6 +2,7 @@
 import { createElement, useState, type ReactNode } from 'react';
 import { modals } from '@mantine/modals';
 import { AppIcon } from '../components/AppIcon';
+import type { AppIconName } from './appIcons';
 import { ModDependenciesConfirmBody } from '../components/modals/ModDependenciesConfirmBody';
 import type { ModInstallConflictInfo } from '../types/modConflict';
 
@@ -15,6 +16,7 @@ type ModDepsButton = {
   text: string;
   value: string;
   primary?: boolean;
+  icon?: AppIconName;
 };
 
 type ModDepsModalOptions = {
@@ -176,9 +178,16 @@ function ModDepsModalWrapper({
           {
             key: b.value,
             type: 'button',
-            className: 'btn' + (b.primary ? ' btn--primary' : ''),
+            className: `btn btn--with-icon${b.primary ? ' btn--primary' : ''}`,
             onClick: () => finish(b.value, Array.from(selectedRecommended)),
           },
+          b.icon
+            ? createElement(AppIcon, {
+                name: b.icon,
+                size: 16,
+                className: 'mod-deps-confirm__btn-icon',
+              })
+            : null,
           b.text,
         ),
       ),
@@ -206,29 +215,30 @@ function openDepsModal(
   }
 
   const copy = variantCopy(variant, t);
-    const title =
-      conflictList.length && !list.length && !recommendedList.length ? t('mod_list_conflicts_title') : copy.title;
+  const isSplit = (list.length > 0 || conflictList.length > 0) && recommendedList.length > 0;
+  const title =
+    conflictList.length && !list.length && !recommendedList.length ? t('mod_list_conflicts_title') : copy.title;
 
-    return new Promise((resolve) => {
-      let settled = false;
-      const finish = (value: string | null, checkedRecommended: string[] = []) => {
-        if (settled) return;
-        settled = true;
-        modals.closeAll();
-        resolve({ value, checkedRecommended });
-      };
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: string | null, checkedRecommended: string[] = []) => {
+      if (settled) return;
+      settled = true;
+      modals.closeAll();
+      resolve({ value, checkedRecommended });
+    };
 
-      modals.open({
-        title: modalTitle(title, conflictList.length > 0),
-        centered: true,
-        size: 'auto',
-        closeOnClickOutside: false,
-        closeOnEscape: false,
-        classNames: {
-          content: 'fcc-modal fcc-modal--mod-deps',
-          header: 'mod-deps-confirm__modal-header',
-          body: 'mod-deps-confirm__modal-body',
-        },
+    modals.open({
+      title: modalTitle(title, conflictList.length > 0),
+      centered: true,
+      size: 'auto',
+      closeOnClickOutside: false,
+      closeOnEscape: false,
+      classNames: {
+        content: `fcc-modal fcc-modal--mod-deps${isSplit ? ' fcc-modal--mod-deps--split' : ''}`,
+        header: 'mod-deps-confirm__modal-header',
+        body: 'mod-deps-confirm__modal-body',
+      },
         children: createElement(ModDepsModalWrapper, {
           copy,
           list,
@@ -261,6 +271,10 @@ export async function modDepsConfirm(
   const conflicts = options?.conflicts ?? [];
   const recommended = options?.recommended ?? [];
   const titles = options?.titles;
+  const confirmIcon: AppIconName =
+    variant === 'install' || variant === 'startup' || variant === 'update' || variant === 'update_all'
+      ? 'download'
+      : 'check';
   const { value, checkedRecommended } = await openDepsModal(
     deps,
     conflicts,
@@ -268,8 +282,8 @@ export async function modDepsConfirm(
     variant,
     t,
     [
-      { text: cancelLabel, value: 'cancel' },
-      { text: confirmLabel, value: 'confirm', primary: true },
+      { text: cancelLabel, value: 'cancel', icon: 'close' },
+      { text: confirmLabel, value: 'confirm', primary: true, icon: confirmIcon },
     ],
     titles,
   );
@@ -282,9 +296,9 @@ export async function modDepsUploadChoice(
   conflicts: ModInstallConflictInfo[] = [],
 ): Promise<ModDepsUploadChoice> {
   const { value } = await openDepsModal(deps, conflicts, [], 'upload', t, [
-    { text: t('cancel'), value: 'cancel' },
-    { text: t('mod_list_upload_missing_deps_install_as_is_btn'), value: 'as_is' },
-    { text: t('mod_list_upload_missing_deps_download_btn'), value: 'download', primary: true },
+    { text: t('cancel'), value: 'cancel', icon: 'close' },
+    { text: t('mod_list_upload_missing_deps_install_as_is_btn'), value: 'as_is', icon: 'check' },
+    { text: t('mod_list_upload_missing_deps_download_btn'), value: 'download', primary: true, icon: 'download' },
   ]);
   if (value === 'download' || value === 'as_is' || value === 'cancel') return value;
   return 'cancel';

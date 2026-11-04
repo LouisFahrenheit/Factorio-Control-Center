@@ -19,11 +19,12 @@ export function useMissingStartupDeps(
   modJob: ModJobApi,
   removeOldZips: boolean,
   t: (key: string, ...args: (string | number)[]) => string,
+  autoDownloadEnabled: boolean = true,
 ) {
   const lastDialogKeyRef = useRef('');
 
   useEffect(() => {
-    if (!enabled || !status) return;
+    if (!enabled || !status || !autoDownloadEnabled) return;
 
     const kind = resolveStatusKind(status);
     const missDeps = Array.isArray(status.missing_startup_dependencies)
@@ -80,5 +81,5 @@ export function useMissingStartupDeps(
     } else if (kind !== 'error') {
       lastDialogKeyRef.current = '';
     }
-  }, [enabled, status, serverBusy, modJob, removeOldZips, t]);
+  }, [enabled, status, autoDownloadEnabled, serverBusy, modJob, removeOldZips, t]);
 }

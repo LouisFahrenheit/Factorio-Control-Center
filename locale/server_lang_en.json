@@ -1312,6 +1312,8 @@
   "program_show_server_list_mod_badges_cb": "Show mod badges in server list",
   "program_show_server_list_sa_badge_cb": "Show Space Age badge in server list",
   "program_show_server_list_sa_badge_tip": "If disabled, the Space Age badge (or SA text) will not be shown next to server names",
+  "program_auto_download_missing_startup_deps_cb": "Download missing mod dependencies",
+  "program_auto_download_missing_startup_deps_tip": "If the server fails to start due to missing required dependencies, the panel will prompt to download them.",
   "program_show_server_list_mod_badges_tip": "Icons for Krastorio, Nullius, Space Exploration, and other major overhauls next to the server name.",
   "program_toast_duration_sec_label": "Notification display time",
   "program_toast_duration_sec_tip": "How long corner notifications stay visible.",

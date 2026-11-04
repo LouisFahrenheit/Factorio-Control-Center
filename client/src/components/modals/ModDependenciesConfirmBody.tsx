@@ -53,10 +53,10 @@ export function ModDependenciesConfirmBody({
           <div className="mod-deps-confirm__col mod-deps-confirm__col--required">
             {hasDeps ? (
               <>
-                <p className="mod-deps-confirm__intro">{intro}</p>
-                <div className="mod-deps-confirm__meta">
+                <div className="mod-deps-confirm__header-row">
+                  <p className="mod-deps-confirm__intro">{intro}</p>
                   <span className="mod-deps-confirm__count">
-                    <AppIcon name="add_link" size={15} className="mod-deps-confirm__count-icon" />
+                    <AppIcon name="add_link" size={13} className="mod-deps-confirm__count-icon" />
                     {countLabel}
                   </span>
                 </div>
@@ -64,12 +64,18 @@ export function ModDependenciesConfirmBody({
                   <ul className="mod-deps-confirm__list" role="list">
                     {deps.map((name) => {
                       const displayTitle = resolveTitle(name);
+                      const showTech = displayTitle.toLowerCase() !== name.toLowerCase();
                       return (
                         <li key={name} className="mod-deps-confirm__item">
                           <span className="mod-deps-confirm__item-icon" aria-hidden="true">
-                            <AppIcon name="mod_update_" size={16} />
+                            <AppIcon name="mod_update_" size={15} />
                           </span>
-                          <span className="mod-deps-confirm__name">{displayTitle}</span>
+                          <div className="mod-deps-confirm__name-wrap">
+                            <span className="mod-deps-confirm__name">{displayTitle}</span>
+                            {showTech ? (
+                              <span className="mod-deps-confirm__technical-name">{name}</span>
+                            ) : null}
+                          </div>
                         </li>
                       );
                     })}
@@ -80,15 +86,15 @@ export function ModDependenciesConfirmBody({
 
             {hasConflicts ? (
               <div className={'mod-deps-confirm__conflicts' + (hasDeps ? ' mod-deps-confirm__conflicts--split' : '')}>
-                {conflictsIntro ? <p className="mod-deps-confirm__conflicts-intro">{conflictsIntro}</p> : null}
-                {conflictsCountLabel ? (
-                  <div className="mod-deps-confirm__meta">
+                <div className="mod-deps-confirm__header-row">
+                  {conflictsIntro ? <p className="mod-deps-confirm__conflicts-intro">{conflictsIntro}</p> : <span />}
+                  {conflictsCountLabel ? (
                     <span className="mod-deps-confirm__count mod-deps-confirm__count--conflict">
-                      <AppIcon name="mode_off_on" size={15} className="mod-deps-confirm__count-icon" />
+                      <AppIcon name="mode_off_on" size={13} className="mod-deps-confirm__count-icon" />
                       {conflictsCountLabel}
                     </span>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
                 <div className="mod-deps-confirm__list-wrap mod-deps-confirm__list-wrap--conflict">
                   <ul className="mod-deps-confirm__list mod-deps-confirm__list--conflicts" role="list">
                     {conflicts.map((item) => {
@@ -106,7 +112,7 @@ export function ModDependenciesConfirmBody({
                             aria-hidden="true"
                             title={conflictTagLabel}
                           >
-                            <AppIcon name="engineering" size={16} className="mod-deps-confirm__conflict-mark-icon" />
+                            <AppIcon name="engineering" size={15} className="mod-deps-confirm__conflict-mark-icon" />
                             <span className="mod-deps-confirm__conflict-bang">!</span>
                           </span>
                           <span className="mod-deps-confirm__conflict-line">
@@ -129,15 +135,15 @@ export function ModDependenciesConfirmBody({
 
         {hasRecommended ? (
           <div className="mod-deps-confirm__col mod-deps-confirm__col--recommended">
-            {recommendedIntro ? <p className="mod-deps-confirm__intro">{recommendedIntro}</p> : null}
-            {recommendedCountLabel ? (
-              <div className="mod-deps-confirm__meta">
+            <div className="mod-deps-confirm__header-row">
+              {recommendedIntro ? <p className="mod-deps-confirm__intro">{recommendedIntro}</p> : <span />}
+              {recommendedCountLabel ? (
                 <span className="mod-deps-confirm__count">
-                  <AppIcon name="add_link" size={15} className="mod-deps-confirm__count-icon" />
+                  <AppIcon name="add_link" size={13} className="mod-deps-confirm__count-icon" />
                   {recommendedCountLabel}
                 </span>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
             <div className="mod-deps-confirm__list-wrap">
               <ul className="mod-deps-confirm__list" role="list">
                 {recommended.map((name) => {

@@ -69,9 +69,31 @@ export function statusLabel(
     maintenance: t('status_maintenance'),
     maintenance_manual: t('status_maintenance_manual'),
   };
-  let label = labelByKind[kind] || labelByKind.stopped;
-  if (kind === 'error' && s?.last_exit_code) {
-    label = t('status_error_with_code', s.last_exit_code);
+  return labelByKind[kind] || labelByKind.stopped;
+}
+
+export function statusTooltip(
+  s: PanelStatus | null | undefined,
+  t: (key: string, ...args: (string | number)[]) => string,
+): string | undefined {
+  if (!s) return undefined;
+  const kind = resolveStatusKind(s);
+  if (kind === 'error') {
+    const parts: string[] = [];
+    if (typeof s.last_exit_code === 'number' && s.last_exit_code !== 0) {
+      parts.push(t('status_error_with_code', s.last_exit_code));
+    } else {
+      parts.push(t('status_error'));
+    }
+    if (
+      Array.isArray(s.missing_startup_dependencies) &&
+      s.missing_startup_dependencies.length > 0
+    ) {
+      parts.push(
+        `${t('server_start_missing_deps_title')}: ${s.missing_startup_dependencies.join(', ')}`,
+      );
+    }
+    return parts.join('\n');
   }
-  return label;
+  return undefined;
 }
