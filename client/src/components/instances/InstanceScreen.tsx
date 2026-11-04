@@ -101,7 +101,17 @@ export function InstanceScreen({
 }: InstanceScreenProps) {
   const { reload: reloadLocale } = useLocale();
   const reduced = webEffectsReduced();
-  const [activeTab, setActiveTab] = useState<InstanceTabKey>('servers');
+  const [activeTab, setActiveTab] = useState<InstanceTabKey>(() => {
+    try {
+      const tab = sessionStorage.getItem('fcc_open_instance_tab');
+      if (tab === 'maintenance' || tab === 'settings') {
+        return tab;
+      }
+    } catch {
+      /* ignore */
+    }
+    return 'servers';
+  });
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState<InstanceItem | null>(null);
@@ -131,14 +141,6 @@ export function InstanceScreen({
   } = useUserServerListColumns();
   const tableWrapRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const tab = sessionStorage.getItem('fcc_open_instance_tab');
-    if (tab === 'maintenance' && userHasTab(user, 'maintenance')) {
-      setActiveTab('maintenance');
-    }
-    sessionStorage.removeItem('fcc_open_instance_tab');
-  }, [user]);
-
   const tabAllowed = useCallback(
     (key: InstanceTabKey) => {
       if (
@@ -155,6 +157,16 @@ export function InstanceScreen({
     },
     [user],
   );
+
+  useEffect(() => {
+    const tab = sessionStorage.getItem('fcc_open_instance_tab');
+    if (tab === 'maintenance' && tabAllowed('maintenance')) {
+      setActiveTab('maintenance');
+    } else if (tab === 'settings' && tabAllowed('settings')) {
+      setActiveTab('settings');
+    }
+    sessionStorage.removeItem('fcc_open_instance_tab');
+  }, [tabAllowed]);
 
   const activateTab = (key: InstanceTabKey) => {
     if (!tabAllowed(key)) return;

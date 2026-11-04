@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   IconAdjustments,
   IconArrowsExchange,
@@ -105,7 +105,7 @@ function SettingsToggleRow({
   onChange,
 }: SettingsToggleRowProps) {
   return (
-    <div className="settings-toggle-row">
+    <div id={`row_${htmlFor}`} className="settings-toggle-row">
       <label htmlFor={htmlFor} className="settings-toggle-row__content">
         <span className="settings-toggle-row__label">{label}</span>
         {hint ? (
@@ -162,6 +162,52 @@ export function InstanceSettingsTab({
   const bindLabel = `${bindHost}:${bindPort}`;
   const isListening = Boolean(bindPort > 0 && bindHost);
   const initialLoading = tabInitialLoad(settings.loading, langs.length > 0);
+
+  useEffect(() => {
+    if (initialLoading) return;
+    const targetId = sessionStorage.getItem('fcc_open_instance_setting');
+    if (!targetId) return;
+
+    if (subTab !== 'general') {
+      setSubTab('general');
+    }
+
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    const interval = setInterval(() => {
+      attempts++;
+      const el =
+        document.getElementById(`row_${targetId}`) ||
+        document.getElementById(targetId);
+      if (el) {
+        clearInterval(interval);
+        sessionStorage.removeItem('fcc_open_instance_setting');
+        const row =
+          el.classList.contains('settings-toggle-row')
+            ? el
+            : el.closest('.settings-toggle-row') || el;
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.add('settings-toggle-row--blink');
+        setTimeout(() => {
+          row.classList.remove('settings-toggle-row--blink');
+        }, 2400);
+        const inputEl = document.getElementById(targetId);
+        if (
+          inputEl &&
+          'focus' in inputEl &&
+          typeof (inputEl as HTMLElement).focus === 'function'
+        ) {
+          (inputEl as HTMLElement).focus();
+        }
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        sessionStorage.removeItem('fcc_open_instance_setting');
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [initialLoading, subTab]);
 
   return (
     <div

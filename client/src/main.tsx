@@ -22,6 +22,7 @@ import './styles/monitoring.css';
 import './styles/public-tab.css';
 import './styles/settings-tab.css';
 import './styles/mods-tab.css';
+import './styles/modpacks-tab.css';
 import './styles/circuit-wire.css';
 import './styles/panel-buttons.css';
 

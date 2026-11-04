@@ -15,3 +15,16 @@ export function goToInstanceSettings(instanceId: string): void {
   markExplicitServersNav();
   navigateWorkspace('/');
 }
+
+export function goToProgramSettings(targetSettingId?: string): void {
+  try {
+    sessionStorage.setItem('fcc_open_instance_tab', 'settings');
+    if (targetSettingId) {
+      sessionStorage.setItem('fcc_open_instance_setting', targetSettingId);
+    }
+  } catch {
+    /* ignore */
+  }
+  markExplicitServersNav();
+  navigateWorkspace('/');
+}

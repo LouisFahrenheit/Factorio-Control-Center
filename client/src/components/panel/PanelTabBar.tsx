@@ -18,7 +18,7 @@ const PANEL_TAB_ICONS: Record<PanelTabKey, AppIconName> = {
   serverSettings: 'settings',
   saves: 'save',
   mods: 'package',
-  modpacks: 'folder_copy',
+  modpacks: 'packages',
   commands: 'terminal',
   stats: 'users',
   history: 'history',

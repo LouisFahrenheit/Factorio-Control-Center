@@ -44,6 +44,7 @@ export const APP_ICON_URLS = {
   panel_add: '/assets/icons/panel_add.svg',
   open_portal: '/assets/icons/open_portal.svg',
   package: '/assets/icons/package.svg',
+  packages: '/assets/icons/packages.svg',
   package_settings: '/assets/icons/package_settings.svg',
   package_update: '/assets/icons/package_update.svg',
   person_add: '/assets/icons/person_add.svg',

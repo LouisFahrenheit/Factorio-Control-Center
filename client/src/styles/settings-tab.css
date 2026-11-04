@@ -220,6 +220,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg-main) 30%, transparent);
   border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  scroll-margin: 100px;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
@@ -229,6 +230,32 @@
 .settings-toggle-row:hover {
   background: color-mix(in srgb, var(--bg-main) 55%, transparent);
   border-color: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.settings-toggle-row--blink {
+  animation: settings-toggle-row-blink 0.7s ease-in-out 3 !important;
+  will-change: background-color, border-color, box-shadow;
+}
+
+@keyframes settings-toggle-row-blink {
+  0%,
+  100% {
+    background: color-mix(in srgb, var(--bg-main) 30%, transparent);
+    border-color: color-mix(in srgb, var(--border) 35%, transparent);
+    box-shadow: none;
+  }
+  50% {
+    background: color-mix(in srgb, var(--accent) 24%, var(--bg-main) 76%);
+    border-color: var(--accent);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent),
+      0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+}
+
+:root[data-web-disable-effects='1'] .settings-toggle-row--blink {
+  animation: none;
+  border-color: var(--accent);
 }
 
 .settings-toggle-row__content {
