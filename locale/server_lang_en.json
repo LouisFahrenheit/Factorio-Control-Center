@@ -1336,6 +1336,8 @@
   "program_log_write_instance_hint": "Write Factorio game server standard output and errors to a log file.",
   "program_log_reformat_timestamps_cb": "Reformat log timestamps",
   "program_log_reformat_timestamps_hint": "Convert Factorio tick timestamps into readable date and time format.",
+  "user_server_log_colorize_cb": "Colorize server logs",
+  "user_server_log_colorize_tip": "Syntax and event color highlighting in the server log console.",
   "program_log_write_web_cb": "Debug web panel log",
   "program_log_write_web_hint": "Log web control panel system events, requests, and errors.",
   "program_log_write_maintenance_cb": "Debug maintenance log",

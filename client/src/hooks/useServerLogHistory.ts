@@ -10,9 +10,14 @@ import {
 } from '../lib/logHistoryUtils';
 import { escapeHtmlText, formatManagerLogHtml, highlightLogFindInElement } from '../lib/logUtils';
 
+export interface ServerLogHistoryOptions {
+  colorize?: boolean;
+}
+
 export function useServerLogHistory(
   instanceId: string,
   t: (key: string, ...args: (string | number)[]) => string,
+  options?: ServerLogHistoryOptions,
 ) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +43,10 @@ export function useServerLogHistory(
     return rawLines.filter((ln) => String(ln).toLowerCase().includes(fql));
   }, [filter, rawLines]);
 
-  const logFormatOptions = useMemo(() => ({ reformatTimestamps: false }), []);
+  const logFormatOptions = useMemo(
+    () => ({ reformatTimestamps: false, colorize: options?.colorize !== false }),
+    [options?.colorize],
+  );
 
   const bodyHtml = useMemo(() => {
     if (!loadOk) return escapeHtmlText(loading ? t('server_log_history_loading') : errorText);

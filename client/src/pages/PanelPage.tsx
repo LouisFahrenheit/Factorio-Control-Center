@@ -38,6 +38,7 @@ import { usePlayers } from '../hooks/usePlayers';
 import { useSaves } from '../hooks/useSaves';
 import { useServerControl } from '../hooks/useServerControl';
 import { useServerSettings } from '../hooks/useServerSettings';
+import { useUserServerLogColorize } from '../hooks/useUserServerLogColorize';
 import { goToServers } from '../lib/goToServers';
 import { allowedPanelTabs, type PanelTabKey } from '../lib/permissions';
 import { resolveStatusKind } from '../types/panel';
@@ -85,6 +86,7 @@ export default function PanelPage() {
     staleTime: 60_000,
   });
   const reformatLogTimestamps = programSettingsQuery.data?.log_reformat_timestamps !== false;
+  const colorizeLog = useUserServerLogColorize();
   const autoDownloadMissingDeps = programSettingsQuery.data?.auto_download_missing_startup_deps !== false;
 
   const onModJobComplete = useCallback(() => {
@@ -110,7 +112,7 @@ export default function PanelPage() {
     selectedId,
     t,
   );
-  const logHistory = useServerLogHistory(selectedId, t);
+  const logHistory = useServerLogHistory(selectedId, t, { colorize: colorizeLog });
   const saves = useSaves(activeTab === 'saves' && !!selectedId, selectedId, statusQuery.data, t);
   const commands = useCommands(activeTab === 'commands' && !!selectedId, statusQuery.data, t);
   const reloadCommandsCatalog = useCallback(() => {
@@ -222,6 +224,7 @@ export default function PanelPage() {
                 factorioUpdate={factorioUpdate}
                 logHistory={logHistory}
                 reformatLogTimestamps={reformatLogTimestamps}
+                colorizeLog={colorizeLog}
                 blockUpdates={blockUpdates}
                 canCommands={userHasTab(user, 'commands')}
                 t={t}

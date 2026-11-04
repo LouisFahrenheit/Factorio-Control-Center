@@ -95,6 +95,25 @@ export function setUserShowServerListSpaceAgeBadge(show: boolean): void {
   }
 }
 
+const SERVER_LOG_COLORIZE_KEY = 'fcc_user_server_log_colorize';
+
+export function readUserServerLogColorize(): boolean {
+  try {
+    return localStorage.getItem(SERVER_LOG_COLORIZE_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+export function setUserServerLogColorize(enabled: boolean): void {
+  try {
+    localStorage.setItem(SERVER_LOG_COLORIZE_KEY, enabled ? '1' : '0');
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+
 export function readUserServerListViewMode(): ServerListViewMode {
   try {
     if (typeof localStorage === 'undefined') return 'list';

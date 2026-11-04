@@ -400,10 +400,6 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                       totalCount,
                     )}
                   >
-                    <span
-                      className="mods-toolbar__badge-dot"
-                      aria-hidden="true"
-                    />
                     <span>
                       {t(
                         'mod_list_panel_enabled_count',

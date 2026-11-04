@@ -268,22 +268,9 @@
 }
 
 #tabPanelMods .mods-toolbar__badge--enabled {
-  color: var(--text-muted);
+  color: var(--text-secondary, #cbd5e1);
   border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
   background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
-}
-
-#tabPanelMods .mods-toolbar__badge--enabled span:last-child {
-  color: var(--text-secondary, #cbd5e1);
-}
-
-#tabPanelMods .mods-toolbar__badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--running, #22c55e);
-  box-shadow: none;
-  flex-shrink: 0;
 }
 
 #tabPanelMods .mods-toolbar__portal-username.factorio-portal-username,

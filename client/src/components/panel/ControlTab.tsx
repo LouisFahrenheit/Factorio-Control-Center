@@ -85,6 +85,7 @@ interface ControlTabProps {
   factorioUpdate: FactorioUpdateApi;
   logHistory: ServerLogHistoryApi;
   reformatLogTimestamps?: boolean;
+  colorizeLog?: boolean;
   blockUpdates: boolean;
   canCommands: boolean;
   enterDelay?: number;
@@ -97,6 +98,7 @@ export function ControlTab({
   factorioUpdate,
   logHistory,
   reformatLogTimestamps = true,
+  colorizeLog = true,
   blockUpdates,
   canCommands,
   enterDelay = 0,
@@ -124,8 +126,11 @@ export function ControlTab({
   const [portTouched, setPortTouched] = useState(false);
   const logRef = useRef<HTMLPreElement>(null);
   const logFormatOptions = useMemo(
-    () => ({ reformatTimestamps: reformatLogTimestamps !== false }),
-    [reformatLogTimestamps],
+    () => ({
+      reformatTimestamps: reformatLogTimestamps !== false,
+      colorize: colorizeLog !== false,
+    }),
+    [reformatLogTimestamps, colorizeLog],
   );
   const logHtml = useMemo(
     () => formatManagerLogHtml(control.logLines, logFormatOptions),

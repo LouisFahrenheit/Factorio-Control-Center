@@ -11,7 +11,16 @@ import {
   setLocalThemeOverride,
 } from '../../theme/themes';
 import { getLocalLanguageOverride, setLocalLanguageOverride } from '../../i18n/locale';
-import { readUserToastDurationSec, readUserShowServerListModBadges, setUserShowServerListModBadges, setUserToastDurationSec, readUserShowServerListSpaceAgeBadge, setUserShowServerListSpaceAgeBadge } from '../../lib/userPrefs';
+import {
+  readUserToastDurationSec,
+  readUserShowServerListModBadges,
+  setUserShowServerListModBadges,
+  setUserToastDurationSec,
+  readUserShowServerListSpaceAgeBadge,
+  setUserShowServerListSpaceAgeBadge,
+  readUserServerLogColorize,
+  setUserServerLogColorize,
+} from '../../lib/userPrefs';
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
 import { AppIcon } from '../AppIcon';
@@ -38,6 +47,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
   const [translateModNames, setTranslateModNames] = useState(true);
   const [showModBadges, setShowModBadges] = useState(true);
   const [showSABadge, setShowSABadge] = useState(true);
+  const [serverLogColorize, setServerLogColorize] = useState(true);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
 
@@ -50,6 +60,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     setDisableEffects(localStorage.getItem('fcc_user_web_disable_effects') === '1');
     setShowModBadges(readUserShowServerListModBadges());
     setShowSABadge(readUserShowServerListSpaceAgeBadge());
+    setServerLogColorize(readUserServerLogColorize());
     void api<ProgramSettings>('/api/config/program')
       .then((r) => {
         setTranslateModNames(r.translate_mod_names !== false);
@@ -89,6 +100,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     localStorage.setItem('fcc_user_web_disable_effects', disableEffects ? '1' : '0');
     setUserShowServerListModBadges(showModBadges);
     setUserShowServerListSpaceAgeBadge(showSABadge);
+    setUserServerLogColorize(serverLogColorize);
     onClose();
     if (prevLang !== String(lang || '').trim().toLowerCase()) {
       window.location.reload();
@@ -293,6 +305,19 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   checked={showSABadge}
                   onChange={setShowSABadge}
                   label={t('program_show_server_list_sa_badge_cb')}
+                />
+              </div>
+              <div
+                className="user-settings-field user-settings-field--switch"
+                title={t('user_server_log_colorize_tip')}
+              >
+                <FccSwitch
+                  id="cbServerLogColorize"
+                  className="user-settings-field__switch"
+                  labelClassName="user-settings-field__switch-label"
+                  checked={serverLogColorize}
+                  onChange={setServerLogColorize}
+                  label={t('user_server_log_colorize_cb')}
                 />
               </div>
             </div>

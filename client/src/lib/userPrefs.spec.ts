@@ -4,6 +4,8 @@ import {
   setUserServerListViewMode,
   readUserServerListColumns,
   setUserServerListColumns,
+  readUserServerLogColorize,
+  setUserServerLogColorize,
   DEFAULT_SERVER_LIST_COLUMNS,
   USER_PREFS_CHANGED_EVENT,
 } from './userPrefs';
@@ -110,6 +112,33 @@ describe('userPrefs - serverListColumns', () => {
     const cols = readUserServerListColumns();
     expect(cols.port).toBe(true);
     expect(cols.mods).toBe(false);
+  });
+});
+
+describe('userPrefs - serverLogColorize', () => {
+  it('defaults to true when nothing is stored', () => {
+    expect(readUserServerLogColorize()).toBe(true);
+  });
+
+  it('saves false and dispatches user prefs changed event', () => {
+    let eventFired = false;
+    const target = new EventTarget();
+    Object.defineProperty(globalThis, 'window', {
+      value: target,
+      writable: true,
+      configurable: true,
+    });
+
+    target.addEventListener(USER_PREFS_CHANGED_EVENT, () => {
+      eventFired = true;
+    });
+
+    setUserServerLogColorize(false);
+    expect(readUserServerLogColorize()).toBe(false);
+    expect(eventFired).toBe(true);
+
+    setUserServerLogColorize(true);
+    expect(readUserServerLogColorize()).toBe(true);
   });
 });
 

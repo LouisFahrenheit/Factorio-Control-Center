@@ -10,6 +10,7 @@ export function escapeHtmlText(s: unknown): string {
 
 export interface FormatManagerLogOptions {
   reformatTimestamps?: boolean;
+  colorize?: boolean;
 }
 
 /** Replace Factorio tick prefixes with readable timestamps (client-side fallback for legacy lines). */
@@ -132,6 +133,7 @@ function colorizeFactorioLogLineHtml(raw: string): string {
 
 export function formatManagerLogHtml(lines: string[], options?: FormatManagerLogOptions): string {
   const src = options?.reformatTimestamps ? reformatFactorioLogTimestamps(lines) : lines;
+  const shouldColorize = options?.colorize !== false;
   return src
     .filter((line) => {
       const text = String(line || '');
@@ -147,7 +149,7 @@ export function formatManagerLogHtml(lines: string[], options?: FormatManagerLog
       }
       return true;
     })
-    .map((line) => colorizeFactorioLogLineHtml(line))
+    .map((line) => (shouldColorize ? colorizeFactorioLogLineHtml(line) : escapeHtmlText(line)))
     .join('\n');
 }
 
