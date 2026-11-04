@@ -44,6 +44,7 @@ describe('web-panel-bind.util', () => {
     require_unique_instance_game_ports: false,
     server_settings_default_public_off: false,
     server_settings_apply_global_credentials: false,
+    auto_download_missing_startup_deps: true,
     log_rotation_max_mb: 50,
     log_rotation_interval_hours: 24,
     log_rotation_backup_count: 5,
