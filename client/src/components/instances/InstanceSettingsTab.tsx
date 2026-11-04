@@ -396,6 +396,7 @@ export function InstanceSettingsTab({
                       <FactorioPortalUsername
                         username={settings.verifiedGlobalPortalUsername}
                         t={t}
+                        className="settings-portal-username-pill"
                       />
                     }
                   >

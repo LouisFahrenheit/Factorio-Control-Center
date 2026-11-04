@@ -475,9 +475,11 @@
   background: color-mix(in srgb, var(--border) 40%, transparent);
 }
 
-/* ── Live Bind Status Pill ───────────────────────────────────────────── */
+/* ── Live Bind Status Pill & Factorio Portal Nickname Pill ───────────── */
 
-.settings-bind-pill {
+.settings-bind-pill,
+.settings-portal-username-pill,
+.settings-card__meta .factorio-portal-username {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -485,13 +487,15 @@
   border-radius: 999px;
   font-size: 0.78rem;
   font-family: var(--font-mono, monospace);
-  color: #38bdf8;
-  background: color-mix(in srgb, #38bdf8 15%, var(--bg-main) 85%);
-  border: 1px solid color-mix(in srgb, #38bdf8 45%, transparent);
-  box-shadow: 0 0 8px color-mix(in srgb, #38bdf8 18%, transparent);
+  font-weight: 500;
+  color: color-mix(in srgb, #38bdf8 82%, var(--text-muted) 18%);
+  background: color-mix(in srgb, #38bdf8 10%, var(--bg-main) 90%);
+  border: 1px solid color-mix(in srgb, #38bdf8 28%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, #38bdf8 10%, transparent);
   white-space: nowrap;
   line-height: 1.4;
   vertical-align: middle;
+  text-decoration: none;
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
@@ -499,10 +503,25 @@
     color 0.18s ease;
 }
 
-.settings-bind-pill:hover {
-  background: color-mix(in srgb, #38bdf8 20%, var(--bg-main) 80%);
-  border-color: color-mix(in srgb, #38bdf8 65%, transparent);
-  box-shadow: 0 0 12px color-mix(in srgb, #38bdf8 28%, transparent);
+.settings-portal-username-pill,
+.settings-card__meta .factorio-portal-username {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-bind-pill:hover,
+.settings-portal-username-pill:hover,
+.settings-card__meta .factorio-portal-username:hover {
+  color: #38bdf8;
+  background: color-mix(in srgb, #38bdf8 15%, var(--bg-main) 85%);
+  border-color: color-mix(in srgb, #38bdf8 45%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, #38bdf8 18%, transparent);
+}
+
+.settings-portal-username-pill:focus-visible,
+.settings-card__meta .factorio-portal-username:focus-visible {
+  outline: 2px solid color-mix(in srgb, #38bdf8 55%, transparent);
+  outline-offset: 1px;
 }
 
 .settings-bind-pill code {
@@ -520,7 +539,7 @@
   height: 7px;
   border-radius: 50%;
   background: #22c55e;
-  box-shadow: 0 0 6px #22c55e;
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.45);
   flex-shrink: 0;
   transition:
     background-color 0.18s ease,
@@ -530,9 +549,9 @@
 .settings-bind-pill__dot--listening {
   background: #22c55e;
   box-shadow:
-    0 0 6px #22c55e,
-    0 0 10px rgba(34, 197, 94, 0.35);
-  animation: pulse-dot 2.2s infinite ease-in-out;
+    0 0 4px #22c55e,
+    0 0 8px rgba(34, 197, 94, 0.25);
+  animation: pulse-dot 2.4s infinite ease-in-out;
 }
 
 .settings-bind-pill__dot--stopped {
@@ -551,15 +570,15 @@
   0%,
   100% {
     transform: scale(1);
-    opacity: 1;
-    box-shadow: 0 0 6px #22c55e;
+    opacity: 0.9;
+    box-shadow: 0 0 4px #22c55e;
   }
   50% {
-    transform: scale(1.18);
-    opacity: 0.85;
+    transform: scale(1.15);
+    opacity: 0.75;
     box-shadow:
-      0 0 8px #22c55e,
-      0 0 14px rgba(34, 197, 94, 0.45);
+      0 0 6px #22c55e,
+      0 0 10px rgba(34, 197, 94, 0.3);
   }
 }
 
