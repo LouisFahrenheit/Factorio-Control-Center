@@ -1085,7 +1085,6 @@
   "has_quality": "Has Quality Parameter ({quality})",
   "items_editor_title": "Edit Items List",
   "command_items": "Items",
-  "items_editor_search": "Search:",
   "mods_from_save_btn": "Import mods from save",
   "mods_from_save_dialog_title": "Import mods from save",
   "mods_from_save_confirm_btn": "Download",

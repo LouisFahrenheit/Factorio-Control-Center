@@ -1085,7 +1085,6 @@
   "has_quality": "Параметр качества ({quality})",
   "items_editor_title": "Редактирование списка предметов",
   "command_items": "Предметы",
-  "items_editor_search": "Поиск:",
   "mods_from_save_btn": "Импорт модов из сохранения",
   "mods_from_save_dialog_title": "Импорт модов из сохранения",
   "mods_from_save_confirm_btn": "Скачать",
