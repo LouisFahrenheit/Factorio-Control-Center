@@ -149,7 +149,9 @@
 
 .workspace__main--panel .btn.btn--danger:hover:not(:disabled),
 .panel-shell .btn.btn--danger:hover:not(:disabled),
-.control-tab__card--actions .btn.btn--danger:hover:not(:disabled) {
+.control-tab__card--actions .btn.btn--danger:hover:not(:disabled),
+.modal .btn.btn--danger:hover:not(:disabled),
+.fu-modal .btn.btn--danger:hover:not(:disabled) {
   background: color-mix(in srgb, #e03131 24%, var(--bg-widget) 76%) !important;
   border-color: #ff4d4d !important;
   color: #ff9090 !important;
@@ -160,7 +162,9 @@
 
 .workspace__main--panel .btn.btn--danger:active:not(:disabled),
 .panel-shell .btn.btn--danger:active:not(:disabled),
-.control-tab__card--actions .btn.btn--danger:active:not(:disabled) {
+.control-tab__card--actions .btn.btn--danger:active:not(:disabled),
+.modal .btn.btn--danger:active:not(:disabled),
+.fu-modal .btn.btn--danger:active:not(:disabled) {
   transform: translateY(1px) !important;
   background: color-mix(in srgb, #e03131 34%, var(--bg-widget) 66%) !important;
   border-color: #ff3333 !important;
@@ -173,44 +177,71 @@
 .panel-shell .btn.btn--danger:hover:not(:disabled) svg,
 .panel-shell .btn.btn--danger:hover:not(:disabled) .app-icon,
 .control-tab__card--actions .btn.btn--danger:hover:not(:disabled) svg,
-.control-tab__card--actions .btn.btn--danger:hover:not(:disabled) .app-icon {
+.control-tab__card--actions .btn.btn--danger:hover:not(:disabled) .app-icon,
+.modal .btn.btn--danger:hover:not(:disabled) svg,
+.modal .btn.btn--danger:hover:not(:disabled) .app-icon,
+.fu-modal .btn.btn--danger:hover:not(:disabled) svg,
+.fu-modal .btn.btn--danger:hover:not(:disabled) .app-icon {
   color: #ff4d4d !important;
 }
 
 /* ── Primary Buttons (Create, Save, Install) ─────────────────────────── */
 
 .workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab):not(:disabled),
-.panel-shell .btn.btn--primary:not(.sub-tabs__tab):not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  color: #ffffff;
+.panel-shell .btn.btn--primary:not(.sub-tabs__tab):not(:disabled),
+.modal .btn.btn--primary:not(.sub-tabs__tab):not(:disabled),
+.fu-modal .btn.btn--primary:not(.sub-tabs__tab):not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--accent) 22%,
+    var(--bg-widget) 78%
+  ) !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent) !important;
+  color: #ffffff !important;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.28),
-    0 0 8px rgba(var(--accent-rgb), 0.12);
+    0 0 8px rgba(var(--accent-rgb), 0.12) !important;
 }
 
 .workspace__main--panel
   .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
-.panel-shell .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 30%, var(--bg-widget) 70%);
-  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+.panel-shell .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
+.modal .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
+.fu-modal .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--accent) 30%,
+    var(--bg-widget) 70%
+  ) !important;
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
+  color: #ffffff !important;
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.32),
-    0 0 12px rgba(var(--accent-rgb), 0.2);
+    0 0 12px rgba(var(--accent-rgb), 0.2) !important;
 }
 
 .workspace__main--panel
   .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
-.panel-shell .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled) {
-  transform: translateY(1px);
-  background: color-mix(in srgb, var(--accent) 36%, var(--bg-widget) 64%);
+.panel-shell .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
+.modal .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
+.fu-modal .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled) {
+  transform: translateY(1px) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 36%,
+    var(--bg-widget) 64%
+  ) !important;
 }
 
 .workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab) svg,
 .workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab) .app-icon,
 .panel-shell .btn.btn--primary:not(.sub-tabs__tab) svg,
-.panel-shell .btn.btn--primary:not(.sub-tabs__tab) .app-icon {
-  color: color-mix(in srgb, var(--accent) 80%, white 20%);
+.panel-shell .btn.btn--primary:not(.sub-tabs__tab) .app-icon,
+.modal .btn.btn--primary:not(.sub-tabs__tab) svg,
+.modal .btn.btn--primary:not(.sub-tabs__tab) .app-icon,
+.fu-modal .btn.btn--primary:not(.sub-tabs__tab) svg,
+.fu-modal .btn.btn--primary:not(.sub-tabs__tab) .app-icon {
+  color: color-mix(in srgb, var(--accent) 80%, white 20%) !important;
 }
 
 /* ── Factorio Update Available Accent Highlight ──────────────────────── */

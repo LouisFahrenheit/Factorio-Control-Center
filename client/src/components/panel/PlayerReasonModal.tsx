@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { IconAlertTriangle, IconBan, IconUserX } from '@tabler/icons-react';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { CancelButton } from '../CancelButton';
 
@@ -85,6 +85,7 @@ export function PlayerReasonModal({
               className={'btn btn--with-icon ' + (isDanger ? 'btn--danger' : 'btn--primary')}
               id="btnPlayerReasonConfirm"
             >
+              {isDanger ? <IconBan size={16} /> : <IconUserX size={16} />}
               {actionTitle}
             </button>
           </div>

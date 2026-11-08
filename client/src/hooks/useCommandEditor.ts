@@ -28,6 +28,7 @@ export function useCommandEditor(
   const [selectedCategoryKey, setSelectedCategoryKey] = useState('');
   const [selectedCommandId, setSelectedCommandId] = useState('');
   const [itemsEditorOpen, setItemsEditorOpen] = useState(false);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const persistTimerRef = useRef<number | null>(null);
   const savedNotifyTimerRef = useRef<number | null>(null);
@@ -172,19 +173,19 @@ export function useCommandEditor(
   );
 
   const addCategory = useCallback(() => {
-    const key = window.prompt(t('category_key'), '')?.trim();
-    if (!key) return;
-    if (catalog.categories[key]) {
-      feedbackMsg(title, t('error_category_exists'), true, false, t);
-      return;
-    }
-    const display = window.prompt(t('display_name'), key)?.trim() || key;
-    const next = cloneCatalog(catalog);
-    next.categories[key] = { name: display, commands: [] };
-    setSelectedCategoryKey(key);
-    setSelectedCommandId('');
-    applyCatalog(next, 'category_added');
-  }, [applyCatalog, catalog, t, title]);
+    setCategoryModalOpen(true);
+  }, []);
+
+  const submitCategory = useCallback(
+    (key: string, display: string) => {
+      const next = cloneCatalog(catalog);
+      next.categories[key] = { name: display, commands: [] };
+      setSelectedCategoryKey(key);
+      setSelectedCommandId('');
+      applyCatalog(next, 'category_added');
+    },
+    [applyCatalog, catalog],
+  );
 
   const deleteCategory = useCallback(() => {
     if (!selectedCategoryKey) return;
@@ -387,6 +388,9 @@ export function useCommandEditor(
     selectedCommand,
     itemsEditorOpen,
     setItemsEditorOpen,
+    categoryModalOpen,
+    setCategoryModalOpen,
+    submitCategory,
     openDialog,
     closeDialog,
     addCategory,

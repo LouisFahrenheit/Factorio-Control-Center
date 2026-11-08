@@ -8,6 +8,7 @@ import {
 } from '@tabler/icons-react';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { CommandItemsEditorModal } from './CommandItemsEditorModal';
+import { CommandCategoryModal } from './CommandCategoryModal';
 import { CommandEditorNav } from './CommandEditorNav';
 import type { CommandEditorApi } from '../../hooks/useCommandEditor';
 
@@ -90,39 +91,41 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                 <h4 className="command-editor-dialog__editor-title">
                   {t('command_editor_title')}
                 </h4>
-                <label className="command-editor-dialog__field">
-                  <span className="command-editor-dialog__field-label">
-                    {t('command_name')}
-                  </span>
-                  <input
-                    type="text"
-                    className="input"
-                    disabled={editorDisabled}
-                    value={cmd?.name || ''}
-                    onChange={(e) =>
-                      editor.setCommandField({ name: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="command-editor-dialog__field">
-                  <span className="command-editor-dialog__field-label">
-                    {t('command_category')}
-                  </span>
-                  <select
-                    className="input"
-                    disabled={editorDisabled}
-                    value={editor.selectedCategoryKey}
-                    onChange={(e) =>
-                      editor.moveCommandToCategory(e.target.value)
-                    }
-                  >
-                    {editor.categoryKeys.map((key) => (
-                      <option key={key} value={key}>
-                        {editor.catalog.categories[key]?.name || key}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="command-editor-dialog__row">
+                  <label className="command-editor-dialog__field">
+                    <span className="command-editor-dialog__field-label">
+                      {t('command_name')}
+                    </span>
+                    <input
+                      type="text"
+                      className="input"
+                      disabled={editorDisabled}
+                      value={cmd?.name || ''}
+                      onChange={(e) =>
+                        editor.setCommandField({ name: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="command-editor-dialog__field">
+                    <span className="command-editor-dialog__field-label">
+                      {t('command_category')}
+                    </span>
+                    <select
+                      className="input"
+                      disabled={editorDisabled}
+                      value={editor.selectedCategoryKey}
+                      onChange={(e) =>
+                        editor.moveCommandToCategory(e.target.value)
+                      }
+                    >
+                      {editor.categoryKeys.map((key) => (
+                        <option key={key} value={key}>
+                          {editor.catalog.categories[key]?.name || key}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
                 <label className="command-editor-dialog__field">
                   <span className="command-editor-dialog__field-label">
                     {t('command_text')}
@@ -220,13 +223,13 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                   </label>
                 </fieldset>
                 {(cmd?.has_value || cmd?.has_boolean) && (
-                  <label className="command-editor-dialog__field">
+                  <label className="command-editor-dialog__field command-editor-dialog__field--default-val">
                     <span className="command-editor-dialog__field-label">
                       {t('default_value')}
                     </span>
                     {cmd?.has_boolean ? (
                       <select
-                        className="input input--narrow"
+                        className="input"
                         disabled={editorDisabled}
                         value={cmd.default_value || 'true'}
                         onChange={(e) =>
@@ -285,6 +288,13 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
           </div>
         </div>
       </ModalBackdrop>
+      <CommandCategoryModal
+        open={editor.categoryModalOpen}
+        existingKeys={editor.categoryKeys}
+        onClose={() => editor.setCategoryModalOpen(false)}
+        onSubmit={editor.submitCategory}
+        t={t}
+      />
       <CommandItemsEditorModal editor={editor} t={t} />
     </>
   );
