@@ -1190,6 +1190,7 @@
   "cmd_param_boolean": "Логика",
   "cmd_param_count": "Количество",
   "cmd_param_quality": "Качество",
+  "cmd_no_params": "Нет параметров",
   "error_category_exists": "Такая категория уже есть.",
   "commands_add_category_first": "Сначала добавьте категорию.",
   "server_settings_json_not_found": "Файл server-settings.json не найден.",

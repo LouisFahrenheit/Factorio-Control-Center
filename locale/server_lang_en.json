@@ -1190,6 +1190,7 @@
   "cmd_param_boolean": "Boolean",
   "cmd_param_count": "Count",
   "cmd_param_quality": "Quality",
+  "cmd_no_params": "No parameters",
   "error_category_exists": "This category already exists.",
   "commands_add_category_first": "Add a category first.",
   "server_settings_json_not_found": "server-settings.json was not found.",

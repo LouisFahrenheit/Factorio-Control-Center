@@ -1,4 +1,11 @@
-import { AppIcon } from '../AppIcon';
+import {
+  IconPlus,
+  IconTrash,
+  IconFolderPlus,
+  IconTerminal2,
+  IconX,
+  IconListDetails,
+} from '@tabler/icons-react';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { CommandItemsEditorModal } from './CommandItemsEditorModal';
 import { CommandEditorNav } from './CommandEditorNav';
@@ -16,20 +23,32 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
 
   return (
     <>
-      <ModalBackdrop open={editor.open} id="commandEditorBackdrop" onClose={editor.closeDialog}>
+      <ModalBackdrop
+        open={editor.open}
+        id="commandEditorBackdrop"
+        onClose={editor.closeDialog}
+      >
         <div
           className="fu-modal command-editor-dialog"
           role="dialog"
           aria-modal="true"
           aria-labelledby="commandEditorHeading"
         >
-          <div className="fu-modal__header fu-modal__header--with-icon" id="commandEditorHeading">
-            <AppIcon name="edit_document" size={20} />
+          <div
+            className="fu-modal__header fu-modal__header--with-icon"
+            id="commandEditorHeading"
+          >
+            <IconTerminal2 size={20} />
             {t('commands_title')}
           </div>
           <div className="fu-modal__body">
             <div className="command-editor-dialog__toolbar">
-              <button type="button" className="btn" onClick={editor.addCategory}>
+              <button
+                type="button"
+                className="btn btn--with-icon"
+                onClick={editor.addCategory}
+              >
+                <IconFolderPlus size={16} />
                 {t('add_category')}
               </button>
               <button
@@ -38,11 +57,19 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                 disabled={!editor.selectedCategoryKey}
                 onClick={editor.deleteCategory}
               >
-                <AppIcon name="delete" size={16} />
+                <IconTrash size={16} />
                 {t('delete_category')}
               </button>
-              <span className="command-editor-dialog__toolbar-sep" aria-hidden="true" />
-              <button type="button" className="btn" onClick={editor.addCommand}>
+              <span
+                className="command-editor-dialog__toolbar-sep"
+                aria-hidden="true"
+              />
+              <button
+                type="button"
+                className="btn btn--with-icon"
+                onClick={editor.addCommand}
+              >
+                <IconPlus size={16} />
                 {t('add_command')}
               </button>
               <button
@@ -51,7 +78,7 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                 disabled={!editor.selectedCommandId}
                 onClick={editor.deleteCommand}
               >
-                <AppIcon name="delete" size={16} />
+                <IconTrash size={16} />
                 {t('delete_command')}
               </button>
             </div>
@@ -60,24 +87,34 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                 <CommandEditorNav editor={editor} t={t} />
               </aside>
               <div className="command-editor-dialog__editor">
-                <h4 className="panel__title panel__title--sub">{t('command_editor_title')}</h4>
+                <h4 className="command-editor-dialog__editor-title">
+                  {t('command_editor_title')}
+                </h4>
                 <label className="command-editor-dialog__field">
-                  <span>{t('command_name')}</span>
+                  <span className="command-editor-dialog__field-label">
+                    {t('command_name')}
+                  </span>
                   <input
                     type="text"
                     className="input"
                     disabled={editorDisabled}
                     value={cmd?.name || ''}
-                    onChange={(e) => editor.setCommandField({ name: e.target.value })}
+                    onChange={(e) =>
+                      editor.setCommandField({ name: e.target.value })
+                    }
                   />
                 </label>
                 <label className="command-editor-dialog__field">
-                  <span>{t('command_category')}</span>
+                  <span className="command-editor-dialog__field-label">
+                    {t('command_category')}
+                  </span>
                   <select
                     className="input"
                     disabled={editorDisabled}
                     value={editor.selectedCategoryKey}
-                    onChange={(e) => editor.moveCommandToCategory(e.target.value)}
+                    onChange={(e) =>
+                      editor.moveCommandToCategory(e.target.value)
+                    }
                   >
                     {editor.categoryKeys.map((key) => (
                       <option key={key} value={key}>
@@ -87,32 +124,47 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                   </select>
                 </label>
                 <label className="command-editor-dialog__field">
-                  <span>{t('command_text')}</span>
+                  <span className="command-editor-dialog__field-label">
+                    {t('command_text')}
+                  </span>
                   <textarea
                     className="settings-json command-editor-dialog__command-text"
                     spellCheck={false}
                     disabled={editorDisabled}
                     value={cmd?.command || ''}
-                    onChange={(e) => editor.setCommandField({ command: e.target.value })}
+                    onChange={(e) =>
+                      editor.setCommandField({ command: e.target.value })
+                    }
                   />
                 </label>
                 <label className="command-editor-dialog__field">
-                  <span>{t('command_description')}</span>
+                  <span className="command-editor-dialog__field-label">
+                    {t('command_description')}
+                  </span>
                   <textarea
                     className="command-editor-dialog__description"
                     spellCheck
                     disabled={editorDisabled}
                     value={cmd?.description || ''}
-                    onChange={(e) => editor.setCommandField({ description: e.target.value })}
+                    onChange={(e) =>
+                      editor.setCommandField({ description: e.target.value })
+                    }
                   />
                 </label>
-                <fieldset className="command-editor-dialog__params" disabled={editorDisabled}>
-                  <legend>{t('parameters')}</legend>
+                <fieldset
+                  className="command-editor-dialog__params"
+                  disabled={editorDisabled}
+                >
+                  <legend className="command-editor-dialog__params-legend">
+                    {t('parameters')}
+                  </legend>
                   <label className="command-editor-dialog__check">
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_player}
-                      onChange={(e) => editor.toggleFlag('has_player', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_player', e.target.checked)
+                      }
                     />
                     <span>{t('has_player')}</span>
                   </label>
@@ -120,7 +172,9 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_value}
-                      onChange={(e) => editor.toggleFlag('has_value', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_value', e.target.checked)
+                      }
                     />
                     <span>{t('has_value')}</span>
                   </label>
@@ -128,7 +182,9 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_boolean}
-                      onChange={(e) => editor.toggleFlag('has_boolean', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_boolean', e.target.checked)
+                      }
                     />
                     <span>{t('has_boolean')}</span>
                   </label>
@@ -136,7 +192,9 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_item}
-                      onChange={(e) => editor.toggleFlag('has_item', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_item', e.target.checked)
+                      }
                     />
                     <span>{t('has_item')}</span>
                   </label>
@@ -144,7 +202,9 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_count}
-                      onChange={(e) => editor.toggleFlag('has_count', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_count', e.target.checked)
+                      }
                     />
                     <span>{t('has_count')}</span>
                   </label>
@@ -152,20 +212,28 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                     <input
                       type="checkbox"
                       checked={!!cmd?.has_quality}
-                      onChange={(e) => editor.toggleFlag('has_quality', e.target.checked)}
+                      onChange={(e) =>
+                        editor.toggleFlag('has_quality', e.target.checked)
+                      }
                     />
                     <span>{t('has_quality')}</span>
                   </label>
                 </fieldset>
                 {(cmd?.has_value || cmd?.has_boolean) && (
                   <label className="command-editor-dialog__field">
-                    <span>{t('default_value')}</span>
+                    <span className="command-editor-dialog__field-label">
+                      {t('default_value')}
+                    </span>
                     {cmd?.has_boolean ? (
                       <select
                         className="input input--narrow"
                         disabled={editorDisabled}
                         value={cmd.default_value || 'true'}
-                        onChange={(e) => editor.setCommandField({ default_value: e.target.value })}
+                        onChange={(e) =>
+                          editor.setCommandField({
+                            default_value: e.target.value,
+                          })
+                        }
                       >
                         <option value="true">true</option>
                         <option value="false">false</option>
@@ -175,7 +243,11 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                         className="input"
                         disabled={editorDisabled}
                         value={cmd?.default_value || ''}
-                        onChange={(e) => editor.setCommandField({ default_value: e.target.value })}
+                        onChange={(e) =>
+                          editor.setCommandField({
+                            default_value: e.target.value,
+                          })
+                        }
                       />
                     )}
                   </label>
@@ -193,7 +265,7 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                       disabled={editorDisabled}
                       onClick={() => editor.setItemsEditorOpen(true)}
                     >
-                      <AppIcon name="edit_document" size={16} />
+                      <IconListDetails size={16} />
                       {t('items_editor_edit_list_btn')}
                     </button>
                   </div>
@@ -202,8 +274,12 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
             </div>
           </div>
           <div className="fu-modal__footer">
-            <button type="button" className="btn btn--with-icon" onClick={editor.closeDialog}>
-              <AppIcon name="close" size={16} />
+            <button
+              type="button"
+              className="btn btn--with-icon"
+              onClick={editor.closeDialog}
+            >
+              <IconX size={16} />
               {t('close')}
             </button>
           </div>

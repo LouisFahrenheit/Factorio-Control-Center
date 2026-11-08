@@ -1,4 +1,5 @@
-import { Fragment, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { IconGripVertical } from '@tabler/icons-react';
 import type { CommandEditorApi } from '../../hooks/useCommandEditor';
 
 const DRAG_CMD = 'cmd:';
@@ -103,7 +104,12 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
     dropTarget?.kind === 'command' ? commandDropKey(dropTarget) : '';
 
   return (
-    <div className={'command-editor-dialog__nav-scroll' + (dragKind === 'category' ? ' is-dragging-category' : '')}>
+    <div
+      className={
+        'command-editor-dialog__nav-scroll commands-grid' +
+        (dragKind === 'category' ? ' is-dragging-category' : '')
+      }
+    >
       {editor.categoryKeys.map((catKey, catIndex) => {
         const cat = editor.catalog.categories[catKey];
         const commands = cat?.commands || [];
@@ -113,7 +119,7 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
           dropTarget?.kind === 'category' && dropTarget.index === catIndex;
 
         return (
-          <Fragment key={catKey}>
+          <div key={catKey} className="command-editor-dialog__cat-wrapper">
             <div
               className={
                 'command-editor-dialog__cat-drop-slot' +
@@ -124,8 +130,10 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
             />
             <section
               className={
-                'command-editor-dialog__cat-section' +
-                (catSelected ? ' command-editor-dialog__cat-section--active' : '') +
+                'commands-group command-editor-dialog__cat-section' +
+                (catSelected
+                  ? ' command-editor-dialog__cat-section--active'
+                  : '') +
                 (catDragging ? ' is-dragging' : '')
               }
             >
@@ -138,34 +146,43 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
                   onDragStart={(ev) => onCategoryDragStart(catKey, ev)}
                   onDragEnd={clearDrag}
                 >
-                  ⋮⋮
+                  <IconGripVertical size={14} />
                 </span>
                 <button
                   type="button"
-                  className={'command-editor-dialog__category' + (catSelected ? ' is-selected' : '')}
+                  className={
+                    'command-editor-dialog__category' +
+                    (catSelected ? ' is-selected' : '')
+                  }
                   onClick={() => editor.setSelectedCategoryKey(catKey)}
                   onDragOver={(ev) => {
-                    if (dragKind === 'command') onDragOverCommand(catKey, commands.length, ev);
+                    if (dragKind === 'command')
+                      onDragOverCommand(catKey, commands.length, ev);
                   }}
                   onDrop={(ev) => {
-                    if (dragKind === 'command') onDropCommand(catKey, commands.length, ev);
+                    if (dragKind === 'command')
+                      onDropCommand(catKey, commands.length, ev);
                   }}
                 >
                   {cat?.name || catKey}
                 </button>
               </div>
-              <ul className="command-editor-dialog__commands">
+              <div className="commands-group__items command-editor-dialog__commands">
                 {commands.map((item, index) => {
                   const slotKey = `${catKey}:${index}`;
                   const isDropHere = activeCommandDropKey === `cmd:${slotKey}`;
-                  const isDragging = dragKind === 'command' && dragId === item.id;
+                  const isDragging =
+                    dragKind === 'command' && dragId === item.id;
                   const isSelected = item.id === editor.selectedCommandId;
 
                   return (
-                    <li
+                    <div
                       key={item.id}
                       className={
-                        (isSelected ? 'is-selected' : '') +
+                        'commands-item command-editor-dialog__command-item' +
+                        (isSelected
+                          ? ' commands-item--selected is-selected'
+                          : '') +
                         (isDragging ? ' is-dragging' : '') +
                         (isDropHere ? ' is-drop-target' : '')
                       }
@@ -180,10 +197,10 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
                         onDragStart={(ev) => onCommandDragStart(item.id, ev)}
                         onDragEnd={clearDrag}
                       >
-                        ⋮⋮
+                        <IconGripVertical size={13} />
                       </span>
                       <span
-                        className="command-editor-dialog__command-label"
+                        className="commands-item__name command-editor-dialog__command-label"
                         role="button"
                         tabIndex={0}
                         onClick={() => {
@@ -200,11 +217,11 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
                       >
                         {item.name || item.id}
                       </span>
-                    </li>
+                    </div>
                   );
                 })}
                 {!commands.length && (
-                  <li
+                  <div
                     className={
                       'command-editor-dialog__drop-empty' +
                       (dropTarget?.kind === 'command' &&
@@ -217,17 +234,18 @@ export function CommandEditorNav({ editor, t }: CommandEditorNavProps) {
                     onDrop={(ev) => onDropCommand(catKey, 0, ev)}
                   >
                     {t('command_drop_here')}
-                  </li>
+                  </div>
                 )}
-              </ul>
+              </div>
             </section>
-          </Fragment>
+          </div>
         );
       })}
       <div
         className={
           'command-editor-dialog__cat-drop-slot command-editor-dialog__cat-drop-slot--end' +
-          (dropTarget?.kind === 'category' && dropTarget.index === editor.categoryKeys.length
+          (dropTarget?.kind === 'category' &&
+          dropTarget.index === editor.categoryKeys.length
             ? ' is-drop-target'
             : '')
         }

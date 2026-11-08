@@ -1,8 +1,9 @@
 import type { CommandRow } from '../../lib/commandUtils';
 import type { CommandEditorApi } from '../../hooks/useCommandEditor';
-import { IconRefresh } from '@tabler/icons-react';
+import { IconRefresh, IconTerminal2, IconPlayerPlay } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
+import { FccSwitch } from '../FccSwitch';
 import type { CommandsApi } from '../../hooks/useCommands';
 import {
   TabLoadingPlaceholder,
@@ -23,6 +24,23 @@ function CommandParams({
   t: (key: string) => string;
 }) {
   const cmd = row.raw;
+  const hasAnyParam =
+    !!cmd.has_player ||
+    !!cmd.has_boolean ||
+    !!cmd.has_value ||
+    !!cmd.has_item ||
+    !!cmd.has_count ||
+    !!cmd.has_quality;
+
+  if (!hasAnyParam) {
+    return (
+      <div id="cmdParams" className="commands-params commands-tab__params commands-tab__params--empty">
+        <span className="commands-tab__params-empty-text">
+          {t('cmd_no_params')}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div id="cmdParams" className="commands-params commands-tab__params">
@@ -225,19 +243,35 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
 
         <section className="commands-tab__card commands-tab__card--editor commands-editor">
           <header className="commands-tab__editor-head commands-editor__header">
-            <div className="commands-tab__editor-title-wrap">
-              <h2 id="cmdTitle" className="commands-tab__editor-title">
-                {selectedName}
-              </h2>
-              {commands.selected ? (
-                <span className="commands-tab__badge commands-tab__badge--accent">
-                  RCON
-                </span>
-              ) : null}
+            <div className="commands-tab__editor-info">
+              <div className="commands-tab__editor-title-wrap">
+                <h2 id="cmdTitle" className="commands-tab__editor-title">
+                  {selectedName}
+                </h2>
+              </div>
+              <p id="cmdDesc" className="commands-tab__editor-desc hint">
+                {commands.selected?.description || ''}
+              </p>
             </div>
-            <p id="cmdDesc" className="commands-tab__editor-desc hint">
-              {commands.selected?.description || ''}
-            </p>
+            <div className="commands-tab__editor-actions commands-editor__actions">
+              <FccSwitch
+                id="cbCmdQuiet"
+                className="commands-tab__quiet-toggle"
+                checked={commands.quiet}
+                onChange={commands.setQuiet}
+                label={t('cmd_quiet_mode_cb')}
+              />
+              <button
+                type="button"
+                className="btn btn--primary btn--with-icon commands-tab__execute-btn"
+                id="btnCmdExecute"
+                disabled={!commands.running || !commands.selected}
+                onClick={() => void commands.execute()}
+              >
+                <IconPlayerPlay size={16} />
+                {t('command_execute')}
+              </button>
+            </div>
           </header>
 
           <div className="commands-tab__editor-body">
@@ -255,6 +289,7 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               htmlFor="cmdPreview"
               className="commands-tab__preview-label commands-editor__preview-label"
             >
+              <IconTerminal2 size={16} />
               {t('cmd_preview_label')}
             </label>
             <textarea
@@ -265,33 +300,6 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               onChange={(e) => commands.setPreview(e.target.value)}
             />
           </div>
-
-          <footer className="commands-tab__editor-footer commands-editor__actions">
-            <label
-              className="commands-tab__quiet-toggle commands-editor__quiet-toggle"
-              htmlFor="cbCmdQuiet"
-            >
-              <input
-                type="checkbox"
-                id="cbCmdQuiet"
-                checked={commands.quiet}
-                onChange={(e) => commands.setQuiet(e.target.checked)}
-              />
-              <span data-i18n="cmd_quiet_mode_cb">
-                {t('cmd_quiet_mode_cb')}
-              </span>
-            </label>
-            <button
-              type="button"
-              className="btn btn--with-icon commands-tab__execute-btn"
-              id="btnCmdExecute"
-              disabled={!commands.running || !commands.selected}
-              onClick={() => void commands.execute()}
-            >
-              <AppIcon name="start" size={16} />
-              {t('command_execute')}
-            </button>
-          </footer>
         </section>
       </div>
     </div>
