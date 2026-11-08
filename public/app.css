@@ -2241,20 +2241,11 @@ table.data.data--save-mods tbody tr:hover td {
   background: color-mix(in srgb, var(--bg-main) 82%, var(--bg-widget) 18%);
 }
 
-#tblSaveModsCompareBody tr.save-mod-row--ok td:first-child {
-  box-shadow: none;
-}
-
-#tblSaveModsCompareBody tr.save-mod-row--ver-diff td:first-child {
-  box-shadow: inset 3px 0 0 #d4b04a;
-}
-
-#tblSaveModsCompareBody tr.save-mod-row--not-in-save td:first-child {
-  box-shadow: inset 3px 0 0 #d07070;
-}
-
+#tblSaveModsCompareBody tr.save-mod-row--ok td:first-child,
+#tblSaveModsCompareBody tr.save-mod-row--ver-diff td:first-child,
+#tblSaveModsCompareBody tr.save-mod-row--not-in-save td:first-child,
 #tblSaveModsCompareBody tr.save-mod-row--not-on-server td:first-child {
-  box-shadow: inset 3px 0 0 var(--text-dim);
+  box-shadow: none;
 }
 
 .saves-detail-panel--expanded .saves-mods-compare__table-wrap.table-wrap--enter table.data tbody tr {
