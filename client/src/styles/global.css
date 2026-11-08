@@ -5011,6 +5011,81 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
       rgba(255, 255, 255, 0.02) 100%) !important;
 }
 
+.monitoring-gametime-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 12%, transparent) 0%,
+      rgba(255, 255, 255, 0.025) 100%) !important;
+}
+
+/* Rounded header bar in monitoring chart cards */
+.monitoring-tab .players-tab__card-header {
+  min-height: 40px !important;
+  max-height: 40px !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-radius: 6px !important;
+}
+
+/* Monitoring range filter buttons hover/active states */
+.monitoring-range-btn:not(.monitoring-range-btn--active):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+  color: var(--text) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.monitoring-range-btn--active:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 28%, var(--bg-widget) 72%) !important;
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
+}
+
+/* Monitoring chart configuration modal items & reorder buttons */
+.monitoring-settings-item:hover {
+  border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
+}
+
+.monitoring-settings-reorder-btn {
+  background: color-mix(in srgb, var(--bg-main) 45%, var(--bg-widget) 55%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-radius: 4px;
+  color: var(--text);
+  width: 24px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.1s ease;
+}
+
+.monitoring-settings-reorder-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 20%, var(--bg-widget) 80%);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+}
+
+.monitoring-settings-reorder-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--accent) 28%, var(--bg-widget) 72%);
+}
+
+.monitoring-settings-reorder-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  box-shadow: none;
+  border-color: transparent;
+  background: transparent;
+}
+
 .instance-dashboard-user {
   height: 44px !important;
   min-height: 44px !important;
@@ -5434,33 +5509,23 @@ td.instance-save-cell {
   display: none !important;
 }
 
-/* 2. Main Workspace & Panels Background Grid */
+/* 2. Main Workspace & Panels Background (no inner grid pattern) */
 :root:not([data-theme]) .panel-shell,
 :root:not([data-theme]) #instanceScreen.instance-screen,
 :root[data-theme='fcc_classic'] .panel-shell,
 :root[data-theme='fcc_classic'] #instanceScreen.instance-screen {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
     linear-gradient(180deg,
       color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
       color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
-  background-size:
-    24px 24px,
-    24px 24px,
-    100% 100% !important;
-  background-attachment: fixed, fixed, scroll !important;
-  background-repeat: repeat, repeat, no-repeat !important;
+  background-size: 100% 100% !important;
+  background-attachment: scroll !important;
+  background-repeat: no-repeat !important;
 }
 
 :root:not([data-theme]) .tab-panels,
 :root[data-theme='fcc_classic'] .tab-panels {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px) !important;
-  background-size: 24px 24px !important;
-  background-attachment: fixed !important;
-  background-repeat: repeat !important;
+  background-image: none !important;
   background-color: color-mix(in srgb,
       var(--bg-main) 58%,
       var(--bg-widget) 42%) !important;

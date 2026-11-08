@@ -11,6 +11,7 @@ import {
   IconCloudFog,
   IconExternalLink,
   IconAdjustmentsHorizontal,
+  IconClock,
 } from '@tabler/icons-react';
 import { api } from '../../api/client';
 import { AppIcon } from '../AppIcon';
@@ -67,6 +68,8 @@ interface CompanionLiveStatus {
   disabled?: boolean;
   game_speed?: number;
   paused?: boolean;
+  elapsed_seconds?: number;
+  elapsed_time?: string;
   research?: {
     name?: string;
     localised_name?: string;
@@ -91,6 +94,28 @@ interface CompanionLiveStatus {
     gleba_total?: number;
   };
   updatedAt?: number;
+}
+
+function formatElapsedGameTime(
+  totalSeconds: number | null | undefined,
+  showDays: boolean,
+): string {
+  if (totalSeconds === null || totalSeconds === undefined || totalSeconds < 0) {
+    return '00:00:00';
+  }
+  const sec = Math.floor(totalSeconds % 60);
+  const min = Math.floor((totalSeconds / 60) % 60);
+  const totalHours = Math.floor(totalSeconds / 3600);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  if (showDays && totalHours >= 24) {
+    const days = Math.floor(totalHours / 24);
+    const remHours = totalHours % 24;
+    return `${days}д ${pad(remHours)}:${pad(min)}:${pad(sec)}`;
+  }
+
+  return `${pad(totalHours)}:${pad(min)}:${pad(sec)}`;
 }
 
 function formatEta(seconds: number | null | undefined): string {
@@ -176,6 +201,27 @@ export function MonitoringTab({
     } catch {
       /* ignore */
     }
+  };
+
+  const [gameTimeShowDays, setGameTimeShowDays] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('fcc_monitoring_gametime_days');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleGameTimeDays = () => {
+    setGameTimeShowDays((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('fcc_monitoring_gametime_days', String(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
   };
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -421,22 +467,24 @@ export function MonitoringTab({
                   display: 'inline-flex',
                   alignItems: 'center',
                   background:
-                    'var(--mantine-color-dark-8, rgba(0, 0, 0, 0.35))',
+                    'var(--mantine-color-dark-8, rgba(0, 0, 0, 0.4))',
                   border:
                     '1px solid var(--mantine-color-dark-4, rgba(255, 255, 255, 0.1))',
-                  borderRadius: '6px',
+                  borderRadius: '5px',
                   padding: '2px',
                   gap: '2px',
                 }}
               >
                 <button
                   type="button"
-                  className={`btn btn--compact ${spmMode === 'spm' ? 'btn--active' : ''}`}
                   style={{
                     border: 'none',
                     padding: '2px 8px',
+                    minHeight: 'unset',
+                    height: '22px',
+                    lineHeight: '18px',
                     borderRadius: '4px',
-                    fontSize: '0.75rem',
+                    fontSize: '0.73rem',
                     fontWeight: spmMode === 'spm' ? 700 : 500,
                     background:
                       spmMode === 'spm'
@@ -453,12 +501,14 @@ export function MonitoringTab({
                 </button>
                 <button
                   type="button"
-                  className={`btn btn--compact ${spmMode === 'espm' ? 'btn--active' : ''}`}
                   style={{
                     border: 'none',
                     padding: '2px 8px',
+                    minHeight: 'unset',
+                    height: '22px',
+                    lineHeight: '18px',
                     borderRadius: '4px',
-                    fontSize: '0.75rem',
+                    fontSize: '0.73rem',
                     fontWeight: spmMode === 'espm' ? 700 : 500,
                     background:
                       spmMode === 'espm'
@@ -595,8 +645,9 @@ export function MonitoringTab({
           }}
         >
           {showLiveWidget && liveData ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
               style={{
@@ -863,9 +914,107 @@ export function MonitoringTab({
                   ) : null}
                 </div>
               )}
-              </motion.div>
-            ) : bannerMode ? (
-              <motion.div
+            </motion.div>
+            {showLiveWidget &&
+              liveData &&
+              (typeof liveData.elapsed_seconds === 'number' ||
+                typeof liveData.elapsed_time === 'string') && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={toggleGameTimeDays}
+                  title={
+                    t('metric_live_game_time_tip') ||
+                    'Нажмите, чтобы переключить формат (дни / только часы)'
+                  }
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleGameTimeDays();
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '6px 14px',
+                    background:
+                      'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.09)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                    minHeight: '56px',
+                    boxSizing: 'border-box',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    transition:
+                      'border-color 0.15s ease, background 0.15s ease',
+                  }}
+                  className="monitoring-gametime-card"
+                >
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '6px',
+                      background: 'rgba(32, 201, 151, 0.1)',
+                      border: '1px solid rgba(32, 201, 151, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <IconClock
+                      size={18}
+                      style={{
+                        color: 'var(--mantine-color-teal-filled, #20c997)',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                      minWidth: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: 'var(--mantine-color-dimmed)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      {t('metric_live_game_time') || 'Время игры'}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        color: 'var(--mantine-color-text)',
+                        fontVariantNumeric: 'tabular-nums',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {formatElapsedGameTime(
+                        liveData.elapsed_seconds,
+                        gameTimeShowDays,
+                      )}
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </>
+          ) : bannerMode ? (
+            <motion.div
                 onClick={() => {
                   if (bannerMode === 'disabled') {
                     document.getElementById('tabBtnMods')?.click();
@@ -1133,59 +1282,52 @@ export function MonitoringTab({
           }}
         >
           <div
-            className="btn-group"
+            className="monitoring-range-picker"
             style={{
-              display: 'flex',
-              background: 'var(--mantine-color-dark-6)',
-              borderRadius: '6px',
-              padding: '4px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px',
+              borderRadius: '7px',
+              height: '32px',
+              boxSizing: 'border-box',
+              background: 'color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%)',
+              border: '1px solid color-mix(in srgb, var(--border-dark) 85%, transparent)',
+              boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.25)',
             }}
           >
             {rangeButtons.map((opt) => (
               <button
                 key={opt.key}
                 type="button"
-                className="btn btn--compact"
+                className={`btn btn--compact monitoring-range-btn ${
+                  range === opt.key ? 'monitoring-range-btn--active' : ''
+                }`}
                 style={{
                   position: 'relative',
-                  background: 'transparent',
-                  color:
-                    range === opt.key
-                      ? 'var(--accent-selected, #f1be64)'
-                      : 'var(--mantine-color-text)',
-                  border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
+                  minHeight: '26px',
+                  height: '26px',
+                  padding: '0 10px',
+                  fontSize: '0.82rem',
+                  fontWeight: range === opt.key ? 700 : 500,
+                  borderRadius: '5px',
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  fontWeight: range === opt.key ? 600 : 500,
-                  transition: 'color 0.2s',
+                  border: range === opt.key
+                    ? '1px solid color-mix(in srgb, var(--accent) 55%, transparent)'
+                    : '1px solid color-mix(in srgb, var(--border-dark) 75%, transparent)',
+                  background: range === opt.key
+                    ? 'color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%)'
+                    : 'color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%)',
+                  color: range === opt.key
+                    ? 'var(--accent)'
+                    : 'var(--text)',
+                  boxShadow: range === opt.key
+                    ? '0 1px 3px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                    : '0 1px 2px rgba(0, 0, 0, 0.18)',
+                  transition: 'background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease',
                 }}
                 onClick={() => setRange(opt.key)}
               >
-                {range === opt.key && (
-                  <motion.div
-                    layoutId="activeRangeHighlight"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background:
-                        'color-mix(in srgb, var(--accent) 20%, var(--mantine-color-dark-5))',
-                      border:
-                        '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
-                      borderRadius: '4px',
-                      zIndex: 1,
-                    }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 380,
-                      damping: 30,
-                    }}
-                  />
-                )}
                 <span style={{ position: 'relative', zIndex: 2 }}>
                   {opt.label}
                 </span>
@@ -1199,19 +1341,10 @@ export function MonitoringTab({
             onClick={() => setSettingsOpen(true)}
             title={t('monitoring_settings_btn') || 'Настроить графики'}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              height: '36px',
-              background: 'var(--mantine-color-dark-6)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              color: 'var(--mantine-color-text)',
-              transition: 'background 0.2s, border-color 0.2s',
+              height: '32px',
+              minHeight: '32px',
+              padding: '0 12px',
+              boxSizing: 'border-box',
             }}
           >
             <IconAdjustmentsHorizontal size={16} />

@@ -1537,6 +1537,8 @@
   "metric_live_speed": "Скорость",
   "metric_live_paused": "На паузе",
   "metric_live_disabled": "Отключен",
+  "metric_live_game_time": "Время игры",
+  "metric_live_game_time_tip": "Нажмите, чтобы переключить формат (дни / только часы)",
   "metrics_mod_promo_title": "FCC: Metrics",
   "metrics_mod_promo_badge": "Мод",
   "metrics_mod_disabled_badge": "Отключен",

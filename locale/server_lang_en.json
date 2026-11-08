@@ -1536,6 +1536,8 @@
   "metric_live_speed": "Speed",
   "metric_live_paused": "Paused",
   "metric_live_disabled": "Disabled",
+  "metric_live_game_time": "Game Time",
+  "metric_live_game_time_tip": "Click to toggle format (days / hours only)",
   "metrics_mod_promo_title": "FCC: Metrics",
   "metrics_mod_promo_badge": "Mod",
   "metrics_mod_disabled_badge": "Disabled",

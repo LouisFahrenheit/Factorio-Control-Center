@@ -179,7 +179,7 @@ export function MonitoringSettingsModal({
         >
           <IconAdjustmentsHorizontal
             size={20}
-            style={{ color: 'var(--mantine-color-blue-filled)' }}
+            style={{ color: 'var(--accent)' }}
           />
           <span>{t('monitoring_settings_title') || 'Настройка графиков'}</span>
         </div>
@@ -197,7 +197,7 @@ export function MonitoringSettingsModal({
             style={{
               margin: '0 0 4px 0',
               fontSize: '0.85rem',
-              color: 'var(--mantine-color-dimmed)',
+              color: 'var(--text-muted, var(--mantine-color-dimmed))',
               lineHeight: 1.45,
             }}
           >
@@ -223,6 +223,7 @@ export function MonitoringSettingsModal({
                   key={item.id}
                   layout
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  className="monitoring-settings-item"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -230,15 +231,19 @@ export function MonitoringSettingsModal({
                     padding: '8px 12px',
                     borderRadius: '8px',
                     background: item.enabled
-                      ? 'rgba(255, 255, 255, 0.03)'
-                      : 'rgba(255, 255, 255, 0.01)',
+                      ? 'color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%)'
+                      : 'color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%)',
                     border: `1px solid ${
                       item.enabled
-                        ? 'rgba(255, 255, 255, 0.08)'
-                        : 'rgba(255, 255, 255, 0.03)'
+                        ? 'color-mix(in srgb, var(--border-dark) 85%, transparent)'
+                        : 'color-mix(in srgb, var(--border-dark) 50%, transparent)'
                     }`,
-                    opacity: item.enabled ? 1 : 0.55,
-                    transition: 'border-color 0.15s, opacity 0.15s',
+                    boxShadow: item.enabled
+                      ? '0 1px 3px rgba(0, 0, 0, 0.22)'
+                      : 'none',
+                    opacity: item.enabled ? 1 : 0.6,
+                    transition:
+                      'background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease',
                   }}
                 >
                   {/* Left: Reorder controls + Icon + Title + Mod badge */}
@@ -262,49 +267,19 @@ export function MonitoringSettingsModal({
                     >
                       <button
                         type="button"
+                        className="monitoring-settings-reorder-btn"
                         aria-label={`${t('monitoring_settings_move_up') || 'Выше'}: ${meta.title}`}
                         disabled={isFirst}
                         onClick={() => handleMove(index, 'up')}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          border: 'none',
-                          borderRadius: '3px',
-                          color: isFirst
-                            ? 'rgba(255, 255, 255, 0.15)'
-                            : 'var(--mantine-color-text)',
-                          width: '24px',
-                          height: '16px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: isFirst ? 'not-allowed' : 'pointer',
-                          padding: 0,
-                          transition: 'background 0.15s',
-                        }}
                       >
                         <IconChevronUp size={14} />
                       </button>
                       <button
                         type="button"
+                        className="monitoring-settings-reorder-btn"
                         aria-label={`${t('monitoring_settings_move_down') || 'Ниже'}: ${meta.title}`}
                         disabled={isLast}
                         onClick={() => handleMove(index, 'down')}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          border: 'none',
-                          borderRadius: '3px',
-                          color: isLast
-                            ? 'rgba(255, 255, 255, 0.15)'
-                            : 'var(--mantine-color-text)',
-                          width: '24px',
-                          height: '16px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: isLast ? 'not-allowed' : 'pointer',
-                          padding: 0,
-                          transition: 'background 0.15s',
-                        }}
                       >
                         <IconChevronDown size={14} />
                       </button>
@@ -316,12 +291,15 @@ export function MonitoringSettingsModal({
                         width: '32px',
                         height: '32px',
                         borderRadius: '6px',
-                        background: 'rgba(255, 255, 255, 0.04)',
-                        border: '1px solid rgba(255, 255, 255, 0.06)',
+                        background:
+                          'color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%)',
+                        border:
+                          '1px solid color-mix(in srgb, var(--border-dark) 75%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
+                        boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.2)',
                       }}
                     >
                       {meta.icon}
@@ -348,7 +326,7 @@ export function MonitoringSettingsModal({
                           style={{
                             fontSize: '0.88rem',
                             fontWeight: 600,
-                            color: 'var(--mantine-color-text)',
+                            color: 'var(--text)',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -363,8 +341,11 @@ export function MonitoringSettingsModal({
                               fontWeight: 600,
                               padding: '1px 6px',
                               borderRadius: '4px',
-                              background: 'rgba(255, 255, 255, 0.08)',
-                              color: 'var(--mantine-color-dimmed)',
+                              background:
+                                'color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%)',
+                              border:
+                                '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                              color: 'var(--accent)',
                               letterSpacing: '0.04em',
                               textTransform: 'uppercase',
                               flexShrink: 0,
@@ -378,7 +359,8 @@ export function MonitoringSettingsModal({
                         <span
                           style={{
                             fontSize: '0.72rem',
-                            color: 'var(--mantine-color-dimmed)',
+                            color:
+                              'var(--text-muted, var(--mantine-color-dimmed))',
                           }}
                         >
                           {isModDisabled
@@ -411,20 +393,12 @@ export function MonitoringSettingsModal({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '12px 20px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
           <button
             type="button"
             className="btn btn--secondary"
             onClick={handleReset}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.85rem',
-            }}
           >
             <IconRotate2 size={16} />
             <span>{t('monitoring_settings_reset') || 'Сбросить'}</span>
@@ -434,12 +408,6 @@ export function MonitoringSettingsModal({
             type="button"
             className="btn btn--primary"
             onClick={onClose}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.85rem',
-            }}
           >
             <IconCheck size={16} />
             <span>{t('monitoring_settings_close') || 'Готово'}</span>

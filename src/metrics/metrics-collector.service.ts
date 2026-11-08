@@ -82,6 +82,8 @@ export interface CompanionLiveMetrics {
   disabled?: boolean;
   game_speed?: number;
   paused?: boolean;
+  elapsed_seconds?: number;
+  elapsed_time?: string;
   research?: CompanionResearchData | null;
   evolution?: CompanionEvolutionData;
   pollution?: CompanionPollutionData;
@@ -97,6 +99,8 @@ export interface CompanionMetricsPayload {
   total_spm?: number;
   game_speed?: number;
   paused?: boolean;
+  elapsed_seconds?: number;
+  elapsed_time?: string;
   evolution?: CompanionEvolutionData;
   pollution?: CompanionPollutionData;
   research?: CompanionResearchData;
@@ -578,6 +582,16 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
           game_speed:
             typeof data.game_speed === 'number' ? data.game_speed : 1.0,
           paused: isPaused,
+          elapsed_seconds:
+            typeof data.elapsed_seconds === 'number'
+              ? data.elapsed_seconds
+              : typeof data.tick === 'number'
+                ? Math.floor(data.tick / 60)
+                : undefined,
+          elapsed_time:
+            typeof data.elapsed_time === 'string'
+              ? data.elapsed_time
+              : undefined,
           research: data.research ?? null,
           evolution: data.evolution,
           pollution: data.pollution,
