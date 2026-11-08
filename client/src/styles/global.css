@@ -5181,7 +5181,6 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   border-color: color-mix(in srgb, var(--border) 65%, transparent) !important;
 }
 
-/* Ensure right toolbar matches exact 44px status bar height */
 .status-bar .instance-dashboard-toolbar {
   height: 44px !important;
   min-height: 44px !important;
@@ -5194,11 +5193,9 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 .status-bar--instances,
 .status-bar--panel {
   background:
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
-    ) !important;
+      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 92%, transparent) !important;
   border-radius: 12px !important;
   box-shadow:
@@ -5206,12 +5203,20 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
     0 4px 18px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Ensure outer panel containers maintain rounded corners across all themes */
 :root .panel,
 :root .panel-shell,
 :root #instanceScreen.instance-screen {
   border-radius: 12px !important;
   overflow: hidden !important;
+}
+
+:root .control-tab__compact-field .control-tab__compact-input,
+:root .control-tab__compact-field input.control-tab__compact-input,
+:root .control-tab__compact-field select.control-tab__compact-input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Running instance status pill using active players tile emerald palette */
