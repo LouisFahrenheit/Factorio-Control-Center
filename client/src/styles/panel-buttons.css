@@ -6,14 +6,8 @@
 
 /* ── Base Unified Button Style inside Server Panel ───────────────────── */
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
-    .btn--toolbar-icon
-  ):not(.mods-toolbar__field-version-btn),
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
-    .btn--toolbar-icon
-  ):not(.mods-toolbar__field-version-btn) {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -40,79 +34,41 @@
     transform 0.1s ease;
 }
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  ),
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  ) {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled),
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled) {
   background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--text);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
 }
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):active:not(
-    :disabled
-  ),
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):active:not(
-    :disabled
-  ) {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):active:not( :disabled),
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):active:not( :disabled) {
   transform: translateY(1px);
   background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):disabled,
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):disabled {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):disabled,
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):disabled {
   opacity: 0.45;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab)
-  svg,
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab)
-  .app-icon,
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab)
-  svg,
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab)
-  .app-icon {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab) svg,
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab) .app-icon,
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab) svg,
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab) .app-icon {
   color: var(--text-muted);
   transition: color 0.16s ease;
 }
 
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  )
-  svg,
-.workspace__main--panel
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  )
-  .app-icon,
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  )
-  svg,
-.panel-shell
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not(
-    :disabled
-  )
-  .app-icon {
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled) svg,
+.workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled) .app-icon,
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled) svg,
+.panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):hover:not( :disabled) .app-icon {
   color: var(--accent);
 }
 
@@ -191,11 +147,9 @@
 .panel-shell .btn.btn--primary:not(.sub-tabs__tab):not(:disabled),
 .modal .btn.btn--primary:not(.sub-tabs__tab):not(:disabled),
 .fu-modal .btn.btn--primary:not(.sub-tabs__tab):not(:disabled) {
-  background: color-mix(
-    in srgb,
-    var(--accent) 22%,
-    var(--bg-widget) 78%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 22%,
+      var(--bg-widget) 78%) !important;
   border-color: color-mix(in srgb, var(--accent) 55%, transparent) !important;
   color: #ffffff !important;
   box-shadow:
@@ -203,16 +157,13 @@
     0 0 8px rgba(var(--accent-rgb), 0.12) !important;
 }
 
-.workspace__main--panel
-  .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
+.workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
 .panel-shell .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
 .modal .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled),
 .fu-modal .btn.btn--primary:not(.sub-tabs__tab):hover:not(:disabled) {
-  background: color-mix(
-    in srgb,
-    var(--accent) 30%,
-    var(--bg-widget) 70%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 30%,
+      var(--bg-widget) 70%) !important;
   border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
   color: #ffffff !important;
   box-shadow:
@@ -220,17 +171,14 @@
     0 0 12px rgba(var(--accent-rgb), 0.2) !important;
 }
 
-.workspace__main--panel
-  .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
+.workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
 .panel-shell .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
 .modal .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled),
 .fu-modal .btn.btn--primary:not(.sub-tabs__tab):active:not(:disabled) {
   transform: translateY(1px) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 36%,
-    var(--bg-widget) 64%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 36%,
+      var(--bg-widget) 64%) !important;
 }
 
 .workspace__main--panel .btn.btn--primary:not(.sub-tabs__tab) svg,
@@ -252,25 +200,24 @@
   animation: factorio-update-btn-accent-pulse 1.4s ease-in-out infinite !important;
 }
 
-.workspace__main--panel
-  #btnFactorioUpdate.btn--update-available:hover:not(:disabled),
+.workspace__main--panel #btnFactorioUpdate.btn--update-available:hover:not(:disabled),
 .panel-shell #btnFactorioUpdate.btn--update-available:hover:not(:disabled) {
   animation: none !important;
   border-color: var(--accent) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 26%,
-    var(--bg-widget) 74%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 26%,
+      var(--bg-widget) 74%) !important;
   box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.45) !important;
 }
 
 @keyframes factorio-update-btn-accent-pulse {
+
   0%,
   100% {
     border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
     box-shadow: none;
   }
+
   50% {
     border-color: var(--accent);
     box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35);
@@ -312,10 +259,8 @@
 
 .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
 .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
-.command-editor-modal
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
-.create-save-modal
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+.command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+.create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
 .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
@@ -325,10 +270,8 @@
 
 .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
 .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
-.command-editor-modal
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
-.create-save-modal
-  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+.command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+.create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
 .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled) {
   transform: translateY(1px);
   background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
@@ -360,11 +303,9 @@
   padding: 0 !important;
   box-sizing: border-box !important;
   border-radius: 7px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 40%,
-    var(--bg-widget) 60%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 40%,
+      var(--bg-widget) 60%) !important;
   color: var(--text-muted) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22) !important;
@@ -389,11 +330,9 @@
   padding: 0 !important;
   box-sizing: border-box !important;
   border-radius: 7px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 40%,
-    var(--bg-widget) 60%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 40%,
+      var(--bg-widget) 60%) !important;
   color: var(--text-muted) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22) !important;
@@ -409,11 +348,9 @@
 .workspace__main--panel .mods-toolbar__field-action,
 .panel-shell .mods-toolbar__field-action {
   border-radius: 7px !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 40%,
-    var(--bg-widget) 60%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--bg-main) 40%,
+      var(--bg-widget) 60%) !important;
   color: var(--text) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22) !important;
@@ -435,11 +372,9 @@
 .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled),
 .workspace__main--panel .mods-toolbar__field-action:hover:not(:disabled),
 .panel-shell .mods-toolbar__field-action:hover:not(:disabled) {
-  background: color-mix(
-    in srgb,
-    var(--accent) 15%,
-    var(--bg-widget) 85%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 15%,
+      var(--bg-widget) 85%) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
   color: var(--text) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28) !important;
@@ -452,11 +387,9 @@
 .workspace__main--panel .mods-toolbar__field-action:active:not(:disabled),
 .panel-shell .mods-toolbar__field-action:active:not(:disabled) {
   transform: translateY(1px) !important;
-  background: color-mix(
-    in srgb,
-    var(--accent) 22%,
-    var(--bg-widget) 78%
-  ) !important;
+  background: color-mix(in srgb,
+      var(--accent) 22%,
+      var(--bg-widget) 78%) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -488,12 +421,8 @@
 .workspace__main--panel .btn--toolbar-icon:hover:not(:disabled) .app-icon,
 .panel-shell .btn--toolbar-icon:hover:not(:disabled) svg,
 .panel-shell .btn--toolbar-icon:hover:not(:disabled) .app-icon,
-.workspace__main--panel
-  .mods-toolbar__field-version-btn:hover:not(:disabled)
-  svg,
-.workspace__main--panel
-  .mods-toolbar__field-version-btn:hover:not(:disabled)
-  .app-icon,
+.workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled) svg,
+.workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled) .app-icon,
 .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled) svg,
 .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled) .app-icon {
   color: var(--accent) !important;
@@ -531,4 +460,400 @@
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
+}
+
+/* ==========================================================================
+   Space Theme (dark_space) Button Styling Enhancements
+   ========================================================================== */
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab) {
+  background: #1e2430;
+  border-color: #313d50;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled) {
+  background: #2a3446;
+  border-color: color-mix(in srgb, var(--accent) 55%, #313d50 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled) {
+  background: #171c26;
+  border-color: #263140;
+}
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn,
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action,
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action {
+  background: #1e2430 !important;
+  border-color: #313d50 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action:hover:not(:disabled) {
+  background: #2a3446 !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #313d50 45%) !important;
+}
+
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action:active:not(:disabled) {
+  background: #171c26 !important;
+  border-color: #263140 !important;
+}
+
+:root[data-theme='dark_space'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='dark_space'] #instanceTabSettings .btn:not(.sub-tabs__tab),
+:root[data-theme='dark_space'] #instanceTabIntegrations .btn:not(.sub-tabs__tab),
+:root[data-theme='dark_space'] .server-settings-tab .btn:not(.sub-tabs__tab),
+:root[data-theme='dark_space'] .mod-settings-page .btn:not(.sub-tabs__tab),
+:root[data-theme='dark_space'] .user-settings-modal .btn:not(.sub-tabs__tab),
+:root[data-theme='dark_space'] .settings-table__control-stack .btn,
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='dark_space'] .access-users-bar__create-btn,
+:root[data-theme='dark_space'] .instance-card__action-btn {
+  background: #1e2430;
+  border-color: #313d50;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='dark_space'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='dark_space'] #instanceTabSettings .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] #instanceTabIntegrations .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .server-settings-tab .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .mod-settings-page .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .user-settings-modal .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .settings-table__control-stack .btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__create-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .instance-card__action-btn:hover:not(:disabled) {
+  background: #2a3446;
+  border-color: color-mix(in srgb, var(--accent) 55%, #313d50 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='dark_space'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='dark_space'] #instanceTabSettings .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] #instanceTabIntegrations .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .server-settings-tab .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .mod-settings-page .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .user-settings-modal .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .settings-table__control-stack .btn:active:not(:disabled),
+:root[data-theme='dark_space'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__create-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .instance-card__action-btn:active:not(:disabled) {
+  background: #171c26;
+  border-color: #263140;
+}
+
+:root[data-theme='dark_space'] .btn--toolbar-icon,
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn,
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action,
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action,
+:root[data-theme='dark_space'] .access-users-bar__refresh-btn,
+:root[data-theme='dark_space'] .access-users-bar__view-toggle-btn,
+:root[data-theme='dark_space'] .access-users-bar__help-btn,
+:root[data-theme='dark_space'] .instance-servers-bar__columns-btn,
+:root[data-theme='dark_space'] .instance-dashboard-toolbar__btn {
+  background: #1e2430 !important;
+  border-color: #313d50 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='dark_space'] .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__refresh-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__view-toggle-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__help-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .instance-servers-bar__columns-btn:hover:not(:disabled),
+:root[data-theme='dark_space'] .instance-dashboard-toolbar__btn:hover:not(:disabled) {
+  background: #2a3446 !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #313d50 45%) !important;
+}
+
+:root[data-theme='dark_space'] .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .workspace__main--panel .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='dark_space'] .panel-shell .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__refresh-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__view-toggle-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .access-users-bar__help-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .instance-servers-bar__columns-btn:active:not(:disabled),
+:root[data-theme='dark_space'] .instance-dashboard-toolbar__btn:active:not(:disabled) {
+  background: #171c26 !important;
+  border-color: #263140 !important;
+}
+
+:root[data-theme='dark_space'] .control-tab__card--actions {
+  background: #12151b;
+  border-color: #222b38;
+}
+
+/* ==========================================================================
+   Ion Storm Theme (ion_storm) Button Styling Enhancements
+   ========================================================================== */
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab) {
+  background: #281e2a;
+  border-color: #443246;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled) {
+  background: #36293a;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled) {
+  background: #1c141e;
+  border-color: #352636;
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action {
+  background: #281e2a !important;
+  border-color: #443246 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action:hover:not(:disabled) {
+  background: #36293a !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%) !important;
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action:active:not(:disabled) {
+  background: #1c141e !important;
+  border-color: #352636 !important;
+}
+
+:root[data-theme='ion_storm'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] #instanceTabSettings .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] #instanceTabIntegrations .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .server-settings-tab .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .mod-settings-page .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .user-settings-modal .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .settings-table__control-stack .btn,
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .access-users-bar__create-btn,
+:root[data-theme='ion_storm'] .instance-card__action-btn {
+  background: #281e2a;
+  border-color: #443246;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='ion_storm'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm'] #instanceTabSettings .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] #instanceTabIntegrations .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .server-settings-tab .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .mod-settings-page .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .user-settings-modal .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .settings-table__control-stack .btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__create-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .instance-card__action-btn:hover:not(:disabled) {
+  background: #36293a;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='ion_storm'] .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(.btn--toolbar-icon):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm'] #instanceTabSettings .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] #instanceTabIntegrations .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .server-settings-tab .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .mod-settings-page .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .user-settings-modal .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .settings-table__control-stack .btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .fu-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .command-editor-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .create-save-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .mod-job-modal .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__create-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .instance-card__action-btn:active:not(:disabled) {
+  background: #1c141e;
+  border-color: #352636;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .access-users-bar__refresh-btn,
+:root[data-theme='ion_storm'] .access-users-bar__view-toggle-btn,
+:root[data-theme='ion_storm'] .access-users-bar__help-btn,
+:root[data-theme='ion_storm'] .instance-servers-bar__columns-btn,
+:root[data-theme='ion_storm'] .instance-dashboard-toolbar__btn {
+  background: #281e2a !important;
+  border-color: #443246 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__refresh-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__view-toggle-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__help-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .instance-servers-bar__columns-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .instance-dashboard-toolbar__btn:hover:not(:disabled) {
+  background: #36293a !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%) !important;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .workspace__main--panel .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__refresh-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__view-toggle-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__help-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .instance-servers-bar__columns-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .instance-dashboard-toolbar__btn:active:not(:disabled) {
+  background: #1c141e !important;
+  border-color: #352636 !important;
+}
+
+:root[data-theme='ion_storm'] .control-tab__card--actions {
+  background: #150f16;
+  border-color: #2e202e;
 }

@@ -78,22 +78,22 @@
   --flag-on: #aac4d6;
   --flag-off: #6a7484;
   --online-green: #78c840;
-  --btn-top: #1d2128;
-  --btn-mid: #16191e;
-  --btn-bot: #101316;
-  --btn-hover-top: #232932;
-  --btn-hover-mid: #1c222a;
-  --btn-hover-bot: #161b22;
-  --fcc-btn-bg: color-mix(in srgb, #222830 90%, rgba(var(--accent-rgb), 0.07) 10%);
-  --fcc-btn-bg-hover: color-mix(in srgb, var(--accent) 12%, var(--fcc-btn-bg) 88%);
-  --fcc-btn-bg-active: color-mix(in srgb, var(--accent) 9%, #141820 91%);
-  --fcc-btn-bg-primary: color-mix(in srgb, var(--accent) 11%, var(--fcc-btn-bg) 89%);
-  --fcc-btn-bg-primary-hover: color-mix(in srgb, var(--accent) 19%, var(--fcc-btn-bg) 81%);
-  --fcc-btn-bg-danger: color-mix(in srgb, var(--error) 9%, var(--fcc-btn-bg) 91%);
-  --fcc-btn-bg-danger-hover: color-mix(in srgb, var(--error) 17%, var(--fcc-btn-bg) 83%);
-  --fcc-btn-bg-disabled: color-mix(in srgb, #101316 62%, #1a1e24 38%);
-  --fcc-btn-border: color-mix(in srgb, #3a3a3a 78%, rgba(var(--accent-rgb), 0.12) 22%);
-  --fcc-btn-shadow: inset 0 1px 0 rgba(212, 232, 245, 0.07);
+  --btn-top: #262e3d;
+  --btn-mid: #1e2430;
+  --btn-bot: #161c26;
+  --btn-hover-top: #323d50;
+  --btn-hover-mid: #273142;
+  --btn-hover-bot: #1e2634;
+  --fcc-btn-bg: #1e2430;
+  --fcc-btn-bg-hover: #2a3446;
+  --fcc-btn-bg-active: #171c26;
+  --fcc-btn-bg-primary: color-mix(in srgb, var(--accent) 18%, #1e2430 82%);
+  --fcc-btn-bg-primary-hover: color-mix(in srgb, var(--accent) 26%, #1e2430 74%);
+  --fcc-btn-bg-danger: color-mix(in srgb, var(--error) 14%, #1e2430 86%);
+  --fcc-btn-bg-danger-hover: color-mix(in srgb, var(--error) 24%, #1e2430 76%);
+  --fcc-btn-bg-disabled: #12161d;
+  --fcc-btn-border: #313d50;
+  --fcc-btn-shadow: 0 1px 3px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 :root[data-theme="vulcanus"] {
@@ -164,25 +164,25 @@
   --flag-on: #b8f8ff;
   --flag-off: #6d6270;
   --online-green: #9ae64a;
-  --btn-top: #2e2530;
-  --btn-mid: #241c24;
-  --btn-bot: #1a1418;
-  --btn-hover-top: #3a3040;
-  --btn-hover-mid: #2a2230;
-  --btn-hover-bot: #1e1820;
+  --btn-top: #342838;
+  --btn-mid: #281e2a;
+  --btn-bot: #1c141e;
+  --btn-hover-top: #423447;
+  --btn-hover-mid: #332637;
+  --btn-hover-bot: #241a28;
   --ion-orbit-period: 80s;
   --ion-aurora-period: 38s;
   --ion-radial-period: 28s;
-  --fcc-btn-bg: color-mix(in srgb, #2a2230 88%, rgba(var(--accent-rgb), 0.09) 12%);
-  --fcc-btn-bg-hover: color-mix(in srgb, var(--accent) 13%, var(--fcc-btn-bg) 87%);
-  --fcc-btn-bg-active: color-mix(in srgb, var(--accent) 10%, #140e12 90%);
-  --fcc-btn-bg-primary: color-mix(in srgb, var(--accent) 12%, var(--fcc-btn-bg) 88%);
-  --fcc-btn-bg-primary-hover: color-mix(in srgb, var(--accent) 20%, var(--fcc-btn-bg) 80%);
-  --fcc-btn-bg-danger: color-mix(in srgb, var(--error) 10%, var(--fcc-btn-bg) 90%);
-  --fcc-btn-bg-danger-hover: color-mix(in srgb, var(--error) 18%, var(--fcc-btn-bg) 82%);
-  --fcc-btn-bg-disabled: color-mix(in srgb, #0f0a0c 62%, #1a1418 38%);
-  --fcc-btn-border: color-mix(in srgb, #3d2c38 74%, rgba(var(--accent-rgb), 0.14) 26%);
-  --fcc-btn-shadow: inset 0 1px 0 rgba(180, 248, 255, 0.06);
+  --fcc-btn-bg: #281e2a;
+  --fcc-btn-bg-hover: #36293a;
+  --fcc-btn-bg-active: #1c141e;
+  --fcc-btn-bg-primary: color-mix(in srgb, var(--accent) 18%, #281e2a 82%);
+  --fcc-btn-bg-primary-hover: color-mix(in srgb, var(--accent) 26%, #281e2a 74%);
+  --fcc-btn-bg-danger: color-mix(in srgb, var(--error) 14%, #281e2a 86%);
+  --fcc-btn-bg-danger-hover: color-mix(in srgb, var(--error) 24%, #281e2a 76%);
+  --fcc-btn-bg-disabled: #140e14;
+  --fcc-btn-border: #443246;
+  --fcc-btn-shadow: 0 1px 3px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 :root[data-theme="cryogenics"] {
