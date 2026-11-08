@@ -2242,7 +2242,7 @@ table.data.data--save-mods tbody tr:hover td {
 }
 
 #tblSaveModsCompareBody tr.save-mod-row--ok td:first-child {
-  box-shadow: inset 3px 0 0 var(--online-green, #6a9a5c);
+  box-shadow: none;
 }
 
 #tblSaveModsCompareBody tr.save-mod-row--ver-diff td:first-child {
