@@ -7,7 +7,10 @@ import {
   localizeBanApiError,
   localizePlayersChatApiError,
 } from '../lib/playerUtils';
-import { isNetworkFetchError, notifyNetworkFetchError } from '../lib/networkErrors';
+import {
+  isNetworkFetchError,
+  notifyNetworkFetchError,
+} from '../lib/networkErrors';
 import { notifyErr, notifyWarn } from '../lib/notify';
 import { isSocketConnected } from '../api/socket';
 import type { AuthUser } from '../types/instance';
@@ -32,7 +35,8 @@ export function usePlayers(
   const canEditAdmins = canEditServerAdminList(user);
 
   const wsActive = isSocketConnected();
-  const accessPollMs = enabled && !historyOnly ? (wsActive ? 15_000 : 2000) : false;
+  const accessPollMs =
+    enabled && !historyOnly ? (wsActive ? 15_000 : 2000) : false;
 
   const summaryQuery = useQuery({
     queryKey: ['players', 'summary'],
@@ -65,7 +69,9 @@ export function usePlayers(
       ? ''
       : t(
           'chat_log_reload_failed',
-          chatQuery.error instanceof Error ? chatQuery.error.message : String(chatQuery.error),
+          chatQuery.error instanceof Error
+            ? chatQuery.error.message
+            : String(chatQuery.error),
         )
     : (chatQuery.data?.lines || []).join('\n');
 
@@ -99,7 +105,11 @@ export function usePlayers(
   }, [moderationPlayer]);
 
   const moderation = useCallback(
-    async (endpoint: string, body: Record<string, unknown>, clearFields = true) => {
+    async (
+      endpoint: string,
+      body: Record<string, unknown>,
+      clearFields = true,
+    ) => {
       try {
         await api(endpoint, { method: 'POST', body: JSON.stringify(body) });
         if (clearFields) {
@@ -114,61 +124,91 @@ export function usePlayers(
     [handleModError, reload],
   );
 
-  const kick = useCallback((targetPlayer?: string, reason?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    const r = (reason !== undefined ? reason : moderationReason).trim();
-    void moderation('/api/moderation/kick', { player, reason: r });
-  }, [blinkModerationPlayer, moderation, moderationPlayer, moderationReason]);
+  const kick = useCallback(
+    (targetPlayer?: string, reason?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      const r = (reason !== undefined ? reason : moderationReason).trim();
+      void moderation('/api/moderation/kick', { player, reason: r });
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer, moderationReason],
+  );
 
-  const ban = useCallback((targetPlayer?: string, reason?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    const r = (reason !== undefined ? reason : moderationReason).trim();
-    void moderation('/api/bans/ban', { player, reason: r });
-  }, [blinkModerationPlayer, moderation, moderationPlayer, moderationReason]);
+  const ban = useCallback(
+    (targetPlayer?: string, reason?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      const r = (reason !== undefined ? reason : moderationReason).trim();
+      void moderation('/api/bans/ban', { player, reason: r });
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer, moderationReason],
+  );
 
-  const unban = useCallback((targetPlayer?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    void moderation('/api/bans/unban', { player }, true);
-  }, [blinkModerationPlayer, moderation, moderationPlayer]);
+  const unban = useCallback(
+    (targetPlayer?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      void moderation('/api/bans/unban', { player }, true);
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer],
+  );
 
-  const mute = useCallback((targetPlayer?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    void moderation('/api/moderation/mute', { player }, false);
-  }, [blinkModerationPlayer, moderation, moderationPlayer]);
+  const mute = useCallback(
+    (targetPlayer?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      void moderation('/api/moderation/mute', { player }, false);
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer],
+  );
 
-  const unmute = useCallback((targetPlayer?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    void moderation('/api/moderation/unmute', { player }, false);
-  }, [blinkModerationPlayer, moderation, moderationPlayer]);
+  const unmute = useCallback(
+    (targetPlayer?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      void moderation('/api/moderation/unmute', { player }, false);
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer],
+  );
 
-  const purge = useCallback((targetPlayer?: string) => {
-    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
-    if (!player) {
-      blinkModerationPlayer();
-      return;
-    }
-    void moderation('/api/moderation/purge', { player }, false);
-  }, [blinkModerationPlayer, moderation, moderationPlayer]);
+  const purge = useCallback(
+    (targetPlayer?: string) => {
+      const player = (
+        targetPlayer !== undefined ? targetPlayer : moderationPlayer
+      ).trim();
+      if (!player) {
+        blinkModerationPlayer();
+        return;
+      }
+      void moderation('/api/moderation/purge', { player }, false);
+    },
+    [blinkModerationPlayer, moderation, moderationPlayer],
+  );
 
   const sendChat = useCallback(async () => {
     const message = chatMessage.trim();
@@ -183,7 +223,10 @@ export function usePlayers(
       await qc.invalidateQueries({ queryKey: ['players', 'chat'] });
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
-      notifyErr(t('players_send_message_btn'), localizePlayersChatApiError(raw, t));
+      notifyErr(
+        t('players_send_message_btn'),
+        localizePlayersChatApiError(raw, t),
+      );
     }
   }, [chatMessage, qc, t]);
 
@@ -196,7 +239,8 @@ export function usePlayers(
         body: JSON.stringify({ player }),
       });
       setWhitelistPlayer('');
-      if (r?.needs_restart) notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
+      if (r?.needs_restart)
+        notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
       await reload();
     } catch (e) {
       handleModError(e);
@@ -208,11 +252,15 @@ export function usePlayers(
       const pn = String(player || '').trim();
       if (!pn) return;
       try {
-        const r = await api<{ needs_restart?: boolean }>('/api/whitelist/remove', {
-          method: 'POST',
-          body: JSON.stringify({ player: pn }),
-        });
-        if (r?.needs_restart) notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
+        const r = await api<{ needs_restart?: boolean }>(
+          '/api/whitelist/remove',
+          {
+            method: 'POST',
+            body: JSON.stringify({ player: pn }),
+          },
+        );
+        if (r?.needs_restart)
+          notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
         await reload();
       } catch (e) {
         handleModError(e);
@@ -251,11 +299,15 @@ export function usePlayers(
       variant: 'danger',
       onConfirm: async () => {
         try {
-          const r = await api<{ needs_restart?: boolean }>('/api/whitelist/clear', {
-            method: 'POST',
-            body: JSON.stringify({}),
-          });
-          if (r?.needs_restart) notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
+          const r = await api<{ needs_restart?: boolean }>(
+            '/api/whitelist/clear',
+            {
+              method: 'POST',
+              body: JSON.stringify({}),
+            },
+          );
+          if (r?.needs_restart)
+            notifyWarn(t('whitelist_tab'), t('whitelist_restart_required'));
           await reload();
         } catch (e) {
           handleModError(e);
@@ -265,16 +317,23 @@ export function usePlayers(
   }, [handleModError, reload, t]);
 
   const commitAdmins = useCallback(
-    async (next: string[], previous: string[]) => {
-      qc.setQueryData(['players', 'summary'], (old: PlayersSummary | undefined) =>
-        old ? { ...old, admins: next } : old,
+    async (next: string[], previous: string[], isClear = false) => {
+      qc.setQueryData(
+        ['players', 'summary'],
+        (old: PlayersSummary | undefined) =>
+          old ? { ...old, admins: next } : old,
       );
       try {
-        await api('/api/files/admin-list', { method: 'PUT', body: JSON.stringify(next) });
+        await api('/api/files/admin-list', {
+          method: 'PUT',
+          body: JSON.stringify({ admins: next, clear: isClear }),
+        });
         await qc.invalidateQueries({ queryKey: ['players', 'summary'] });
       } catch (e) {
-        qc.setQueryData(['players', 'summary'], (old: PlayersSummary | undefined) =>
-          old ? { ...old, admins: previous } : old,
+        qc.setQueryData(
+          ['players', 'summary'],
+          (old: PlayersSummary | undefined) =>
+            old ? { ...old, admins: previous } : old,
         );
         handleModError(e);
       }
@@ -317,7 +376,7 @@ export function usePlayers(
       variant: 'danger',
       onConfirm: async () => {
         const previous = admins.slice();
-        await commitAdmins([], previous);
+        await commitAdmins([], previous, true);
       },
     });
   }, [admins, canEditAdmins, commitAdmins, t]);

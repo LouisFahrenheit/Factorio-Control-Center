@@ -32,6 +32,7 @@ import {
 import { diffJsonObjects } from '../../common/json-diff.util';
 import { ensureBanlistFile } from '../../common/banlist.util';
 import { safeStr, safeTrim } from '../../common/trim.util';
+import { panelTimestamp } from '../../common/datetime.util';
 import { ModSettingsSchemaService } from './mod-settings-schema.service';
 import { ModPortalService } from '../mod-portal/mod-portal.service';
 
@@ -129,7 +130,11 @@ export class FilesOpsService {
     return readJsonPath(sel.pm.adminList);
   }
 
-  async writeAdminList(data: unknown): Promise<OpResult> {
+  async writeAdminList(
+    data: unknown,
+    clear = false,
+    actor = 'Web',
+  ): Promise<OpResult> {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     if (!Array.isArray(data)) return { ok: false, error: 'invalid_data' };
@@ -137,18 +142,19 @@ export class FilesOpsService {
       new Set(data.map((x) => String(x || '').trim()).filter(Boolean)),
     );
 
+    const oldList = existsSync(sel.pm.adminList)
+      ? (readJsonPath(sel.pm.adminList).data as string[])
+      : [];
+    const safeOld = Array.isArray(oldList)
+      ? oldList.map((x) => String(x || '').trim()).filter(Boolean)
+      : [];
+    const oldSet = new Set(safeOld);
+    const newSet = new Set(names);
+    const toPromote = names.filter((n) => !oldSet.has(n));
+    const toDemote = safeOld.filter((n) => !newSet.has(n));
+
     const running = this.runtime.isRunning(sel.item.id);
     if (running) {
-      const oldList = existsSync(sel.pm.adminList)
-        ? (readJsonPath(sel.pm.adminList).data as string[])
-        : [];
-      const safeOld = Array.isArray(oldList)
-        ? oldList.map((x) => String(x || '').trim()).filter(Boolean)
-        : [];
-      const oldSet = new Set(safeOld);
-      const newSet = new Set(names);
-      const toPromote = names.filter((n) => !oldSet.has(n));
-      const toDemote = safeOld.filter((n) => !newSet.has(n));
       for (const name of toPromote) {
         const res = await this.runtime.rconExec(
           sel.item.id,
@@ -164,6 +170,13 @@ export class FilesOpsService {
       }
       const written = writeJsonPath(sel.pm.adminList, names);
       if (written.ok === false) return written;
+      this.recordAdminHistory(
+        sel.item.serverPath,
+        toPromote,
+        toDemote,
+        clear,
+        actor,
+      );
       await this.propagate.propagateAdminList(sel.item.id, names);
       return {
         ok: true,
@@ -175,8 +188,63 @@ export class FilesOpsService {
 
     const res = writeJsonPath(sel.pm.adminList, names);
     if (res.ok === false) return res;
+    this.recordAdminHistory(
+      sel.item.serverPath,
+      toPromote,
+      toDemote,
+      clear,
+      actor,
+    );
     await this.propagate.propagateAdminList(sel.item.id, names);
     return { ok: true };
+  }
+
+  private recordAdminHistory(
+    serverPath: string,
+    promoted: string[],
+    demoted: string[],
+    isClear: boolean,
+    actor: string,
+  ): void {
+    const historyPath = join(serverPath, 'server-history.json');
+    const doc = existsSync(historyPath)
+      ? (JSON.parse(readFileSync(historyPath, 'utf-8')) as Record<
+          string,
+          unknown
+        >)
+      : {};
+    const arr = Array.isArray(doc.admin_history)
+      ? (doc.admin_history as Record<string, unknown>[])
+      : [];
+    const date = panelTimestamp();
+
+    if (isClear && promoted.length === 0) {
+      arr.push({
+        player: '*',
+        action: 'CLEAR',
+        actor: actor || 'Web',
+        date,
+      });
+    } else {
+      for (const p of promoted) {
+        arr.push({
+          player: p,
+          action: 'PROMOTE',
+          actor: actor || 'Web',
+          date,
+        });
+      }
+      for (const d of demoted) {
+        arr.push({
+          player: d,
+          action: 'DEMOTE',
+          actor: actor || 'Web',
+          date,
+        });
+      }
+    }
+    doc.admin_history = arr.slice(-2000);
+    writeJsonPath(historyPath, doc);
   }
 
   readBanList(): OpResult {

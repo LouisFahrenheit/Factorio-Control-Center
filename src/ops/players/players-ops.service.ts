@@ -97,6 +97,9 @@ export class PlayersOpsService {
       whitelist_history_tail: Array.isArray(hist.whitelist_history)
         ? hist.whitelist_history.slice(-100)
         : [],
+      admin_history_tail: Array.isArray(hist.admin_history)
+        ? hist.admin_history.slice(-100)
+        : [],
       server_history_tail: this.instanceHistory.tailServer(sel.item.serverPath),
       mods_history_tail: this.instanceHistory.tailMods(sel.item.serverPath),
       commands_history_tail: this.instanceHistory.tailCommands(
@@ -207,6 +210,8 @@ export class PlayersOpsService {
       player: '*',
       action: 'CLEAR',
       actor: actor || 'Web',
+      unbanned_by: actor || 'Web',
+      banned_by: actor || 'Web',
       date: panelTimestamp(),
     });
     this.propagate.propagateBanList(sel.item.serverPath);

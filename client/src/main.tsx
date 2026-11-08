@@ -25,6 +25,7 @@ import './styles/mods-tab.css';
 import './styles/modpacks-tab.css';
 import './styles/commands-tab.css';
 import './styles/players-tab.css';
+import './styles/history-tab.css';
 import './styles/circuit-wire.css';
 import './styles/panel-buttons.css';
 

@@ -1,0 +1,367 @@
+/* ── History Tab Polish (Factorio Control Center Design System) ──────────── */
+
+#tabPanelHistory.tab-panel.tab-panel--active,
+#tabPanelHistory {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#tabPanelHistory .history-tab__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Outer Card ─────────────────────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__card {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 10px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Sub-tabs Header Bar ─────────────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__header-bar {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-sizing: border-box;
+}
+
+#tabPanelHistory .history-tab__sub-tabs {
+  margin: 0;
+  display: inline-flex;
+  gap: 6px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab--active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+#tabPanelHistory .history-tab__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+}
+
+#tabPanelHistory .sub-tabs__tab--active .history-tab__tab-badge {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-main) 78%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* ── Card Body & Sub-Tab Panels ─────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+#tabPanelHistory .sub-tab-panel--active {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+/* ── Filter Toolbar ──────────────────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+}
+
+#tabPanelHistory .history-tab__search {
+  flex: 0 1 320px;
+  min-width: 200px;
+}
+
+#tabPanelHistory .history-tab__search .input {
+  width: 100%;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 12px 0 34px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-sizing: border-box;
+  font-size: 0.88rem;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+#tabPanelHistory .history-tab__search .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+#tabPanelHistory .history-tab__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+#tabPanelHistory .history-tab__filter-label {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+#tabPanelHistory .history-tab__filter-select {
+  height: 36px;
+  min-height: 36px;
+  min-width: 11rem;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  font-size: 0.86rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+  cursor: pointer;
+}
+
+#tabPanelHistory .history-tab__filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+/* ── Table Layout & Polish ───────────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  box-sizing: border-box;
+}
+
+#tabPanelHistory table.data.data--history {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+}
+
+#tabPanelHistory table.data.data--history thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+#tabPanelHistory table.data.data--history tbody td {
+  padding: 7px 12px;
+  font-size: 0.86rem;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 40%, transparent);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+#tabPanelHistory table.data.data--history tbody tr:hover td {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+#tabPanelHistory .history-col-player {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+#tabPanelHistory .history-col-actor {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+#tabPanelHistory .history-col-date {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+#tabPanelHistory .history-col-reason {
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+/* ── Badges (Subtle, professional, non-distracting) ───────────────────── */
+
+#tabPanelHistory .history-action-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#tabPanelHistory .history-action-badge--positive {
+  color: var(--text-secondary, #cbd5e1);
+  background: color-mix(
+    in srgb,
+    var(--running, #34d399) 7%,
+    var(--bg-main) 93%
+  );
+  border: 1px solid color-mix(in srgb, var(--running, #34d399) 20%, transparent);
+}
+
+#tabPanelHistory .history-action-badge--negative {
+  color: var(--text-secondary, #cbd5e1);
+  background: color-mix(in srgb, var(--error, #ef4444) 7%, var(--bg-main) 93%);
+  border: 1px solid color-mix(in srgb, var(--error, #ef4444) 20%, transparent);
+}
+
+#tabPanelHistory .history-action-badge--neutral {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+}
+
+#tabPanelHistory .history-type-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+}
+
+#tabPanelHistory .history-detail-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.84rem;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+#tabPanelHistory .history-detail-link:hover {
+  opacity: 0.85;
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+
+#tabPanelHistory .history-tab__table-wrap--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tabPanelHistory .history-tab__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 240px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+#tabPanelHistory .history-tab__empty-icon {
+  opacity: 0.35;
+  color: var(--accent);
+}

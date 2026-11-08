@@ -53,9 +53,12 @@ describe('PlayersController', () => {
       await controller.adminList();
       expect(mockBridge.submit).toHaveBeenCalledWith('read_admin_list');
 
-      await controller.adminListPut(['alice', 'bob']);
+      const req = createMockReq('admin');
+      await controller.adminListPut(['alice', 'bob'], req);
       expect(mockBridge.submit).toHaveBeenCalledWith('write_admin_list', {
         data: ['alice', 'bob'],
+        clear: false,
+        actor: 'admin',
       });
     });
 

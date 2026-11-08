@@ -56,6 +56,7 @@ export interface PlayersSummary {
   kick_history_tail?: HistoryEvent[];
   mute_history_tail?: HistoryEvent[];
   whitelist_history_tail?: HistoryEvent[];
+  admin_history_tail?: HistoryEvent[];
   server_history_tail?: OpsHistoryEvent[];
   mods_history_tail?: OpsHistoryEvent[];
   commands_history_tail?: OpsHistoryEvent[];

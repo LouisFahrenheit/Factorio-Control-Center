@@ -3,8 +3,21 @@ import { formatPanelActorName } from './actorUtils';
 import { formatPanelDateTime, parsePanelDateTime } from './datetimeUtils';
 import { formatBanHistoryRow, formatWhitelistHistoryRow } from './playerUtils';
 
-export type PlayerHistoryCategory = 'all' | 'session' | 'ban' | 'kick' | 'mute' | 'whitelist';
-export type PlayerHistorySource = 'session' | 'ban' | 'kick' | 'mute' | 'whitelist';
+export type PlayerHistoryCategory =
+  | 'all'
+  | 'session'
+  | 'ban'
+  | 'kick'
+  | 'mute'
+  | 'whitelist'
+  | 'admin';
+export type PlayerHistorySource =
+  | 'session'
+  | 'ban'
+  | 'kick'
+  | 'mute'
+  | 'whitelist'
+  | 'admin';
 export type PlayerHistoryActionVariant = 'positive' | 'negative' | 'neutral';
 
 export interface UnifiedPlayerHistoryRow {
@@ -27,6 +40,7 @@ const PLAYER_HISTORY_CATEGORY_KEYS: Record<PlayerHistorySource, string> = {
   kick: 'history_player_category_kick',
   mute: 'history_player_category_mute',
   whitelist: 'history_player_category_whitelist',
+  admin: 'history_player_category_admin',
 };
 
 export function playerHistorySourceTypeLabel(
@@ -45,7 +59,9 @@ export function playerHistoryFilterTypeLabel(
   return playerHistorySourceTypeLabel(category, t);
 }
 
-function actionVariantFromClass(actionClass: string | undefined): PlayerHistoryActionVariant {
+function actionVariantFromClass(
+  actionClass: string | undefined,
+): PlayerHistoryActionVariant {
   if (actionClass === 'cell-online') return 'positive';
   if (actionClass === 'cell-offline') return 'negative';
   return 'neutral';
@@ -71,7 +87,13 @@ function pushRow(
   rows.push({
     ...row,
     id: `${row.source}-${row.sortTs}-${row.player}-${row.actionLabel}-${index}`,
-    searchText: buildSearchText([row.player, row.categoryLabel, row.actionLabel, row.detailVal, row.actorVal]),
+    searchText: buildSearchText([
+      row.player,
+      row.categoryLabel,
+      row.actionLabel,
+      row.detailVal,
+      row.actorVal,
+    ]),
   });
 }
 
@@ -81,6 +103,7 @@ export function buildPlayerHistoryRows(
   kickEvents: HistoryEvent[],
   muteEvents: HistoryEvent[],
   whitelistEvents: HistoryEvent[],
+  adminEvents: HistoryEvent[],
   t: (key: string) => string,
 ): UnifiedPlayerHistoryRow[] {
   const rows: UnifiedPlayerHistoryRow[] = [];
@@ -89,14 +112,22 @@ export function buildPlayerHistoryRows(
   sessionEvents.forEach((ev) => {
     const rawAction = String(ev.action || '').toUpperCase();
     const actionClass =
-      rawAction === 'JOIN' ? 'cell-online' : rawAction === 'LEAVE' ? 'cell-offline' : '';
+      rawAction === 'JOIN'
+        ? 'cell-online'
+        : rawAction === 'LEAVE'
+          ? 'cell-offline'
+          : '';
+    let actionLabel = String(ev.action || '');
+    if (rawAction === 'JOIN') actionLabel = t('player_action_join');
+    else if (rawAction === 'LEAVE') actionLabel = t('player_action_leave');
+
     pushRow(
       rows,
       {
         source: 'session',
         categoryLabel: playerHistorySourceTypeLabel('session', t),
         player: String(ev.player || ''),
-        actionLabel: String(ev.action || ''),
+        actionLabel,
         actionVariant: actionVariantFromClass(actionClass),
         detailVal: '',
         actorVal: '',
@@ -121,7 +152,9 @@ export function buildPlayerHistoryRows(
         actorVal: row.actorVal,
         actionDate: row.actionDate,
         sortTs: rowSortTs(
-          String(ev.action || '').toUpperCase() === 'UNBAN' ? ev.unban_date || ev.date : ev.date,
+          String(ev.action || '').toUpperCase() === 'UNBAN'
+            ? ev.unban_date || ev.date
+            : ev.date,
         ),
       },
       index++,
@@ -135,7 +168,7 @@ export function buildPlayerHistoryRows(
         source: 'kick',
         categoryLabel: playerHistorySourceTypeLabel('kick', t),
         player: String(ev.player || ''),
-        actionLabel: String(ev.action || ''),
+        actionLabel: t('player_action_kick'),
         actionVariant: 'negative',
         detailVal: String(ev.reason || ''),
         actorVal: formatPanelActorName(ev.actor, t),
@@ -148,14 +181,24 @@ export function buildPlayerHistoryRows(
 
   muteEvents.forEach((ev) => {
     const action = String(ev.action || '').toUpperCase();
-    const actionClass = action === 'UNMUTE' ? 'cell-online' : action === 'MUTE' ? 'cell-offline' : '';
+    const actionClass =
+      action === 'UNMUTE'
+        ? 'cell-online'
+        : action === 'MUTE'
+          ? 'cell-offline'
+          : '';
+    let actionLabel = String(ev.action || '');
+    if (action === 'MUTE') actionLabel = t('player_action_mute');
+    else if (action === 'UNMUTE') actionLabel = t('player_action_unmute');
+    else if (action === 'PURGE') actionLabel = t('player_action_purge');
+
     pushRow(
       rows,
       {
         source: 'mute',
         categoryLabel: playerHistorySourceTypeLabel('mute', t),
         player: String(ev.player || ''),
-        actionLabel: String(ev.action || ''),
+        actionLabel,
         actionVariant: actionVariantFromClass(actionClass),
         detailVal: '',
         actorVal: formatPanelActorName(ev.actor, t),
@@ -179,6 +222,41 @@ export function buildPlayerHistoryRows(
         detailVal: '',
         actorVal: row.actorVal,
         actionDate: row.date,
+        sortTs: rowSortTs(ev.date),
+      },
+      index++,
+    );
+  });
+
+  adminEvents.forEach((ev) => {
+    const rawAction = String(ev.action || '').toUpperCase();
+    let actionLabel = String(ev.action || '');
+    let actionClass = '';
+    if (rawAction === 'PROMOTE') {
+      actionLabel = t('admin_action_promote');
+      actionClass = 'cell-online';
+    } else if (rawAction === 'DEMOTE') {
+      actionLabel = t('admin_action_demote');
+      actionClass = 'cell-offline';
+    } else if (rawAction === 'CLEAR') {
+      actionLabel = t('admin_action_clear');
+      actionClass = 'cell-offline';
+    }
+    const playerCell =
+      String(ev.player || '').trim() === '*'
+        ? t('whitelist_history_all_players')
+        : String(ev.player || '');
+    pushRow(
+      rows,
+      {
+        source: 'admin',
+        categoryLabel: playerHistorySourceTypeLabel('admin', t),
+        player: playerCell,
+        actionLabel,
+        actionVariant: actionVariantFromClass(actionClass),
+        detailVal: '',
+        actorVal: formatPanelActorName(ev.actor, t),
+        actionDate: formatPanelDateTime(ev.date),
         sortTs: rowSortTs(ev.date),
       },
       index++,

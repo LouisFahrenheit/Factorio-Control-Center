@@ -27,8 +27,9 @@ import { BanPlayerDto, PlayerActionDto } from '../../common/dto/api.dto';
 export class PlayersController {
   constructor(private readonly bridge: ApiBridgeService) {}
 
-  private user(req: Request): SessionUser {
-    return (req as Request & { [AUTH_USER_KEY]: SessionUser })[AUTH_USER_KEY];
+  private user(req?: Request): SessionUser | undefined {
+    if (!req) return undefined;
+    return (req as Request & { [AUTH_USER_KEY]?: SessionUser })[AUTH_USER_KEY];
   }
 
   @Get('players/summary')
@@ -51,8 +52,21 @@ export class PlayersController {
   @ApiTags('Files')
   @ApiOperation({ summary: 'Write the admin-list (admins.txt)' })
   @ApiResponse({ status: 200, description: 'Admin list saved' })
-  adminListPut(@Body() body: unknown) {
-    return this.bridge.submit('write_admin_list', { data: body });
+  adminListPut(@Body() body: unknown, @Req() req: Request) {
+    let data = body;
+    let isClear = false;
+    if (body && typeof body === 'object' && !Array.isArray(body)) {
+      const b = body as Record<string, unknown>;
+      if ('admins' in b) {
+        data = b.admins;
+        isClear = Boolean(b.clear);
+      }
+    }
+    return this.bridge.submit('write_admin_list', {
+      data,
+      clear: isClear,
+      actor: this.bridge.webActor(this.user(req)),
+    });
   }
 
   @Get('files/ban-list')

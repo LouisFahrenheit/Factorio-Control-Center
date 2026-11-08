@@ -286,7 +286,11 @@ export class DispatchService {
       case 'read_admin_list':
         return this.files.readAdminList();
       case 'write_admin_list':
-        return this.files.writeAdminList(kwargs.data);
+        return this.files.writeAdminList(
+          kwargs.data,
+          Boolean(kwargs.clear),
+          s(kwargs.actor, 'Web'),
+        );
       case 'read_ban_list':
         return this.files.readBanList();
       case 'read_commands_catalog':
