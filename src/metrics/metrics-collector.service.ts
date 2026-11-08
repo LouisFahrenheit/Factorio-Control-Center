@@ -555,8 +555,10 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
         // If mtime is older than 3.5 seconds, or game.tick_paused is true, the simulation is paused.
         const isPaused = Boolean(data.paused) || ageMs > 3500;
 
-        if (isPaused) {
-          ups = 0.0;
+        if (typeof data.ups === 'number' && data.ups > 0) {
+          ups = data.ups;
+        } else if (isPaused) {
+          ups = (data.game_speed || 1.0) * 60.0;
         } else {
           const last = this.lastTicks.get(id);
           if (last && data.tick >= last.tick) {
@@ -574,7 +576,12 @@ export class MetricsCollectorService implements OnModuleInit, OnModuleDestroy {
           }
         }
 
-        this.lastTicks.set(id, { tick: data.tick, time: now });
+        if (isPaused) {
+          // Reset tick baseline while paused to prevent false UPS drops when resuming
+          this.lastTicks.delete(id);
+        } else {
+          this.lastTicks.set(id, { tick: data.tick, time: now });
+        }
 
         this.latestCompanionMetrics.set(id, {
           active: true,
