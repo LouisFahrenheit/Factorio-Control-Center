@@ -95,6 +95,16 @@ export class PlayersController {
     });
   }
 
+  @Post('bans/clear')
+  @ApiTags('Moderation')
+  @ApiOperation({ summary: 'Clear the entire ban list' })
+  @ApiResponse({ status: 200, description: 'Ban list cleared' })
+  bansClear(@Req() req: Request) {
+    return this.bridge.submit('bans_clear', {
+      actor: this.bridge.webActor(this.user(req)),
+    });
+  }
+
   @Post('moderation/mute')
   @ApiTags('Moderation')
   @ApiOperation({ summary: 'Mute a player (suppress in-game chat)' })

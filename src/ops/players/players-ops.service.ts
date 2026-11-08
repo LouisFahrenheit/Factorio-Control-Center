@@ -191,6 +191,34 @@ export class PlayersOpsService {
     return res;
   }
 
+  async bansClear(actor = 'Web'): Promise<OpResult> {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return sel;
+    const oldEntries = existsSync(sel.pm.banList)
+      ? normalizeBanlistEntries(readJsonFile<unknown>(sel.pm.banList, []))
+      : [];
+    this.writeBanlist(sel.pm.banList, []);
+    for (const b of oldEntries) {
+      if (b.username) {
+        await this.rconOrOffline(`/unban ${b.username}`);
+      }
+    }
+    this.appendHistory('ban_history', {
+      player: '*',
+      action: 'CLEAR',
+      actor: actor || 'Web',
+      date: panelTimestamp(),
+    });
+    this.propagate.propagateBanList(sel.item.serverPath);
+    void this.notifications.onModeration(
+      sel.item.id,
+      'bans_clear',
+      '*',
+      actor || 'Web',
+    );
+    return { ok: true };
+  }
+
   mute(player: string, actor = 'Web'): Promise<OpResult> {
     return this.simpleRcon(player, `/mute`, 'mute_history', 'MUTE', actor);
   }
@@ -226,6 +254,8 @@ export class PlayersOpsService {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     const path = join(sel.item.serverPath, 'server-whitelist.json');
+    const wasNotEmpty =
+      existsSync(path) && readJsonFile<string[]>(path, []).length > 0;
     writeJsonFile(path, []);
     await this.rconOrOffline('/whitelist clear');
     this.propagate.propagateWhitelist(sel.item.serverPath);
@@ -240,7 +270,7 @@ export class PlayersOpsService {
       '*',
       actor || 'Web',
     );
-    return { ok: true };
+    return { ok: true, needs_restart: wasNotEmpty };
   }
 
   private validPlayer(player: string): { name?: string; error?: string } {
@@ -296,6 +326,7 @@ export class PlayersOpsService {
     if (isErrorResult(sel)) return sel;
     const path = join(sel.item.serverPath, 'server-whitelist.json');
     const list = existsSync(path) ? readJsonFile<string[]>(path, []) : [];
+    const wasEmpty = list.length === 0;
     const next = add
       ? Array.from(new Set([...list, v.name!]))
       : list.filter((x) => x.toLowerCase() !== v.name!.toLowerCase());
@@ -316,7 +347,8 @@ export class PlayersOpsService {
       v.name!,
       actor || 'Web',
     );
-    return { ok: true };
+    const becameEnabled = add && wasEmpty && next.length > 0;
+    return { ok: true, needs_restart: becameEnabled };
   }
 
   private async rconOrOffline(command: string): Promise<OpResult> {

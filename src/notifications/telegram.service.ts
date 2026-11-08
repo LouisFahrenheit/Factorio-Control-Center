@@ -246,7 +246,10 @@ export class TelegramService implements OnModuleDestroy {
     if (act === 'BAN') emoji = '🔨';
     else if (act === 'KICK') emoji = '👢';
     else if (act === 'UNBAN') emoji = '🤝';
-    else if (act === 'MUTE') emoji = '🔇';
+    else if (act === 'BANS_CLEAR' || act === 'BANS CLEAR') {
+      emoji = '🔨🗑️';
+      actionLabel = 'BANS CLEAR';
+    } else if (act === 'MUTE') emoji = '🔇';
     else if (act === 'UNMUTE') emoji = '🔊';
     else if (act === 'PROMOTE') emoji = '⭐';
     else if (act === 'DEMOTE') emoji = '🔻';

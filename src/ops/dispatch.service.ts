@@ -331,6 +331,8 @@ export class DispatchService {
         );
       case 'unban_player':
         return this.players.unban(s(kwargs.player, ''), s(kwargs.actor, 'Web'));
+      case 'bans_clear':
+        return this.players.bansClear(s(kwargs.actor, 'Web'));
       case 'mute_player':
         return this.players.mute(s(kwargs.player, ''), s(kwargs.actor, 'Web'));
       case 'unmute_player':

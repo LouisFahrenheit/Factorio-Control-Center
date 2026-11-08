@@ -1,0 +1,710 @@
+/* ==========================================================================
+   Factorio Control Center — Players & Moderation Tab (StatsTab) Styles
+   Harmonized with FCC Panel Design System (CommandsTab, SavesTab, MonitoringTab)
+   ========================================================================== */
+
+#tabPanelStats.tab-panel.tab-panel--active,
+#tabPanelStats {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#tabPanelStats .players-tab__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#tabPanelStats .players-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1080px) {
+  #tabPanelStats .players-layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+}
+
+#tabPanelStats .players-layout__main,
+#tabPanelStats .players-layout__side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+/* ── Panel Cards ───────────────────────────────────────────────────────── */
+
+#tabPanelStats .players-tab__card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 10px rgba(0, 0, 0, 0.22);
+}
+
+#tabPanelStats .players-tab__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  min-height: 48px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+#tabPanelStats .players-tab__card-header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tabPanelStats .players-tab__card-header-icon {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tabPanelStats .players-tab__card-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+#tabPanelStats .players-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 1px 8px;
+  border-radius: 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+}
+
+#tabPanelStats .players-tab__badge--online {
+  color: var(--running);
+  border-color: color-mix(in srgb, var(--running) 35%, transparent);
+  background: color-mix(in srgb, var(--running) 14%, var(--bg-main) 86%);
+}
+
+#tabPanelStats .players-tab__card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  background: color-mix(in srgb, var(--bg-main) 45%, var(--bg-widget) 55%);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Chat Log Viewer ───────────────────────────────────────────────────── */
+
+#tabPanelStats .players-tab__card-body--chat {
+  padding: 12px;
+  gap: 10px;
+}
+
+#tabPanelStats .players-chat-log {
+  flex: 1 1 auto;
+  min-height: 140px;
+  max-height: none;
+  margin: 0;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
+  background: color-mix(in srgb, var(--bg-log) 88%, var(--bg-main) 12%);
+  color: var(--text);
+  font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  padding: 10px 12px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+#tabPanelStats .players-tab__chat-compose {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+#tabPanelStats .players-tab__chat-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#tabPanelStats .players-tab__chat-field .input {
+  width: 100%;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-sizing: border-box;
+  font-size: 0.88rem;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+#tabPanelStats .players-tab__chat-field .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+#tabPanelStats .players-tab__chat-send-btn,
+#tabPanelStats .players-tab__chat-announce-btn {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+/* ── Player Statistics Table ───────────────────────────────────────────── */
+
+#tabPanelStats .players-tab__table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+}
+
+#tabPanelStats table.data {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+#tabPanelStats table.data thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+#tabPanelStats table.data tbody td {
+  padding: 7px 12px;
+  font-size: 0.86rem;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 40%, transparent);
+  color: var(--text);
+}
+
+#tabPanelStats table.data tbody tr:hover td {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+#tabPanelStats .player-stats__name-cell {
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+#tabPanelStats .player-stats__name-cell:hover {
+  color: var(--accent-light, #ffd580);
+  text-decoration: underline;
+}
+
+/* ── Online Players Card ────────────────────────────────────────────────── */
+
+#tabPanelStats .players-tab__card--online {
+  flex: 1 1 0;
+}
+
+#tabPanelStats .players-tab__card-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tabPanelStats .players-online-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 10px 12px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+  list-style: none;
+  background: color-mix(in srgb, var(--bg-main) 48%, var(--bg-widget) 52%);
+}
+
+#tabPanelStats .players-online-list__empty {
+  grid-column: 1 / -1;
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+#tabPanelStats .players-online-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 25%, var(--bg-widget) 75%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 70%, transparent);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+#tabPanelStats .players-online-list__item:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--text);
+}
+
+#tabPanelStats .players-online-list__item.is-selected {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  border-color: var(--accent);
+  color: var(--accent-light, #ffd580);
+}
+
+#tabPanelStats .players-online-list__item.is-admin .players-online-list__name {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+#tabPanelStats .players-online-list__admin-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+#tabPanelStats .players-online-list__dot {
+  display: none;
+}
+
+#tabPanelStats .players-online-list__name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#tabPanelStats .players-online-list__item:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--text);
+}
+
+#tabPanelStats .players-online-list__item.is-selected {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  border-color: var(--accent);
+  color: var(--accent-light, #ffd580);
+}
+
+#tabPanelStats .players-online-list__item.is-admin .players-online-list__name {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+#tabPanelStats .players-online-list__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--running, #48bb78);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--running) 70%, transparent);
+  flex-shrink: 0;
+}
+
+#tabPanelStats .players-online-list__name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Access Control Card (Admins / Bans / Whitelist) ────────────────────── */
+
+#tabPanelStats .players-tab__card--access {
+  flex: 1 1 0;
+}
+
+#tabPanelStats .players-tab__card-body--access {
+  padding: 10px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#tabPanelStats .players-access-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-bottom: 2px;
+}
+
+#tabPanelStats .players-access-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+#tabPanelStats .players-whitelist-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+#tabPanelStats .players-whitelist-pill--enabled {
+  background: color-mix(
+    in srgb,
+    var(--running, #48bb78) 12%,
+    var(--bg-main) 88%
+  );
+  border-color: color-mix(in srgb, var(--running, #48bb78) 40%, transparent);
+  color: var(--running, #48bb78);
+}
+
+#tabPanelStats .players-whitelist-pill--disabled {
+  background: color-mix(
+    in srgb,
+    var(--stopped, #9a9a9a) 12%,
+    var(--bg-main) 88%
+  );
+  border-color: color-mix(in srgb, var(--stopped, #9a9a9a) 35%, transparent);
+  color: var(--text-dim, #8c8c8c);
+}
+
+#tabPanelStats .players-whitelist-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 5px currentColor;
+}
+
+#tabPanelStats .players-whitelist-pill__text {
+  text-transform: capitalize;
+}
+
+#tabPanelStats .players-access-tabs .sub-tabs__tab {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+#tabPanelStats .players-access-tabs .sub-tabs__tab:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+#tabPanelStats .players-access-tabs .sub-tabs__tab.sub-tabs__tab--active {
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#tabPanelStats .players-access-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#tabPanelStats .players-access-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+#tabPanelStats .players-access-form .input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  font-size: 0.86rem;
+  box-sizing: border-box;
+}
+
+#tabPanelStats .players-access-form .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+#tabPanelStats .players-access-form .btn,
+#tabPanelStats .players-access-form__btn {
+  flex: 0 0 auto;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+#tabPanelStats .players-admin-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  overflow-y: auto;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#tabPanelStats .players-admin-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bg-main) 20%, var(--bg-widget) 80%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  color: var(--text);
+  font-size: 0.86rem;
+  transition: background-color 0.15s ease;
+}
+
+#tabPanelStats .players-admin-list li:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+}
+
+#tabPanelStats .players-admin-list__name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+#tabPanelStats .players-admin-list .btn-remove,
+#tabPanelStats .data--whitelist .btn-remove {
+  height: 26px;
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+  border-radius: 4px;
+}
+
+#tabPanelStats .players-whitelist-status {
+  margin: 0 0 2px 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+#tabPanelStats .players-whitelist-status strong {
+  color: var(--accent);
+}
+
+#tabPanelStats .active-bans__name-cell {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+#tabPanelStats .active-bans__name-cell:hover {
+  color: var(--accent-light, #ffd580);
+  text-decoration: underline;
+}
+
+/* ── Player Row Context Menu ───────────────────────────────────────────── */
+
+.player-row-menu {
+  min-width: 190px;
+}
+
+.player-row-menu__header {
+  padding: 6px 12px 4px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 75%, transparent);
+  margin-bottom: 3px;
+}
+
+.player-row-menu__player-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Player Reason Modal (Kick / Ban Prompt) ───────────────────────────── */
+
+.player-reason-modal {
+  width: min(440px, 94vw);
+  max-width: 440px;
+}
+
+.player-reason-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.player-reason-modal__header-icon {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+}
+
+.player-reason-modal__title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.player-reason-modal__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.player-reason-modal__target {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.player-reason-modal__name {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.player-reason-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-reason-modal__field-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.player-reason-modal__field .input {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  font-size: 0.88rem;
+  box-sizing: border-box;
+}
+
+.player-reason-modal__field .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+.player-reason-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+}

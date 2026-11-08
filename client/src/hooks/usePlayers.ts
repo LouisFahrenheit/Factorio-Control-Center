@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { modals } from '@mantine/modals';
 import { api } from '../api/client';
+import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { canEditServerAdminList } from '../lib/permissions';
 import {
   localizeBanApiError,
@@ -24,6 +24,7 @@ export function usePlayers(
   const [moderationPlayer, setModerationPlayer] = useState('');
   const [moderationPlayerBlink, setModerationPlayerBlink] = useState(false);
   const [moderationReason, setModerationReason] = useState('');
+  const [banPlayer, setBanPlayer] = useState('');
   const [whitelistPlayer, setWhitelistPlayer] = useState('');
   const [chatMessage, setChatMessage] = useState('');
   const [adminNew, setAdminNew] = useState('');
@@ -113,26 +114,28 @@ export function usePlayers(
     [handleModError, reload],
   );
 
-  const kick = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const kick = useCallback((targetPlayer?: string, reason?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
     }
-    void moderation('/api/moderation/kick', { player, reason: moderationReason.trim() });
+    const r = (reason !== undefined ? reason : moderationReason).trim();
+    void moderation('/api/moderation/kick', { player, reason: r });
   }, [blinkModerationPlayer, moderation, moderationPlayer, moderationReason]);
 
-  const ban = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const ban = useCallback((targetPlayer?: string, reason?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
     }
-    void moderation('/api/bans/ban', { player, reason: moderationReason.trim() });
+    const r = (reason !== undefined ? reason : moderationReason).trim();
+    void moderation('/api/bans/ban', { player, reason: r });
   }, [blinkModerationPlayer, moderation, moderationPlayer, moderationReason]);
 
-  const unban = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const unban = useCallback((targetPlayer?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
@@ -140,8 +143,8 @@ export function usePlayers(
     void moderation('/api/bans/unban', { player }, true);
   }, [blinkModerationPlayer, moderation, moderationPlayer]);
 
-  const mute = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const mute = useCallback((targetPlayer?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
@@ -149,8 +152,8 @@ export function usePlayers(
     void moderation('/api/moderation/mute', { player }, false);
   }, [blinkModerationPlayer, moderation, moderationPlayer]);
 
-  const unmute = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const unmute = useCallback((targetPlayer?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
@@ -158,8 +161,8 @@ export function usePlayers(
     void moderation('/api/moderation/unmute', { player }, false);
   }, [blinkModerationPlayer, moderation, moderationPlayer]);
 
-  const purge = useCallback(() => {
-    const player = moderationPlayer.trim();
+  const purge = useCallback((targetPlayer?: string) => {
+    const player = (targetPlayer !== undefined ? targetPlayer : moderationPlayer).trim();
     if (!player) {
       blinkModerationPlayer();
       return;
@@ -218,12 +221,34 @@ export function usePlayers(
     [handleModError, reload, t],
   );
 
+  const bansClear = useCallback(async () => {
+    openFccConfirmModal({
+      title: t('bans_clear_confirm_title'),
+      message: t('bans_clear_confirm_message'),
+      confirmLabel: t('reset_btn'),
+      cancelLabel: t('cancel'),
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api('/api/bans/clear', {
+            method: 'POST',
+            body: JSON.stringify({}),
+          });
+          await reload();
+        } catch (e) {
+          handleModError(e);
+        }
+      },
+    });
+  }, [handleModError, reload, t]);
+
   const whitelistClear = useCallback(async () => {
-    modals.openConfirmModal({
+    openFccConfirmModal({
       title: t('whitelist_clear_confirm_title'),
-      children: t('whitelist_clear_confirm_message'),
-      labels: { confirm: t('ok'), cancel: t('cancel') },
-      confirmProps: { className: 'btn btn--danger' },
+      message: t('whitelist_clear_confirm_message'),
+      confirmLabel: t('reset_btn'),
+      cancelLabel: t('cancel'),
+      variant: 'danger',
       onConfirm: async () => {
         try {
           const r = await api<{ needs_restart?: boolean }>('/api/whitelist/clear', {
@@ -257,15 +282,20 @@ export function usePlayers(
     [handleModError, qc],
   );
 
-  const addAdmin = useCallback(() => {
-    if (!canEditAdmins) return;
-    const v = adminNew.trim();
-    if (!v || admins.includes(v)) return;
-    setAdminNew('');
-    const previous = admins.slice();
-    const next = [...admins, v];
-    void commitAdmins(next, previous);
-  }, [adminNew, admins, canEditAdmins, commitAdmins]);
+  const addAdmin = useCallback(
+    (targetPlayer?: string) => {
+      if (!canEditAdmins) return;
+      const v = (targetPlayer !== undefined ? targetPlayer : adminNew).trim();
+      if (!v || admins.includes(v)) return;
+      if (targetPlayer === undefined) {
+        setAdminNew('');
+      }
+      const previous = admins.slice();
+      const next = [...admins, v];
+      void commitAdmins(next, previous);
+    },
+    [adminNew, admins, canEditAdmins, commitAdmins],
+  );
 
   const removeAdmin = useCallback(
     (name: string) => {
@@ -276,6 +306,21 @@ export function usePlayers(
     },
     [admins, canEditAdmins, commitAdmins],
   );
+
+  const adminsClear = useCallback(async () => {
+    if (!canEditAdmins) return;
+    openFccConfirmModal({
+      title: t('admins_clear_confirm_title'),
+      message: t('admins_clear_confirm_message'),
+      confirmLabel: t('reset_btn'),
+      cancelLabel: t('cancel'),
+      variant: 'danger',
+      onConfirm: async () => {
+        const previous = admins.slice();
+        await commitAdmins([], previous);
+      },
+    });
+  }, [admins, canEditAdmins, commitAdmins, t]);
 
   return {
     summary,
@@ -290,6 +335,8 @@ export function usePlayers(
     setModerationReason,
     whitelistPlayer,
     setWhitelistPlayer,
+    banPlayer,
+    setBanPlayer,
     chatMessage,
     setChatMessage,
     adminNew,
@@ -297,6 +344,7 @@ export function usePlayers(
     kick,
     ban,
     unban,
+    bansClear,
     mute,
     unmute,
     purge,
@@ -306,6 +354,7 @@ export function usePlayers(
     whitelistClear,
     addAdmin,
     removeAdmin,
+    adminsClear,
     reload,
   };
 }

@@ -189,6 +189,25 @@ describe('PlayersOpsService', () => {
         '/unban Player1',
       );
     });
+
+    it('bansClear empties banlist and unbans via RCON', async () => {
+      (mockRuntime.isRunning as jest.Mock).mockReturnValue(true);
+      fs.writeFileSync(
+        path.join(serverDir, 'server-banlist.json'),
+        JSON.stringify([{ username: 'Banned1', reason: '', address: '' }]),
+      );
+
+      const res = await service.bansClear('Admin');
+      expect(res).toEqual({ ok: true });
+      expect(mockRuntime.rconExec).toHaveBeenCalledWith(
+        'inst-1',
+        '/unban Banned1',
+      );
+      const banlist = JSON.parse(
+        fs.readFileSync(path.join(serverDir, 'server-banlist.json'), 'utf8'),
+      ) as unknown[];
+      expect(banlist).toEqual([]);
+    });
   });
 
   describe('kick, mute, unmute, purge', () => {
@@ -247,7 +266,7 @@ describe('PlayersOpsService', () => {
   describe('whitelist operations', () => {
     it('whitelistAdd adds player to server-whitelist.json', async () => {
       const res = await service.whitelistAdd('NewFriend', 'Admin');
-      expect(res).toEqual({ ok: true });
+      expect(res).toEqual({ ok: true, needs_restart: true });
 
       const list = JSON.parse(
         fs.readFileSync(path.join(serverDir, 'server-whitelist.json'), 'utf8'),
@@ -263,7 +282,7 @@ describe('PlayersOpsService', () => {
       );
 
       const res = await service.whitelistRemove('PlayerA', 'Admin');
-      expect(res).toEqual({ ok: true });
+      expect(res).toEqual({ ok: true, needs_restart: false });
 
       const list = JSON.parse(
         fs.readFileSync(path.join(serverDir, 'server-whitelist.json'), 'utf8'),
@@ -279,7 +298,7 @@ describe('PlayersOpsService', () => {
       );
 
       const res = await service.whitelistClear('Admin');
-      expect(res).toEqual({ ok: true });
+      expect(res).toEqual({ ok: true, needs_restart: true });
 
       const list = JSON.parse(
         fs.readFileSync(path.join(serverDir, 'server-whitelist.json'), 'utf8'),

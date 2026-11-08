@@ -26,6 +26,7 @@ const LOGGED_OPS = new Set([
   'maintenance_clear_manual',
   'ban_player',
   'unban_player',
+  'bans_clear',
   'kick_player',
   'mute_player',
   'unmute_player',
@@ -226,6 +227,9 @@ export class WebPanelEventLogService {
         break;
       case 'unban_player':
         message = `Unbanned player ${safeStr(kwargs.player, '?')}`;
+        break;
+      case 'bans_clear':
+        message = `Cleared ban list`;
         break;
       case 'kick_player':
         message = `Kicked player ${safeStr(kwargs.player, '?')}`;
