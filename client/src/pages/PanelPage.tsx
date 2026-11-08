@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { AppLoadingShell } from '../components/AppLoadingShell';
 import { AppStatusBar } from '../components/AppStatusBar';
+import { CircuitWireConnection } from '../components/instances/CircuitWireConnection';
 import { AboutModal } from '../components/modals/AboutModal';
 import { UserSettingsModal } from '../components/modals/UserSettingsModal';
 import { AnnouncementsModal } from '../components/panel/AnnouncementsModal';
@@ -52,6 +53,7 @@ export default function PanelPage() {
   const { ready, strings } = useLocale();
   const { user, logout } = useAuth();
   useAppShellReveal();
+  const panelShellRef = useRef<HTMLDivElement>(null);
   const instances = useInstances(true, t);
   const [activeTab, setActiveTab] = useState<PanelTabKey>('main');
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -214,7 +216,15 @@ export default function PanelPage() {
           t={t}
         />
         <main className="workspace__main workspace__main--panel">
-          <div className="panel-shell">
+          <div className="panel-shell" ref={panelShellRef}>
+            {activeTab === 'history' && (
+              <CircuitWireConnection
+                activeTab="history"
+                containerRef={panelShellRef}
+                mainSelector="#tabBtnHistory"
+                subSelector="#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab--active"
+              />
+            )}
             <PanelTabBar user={user} active={activeTab} onChange={setActiveTab} t={t} />
             <TabPanelsTransition activeKey={activeTab} className="tab-panels">
             {activeTab === 'main' && (

@@ -20,6 +20,8 @@ import {
   setUserShowServerListSpaceAgeBadge,
   readUserServerLogColorize,
   setUserServerLogColorize,
+  readUserCircuitWireEnabled,
+  setUserCircuitWireEnabled,
 } from '../../lib/userPrefs';
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
@@ -48,6 +50,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
   const [showModBadges, setShowModBadges] = useState(true);
   const [showSABadge, setShowSABadge] = useState(true);
   const [serverLogColorize, setServerLogColorize] = useState(true);
+  const [circuitWireEnabled, setCircuitWireEnabled] = useState(true);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
 
@@ -61,6 +64,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     setShowModBadges(readUserShowServerListModBadges());
     setShowSABadge(readUserShowServerListSpaceAgeBadge());
     setServerLogColorize(readUserServerLogColorize());
+    setCircuitWireEnabled(readUserCircuitWireEnabled());
     void api<ProgramSettings>('/api/config/program')
       .then((r) => {
         setTranslateModNames(r.translate_mod_names !== false);
@@ -101,6 +105,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     setUserShowServerListModBadges(showModBadges);
     setUserShowServerListSpaceAgeBadge(showSABadge);
     setUserServerLogColorize(serverLogColorize);
+    setUserCircuitWireEnabled(circuitWireEnabled);
     onClose();
     if (prevLang !== String(lang || '').trim().toLowerCase()) {
       window.location.reload();
@@ -318,6 +323,19 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   checked={serverLogColorize}
                   onChange={setServerLogColorize}
                   label={t('user_server_log_colorize_cb')}
+                />
+              </div>
+              <div
+                className="user-settings-field user-settings-field--switch"
+                title={t('user_circuit_wire_tip')}
+              >
+                <FccSwitch
+                  id="cbCircuitWire"
+                  className="user-settings-field__switch"
+                  labelClassName="user-settings-field__switch-label"
+                  checked={circuitWireEnabled}
+                  onChange={setCircuitWireEnabled}
+                  label={t('user_circuit_wire_cb')}
                 />
               </div>
             </div>

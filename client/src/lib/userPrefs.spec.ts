@@ -6,6 +6,8 @@ import {
   setUserServerListColumns,
   readUserServerLogColorize,
   setUserServerLogColorize,
+  readUserCircuitWireEnabled,
+  setUserCircuitWireEnabled,
   DEFAULT_SERVER_LIST_COLUMNS,
   USER_PREFS_CHANGED_EVENT,
 } from './userPrefs';
@@ -139,6 +141,33 @@ describe('userPrefs - serverLogColorize', () => {
 
     setUserServerLogColorize(true);
     expect(readUserServerLogColorize()).toBe(true);
+  });
+});
+
+describe('userPrefs - circuitWireEnabled', () => {
+  it('defaults to true when nothing is stored', () => {
+    expect(readUserCircuitWireEnabled()).toBe(true);
+  });
+
+  it('saves false and dispatches user prefs changed event', () => {
+    let eventFired = false;
+    const target = new EventTarget();
+    Object.defineProperty(globalThis, 'window', {
+      value: target,
+      writable: true,
+      configurable: true,
+    });
+
+    target.addEventListener(USER_PREFS_CHANGED_EVENT, () => {
+      eventFired = true;
+    });
+
+    setUserCircuitWireEnabled(false);
+    expect(readUserCircuitWireEnabled()).toBe(false);
+    expect(eventFired).toBe(true);
+
+    setUserCircuitWireEnabled(true);
+    expect(readUserCircuitWireEnabled()).toBe(true);
   });
 });
 

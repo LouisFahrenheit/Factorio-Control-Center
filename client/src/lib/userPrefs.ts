@@ -96,6 +96,7 @@ export function setUserShowServerListSpaceAgeBadge(show: boolean): void {
 }
 
 const SERVER_LOG_COLORIZE_KEY = 'fcc_user_server_log_colorize';
+const CIRCUIT_WIRE_ENABLED_KEY = 'fcc_user_circuit_wire_enabled';
 
 export function readUserServerLogColorize(): boolean {
   try {
@@ -108,6 +109,23 @@ export function readUserServerLogColorize(): boolean {
 export function setUserServerLogColorize(enabled: boolean): void {
   try {
     localStorage.setItem(SERVER_LOG_COLORIZE_KEY, enabled ? '1' : '0');
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readUserCircuitWireEnabled(): boolean {
+  try {
+    return localStorage.getItem(CIRCUIT_WIRE_ENABLED_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+export function setUserCircuitWireEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(CIRCUIT_WIRE_ENABLED_KEY, enabled ? '1' : '0');
     dispatchUserPrefsChanged();
   } catch {
     /* ignore */

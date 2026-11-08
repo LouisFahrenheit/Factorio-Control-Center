@@ -48,41 +48,6 @@
 
 #tabPanelHistory .history-tab__sub-tabs {
   margin: 0;
-  display: inline-flex;
-  gap: 6px;
-  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
-  border-radius: 8px;
-  padding: 3px;
-}
-
-#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab {
-  height: 32px;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.84rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-
-#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab:hover {
-  color: var(--text);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-#tabPanelHistory .history-tab__sub-tabs .sub-tabs__tab--active {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 #tabPanelHistory .history-tab__tab-badge {

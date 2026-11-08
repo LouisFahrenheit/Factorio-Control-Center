@@ -2,7 +2,8 @@
    Factorio Control Center — Circuit Wire Connection Styles
    ========================================================================== */
 
-.instance-screen {
+.instance-screen,
+.panel-shell {
   position: relative;
 }
 

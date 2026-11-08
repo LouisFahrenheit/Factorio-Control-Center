@@ -7,6 +7,7 @@ import {
   type CSSProperties,
 } from 'react';
 import { webEffectsReduced } from '../../theme/webEffects';
+import { useUserCircuitWireEnabled } from '../../hooks/useUserCircuitWireEnabled';
 
 // Constant physical speed of the pulse(in px/s)
 const PULSE_SPEED_PX_PER_SEC = 400;
@@ -78,10 +79,12 @@ export function CircuitWireConnection({
   mainSelector,
   subSelector,
 }: CircuitWireConnectionProps) {
+  const wireEnabled = useUserCircuitWireEnabled();
   const hasSubTabs =
-    (Boolean(mainSelector) && Boolean(subSelector)) ||
-    activeTab === 'maintenance' ||
-    activeTab === 'settings';
+    wireEnabled &&
+    ((Boolean(mainSelector) && Boolean(subSelector)) ||
+      activeTab === 'maintenance' ||
+      activeTab === 'settings');
   const [coords, setCoords] = useState<CircuitWireCoords | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const isReduced = webEffectsReduced();

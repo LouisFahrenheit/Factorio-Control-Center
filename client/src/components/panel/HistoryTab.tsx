@@ -1,4 +1,4 @@
-import { useMemo, useState, type ComponentType, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import {
   IconSettings,
   IconPackage,
@@ -6,6 +6,11 @@ import {
   IconUsers,
   IconHistory,
 } from '@tabler/icons-react';
+import {
+  useSlidingTabIndicator,
+  TAB_INDICATOR_ID_ATTR,
+} from '../../hooks/useSlidingTabIndicator';
+import { SlidingTabIndicator } from '../SlidingTabHighlight';
 import type { PlayersApi } from '../../hooks/usePlayers';
 import {
   TabLoadingPlaceholder,
@@ -187,6 +192,8 @@ function HistoryFilterToolbar({
 
 export function HistoryTab({ players, t }: HistoryTabProps) {
   const [historyTab, setHistoryTab] = useState<HistoryTabKey>('server');
+  const subTabsRef = useRef<HTMLDivElement>(null);
+  const slidingRect = useSlidingTabIndicator(subTabsRef, historyTab);
   const [playerSearch, setPlayerSearch] = useState('');
   const [playerCategory, setPlayerCategory] =
     useState<PlayerHistoryCategory>('all');
@@ -413,7 +420,12 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
         <div id="playersRootPanelHistory" className="history-tab__body">
           <section className="history-tab__card">
             <div className="history-tab__header-bar">
-              <div className="sub-tabs history-tab__sub-tabs" role="tablist">
+              <div
+                ref={subTabsRef}
+                className="sub-tabs history-tab__sub-tabs"
+                role="tablist"
+              >
+                <SlidingTabIndicator rect={slidingRect} variant="sub-tabs" />
                 {HISTORY_TABS.map(({ key, i18n, btnId, Icon }) => {
                   const count = tabCounts[key];
                   return (
@@ -427,13 +439,16 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                       }
                       role="tab"
                       aria-selected={historyTab === key}
+                      {...{ [TAB_INDICATOR_ID_ATTR]: key }}
                       onClick={() => setHistoryTab(key)}
                     >
-                      <Icon size={16} />
-                      {t(i18n)}
-                      {count > 0 ? (
-                        <span className="history-tab__tab-badge">{count}</span>
-                      ) : null}
+                      <span className="sub-tabs__tab-inner">
+                        <Icon size={16} />
+                        {t(i18n)}
+                        {count > 0 ? (
+                          <span className="history-tab__tab-badge">{count}</span>
+                        ) : null}
+                      </span>
                     </button>
                   );
                 })}

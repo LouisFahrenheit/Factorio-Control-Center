@@ -1363,6 +1363,8 @@
   "program_log_reformat_timestamps_hint": "Преобразование игровых временных меток Factorio в читаемый формат даты и времени.",
   "user_server_log_colorize_cb": "Раскраска логов сервера",
   "user_server_log_colorize_tip": "Цветная подсветка событий и синтаксиса в окне логов сервера.",
+  "user_circuit_wire_cb": "Соединительный кабель вкладок",
+  "user_circuit_wire_tip": "Анимированный соединительный кабель между активной вкладкой и её подразделом.",
   "program_log_write_web_cb": "Лог веб-панели",
   "program_log_write_web_hint": "Запись системных событий, запросов и ошибок веб-панели управления.",
   "program_log_write_maintenance_cb": "Лог обслуживания",
