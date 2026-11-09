@@ -59,7 +59,7 @@ export class SystemController {
     private readonly config: FccConfigService,
     private readonly users: UsersService,
     private readonly instances: InstancesService,
-  ) { }
+  ) {}
 
   private user(req: Request): SessionUser {
     return (req as Request & { [AUTH_USER_KEY]: SessionUser })[AUTH_USER_KEY];
@@ -202,25 +202,25 @@ export class SystemController {
       .map((it) => {
         const publicMods = Array.isArray(it.publicMods)
           ? it.publicMods.map(
-            (m: { name: string; title: string; version?: string }) => {
-              const sp = safeStr(it.serverPath);
-              if (!sp) return m;
-              const modsDir = join(sp, 'mods');
-              const packages = modPackagePathsForInternalName(
-                modsDir,
-                m.name,
-              );
-              const details =
-                packages.length > 0
-                  ? getModDetailsCached(packages[0], lang)
-                  : { title: m.title, version: m.version };
-              return {
-                name: m.name,
-                title: details.title,
-                version: details.version,
-              };
-            },
-          )
+              (m: { name: string; title: string; version?: string }) => {
+                const sp = safeStr(it.serverPath);
+                if (!sp) return m;
+                const modsDir = join(sp, 'mods');
+                const packages = modPackagePathsForInternalName(
+                  modsDir,
+                  m.name,
+                );
+                const details =
+                  packages.length > 0
+                    ? getModDetailsCached(packages[0], lang)
+                    : { title: m.title, version: m.version };
+                return {
+                  name: m.name,
+                  title: details.title,
+                  version: details.version,
+                };
+              },
+            )
           : [];
         return {
           id: it.id,
