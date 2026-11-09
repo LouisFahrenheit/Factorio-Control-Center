@@ -10,7 +10,7 @@ import { LocaleService } from '../../locale/locale.service';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { UsersService } from '../../auth/users.service';
 import { InstancesService } from '../../instances/instances.service';
-import { AUTH_USER_KEY } from '../../auth/auth.guard';
+import { AuthGuard, AUTH_USER_KEY } from '../../auth/auth.guard';
 import { SessionUser } from '../../common/types';
 
 describe('SystemController', () => {
@@ -144,6 +144,15 @@ describe('SystemController', () => {
       expect(Array.isArray(res.host_ips)).toBe(true);
     });
 
+    it('enforces AuthGuard on hostIps', () => {
+      const hostIpsFn =
+        (Object.getOwnPropertyDescriptor(SystemController.prototype, 'hostIps')
+          ?.value as object) || {};
+      const guards =
+        (Reflect.getMetadata('__guards__', hostIpsFn) as unknown[]) || [];
+      expect(guards).toContain(AuthGuard);
+    });
+
     it('localeBootstrap returns bootstrap configuration', async () => {
       const res = await controller.localeBootstrap('ru');
       expect(res.ok).toBe(true);
@@ -202,6 +211,50 @@ describe('SystemController', () => {
       await expect(
         controller.downloadInstanceModsPublic('inst-1', res, req),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('enforces rate limit of 3 requests per 15 minutes', async () => {
+      mockInstances.getById.mockReturnValue({ isPublic: true });
+      mockInstances.withInstance.mockResolvedValue({ path: '' });
+      const req = createMockReq('alice', {}, '192.168.1.100');
+      const res = {} as Response;
+
+      // 3 requests should succeed up to the archive check (NotFoundException since path is empty)
+      for (let i = 0; i < 3; i++) {
+        await expect(
+          controller.downloadInstanceModsPublic('inst-1', res, req),
+        ).rejects.toThrow(NotFoundException);
+      }
+
+      // 4th request must be rejected with rate limit ForbiddenException
+      await expect(
+        controller.downloadInstanceModsPublic('inst-1', res, req),
+      ).rejects.toThrow(
+        new ForbiddenException(
+          'Rate limit exceeded. Please try again in 15 minutes.',
+        ),
+      );
+    });
+
+    it('purges expired rate limit entries and deletes empty IP records', async () => {
+      const internal = controller as unknown as {
+        downloadRateLimits: Map<string, number[]>;
+      };
+      const staleTime = Date.now() - 16 * 60 * 1000;
+      internal.downloadRateLimits.set('stale-ip', [staleTime]);
+      internal.downloadRateLimits.set('mixed-ip', [staleTime, Date.now()]);
+
+      mockInstances.getById.mockReturnValue(null);
+      const req = createMockReq('alice', {}, 'new-ip');
+      const res = {} as Response;
+
+      // Invoking endpoint triggers prune
+      await expect(
+        controller.downloadInstanceModsPublic('inst-1', res, req),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(internal.downloadRateLimits.has('stale-ip')).toBe(false);
+      expect(internal.downloadRateLimits.get('mixed-ip')?.length).toBe(1);
     });
   });
 

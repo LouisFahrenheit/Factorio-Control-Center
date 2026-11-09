@@ -30,6 +30,7 @@ import { unlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { Request } from 'express';
+import { AdminGuard } from '../../auth/admin.guard';
 import { AuthGuard, AUTH_USER_KEY } from '../../auth/auth.guard';
 import { SessionUser } from '../../common/types';
 import { FccConfigService } from '../../config/fcc-config.service';
@@ -356,6 +357,7 @@ export class ConfigController {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Post('web/restart')
   @ApiOperation({ summary: 'Restart the FCC web panel process' })
   @ApiResponse({ status: 200, description: 'Restart initiated' })
@@ -363,6 +365,7 @@ export class ConfigController {
     return this.bridge.submit('restart_web_panel');
   }
 
+  @UseGuards(AdminGuard)
   @Post('web-tls/upload')
   @ApiOperation({ summary: 'Upload TLS certificate or key file' })
   @ApiConsumes('multipart/form-data')
@@ -385,6 +388,9 @@ export class ConfigController {
     @UploadedFile() file: Express.Multer.File,
     @Body('kind') kind: string,
   ): Promise<Record<string, unknown>> {
+    if (!file?.buffer) {
+      throw new BadRequestException('File is required');
+    }
     const k = String(kind || '')
       .trim()
       .toLowerCase();

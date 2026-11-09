@@ -1112,6 +1112,7 @@
   "items_editor_error_item_name": "Название предмета обязательно",
   "items_editor_items_configured": "Настроено предметов: {}",
   "items_editor_no_items": "Предметы не настроены",
+  "items_editor_search_no_results": "Нет предметов по вашему запросу",
   "items_editor_edit_list_btn": "Редактировать список предметов...",
   "server_settings_visibility_public": "Публичный",
   "server_settings_visibility_lan": "LAN",

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { ConfigController } from './config.controller';
+import { AdminGuard } from '../../auth/admin.guard';
 import { ApiBridgeService } from '../api-bridge.service';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { InstancesService } from '../../instances/instances.service';
@@ -262,9 +263,24 @@ describe('ConfigController', () => {
       expect(mockBridge.submit).toHaveBeenCalledWith('restart_web_panel');
     });
 
+    it('webTlsUpload throws BadRequestException when file is missing', async () => {
+      await expect(
+        controller.webTlsUpload(
+          undefined as unknown as Express.Multer.File,
+          'cert',
+        ),
+      ).rejects.toThrow(new BadRequestException('File is required'));
+    });
+
+    it('webTlsUpload throws BadRequestException when file buffer is missing', async () => {
+      await expect(
+        controller.webTlsUpload({} as Express.Multer.File, 'cert'),
+      ).rejects.toThrow(new BadRequestException('File is required'));
+    });
+
     it('webTlsUpload rejects invalid kind', async () => {
       const res = await controller.webTlsUpload(
-        {} as Express.Multer.File,
+        { buffer: Buffer.from('test') } as Express.Multer.File,
         'invalid',
       );
       expect(res).toEqual({ ok: false, error: 'tls_upload_invalid_kind' });
@@ -274,7 +290,7 @@ describe('ConfigController', () => {
       const res = await controller.webTlsUpload(
         {
           originalname: 'cert.txt',
-          buffer: Buffer.from(''),
+          buffer: Buffer.from('data'),
         } as Express.Multer.File,
         'cert',
       );
@@ -297,6 +313,24 @@ describe('ConfigController', () => {
       expect(call[1].kind).toBe('cert');
       expect(call[1].tmp_path.includes('fcc-tls')).toBe(true);
       expect(res).toEqual({ ok: true });
+    });
+
+    it('enforces AdminGuard on webRestart and webTlsUpload', () => {
+      const getMethod = (name: string): object =>
+        (Object.getOwnPropertyDescriptor(ConfigController.prototype, name)
+          ?.value as object) || {};
+      const restartGuards =
+        (Reflect.getMetadata(
+          '__guards__',
+          getMethod('webRestart'),
+        ) as unknown[]) || [];
+      const tlsGuards =
+        (Reflect.getMetadata(
+          '__guards__',
+          getMethod('webTlsUpload'),
+        ) as unknown[]) || [];
+      expect(restartGuards).toContain(AdminGuard);
+      expect(tlsGuards).toContain(AdminGuard);
     });
   });
 });

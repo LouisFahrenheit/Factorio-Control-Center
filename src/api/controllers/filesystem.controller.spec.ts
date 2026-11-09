@@ -2,6 +2,18 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { FileSystemController } from './filesystem.controller';
+import { AdminGuard } from '../../auth/admin.guard';
+import { AuthGuard } from '../../auth/auth.guard';
+
+jest.mock('fs', () => {
+  const actual = jest.requireActual<Record<string, unknown>>('fs');
+  return {
+    ...actual,
+    statSync: jest.fn(actual.statSync as (...args: unknown[]) => unknown),
+    readdirSync: jest.fn(actual.readdirSync as (...args: unknown[]) => unknown),
+    mkdirSync: jest.fn(actual.mkdirSync as (...args: unknown[]) => unknown),
+  };
+});
 
 describe('FileSystemController', () => {
   let controller: FileSystemController;
@@ -56,6 +68,22 @@ describe('FileSystemController', () => {
       };
       expect(res.ok).toBe(true);
       expect(res.current).toBe(path.resolve(tempDir));
+    });
+
+    it('returns path_invalid when statSync throws in dirs', () => {
+      (fs.statSync as unknown as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('EACCES: permission denied');
+      });
+      const res = controller.dirs(tempDir);
+      expect(res).toEqual({ ok: false, error: 'path_invalid' });
+    });
+
+    it('returns path_invalid when readdirSync throws in dirs', () => {
+      (fs.readdirSync as unknown as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('EACCES: permission denied');
+      });
+      const res = controller.dirs(tempDir);
+      expect(res).toEqual({ ok: false, error: 'path_invalid' });
     });
   });
 
@@ -146,6 +174,34 @@ describe('FileSystemController', () => {
         name: 'new-folder',
       });
       expect(duplicate).toEqual({ ok: false, error: 'folder_exists' });
+    });
+
+    it('returns path_invalid when statSync throws in mkdir', () => {
+      (fs.statSync as unknown as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('EACCES: permission denied');
+      });
+      const res = controller.mkdir({ path: tempDir, name: 'sub-folder' });
+      expect(res).toEqual({ ok: false, error: 'path_invalid' });
+    });
+
+    it('returns path_invalid when mkdirSync throws in mkdir', () => {
+      (fs.mkdirSync as unknown as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('EACCES: permission denied');
+      });
+      const res = controller.mkdir({ path: tempDir, name: 'sub-folder' });
+      expect(res).toEqual({ ok: false, error: 'path_invalid' });
+    });
+  });
+
+  describe('guards configuration', () => {
+    it('enforces AuthGuard and AdminGuard at the controller level', () => {
+      const guards =
+        (Reflect.getMetadata(
+          '__guards__',
+          FileSystemController,
+        ) as unknown[]) || [];
+      expect(guards).toContain(AuthGuard);
+      expect(guards).toContain(AdminGuard);
     });
   });
 });

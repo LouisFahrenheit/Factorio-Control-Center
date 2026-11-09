@@ -1,6 +1,7 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
 import { InstancesController } from './instances.controller';
+import { AdminGuard } from '../../auth/admin.guard';
 import { ApiBridgeService } from '../api-bridge.service';
 import { SessionService } from '../../auth/session.service';
 import { InstancesService } from '../../instances/instances.service';
@@ -214,6 +215,37 @@ describe('InstancesController', () => {
     it('bootstrapStop dispatches instance_bootstrap_stop', async () => {
       await controller.bootstrapStop();
       expect(mockBridge.submit).toHaveBeenCalledWith('instance_bootstrap_stop');
+    });
+  });
+
+  describe('guards configuration', () => {
+    const getMethod = (name: string): object =>
+      (Object.getOwnPropertyDescriptor(InstancesController.prototype, name)
+        ?.value as object) || {};
+
+    const getGuards = (target: object): unknown[] =>
+      (Reflect.getMetadata('__guards__', target) as unknown[]) || [];
+
+    it('enforces AdminGuard on mutating and bootstrap routes', () => {
+      const mutatingMethodNames = [
+        'instancesAdd',
+        'instancesUpdate',
+        'instancesClone',
+        'instancesRemove',
+        'bootstrapStart',
+        'bootstrapStatus',
+        'bootstrapStop',
+      ];
+
+      for (const name of mutatingMethodNames) {
+        const guards = getGuards(getMethod(name));
+        expect(guards).toContain(AdminGuard);
+      }
+    });
+
+    it('does not enforce AdminGuard on instancesList or instancesSelect', () => {
+      expect(getGuards(getMethod('instancesList'))).not.toContain(AdminGuard);
+      expect(getGuards(getMethod('instancesSelect'))).not.toContain(AdminGuard);
     });
   });
 });

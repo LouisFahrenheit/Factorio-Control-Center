@@ -1112,6 +1112,7 @@
   "items_editor_error_item_name": "Item name is required",
   "items_editor_items_configured": "Items configured: {} item(s)",
   "items_editor_no_items": "No items configured",
+  "items_editor_search_no_results": "No items match your search",
   "items_editor_edit_list_btn": "Edit Items List...",
   "server_settings_visibility_public": "Public",
   "server_settings_visibility_lan": "LAN",

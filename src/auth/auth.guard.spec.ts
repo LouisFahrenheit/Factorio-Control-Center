@@ -14,6 +14,8 @@ describe('AuthGuard', () => {
   interface MockRequest {
     path?: string;
     headers?: Record<string, string>;
+    query?: Record<string, unknown>;
+    body?: Record<string, unknown>;
     [AUTH_TOKEN_KEY]?: string;
     [AUTH_USER_KEY]?: {
       username: string;
@@ -289,6 +291,182 @@ describe('AuthGuard', () => {
 
       const allowed = await guard.canActivate(ctx);
       expect(allowed).toBe(true);
+    });
+
+    it('throws ForbiddenException when restricted user passes unauthorized instance_id in query', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves',
+        headers: { authorization: 'Bearer engineer-token' },
+        query: { instance_id: 'instance-beta' },
+      };
+      const ctx = createMockContext(req);
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        'forbidden_instance',
+      );
+    });
+
+    it('throws ForbiddenException when restricted user passes unauthorized instance_id in body', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/server/start',
+        headers: { authorization: 'Bearer engineer-token' },
+        body: { instance_id: 'instance-beta' },
+      };
+      const ctx = createMockContext(req);
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        'forbidden_instance',
+      );
+    });
+
+    it('throws ForbiddenException when restricted user passes unauthorized target_instance_id in body', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves/transfer',
+        headers: { authorization: 'Bearer engineer-token' },
+        body: { target_instance_id: 'instance-beta' },
+      };
+      const ctx = createMockContext(req);
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        'forbidden_instance',
+      );
+    });
+
+    it('throws ForbiddenException when restricted user passes unauthorized target_server_id in body', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves/transfer',
+        headers: { authorization: 'Bearer engineer-token' },
+        body: { target_server_id: 'instance-beta' },
+      };
+      const ctx = createMockContext(req);
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        'forbidden_instance',
+      );
+    });
+
+    it('allows access when restricted user passes authorized instance identifiers in query and body', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves/transfer',
+        headers: { authorization: 'Bearer engineer-token' },
+        query: { instance_id: 'instance-alpha' },
+        body: { target_instance_id: 'instance-alpha' },
+      };
+      const ctx = createMockContext(req);
+
+      const allowed = await guard.canActivate(ctx);
+      expect(allowed).toBe(true);
+    });
+
+    it('allows access for admin with wildcard instance access even with different instance IDs in query/body', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'admin',
+        role: 'administrator',
+        tabs: ['control'],
+        instance_ids: ['*'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves/transfer',
+        headers: { authorization: 'Bearer admin-token' },
+        query: { instance_id: 'any-instance-1' },
+        body: { target_instance_id: 'any-instance-2' },
+      };
+      const ctx = createMockContext(req);
+
+      const allowed = await guard.canActivate(ctx);
+      expect(allowed).toBe(true);
+    });
+
+    it('ignores empty or whitespace instance parameters', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/server/start',
+        headers: { authorization: 'Bearer engineer-token' },
+        query: { instance_id: '   ' },
+        body: { target_instance_id: '' },
+      };
+      const ctx = createMockContext(req);
+
+      const allowed = await guard.canActivate(ctx);
+      expect(allowed).toBe(true);
+    });
+
+    it('handles array query parameters and throws if any item is unauthorized', async () => {
+      (mockSessions.resolve as jest.Mock).mockResolvedValue({
+        username: 'engineer',
+        role: 'server_engineer',
+        tabs: ['control'],
+        instance_ids: ['instance-alpha'],
+        enabled: true,
+      });
+      (mockUsers.cleanTabs as jest.Mock).mockReturnValue(['control']);
+
+      const req = {
+        path: '/api/saves',
+        headers: { authorization: 'Bearer engineer-token' },
+        query: { instance_id: ['instance-alpha', 'instance-beta'] },
+      };
+      const ctx = createMockContext(req);
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        'forbidden_instance',
+      );
     });
   });
 });

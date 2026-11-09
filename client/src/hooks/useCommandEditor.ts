@@ -159,7 +159,7 @@ export function useCommandEditor(
     if (!getToken()) return;
     cancelScheduledPersist();
     if (!dirtyRef.current) return;
-    persistNow(catalogRef.current).catch(() => {});
+    persistNow(catalogRef.current).catch(() => { });
   }, [cancelScheduledPersist, persistNow]);
 
   const applyCatalog = useCallback(
@@ -243,7 +243,7 @@ export function useCommandEditor(
   const setCommandField = useCallback(
     (patch: Partial<CommandDef>) => {
       if (!selectedCommandId) return;
-      const next = cloneCatalog(catalog);
+      const next = cloneCatalog(catalogRef.current);
       const loc = findCommandLocation(next, selectedCommandId);
       if (!loc) return;
       const current = next.categories[loc.categoryKey].commands[loc.index];
@@ -262,7 +262,7 @@ export function useCommandEditor(
       setCatalog(next);
       schedulePersist(next);
     },
-    [catalog, schedulePersist, selectedCommandId],
+    [schedulePersist, selectedCommandId],
   );
 
   const moveCommandToCategory = useCallback(
@@ -282,52 +282,42 @@ export function useCommandEditor(
 
   const moveCommand = useCallback(
     (commandId: string, targetCategoryKey: string, targetIndex: number) => {
-      let next: CommandsCatalogDoc | null = null;
+      const current = catalogRef.current;
+      const loc = findCommandLocation(current, commandId);
+      if (!loc || !current.categories[targetCategoryKey]) return;
 
-      setCatalog((prev) => {
-        const loc = findCommandLocation(prev, commandId);
-        if (!loc || !prev.categories[targetCategoryKey]) return prev;
+      const candidate = cloneCatalog(current);
+      const sourceList = candidate.categories[loc.categoryKey].commands;
+      const [cmd] = sourceList.splice(loc.index, 1);
+      const targetList = candidate.categories[targetCategoryKey].commands;
 
-        const candidate = cloneCatalog(prev);
-        const sourceList = candidate.categories[loc.categoryKey].commands;
-        const [cmd] = sourceList.splice(loc.index, 1);
-        const targetList = candidate.categories[targetCategoryKey].commands;
+      let insertIndex = Math.max(0, Math.min(targetIndex, targetList.length));
+      if (loc.categoryKey === targetCategoryKey) {
+        if (loc.index === insertIndex || loc.index + 1 === insertIndex) return;
+        if (loc.index < insertIndex) insertIndex -= 1;
+      }
 
-        let insertIndex = Math.max(0, Math.min(targetIndex, targetList.length));
-        if (loc.categoryKey === targetCategoryKey) {
-          if (loc.index === insertIndex || loc.index + 1 === insertIndex) return prev;
-          if (loc.index < insertIndex) insertIndex -= 1;
-        }
+      targetList.splice(insertIndex, 0, cmd);
 
-        targetList.splice(insertIndex, 0, cmd);
-        next = candidate;
-        return candidate;
-      });
-
-      if (!next) return;
-      catalogRef.current = next;
+      catalogRef.current = candidate;
+      setCatalog(candidate);
       if (selectedCommandId === commandId) {
         setSelectedCategoryKey(targetCategoryKey);
       }
-      schedulePersist(next);
+      schedulePersist(candidate);
     },
     [schedulePersist, selectedCommandId],
   );
 
   const moveCategoryOrder = useCallback(
     (categoryKey: string, targetIndex: number) => {
-      let next: CommandsCatalogDoc | null = null;
+      const current = catalogRef.current;
+      const candidate = moveCategory(current, categoryKey, targetIndex);
+      if (candidate === current) return;
 
-      setCatalog((prev) => {
-        const candidate = moveCategory(prev, categoryKey, targetIndex);
-        if (candidate === prev) return prev;
-        next = candidate;
-        return candidate;
-      });
-
-      if (!next) return;
-      catalogRef.current = next;
-      schedulePersist(next);
+      catalogRef.current = candidate;
+      setCatalog(candidate);
+      schedulePersist(candidate);
     },
     [schedulePersist],
   );

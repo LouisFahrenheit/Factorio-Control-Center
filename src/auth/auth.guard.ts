@@ -86,6 +86,30 @@ export class AuthGuard implements CanActivate {
       ) {
         throw new ForbiddenException('forbidden_instance');
       }
+
+      if (!user.instance_ids.includes('*')) {
+        const query = (
+          req.query && typeof req.query === 'object' ? req.query : undefined
+        ) as Record<string, unknown> | undefined;
+        const body = (
+          req.body && typeof req.body === 'object' ? req.body : undefined
+        ) as Record<string, unknown> | undefined;
+
+        const targetKeys = [
+          'instance_id',
+          'target_instance_id',
+          'target_server_id',
+        ] as const;
+
+        for (const key of targetKeys) {
+          if (query && key in query) {
+            this.validateInstanceAccess(query[key], user.instance_ids);
+          }
+          if (body && key in body) {
+            this.validateInstanceAccess(body[key], user.instance_ids);
+          }
+        }
+      }
     }
     user.tabs = tabs;
     (
@@ -123,5 +147,22 @@ export class AuthGuard implements CanActivate {
       path.startsWith('/api/config/web-tls/') ||
       path.startsWith('/api/backup')
     );
+  }
+
+  private validateInstanceAccess(id: unknown, allowedIds: string[]): void {
+    if (typeof id === 'string') {
+      const trimmed = id.trim();
+      if (
+        trimmed &&
+        !allowedIds.includes('*') &&
+        !allowedIds.includes(trimmed)
+      ) {
+        throw new ForbiddenException('forbidden_instance');
+      }
+    } else if (Array.isArray(id)) {
+      for (const item of id) {
+        this.validateInstanceAccess(item, allowedIds);
+      }
+    }
   }
 }

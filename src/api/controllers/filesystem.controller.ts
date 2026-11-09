@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { existsSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { dirname, join, resolve } from 'path';
+import { AdminGuard } from '../../auth/admin.guard';
 import { AuthGuard } from '../../auth/auth.guard';
 import {
   getPrimaryDockerVolume,
@@ -18,7 +19,7 @@ import { hasFactorioExecutable } from '../../ops/path-manager';
 @ApiTags('FileSystem')
 @ApiBearerAuth('bearer')
 @Controller('api/fs')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, AdminGuard)
 export class FileSystemController {
   @Get('dirs')
   @ApiOperation({ summary: 'Browse host directories for instance setup' })
@@ -87,16 +88,20 @@ export class FileSystemController {
       }
       return { ok: false, error: 'path_not_found' };
     }
-    const st = statSync(cur);
-    if (!st.isDirectory()) cur = dirname(cur);
-    const parent = resolve(cur, '..') === cur ? '' : dirname(cur);
-    const items = readdirSync(cur, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => ({ name: d.name, path: join(cur, d.name), isDir: true }))
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
-      );
-    return { ok: true, current: cur, parent, items };
+    try {
+      const st = statSync(cur);
+      if (!st.isDirectory()) cur = dirname(cur);
+      const parent = resolve(cur, '..') === cur ? '' : dirname(cur);
+      const items = readdirSync(cur, { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => ({ name: d.name, path: join(cur, d.name), isDir: true }))
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+        );
+      return { ok: true, current: cur, parent, items };
+    } catch {
+      return { ok: false, error: 'path_invalid' };
+    }
   }
 
   private fsMkdirImpl(baseRaw: string, name: string): Record<string, unknown> {
@@ -106,11 +111,15 @@ export class FileSystemController {
     if (/[/\\]/.test(name)) return { ok: false, error: 'folder_name_invalid' };
     let base = resolve(baseRaw || '.');
     if (!existsSync(base)) return { ok: false, error: 'path_not_found' };
-    if (!statSync(base).isDirectory()) base = dirname(base);
-    const created = join(base, name);
-    if (existsSync(created)) return { ok: false, error: 'folder_exists' };
-    mkdirSync(created);
-    return { ok: true, path: created };
+    try {
+      if (!statSync(base).isDirectory()) base = dirname(base);
+      const created = join(base, name);
+      if (existsSync(created)) return { ok: false, error: 'folder_exists' };
+      mkdirSync(created);
+      return { ok: true, path: created };
+    } catch {
+      return { ok: false, error: 'path_invalid' };
+    }
   }
 
   private fsPathInfoImpl(raw: string): Record<string, unknown> {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { modals } from '@mantine/modals';
 import {
   IconDeviceFloppy,
@@ -51,11 +51,17 @@ export function CommandItemsEditorModal({
     setItemCount(String(items[name] ?? 1));
   }
 
-  function resetForm() {
+  const resetForm = useCallback(() => {
     setSelectedItem('');
     setItemName('');
-    setItemCount('');
-  }
+    setItemCount('1');
+  }, []);
+
+  useEffect(() => {
+    resetForm();
+    setSearch('');
+    setItemCount('1');
+  }, [editor.itemsEditorOpen, editor.selectedCommandId, resetForm]);
 
   function upsertItem() {
     const name = itemName.trim();
@@ -164,7 +170,7 @@ export function CommandItemsEditorModal({
                   <li className="command-items-editor__empty">
                     {itemKeys.length === 0
                       ? t('items_editor_no_items')
-                      : t('search_placeholder')}
+                      : t('items_editor_search_no_results')}
                   </li>
                 )}
               </ul>

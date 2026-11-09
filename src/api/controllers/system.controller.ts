@@ -45,6 +45,9 @@ import {
 import { listHostIPv4 } from '../../http/lan-address.util';
 import { ApiBridgeService } from '../api-bridge.service';
 
+const DOWNLOAD_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const DOWNLOAD_RATE_LIMIT_MAX_REQUESTS = 3;
+
 @ApiTags('System')
 @Controller('api')
 export class SystemController {
@@ -56,7 +59,7 @@ export class SystemController {
     private readonly config: FccConfigService,
     private readonly users: UsersService,
     private readonly instances: InstancesService,
-  ) {}
+  ) { }
 
   private user(req: Request): SessionUser {
     return (req as Request & { [AUTH_USER_KEY]: SessionUser })[AUTH_USER_KEY];
@@ -88,13 +91,16 @@ export class SystemController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Get('host-ips')
+  @ApiBearerAuth('bearer')
   @ApiOperation({
     summary: 'List host network IPv4 addresses',
     description:
       'Returns list of non-loopback IPv4 addresses available on the host machine',
   })
   @ApiResponse({ status: 200, description: 'List of host IPv4 addresses' })
+  @ApiResponse({ status: 401, description: 'Missing bearer token' })
   hostIps() {
     return {
       ok: true,
@@ -196,25 +202,25 @@ export class SystemController {
       .map((it) => {
         const publicMods = Array.isArray(it.publicMods)
           ? it.publicMods.map(
-              (m: { name: string; title: string; version?: string }) => {
-                const sp = safeStr(it.serverPath);
-                if (!sp) return m;
-                const modsDir = join(sp, 'mods');
-                const packages = modPackagePathsForInternalName(
-                  modsDir,
-                  m.name,
-                );
-                const details =
-                  packages.length > 0
-                    ? getModDetailsCached(packages[0], lang)
-                    : { title: m.title, version: m.version };
-                return {
-                  name: m.name,
-                  title: details.title,
-                  version: details.version,
-                };
-              },
-            )
+            (m: { name: string; title: string; version?: string }) => {
+              const sp = safeStr(it.serverPath);
+              if (!sp) return m;
+              const modsDir = join(sp, 'mods');
+              const packages = modPackagePathsForInternalName(
+                modsDir,
+                m.name,
+              );
+              const details =
+                packages.length > 0
+                  ? getModDetailsCached(packages[0], lang)
+                  : { title: m.title, version: m.version };
+              return {
+                name: m.name,
+                title: details.title,
+                version: details.version,
+              };
+            },
+          )
           : [];
         return {
           id: it.id,
@@ -257,6 +263,20 @@ export class SystemController {
   })
   @ApiParam({ name: 'id', description: 'Public server instance ID' })
   @ApiResponse({ status: 200, description: 'ZIP file with server mods' })
+  private pruneDownloadRateLimits(
+    now: number = Date.now(),
+    windowMs: number = DOWNLOAD_RATE_LIMIT_WINDOW_MS,
+  ): void {
+    for (const [ip, timestamps] of this.downloadRateLimits.entries()) {
+      const valid = timestamps.filter((t) => now - t < windowMs);
+      if (valid.length === 0) {
+        this.downloadRateLimits.delete(ip);
+      } else if (valid.length !== timestamps.length) {
+        this.downloadRateLimits.set(ip, valid);
+      }
+    }
+  }
+
   @ApiResponse({
     status: 403,
     description:
@@ -277,11 +297,12 @@ export class SystemController {
 
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
-    const windowMs = 15 * 60 * 1000;
-    const maxRequests = 3;
+    const windowMs = DOWNLOAD_RATE_LIMIT_WINDOW_MS;
+    const maxRequests = DOWNLOAD_RATE_LIMIT_MAX_REQUESTS;
 
-    let timestamps = this.downloadRateLimits.get(ip) || [];
-    timestamps = timestamps.filter((t) => now - t < windowMs);
+    this.pruneDownloadRateLimits(now, windowMs);
+
+    const timestamps = this.downloadRateLimits.get(ip) || [];
     if (timestamps.length >= maxRequests) {
       throw new ForbiddenException(
         'Rate limit exceeded. Please try again in 15 minutes.',

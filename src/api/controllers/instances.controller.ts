@@ -22,6 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { AdminGuard } from '../../auth/admin.guard';
 import { AuthGuard, AUTH_USER_KEY } from '../../auth/auth.guard';
 import { requestBearerToken } from '../../auth/auth.util';
 import { SessionService } from '../../auth/session.service';
@@ -75,6 +76,7 @@ export class InstancesController {
     return { ...data, items: filtered, selectedId };
   }
 
+  @UseGuards(AdminGuard)
   @Post()
   @ApiOperation({ summary: 'Add a new server instance' })
   @ApiResponse({ status: 200, description: 'Instance created successfully' })
@@ -116,6 +118,7 @@ export class InstancesController {
     return { ok: true };
   }
 
+  @UseGuards(AdminGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update instance configuration' })
   @ApiParam({ name: 'id', description: 'Instance ID' })
@@ -132,6 +135,7 @@ export class InstancesController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Post(':id/clone')
   @ApiOperation({ summary: 'Clone an existing instance' })
   @ApiParam({ name: 'id', description: 'Source instance ID' })
@@ -148,6 +152,7 @@ export class InstancesController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Remove an instance' })
   @ApiParam({ name: 'id', description: 'Instance ID to remove' })
@@ -176,6 +181,7 @@ export class InstancesController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Post('bootstrap/start')
   @ApiOperation({ summary: 'Start instance bootstrap process' })
   @ApiResponse({ status: 200, description: 'Bootstrap started' })
@@ -185,6 +191,7 @@ export class InstancesController {
     return this.bridge.submit('instance_bootstrap_start', body);
   }
 
+  @UseGuards(AdminGuard)
   @Get('bootstrap/status')
   @ApiOperation({ summary: 'Get instance bootstrap progress and status' })
   @ApiResponse({ status: 200, description: 'Bootstrap status' })
@@ -192,6 +199,7 @@ export class InstancesController {
     return this.bridge.submit('instance_bootstrap_status');
   }
 
+  @UseGuards(AdminGuard)
   @Post('bootstrap/stop')
   @ApiOperation({ summary: 'Stop instance bootstrap process' })
   @ApiResponse({ status: 200, description: 'Bootstrap stopped' })
