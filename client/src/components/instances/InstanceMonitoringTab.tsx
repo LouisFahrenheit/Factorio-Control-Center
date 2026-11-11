@@ -11,6 +11,8 @@ import { motion } from 'motion/react';
 import { IconActivity, IconBug, IconCloudFog } from '@tabler/icons-react';
 import { api } from '../../api/client';
 import { AppIcon } from '../AppIcon';
+import { SectionHelpButton } from '../SectionHelpModal';
+import { MONITORING_HELP } from '../../lib/instanceHelpContent';
 import type { InstanceItem } from '../../types/instance';
 
 interface MetricPoint {
@@ -766,6 +768,12 @@ export function InstanceMonitoringTab({
               );
             })}
           </div>
+          <SectionHelpButton
+            idPrefix="monitoring"
+            content={MONITORING_HELP}
+            label={t('monitoring_help_btn')}
+            t={t}
+          />
         </div>
       </div>
 

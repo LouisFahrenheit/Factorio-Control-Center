@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Factorio Control Center — Monitoring Tab Styles
+   Monitoring
    ========================================================================== */
 
-.instance-screen .panel__body > .instance-screen__tab-stage,
+.instance-screen .panel__body>.instance-screen__tab-stage,
 .instance-screen__tab-stage {
   display: flex;
   flex-direction: column;
@@ -104,10 +104,13 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.instance-monitoring-metric-btn--active {
-  color: var(--text-bright, #fff);
-  background: var(--accent);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 50%, transparent);
+.instance-monitoring-metric-btn--active,
+.instance-monitoring-metric-btn--active:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .instance-monitoring-metric-btn__badge {
@@ -152,9 +155,13 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-.instance-monitoring-range__btn--active {
-  color: var(--text-bright, #fff);
-  background: var(--accent);
+.instance-monitoring-range__btn--active,
+.instance-monitoring-range__btn--active:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 1px 3px rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
 
@@ -233,12 +240,14 @@
 }
 
 @keyframes monitoring-dot-pulse {
+
   0%,
   100% {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
   }
+
   50% {
     opacity: 0.35;
     transform: scale(0.8);
@@ -252,12 +261,10 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--accent) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--accent) 50%,
+      transparent 100%);
   background-size: 200% 100%;
   animation: monitoring-bar-slide 1.2s infinite ease-in-out;
   border-top-left-radius: 8px;
@@ -269,6 +276,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -298,7 +306,7 @@
 .instance-monitoring-tooltip {
   position: absolute;
   pointer-events: none;
-  background: var(--bg-modal, #1a1c23);
+  background: var(--bg-modal);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px 14px;
