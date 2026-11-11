@@ -6,6 +6,7 @@ import {
   useState,
   type MouseEvent,
 } from 'react';
+import { IconRefresh, IconHelp } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { MaintenanceReportDetail } from './MaintenanceReportDetail';
 import { useListViewportPageSize } from '../../hooks/useListViewportPageSize';
@@ -45,6 +46,7 @@ import {
 } from './MaintenanceTasksEmpty';
 import { MaintenanceTaskCards } from './MaintenanceTaskCards';
 import { MaintenanceTaskTable } from './MaintenanceTaskTable';
+import { SearchField } from '../SearchField';
 
 interface InstanceMaintenanceTabProps {
   maintenance: MaintenanceApi;
@@ -79,6 +81,7 @@ export function InstanceMaintenanceTab({
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuTask, setMenuTask] = useState<MaintenanceTask | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const [reportSearch, setReportSearch] = useState('');
   const [reportKindFilter, setReportKindFilter] =
     useState<ReportKindFilter>('');
   const [eventKindFilter, setEventKindFilter] = useState<EventKindFilter>('');
@@ -166,21 +169,64 @@ export function InstanceMaintenanceTab({
     onInnerTabChange?.(innerTab);
   }, [innerTab, onInnerTabChange]);
 
-  const visibleReports = useMemo(
-    () =>
-      filterPeriodReports(
-        maintenance.reports,
-        reportInstanceFilter || undefined,
-        reportKindFilter || undefined,
-        eventKindFilter || undefined,
-      ),
-    [
+  const visibleReports = useMemo(() => {
+    const base = filterPeriodReports(
       maintenance.reports,
-      reportInstanceFilter,
-      reportKindFilter,
-      eventKindFilter,
-    ],
-  );
+      reportInstanceFilter || undefined,
+      reportKindFilter || undefined,
+      eventKindFilter || undefined,
+    );
+    const q = reportSearch.trim().toLowerCase();
+    if (!q) return base;
+
+    return base.filter((rep) => {
+      const srv = String(
+        rep.instance_name || rep.instance_id || '',
+      ).toLowerCase();
+      const dateStr = reportPeriodLabel(rep).toLowerCase();
+      const runType = reportRunTypeLabel(rep, t).toLowerCase();
+      const actor = String(rep.web_actor || '').toLowerCase();
+      const err = String(rep.error || '').toLowerCase();
+      const statusStr =
+        rep.success !== false
+          ? t('maintenance_report_ok').toLowerCase()
+          : t('maintenance_report_fail').toLowerCase();
+      const optionsStr = reportOptionsFromRep(rep, t).toLowerCase();
+
+      if (
+        srv.includes(q) ||
+        dateStr.includes(q) ||
+        runType.includes(q) ||
+        actor.includes(q) ||
+        err.includes(q) ||
+        statusStr.includes(q) ||
+        optionsStr.includes(q)
+      ) {
+        return true;
+      }
+
+      if (rep.steps && rep.steps.length > 0) {
+        for (const st of rep.steps) {
+          if (
+            (st.kind && String(st.kind).toLowerCase().includes(q)) ||
+            (st.error && String(st.error).toLowerCase().includes(q)) ||
+            (st.web_actor && String(st.web_actor).toLowerCase().includes(q))
+          ) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    });
+  }, [
+    maintenance.reports,
+    reportInstanceFilter,
+    reportKindFilter,
+    eventKindFilter,
+    reportSearch,
+    t,
+  ]);
 
   const reportsPageSize = useListViewportPageSize(
     reportsListRef,
@@ -195,6 +241,7 @@ export function InstanceMaintenanceTab({
       reportInstanceFilter,
       reportKindFilter,
       eventKindFilter,
+      reportSearch,
     ],
   );
 
@@ -211,7 +258,7 @@ export function InstanceMaintenanceTab({
 
   useEffect(() => {
     setReportPage(0);
-  }, [reportInstanceFilter, reportKindFilter, eventKindFilter]);
+  }, [reportInstanceFilter, reportKindFilter, eventKindFilter, reportSearch]);
 
   useEffect(() => {
     if (reportPage >= reportPageCount) {
@@ -394,272 +441,311 @@ export function InstanceMaintenanceTab({
       )}
 
       {innerTab === 'reports' && (
-        <section className="maintenance-tab__card">
-          <div className="maintenance-tab__card-body">
-            <div
-              id="maintPanelReports"
-              className="maintenance-tab__panel maintenance-tab__panel--reports maintenance-tab__panel--active"
-            >
-              <div className="maintenance-reports-toolbar">
-                <label className="maintenance-reports-filter">
-                  <span className="maintenance-reports-filter__label">
-                    {t('maintenance_reports_filter_instance')}
-                  </span>
-                  <select
-                    className="input input--compact maintenance-reports-filter__input"
-                    value={reportInstanceFilter}
-                    onChange={(e) => setReportInstanceFilter(e.target.value)}
-                  >
-                    <option value="">
-                      {t('maintenance_reports_filter_all')}
-                    </option>
-                    {reportInstanceOptions.map(([id, name]) => (
-                      <option key={id} value={id}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="maintenance-reports-filter">
-                  <span className="maintenance-reports-filter__label">
-                    {t('maintenance_reports_filter_type')}
-                  </span>
-                  <select
-                    className="input input--compact maintenance-reports-filter__input"
-                    value={reportKindFilter}
-                    onChange={(e) =>
-                      setReportKindFilter(e.target.value as ReportKindFilter)
-                    }
-                  >
-                    <option value="">
-                      {t('maintenance_reports_filter_all')}
-                    </option>
-                    <option value="manual_session">
-                      {t('audit_report_kind_manual_session')}
-                    </option>
-                    <option value="maintenance_run">
-                      {t('audit_report_kind_maintenance_run')}
-                    </option>
-                  </select>
-                </label>
-                <label className="maintenance-reports-filter">
-                  <span className="maintenance-reports-filter__label">
-                    {t('maintenance_reports_filter_event')}
-                  </span>
-                  <select
-                    className="input input--compact maintenance-reports-filter__input"
-                    value={eventKindFilter}
-                    onChange={(e) =>
-                      setEventKindFilter(e.target.value as EventKindFilter)
-                    }
-                  >
-                    <option value="">
-                      {t('maintenance_reports_filter_all')}
-                    </option>
-                    <option value="mod">
-                      {t('maintenance_reports_filter_event_mod')}
-                    </option>
-                    <option value="server_settings">
-                      {t('maintenance_reports_filter_event_settings')}
-                    </option>
-                    <option value="save">
-                      {t('maintenance_reports_filter_event_save')}
-                    </option>
-                    <option value="modpack">
-                      {t('maintenance_reports_filter_event_modpack')}
-                    </option>
-                    <option value="factorio_update">
-                      {t('maintenance_reports_filter_event_factorio')}
-                    </option>
-                  </select>
-                </label>
-              </div>
+        <div className="maintenance-tasks-layout maintenance-reports-layout">
+          <div
+            className="access-users-bar maintenance-reports-toolbar maintenance-reports-bar"
+            role="toolbar"
+            aria-label={t('maintenance_inner_tab_reports')}
+          >
+            {/* 1. Поиск */}
+            <SearchField
+              id="maintenanceReportsSearchInput"
+              className="access-users-bar__search maintenance-reports-bar__search"
+              placeholder={t('search_placeholder')}
+              autoComplete="off"
+              spellCheck={false}
+              value={reportSearch}
+              onChange={(e) => setReportSearch(e.target.value)}
+            />
 
-              <div className="maintenance-reports-split">
-                <div className="maintenance-reports-split__list">
-                  <div className="maintenance-reports-split__list-head">
-                    <AppIcon
-                      name="history"
-                      size={16}
-                      className="maintenance-reports-split__list-head-icon"
+            {/* 2. Фильтры */}
+            <div className="access-users-bar__filters maintenance-reports-bar__filters">
+              <label className="maintenance-reports-filter">
+                <span className="maintenance-reports-filter__label">
+                  {t('maintenance_reports_filter_instance')}
+                </span>
+                <select
+                  className="input access-users-bar__select maintenance-reports-filter__select"
+                  value={reportInstanceFilter}
+                  onChange={(e) => setReportInstanceFilter(e.target.value)}
+                  aria-label={t('maintenance_reports_filter_instance')}
+                >
+                  <option value="">
+                    {t('maintenance_reports_filter_all')}
+                  </option>
+                  {reportInstanceOptions.map(([id, name]) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="maintenance-reports-filter">
+                <span className="maintenance-reports-filter__label">
+                  {t('maintenance_reports_filter_type')}
+                </span>
+                <select
+                  className="input access-users-bar__select maintenance-reports-filter__select"
+                  value={reportKindFilter}
+                  onChange={(e) =>
+                    setReportKindFilter(e.target.value as ReportKindFilter)
+                  }
+                  aria-label={t('maintenance_reports_filter_type')}
+                >
+                  <option value="">
+                    {t('maintenance_reports_filter_all')}
+                  </option>
+                  <option value="manual_session">
+                    {t('audit_report_kind_manual_session')}
+                  </option>
+                  <option value="maintenance_run">
+                    {t('audit_report_kind_maintenance_run')}
+                  </option>
+                </select>
+              </label>
+
+              <label className="maintenance-reports-filter">
+                <span className="maintenance-reports-filter__label">
+                  {t('maintenance_reports_filter_event')}
+                </span>
+                <select
+                  className="input access-users-bar__select maintenance-reports-filter__select"
+                  value={eventKindFilter}
+                  onChange={(e) =>
+                    setEventKindFilter(e.target.value as EventKindFilter)
+                  }
+                  aria-label={t('maintenance_reports_filter_event')}
+                >
+                  <option value="">
+                    {t('maintenance_reports_filter_all')}
+                  </option>
+                  <option value="mod">
+                    {t('maintenance_reports_filter_event_mod')}
+                  </option>
+                  <option value="server_settings">
+                    {t('maintenance_reports_filter_event_settings')}
+                  </option>
+                  <option value="save">
+                    {t('maintenance_reports_filter_event_save')}
+                  </option>
+                  <option value="modpack">
+                    {t('maintenance_reports_filter_event_modpack')}
+                  </option>
+                  <option value="factorio_update">
+                    {t('maintenance_reports_filter_event_factorio')}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <div className="access-users-bar__actions">
+              <button
+                type="button"
+                className="btn access-users-bar__refresh-btn"
+                title={t('update_list_btn') || 'Обновить'}
+                aria-label={t('update_list_btn') || 'Обновить'}
+                onClick={() => void maintenance.refreshReports()}
+                disabled={maintenance.reportsLoading}
+              >
+                <IconRefresh size={18} />
+              </button>
+              {onOpenHelp && (
+                <button
+                  type="button"
+                  className="btn access-users-bar__help-btn"
+                  title={t('instances_help_modal_title')}
+                  aria-label={t('instances_help_modal_title')}
+                  onClick={onOpenHelp}
+                >
+                  <IconHelp size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="maintenance-reports-split">
+            <div className="maintenance-reports-split__list">
+              <div className="maintenance-reports-split__list-head">
+                <AppIcon
+                  name="history"
+                  size={16}
+                  className="maintenance-reports-split__list-head-icon"
+                />
+                <span>{t('maintenance_inner_tab_reports')}</span>
+                {visibleReports.length > 0 ? (
+                  <span className="maintenance-reports-split__list-count">
+                    {visibleReports.length}
+                  </span>
+                ) : null}
+              </div>
+              <div className="maintenance-reports-split__list-body">
+                <div
+                  id="maintReportsList"
+                  ref={reportsListRef}
+                  className={
+                    'maintenance-reports-list' +
+                    (reportPageCount > 1
+                      ? ' maintenance-reports-list--paged'
+                      : '')
+                  }
+                  role="list"
+                >
+                  {maintenance.reportsLoading && (
+                    <TabLoadingPlaceholder
+                      variant="table"
+                      label={t('tab_data_loading')}
                     />
-                    <span>{t('maintenance_inner_tab_reports')}</span>
-                    {visibleReports.length > 0 ? (
-                      <span className="maintenance-reports-split__list-count">
-                        {visibleReports.length}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="maintenance-reports-split__list-body">
-                    <div
-                      id="maintReportsList"
-                      ref={reportsListRef}
-                      className={
-                        'maintenance-reports-list' +
-                        (reportPageCount > 1
-                          ? ' maintenance-reports-list--paged'
-                          : '')
-                      }
-                      role="list"
-                    >
-                      {maintenance.reportsLoading && (
-                        <TabLoadingPlaceholder
-                          variant="table"
-                          label={t('tab_data_loading')}
+                  )}
+                  {!maintenance.reportsLoading && maintenance.reportsError && (
+                    <p className="maintenance-tab__inline-error">
+                      {maintenance.reportsError}
+                    </p>
+                  )}
+                  {!maintenance.reportsLoading &&
+                    !maintenance.reportsError &&
+                    !visibleReports.length && (
+                      <div className="maintenance-tab__empty maintenance-tab__empty--compact">
+                        <AppIcon
+                          name="history"
+                          size={24}
+                          className="maintenance-tab__empty-icon"
                         />
-                      )}
-                      {!maintenance.reportsLoading &&
-                        maintenance.reportsError && (
-                          <p className="maintenance-tab__inline-error">
-                            {maintenance.reportsError}
-                          </p>
-                        )}
-                      {!maintenance.reportsLoading &&
-                        !maintenance.reportsError &&
-                        !visibleReports.length && (
-                          <div className="maintenance-tab__empty maintenance-tab__empty--compact">
-                            <AppIcon
-                              name="history"
-                              size={24}
-                              className="maintenance-tab__empty-icon"
-                            />
-                            <span>{t('maintenance_reports_empty')}</span>
-                          </div>
-                        )}
-                      {!maintenance.reportsLoading &&
-                        pagedReports.map((rep) => {
-                          const key = reportSelectionKey(rep);
-                          const selected =
-                            maintenance.selectedReport &&
-                            reportSelectionKey(maintenance.selectedReport) ===
-                              key;
-                          const dur = reportDurationBetween(
-                            rep.started_at,
-                            rep.finished_at,
-                            t,
-                          );
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              className={
-                                'maint-report-row' +
-                                (selected ? ' maint-report-row--selected' : '')
-                              }
-                              role="listitem"
-                              title={reportOptionsFromRep(rep, t)}
-                              onClick={() => selectReport(rep)}
-                            >
-                              <div className="maint-report-row__body">
-                                <div className="maint-report-row__line">
-                                  <span className="maint-report-row__date">
-                                    {reportPeriodLabel(rep)}
-                                  </span>
-                                  <span
-                                    className={
-                                      'maint-report-row__badge ' +
-                                      (rep.success !== false
-                                        ? 'maint-report-row__badge--ok'
-                                        : 'maint-report-row__badge--fail')
-                                    }
-                                  >
-                                    {rep.success !== false
-                                      ? t('maintenance_report_ok')
-                                      : t('maintenance_report_fail')}
-                                  </span>
-                                  {dur ? (
-                                    <span className="maint-report-row__dur">
-                                      {dur}
-                                    </span>
-                                  ) : null}
-                                </div>
-                                <div className="maint-report-row__type">
-                                  {reportRunTypeLabel(rep, t)}
-                                </div>
-                              </div>
-                              {String(
-                                rep.instance_name || rep.instance_id || '',
-                              ).trim() ? (
-                                <span className="maint-report-row__server">
-                                  {String(
-                                    rep.instance_name || rep.instance_id || '',
-                                  ).trim()}
+                        <span>
+                          {reportSearch.trim()
+                            ? t('maintenance_reports_search_no_results')
+                            : t('maintenance_reports_empty')}
+                        </span>
+                      </div>
+                    )}
+                  {!maintenance.reportsLoading &&
+                    pagedReports.map((rep) => {
+                      const key = reportSelectionKey(rep);
+                      const selected =
+                        maintenance.selectedReport &&
+                        reportSelectionKey(maintenance.selectedReport) === key;
+                      const dur = reportDurationBetween(
+                        rep.started_at,
+                        rep.finished_at,
+                        t,
+                      );
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          className={
+                            'maint-report-row' +
+                            (selected ? ' maint-report-row--selected' : '')
+                          }
+                          role="listitem"
+                          title={reportOptionsFromRep(rep, t)}
+                          onClick={() => selectReport(rep)}
+                        >
+                          <div className="maint-report-row__body">
+                            <div className="maint-report-row__line">
+                              <span className="maint-report-row__date">
+                                {reportPeriodLabel(rep)}
+                              </span>
+                              <span
+                                className={
+                                  'maint-report-row__badge ' +
+                                  (rep.success !== false
+                                    ? 'maint-report-row__badge--ok'
+                                    : 'maint-report-row__badge--fail')
+                                }
+                              >
+                                {rep.success !== false
+                                  ? t('maintenance_report_ok')
+                                  : t('maintenance_report_fail')}
+                              </span>
+                              {dur ? (
+                                <span className="maint-report-row__dur">
+                                  {dur}
                                 </span>
                               ) : null}
-                            </button>
-                          );
-                        })}
-                    </div>
-                    {reportPageCount > 1 ? (
-                      <div
-                        className="maintenance-reports-list-pager"
-                        aria-label={t('maintenance_reports_pager_aria')}
-                      >
-                        <button
-                          type="button"
-                          className="maintenance-reports-list-pager__btn"
-                          disabled={reportPage <= 0}
-                          aria-label={t('maintenance_reports_pager_prev')}
-                          onClick={() =>
-                            setReportPage((page) => Math.max(0, page - 1))
-                          }
-                        >
-                          ‹
+                            </div>
+                            <div className="maint-report-row__type">
+                              {reportRunTypeLabel(rep, t)}
+                            </div>
+                          </div>
+                          {String(
+                            rep.instance_name || rep.instance_id || '',
+                          ).trim() ? (
+                            <span className="maint-report-row__server">
+                              {String(
+                                rep.instance_name || rep.instance_id || '',
+                              ).trim()}
+                            </span>
+                          ) : null}
                         </button>
-                        <span className="maintenance-reports-list-pager__status">
-                          {t(
-                            'maintenance_reports_pager_status',
-                            reportPage + 1,
-                            reportPageCount,
-                          )}
-                        </span>
-                        <button
-                          type="button"
-                          className="maintenance-reports-list-pager__btn"
-                          disabled={reportPage >= reportPageCount - 1}
-                          aria-label={t('maintenance_reports_pager_next')}
-                          onClick={() =>
-                            setReportPage((page) =>
-                              Math.min(reportPageCount - 1, page + 1),
-                            )
-                          }
-                        >
-                          ›
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
+                      );
+                    })}
                 </div>
-                <div className="maintenance-reports-split__detail">
-                  <div className="maintenance-reports-detail-frame">
-                    {!maintenance.selectedReport &&
-                      !maintenance.reportsLoading && (
-                        <div
-                          id="maintReportDetailEmpty"
-                          className="maintenance-reports-detail-empty"
-                        >
-                          <AppIcon
-                            name="info"
-                            size={28}
-                            className="maintenance-tab__empty-icon"
-                          />
-                          <span>
-                            {t('maintenance_report_detail_placeholder')}
-                          </span>
-                        </div>
+                {reportPageCount > 1 ? (
+                  <div
+                    className="maintenance-reports-list-pager"
+                    aria-label={t('maintenance_reports_pager_aria')}
+                  >
+                    <button
+                      type="button"
+                      className="maintenance-reports-list-pager__btn"
+                      disabled={reportPage <= 0}
+                      aria-label={t('maintenance_reports_pager_prev')}
+                      onClick={() =>
+                        setReportPage((page) => Math.max(0, page - 1))
+                      }
+                    >
+                      ‹
+                    </button>
+                    <span className="maintenance-reports-list-pager__status">
+                      {t(
+                        'maintenance_reports_pager_status',
+                        reportPage + 1,
+                        reportPageCount,
                       )}
-                    {maintenance.selectedReport && (
-                      <MaintenanceReportDetail
-                        report={maintenance.selectedReport}
-                        t={t}
-                      />
-                    )}
+                    </span>
+                    <button
+                      type="button"
+                      className="maintenance-reports-list-pager__btn"
+                      disabled={reportPage >= reportPageCount - 1}
+                      aria-label={t('maintenance_reports_pager_next')}
+                      onClick={() =>
+                        setReportPage((page) =>
+                          Math.min(reportPageCount - 1, page + 1),
+                        )
+                      }
+                    >
+                      ›
+                    </button>
                   </div>
-                </div>
+                ) : null}
+              </div>
+            </div>
+            <div className="maintenance-reports-split__detail">
+              <div className="maintenance-reports-detail-frame">
+                {!maintenance.selectedReport && !maintenance.reportsLoading && (
+                  <div
+                    id="maintReportDetailEmpty"
+                    className="maintenance-reports-detail-empty"
+                  >
+                    <AppIcon
+                      name="info"
+                      size={32}
+                      className="maintenance-reports-detail-empty-icon"
+                    />
+                    <span>{t('maintenance_report_detail_placeholder')}</span>
+                  </div>
+                )}
+                {maintenance.selectedReport && (
+                  <MaintenanceReportDetail
+                    report={maintenance.selectedReport}
+                    t={t}
+                  />
+                )}
               </div>
             </div>
           </div>
-        </section>
+        </div>
       )}
 
       <MaintenanceTaskMenu

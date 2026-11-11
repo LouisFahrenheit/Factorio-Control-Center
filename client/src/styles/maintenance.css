@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Factorio Control Center — Maintenance Redesign Styles
+   Maintenance
    ========================================================================== */
 
 #instanceTabMaintenance.sub-tab-panel--active,
@@ -194,4 +194,618 @@
   font-size: 0.86rem;
   color: var(--text);
   white-space: nowrap;
+}
+
+/* ── Maintenance Reports Layout ──────────────────────────────────────── */
+
+.maintenance-reports-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  gap: 12px;
+}
+
+.maintenance-reports-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.maintenance-reports-bar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.maintenance-reports-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 200px;
+}
+
+.maintenance-reports-filter__label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.maintenance-reports-filter__input,
+.maintenance-reports-filter__select {
+  height: 34px;
+  min-height: 34px;
+  flex: 1 1 auto;
+  min-width: 130px;
+  max-width: none;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 0 10px;
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.maintenance-reports-filter__input:hover:not(:disabled),
+.maintenance-reports-filter__select:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
+}
+
+.maintenance-reports-filter__input:focus,
+.maintenance-reports-filter__select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* ── Reports Split Grid ──────────────────────────────────────────────── */
+
+.maintenance-reports-split {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.62fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+/* ── Reports List Panel (Left) ───────────────────────────────────────── */
+
+.maintenance-reports-split__list {
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 1px solid var(--border-dark);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.maintenance-reports-split__list-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-dark);
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.maintenance-reports-split__list-head-icon {
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.maintenance-reports-split__list-count {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent-selected);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.maintenance-reports-split__list-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: transparent;
+}
+
+.maintenance-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.maintenance-reports-list--paged {
+  overflow: hidden;
+}
+
+/* ── Report Row Item ─────────────────────────────────────────────────── */
+
+button.maint-report-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+button.maint-report-row:hover {
+  transform: translateY(-1px);
+  background: var(--fcc-row-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border) 65%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+button.maint-report-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button.maint-report-row.maint-report-row--selected {
+  background: var(--fcc-row-hover-selected-bg);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border) 40%);
+  border-left: 3px solid var(--accent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.24);
+}
+
+.maint-report-row__body {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.maint-report-row__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.maint-report-row__date {
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.maint-report-row__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0 8px;
+  min-height: 20px;
+  line-height: 20px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.maint-report-row__badge--ok {
+  color: var(--running);
+  background: color-mix(in srgb, var(--running) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--running) 30%, transparent);
+}
+
+.maint-report-row__badge--fail {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+}
+
+.maint-report-row__dur {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.maint-report-row__type {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.maint-report-row__server {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 70%, transparent);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Pager ───────────────────────────────────────────────────────────── */
+
+.maintenance-reports-list-pager {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-dark);
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+}
+
+.maintenance-reports-list-pager__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--fcc-btn-border);
+  background: var(--fcc-btn-bg);
+  color: var(--text);
+  box-shadow: var(--fcc-btn-shadow);
+  font: inherit;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.maintenance-reports-list-pager__btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+  background: var(--fcc-btn-bg-hover);
+  color: var(--accent);
+}
+
+.maintenance-reports-list-pager__btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.maintenance-reports-list-pager__status {
+  min-width: 5.5rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Reports Detail Panel (Right) ────────────────────────────────────── */
+
+.maintenance-reports-split__detail {
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+}
+
+.maintenance-reports-detail-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  border-radius: 10px;
+  border: 1px solid var(--border-dark);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.maintenance-reports-detail-empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  text-align: center;
+  max-width: 100%;
+  padding: 32px 20px;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.maintenance-reports-detail-empty-icon {
+  color: var(--accent);
+  opacity: 0.45;
+}
+
+.maintenance-report-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.maintenance-report-detail__head {
+  flex: 0 0 auto;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-dark);
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+}
+
+.maintenance-report-detail__head-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.maintenance-report-detail__head-icon {
+  flex: 0 0 auto;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.maintenance-report-detail__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+
+.maintenance-report-detail__status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.maintenance-report-detail__status--ok {
+  color: var(--running);
+  background: color-mix(in srgb, var(--running) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--running) 30%, transparent);
+}
+
+.maintenance-report-detail__status--fail {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+}
+
+.maintenance-report-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.maintenance-report-detail__meta-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ── Events Table ────────────────────────────────────────────────────── */
+
+.maintenance-report-events-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+}
+
+.maintenance-report-events {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.maintenance-report-events__th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.maintenance-report-events__th--time {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.maintenance-report-events__th--user {
+  width: 110px;
+  white-space: nowrap;
+}
+
+.maintenance-report-events__row {
+  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  transition: background-color 0.16s ease;
+}
+
+.maintenance-report-events__row:hover {
+  background: var(--fcc-row-hover-bg);
+}
+
+.maintenance-report-events__time,
+.maintenance-report-events__action,
+.maintenance-report-events__user {
+  padding: 9px 14px;
+  vertical-align: top;
+}
+
+.maintenance-report-events__time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.maintenance-report-events__action {
+  color: var(--text);
+}
+
+.maintenance-report-events__action-main {
+  font-weight: 500;
+}
+
+.maintenance-report-events__row--fail .maintenance-report-events__action-main {
+  color: var(--error);
+}
+
+.maintenance-report-events__user {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.maintenance-report-events__details {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  list-style: disc;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.maintenance-report-events__details li {
+  margin: 2px 0;
+}
+
+.maintenance-report-events__empty {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  button.maint-report-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .maint-report-row__server {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .maintenance-reports-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, min(38vh, 280px)) minmax(0, 1fr);
+  }
 }

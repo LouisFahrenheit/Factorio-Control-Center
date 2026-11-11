@@ -1,181 +1,73 @@
-import type { SectionHelpContent } from '../components/SectionHelpModal';
+import type {
+  HelpSection,
+  SectionHelpContent,
+} from '../components/SectionHelpModal';
+import type { AppIconName } from './appIcons';
 
-export const WEB_ACCESS_HELP: SectionHelpContent = {
-  titleKey: 'web_access_help_title',
-  introKey: 'web_access_help_intro',
-  sections: [
-    {
-      titleKey: 'web_access_help_create_title',
-      icon: 'person_add',
-      textKey: 'web_access_help_create_text',
-      bulletKeys: [
-        'web_access_help_create_b1',
-        'web_access_help_create_b2',
-        'web_access_help_create_b3',
-      ],
-    },
-    {
-      titleKey: 'web_access_help_edit_title',
-      icon: 'edit',
-      textKey: 'web_access_help_edit_text',
-      bulletKeys: ['web_access_help_edit_b1', 'web_access_help_edit_b2'],
-      tipKey: 'web_access_help_edit_tip',
-    },
-    {
-      titleKey: 'web_access_help_roles_title',
-      icon: 'badge',
-      textKey: 'web_access_help_roles_text',
-      bulletKeys: [
-        'web_access_help_roles_b1',
-        'web_access_help_roles_b2',
-        'web_access_help_roles_b3',
-      ],
-    },
-    {
-      titleKey: 'web_access_help_perms_title',
-      icon: 'person_shield',
-      textKey: 'web_access_help_perms_text',
-      bulletKeys: [
-        'web_access_help_perms_b1',
-        'web_access_help_perms_b2',
-        'web_access_help_perms_b3',
-      ],
-    },
-    {
-      titleKey: 'web_access_help_servers_title',
-      icon: 'list',
-      textKey: 'web_access_help_servers_text',
-      bulletKeys: ['web_access_help_servers_b1', 'web_access_help_servers_b2'],
-    },
-  ],
-};
+function section(
+  prefix: string,
+  key: string,
+  icon: AppIconName,
+  bulletCount: number = 0,
+  withTip = false,
+): HelpSection {
+  return {
+    titleKey: `${prefix}_help_${key}_title`,
+    textKey: `${prefix}_help_${key}_text`,
+    icon,
+    bulletKeys:
+      bulletCount > 0
+        ? Array.from(
+            { length: bulletCount },
+            (_, i) => `${prefix}_help_${key}_b${i + 1}`,
+          )
+        : undefined,
+    tipKey: withTip ? `${prefix}_help_${key}_tip` : undefined,
+  };
+}
 
-export const INSTANCES_HELP: SectionHelpContent = {
-  titleKey: 'instances_help_title',
-  introKey: 'instances_help_intro',
-  sections: [
-    {
-      titleKey: 'instances_help_add_title',
-      icon: 'add',
-      textKey: 'instances_help_add_text',
-      bulletKeys: [
-        'instances_help_add_b1',
-        'instances_help_add_b2',
-        'instances_help_add_b3',
-        'instances_help_add_b4',
-      ],
-    },
-    {
-      titleKey: 'instances_help_row_menu_title',
-      icon: 'open_panel',
-      textKey: 'instances_help_row_menu_text',
-      bulletKeys: [
-        'instances_help_row_menu_b1',
-        'instances_help_row_menu_b2',
-        'instances_help_row_menu_b3',
-      ],
-      tipKey: 'instances_help_row_menu_tip',
-    },
-    {
-      titleKey: 'instances_help_badges_title',
-      icon: 'badge',
-      textKey: 'instances_help_badges_text',
-      bulletKeys: [
-        'instances_help_badges_b1',
-        'instances_help_badges_b2',
-        'instances_help_badges_b3',
-        'instances_help_badges_b4',
-      ],
-      tipKey: 'instances_help_badges_tip',
-    },
-    {
-      titleKey: 'instances_help_maintenance_title',
-      icon: 'maintenance',
-      textKey: 'instances_help_maintenance_text',
-      bulletKeys: [
-        'instances_help_maintenance_b1',
-        'instances_help_maintenance_b2',
-        'instances_help_maintenance_b3',
-      ],
-      tipKey: 'instances_help_maintenance_tip',
-    },
-    {
-      titleKey: 'instances_help_bulk_title',
-      icon: 'start',
-      textKey: 'instances_help_bulk_text',
-      bulletKeys: [
-        'instances_help_bulk_b1',
-        'instances_help_bulk_b2',
-        'instances_help_bulk_b3',
-        'instances_help_bulk_b4',
-      ],
-    },
-  ],
-};
+function content(prefix: string, sections: HelpSection[]): SectionHelpContent {
+  return {
+    titleKey: `${prefix}_help_title`,
+    introKey: `${prefix}_help_intro`,
+    sections,
+  };
+}
 
-export const MAINTENANCE_HELP: SectionHelpContent = {
-  titleKey: 'maintenance_help_title',
-  introKey: 'maintenance_help_intro',
-  sections: [
-    {
-      titleKey: 'maintenance_help_tasks_title',
-      icon: 'maintenance',
-      textKey: 'maintenance_help_tasks_text',
-      bulletKeys: [
-        'maintenance_help_tasks_b1',
-        'maintenance_help_tasks_b2',
-      ],
-    },
-    {
-      titleKey: 'maintenance_help_task_edit_title',
-      icon: 'edit',
-      textKey: 'maintenance_help_task_edit_text',
-      bulletKeys: [
-        'maintenance_help_task_edit_b1',
-        'maintenance_help_task_edit_b2',
-        'maintenance_help_task_edit_b3',
-      ],
-    },
-    {
-      titleKey: 'maintenance_help_schedule_title',
-      icon: 'autostart',
-      textKey: 'maintenance_help_schedule_text',
-      bulletKeys: [
-        'maintenance_help_schedule_b1',
-        'maintenance_help_schedule_b2',
-        'maintenance_help_schedule_b3',
-      ],
-    },
-    {
-      titleKey: 'maintenance_help_manual_title',
-      icon: 'stop',
-      textKey: 'maintenance_help_manual_text',
-      bulletKeys: [
-        'maintenance_help_manual_b1',
-        'maintenance_help_manual_b2',
-      ],
-      tipKey: 'maintenance_help_manual_tip',
-    },
-    {
-      titleKey: 'maintenance_help_manual_mode_title',
-      icon: 'start',
-      textKey: 'maintenance_help_manual_mode_text',
-      bulletKeys: [
-        'maintenance_help_manual_mode_b1',
-        'maintenance_help_manual_mode_b2',
-        'maintenance_help_manual_mode_b3',
-      ],
-      tipKey: 'maintenance_help_manual_mode_tip',
-    },
-    {
-      titleKey: 'maintenance_help_reports_title',
-      icon: 'history',
-      textKey: 'maintenance_help_reports_text',
-      bulletKeys: [
-        'maintenance_help_reports_b1',
-        'maintenance_help_reports_b2',
-        'maintenance_help_reports_b3',
-      ],
-    },
-  ],
-};
+export const INSTANCES_HELP = content('instances', [
+  section('instances', 'add', 'add', 3),
+  section('instances', 'manage', 'server', 3, true),
+  section('instances', 'view', 'search', 4),
+  section('instances', 'maintenance', 'maintenance', 3),
+]);
+
+export const MAINTENANCE_HELP = content('maintenance', [
+  section('maintenance', 'tasks', 'schedule', 3),
+  section('maintenance', 'schedule', 'autostart', 2),
+  section('maintenance', 'modes', 'engineering', 3),
+  section('maintenance', 'reports', 'history', 2),
+]);
+
+export const WEB_ACCESS_HELP = content('web_access', [
+  section('web_access', 'users', 'person_add', 3, true),
+  section('web_access', 'roles', 'person_shield', 4),
+  section('web_access', 'servers', 'server', 2),
+  section('web_access', '2fa', 'settings_account', 3),
+]);
+
+export const MONITORING_HELP = content('monitoring', [
+  section('monitoring', 'metrics', 'monitoring', 3, true),
+  section('monitoring', 'analysis', 'schedule', 3),
+]);
+
+export const PUBLIC_HELP = content('public', [
+  section('public', 'setup', 'public_page', 3),
+  section('public', 'visibility', 'server', 3),
+  section('public', 'customization', 'settings', 3),
+]);
+
+export const BACKUP_HELP = content('backup', [
+  section('backup', 'create', 'backup', 3),
+  section('backup', 'auto', 'schedule', 2),
+  section('backup', 'restore', 'restore', 2, true),
+]);

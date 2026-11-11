@@ -76,16 +76,16 @@
   font-size: 0.88rem;
   font-weight: 600;
   border-radius: 7px;
-  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  background: var(--fcc-btn-bg);
   color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--fcc-btn-border);
+  box-shadow: var(--fcc-btn-shadow);
   cursor: pointer;
   transition: all 0.16s ease;
 }
 
 .access-users-bar__create-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  background: var(--fcc-btn-bg-hover);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--text);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
@@ -93,7 +93,7 @@
 
 .access-users-bar__create-btn:active:not(:disabled) {
   transform: translateY(1px);
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  background: var(--fcc-btn-bg-active);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -173,9 +173,9 @@ select.access-users-bar__select,
   padding: 0;
   box-sizing: border-box;
   border-radius: 7px;
-  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  background: var(--fcc-btn-bg);
+  border: 1px solid var(--fcc-btn-border);
+  box-shadow: var(--fcc-btn-shadow);
   color: var(--text);
   cursor: pointer;
   transition: all 0.16s ease;
@@ -188,7 +188,7 @@ select.access-users-bar__select,
 .instance-servers-bar__columns-btn:hover:not(:disabled) {
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
+  background: var(--fcc-btn-bg-hover);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
 }
 
@@ -198,7 +198,7 @@ select.access-users-bar__select,
 .btn.instance-servers-bar__columns-btn:active:not(:disabled),
 .instance-servers-bar__columns-btn:active:not(:disabled) {
   transform: translateY(1px);
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  background: var(--fcc-btn-bg-active);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -376,14 +376,14 @@ table.access-users-table thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  padding: 12px 18px;
+  padding: 9px 12px;
   background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
   border-bottom: 1px solid
     color-mix(in srgb, var(--border-dark) 80%, transparent);
-  font-size: 0.84rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.92em;
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   text-align: left;
 }
@@ -398,11 +398,7 @@ table.access-users-table thead th.access-sort-th {
 
 table.access-users-table thead th.access-sort-th:hover {
   color: var(--text);
-  background: color-mix(
-    in srgb,
-    var(--accent) 8%,
-    var(--bg-widget) 92%
-  ) !important;
+  background: var(--fcc-interactive-hover-bg) !important;
 }
 
 table.access-users-table thead th.access-sort-th--active {
@@ -443,19 +439,11 @@ table.access-users-table tbody tr.access-users-row td {
 }
 
 table.access-users-table tbody tr.access-users-row:hover td {
-  background: color-mix(
-    in srgb,
-    var(--accent, #e58e26) 6%,
-    var(--bg-widget) 94%
-  );
+  background: var(--fcc-row-hover-bg);
 }
 
 table.access-users-table tbody tr.access-users-row--selected td {
-  background: color-mix(
-    in srgb,
-    var(--accent, #da8216) 12%,
-    var(--bg-widget) 88%
-  ) !important;
+  background: var(--fcc-row-hover-selected-bg) !important;
   box-shadow: none !important;
 }
 
@@ -593,8 +581,9 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   height: 32px;
   padding: 0;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  background: var(--fcc-btn-bg);
+  border: 1px solid var(--fcc-btn-border);
+  box-shadow: var(--fcc-btn-shadow);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -602,8 +591,8 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 
 .access-users-table__action-btn:hover:not(:disabled) {
   color: var(--text);
-  background: color-mix(in srgb, var(--accent) 15%, var(--bg-widget) 85%);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--fcc-btn-bg-hover);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   transform: translateY(-1px);
 }
 
@@ -785,7 +774,7 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 
 .access-user-card--selected {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 7%, var(--bg-widget) 93%);
+  background: var(--fcc-row-hover-selected-bg);
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.28),
     0 0 10px rgba(var(--accent-rgb), 0.15);
@@ -990,436 +979,24 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   margin: 20px auto;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   Web User Editor Modal
-   ══════════════════════════════════════════════════════════════════════════ */
-
-.fu-modal.web-user-editor-modal {
-  width: min(780px, 96vw);
-  max-height: calc(100dvh - 2 * max(14px, 2.5vh));
-  border-radius: 12px;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.45),
-    0 0 0 1px color-mix(in srgb, var(--border) 40%, transparent);
-}
-
-.web-user-editor-modal .fu-modal__header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 85%, transparent);
-}
-
-.web-user-editor-modal__header-icon {
-  color: var(--accent-selected);
-  opacity: 0.9;
-}
-
-.web-user-editor-modal__header-title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.web-user-editor-modal__body {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px;
-  overflow-y: auto;
-}
-
 /* ── Hero / Account Credentials & Status Card ────────────────────────── */
-
-.web-user-modal-hero {
-  display: flex;
-  flex-direction: column;
-  padding: 20px 22px;
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--bg-data) 80%, var(--bg-widget) 20%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.web-user-modal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  align-items: stretch;
-}
-
-.web-user-modal-hero .access-user-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
-}
-
-.web-user-modal-hero .access-user-field__label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  line-height: 1.25;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-}
-
-.web-user-modal-hero .access-user-field__input,
-.web-user-modal-hero .input.access-user-field__input {
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  height: 44px;
-  min-height: 44px;
-  box-sizing: border-box;
-  padding: 0 14px;
-  border-radius: 7px;
-  background: var(--bg-input);
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  color: var(--text);
-  font-size: 0.94rem;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.web-user-modal-hero select.access-user-field__input {
-  cursor: pointer;
-  padding-right: 32px;
-}
-
-.web-user-modal-hero .access-user-field__input:focus,
-.web-user-modal-hero .input.access-user-field__input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
-  outline: none;
-}
-
-.web-user-modal-hero .access-user-field__input.is-locked,
-.web-user-modal-hero .input.access-user-field__input.is-locked {
-  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-input) 35%);
-  color: var(--text);
-  opacity: 0.85;
-  cursor: default;
-  border-color: color-mix(in srgb, var(--border-dark) 70%, transparent);
-}
 
 /* ── Status & 2FA Bar (under credentials) ────────────────────────────── */
 
-.web-user-modal-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
-  min-height: 40px;
-  flex-wrap: wrap;
-}
-
-.web-user-modal-status-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  min-height: 34px;
-}
-
-.web-user-modal-status-item__label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  user-select: none;
-  white-space: nowrap;
-  line-height: 1;
-  margin: 0;
-}
-
-.web-user-modal-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-}
-
-.web-user-modal-switch-text {
-  font-size: 0.88rem;
-  font-weight: 600;
-  line-height: 1;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.web-user-modal-switch-text--on {
-  color: var(--running);
-}
-
-.web-user-modal-switch-text--off {
-  color: var(--text-muted);
-}
-
-.web-user-modal-lock-hint {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  font-style: italic;
-  white-space: nowrap;
-}
-
-.web-user-modal-2fa-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-}
-
 /* 2FA Badge & Reset Button in Modal */
-.web-user-modal-2fa-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.web-user-modal-2fa-badge--on {
-  background: color-mix(in srgb, var(--running) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--running) 35%, transparent);
-  color: var(--running);
-}
-
-.web-user-modal-2fa-badge--off {
-  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  color: var(--text-muted);
-}
-
-.web-user-modal-2fa-reset-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  color: var(--text);
-  transition: all 0.15s ease;
-}
-
-.web-user-modal-2fa-reset-btn:hover {
-  background: color-mix(in srgb, #4a78b8 20%, transparent);
-  border-color: color-mix(in srgb, #4a78b8 45%, transparent);
-  color: #9ec8ff;
-}
 
 /* ── Permissions & Server Access Groups ──────────────────────────────── */
 
-.web-user-editor-modal .access-perm-groups {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 14px;
-  align-items: stretch;
-}
-
-.web-user-editor-modal .access-perm-group {
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--bg-data) 82%, var(--bg-widget) 18%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.web-user-editor-modal .access-perm-group__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 80%, transparent);
-}
-
-.web-user-editor-modal .access-perm-group__header-icon {
-  color: var(--accent-selected);
-  opacity: 0.9;
-}
-
-.web-user-editor-modal .access-perm-group__title {
-  margin: 0;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
 /* Administrator Full Access Callout */
-.access-perm-admin-notice {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 36px 20px;
-  gap: 10px;
-  flex: 1 1 auto;
-}
-
-.access-perm-admin-notice__body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.access-perm-admin-notice__title {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 14px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  color: var(--text);
-  font-weight: 600;
-  font-size: 0.88rem;
-}
-
-.access-perm-admin-notice__desc {
-  margin: 0;
-  max-width: 320px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
 
 /* Permission List Grid (when not admin) */
-.web-user-editor-modal .access-perm-grid--stack {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 12px;
-  gap: 2px;
-  max-height: 290px;
-  overflow-y: auto;
-}
-
-.web-user-editor-modal .access-perm-grid__item {
-  display: flex;
-  align-items: center;
-  padding: 4px 6px;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-}
-
-.web-user-editor-modal .access-perm-grid__item:hover {
-  background: color-mix(in srgb, var(--bg-main) 50%, transparent);
-}
-
-.web-user-editor-modal .access-perm-switch {
-  width: 100%;
-}
-
-.web-user-editor-modal .access-perm-grid__label {
-  font-size: 0.86rem;
-  color: var(--text);
-  font-weight: 500;
-}
 
 /* Instances List */
-.web-user-editor-modal .access-perm-grid--instances {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 12px;
-  gap: 4px;
-  max-height: 290px;
-  overflow-y: auto;
-}
-
-.access-instance-check-wrap--all {
-  padding-bottom: 6px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 75%, transparent);
-}
-
-.access-instance-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.web-user-editor-modal .access-instance-check {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.web-user-editor-modal
-  .access-instance-check:hover:not(:has(> input:disabled)) {
-  background: color-mix(in srgb, var(--bg-main) 60%, transparent);
-  border-color: color-mix(in srgb, var(--border) 40%, transparent);
-}
-
-.web-user-editor-modal .access-instance-check:has(> input:checked) {
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-main) 90%);
-  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
-}
-
-.web-user-editor-modal .access-instance-check__label {
-  font-size: 0.86rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.web-user-editor-modal
-  .access-instance-check--all
-  .access-instance-check__label {
-  font-weight: 600;
-}
 
 /* Responsive collapse on smaller viewports */
-@media (max-width: 680px) {
-  .web-user-modal-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .web-user-editor-modal .access-perm-groups {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* ── 2K / Large Screen Responsive Media Queries ───────────────────────── */
+
 @media (min-width: 2000px) {
   table.access-users-table thead th {
     padding: 16px 22px;

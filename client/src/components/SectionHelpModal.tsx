@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { IconHelp } from '@tabler/icons-react';
 import { AppIcon } from './AppIcon';
 import type { AppIconName } from '../lib/appIcons';
 import { ModalBackdrop } from './modals/ModalBackdrop';
@@ -43,9 +45,18 @@ export function SectionHelpModal({
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="fu-modal__header section-help-modal__header" id={titleId}>
-          <AppIcon name="help" size={22} className="section-help-modal__header-icon" />
-          <span className="section-help-modal__header-title">{t(content.titleKey)}</span>
+        <div
+          className="fu-modal__header section-help-modal__header"
+          id={titleId}
+        >
+          <AppIcon
+            name="help"
+            size={22}
+            className="section-help-modal__header-icon"
+          />
+          <span className="section-help-modal__header-title">
+            {t(content.titleKey)}
+          </span>
         </div>
         <div className="fu-modal__body section-help-modal__body">
           <div className="section-help-modal__intro-card">
@@ -53,17 +64,27 @@ export function SectionHelpModal({
           </div>
           <div className="section-help-modal__sections">
             {content.sections.map((section) => (
-              <article key={section.titleKey} className="section-help-modal__card">
+              <article
+                key={section.titleKey}
+                className="section-help-modal__card"
+              >
                 <div className="section-help-modal__card-head">
                   {section.icon ? (
-                    <span className="section-help-modal__card-icon" aria-hidden="true">
+                    <span
+                      className="section-help-modal__card-icon"
+                      aria-hidden="true"
+                    >
                       <AppIcon name={section.icon} size={20} />
                     </span>
                   ) : null}
-                  <h4 className="section-help-modal__card-title">{t(section.titleKey)}</h4>
+                  <h4 className="section-help-modal__card-title">
+                    {t(section.titleKey)}
+                  </h4>
                 </div>
                 {section.textKey ? (
-                  <p className="section-help-modal__card-text">{t(section.textKey)}</p>
+                  <p className="section-help-modal__card-text">
+                    {t(section.textKey)}
+                  </p>
                 ) : null}
                 {section.bulletKeys?.length ? (
                   <ul className="section-help-modal__list">
@@ -74,7 +95,11 @@ export function SectionHelpModal({
                 ) : null}
                 {section.tipKey ? (
                   <aside className="section-help-modal__tip">
-                    <AppIcon name="info" size={16} className="section-help-modal__tip-icon" />
+                    <AppIcon
+                      name="info"
+                      size={16}
+                      className="section-help-modal__tip-icon"
+                    />
                     <span>{t(section.tipKey)}</span>
                   </aside>
                 ) : null}
@@ -83,7 +108,12 @@ export function SectionHelpModal({
           </div>
         </div>
         <div className="fu-modal__footer section-help-modal__footer">
-          <button type="button" className="btn btn--with-icon" id={closeId} onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn--with-icon"
+            id={closeId}
+            onClick={onClose}
+          >
             <AppIcon name="close" size={16} />
             {t('close')}
           </button>
@@ -92,3 +122,44 @@ export function SectionHelpModal({
     </ModalBackdrop>
   );
 }
+
+export interface SectionHelpButtonProps {
+  idPrefix: string;
+  content: SectionHelpContent;
+  label: string;
+  t: (key: string, ...args: (string | number)[]) => string;
+}
+
+/** Toolbar help button that owns its modal state. */
+export function SectionHelpButton({
+  idPrefix,
+  content,
+  label,
+  t,
+}: SectionHelpButtonProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn--toolbar-icon access-users-bar__help-btn"
+        id={`${idPrefix}HelpBtn`}
+        title={label}
+        aria-label={label}
+        onClick={() => setOpen(true)}
+      >
+        <IconHelp size={18} />
+      </button>
+      <SectionHelpModal
+        open={open}
+        onClose={() => setOpen(false)}
+        t={t}
+        backdropId={`${idPrefix}HelpBackdrop`}
+        titleId={`${idPrefix}HelpTitle`}
+        closeId={`${idPrefix}HelpClose`}
+        content={content}
+      />
+    </>
+  );
+}
+

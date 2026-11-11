@@ -3,10 +3,6 @@ import { useState, useEffect, useMemo, type MouseEvent } from 'react';
 import {
   IconUser,
   IconShieldCheck,
-  IconPencil,
-  IconPower,
-  IconKey,
-  IconTrash,
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-react';
@@ -46,11 +42,7 @@ export function AccessUsersTable({
   users,
   accessInstances,
   selectedUser,
-  isLastEnabledAdmin,
   onOpenEdit,
-  onToggleEnabled,
-  onReset2fa,
-  onDeleteUser,
   onRowClick,
   t,
 }: AccessUsersTableProps) {
@@ -158,7 +150,6 @@ export function AccessUsersTable({
                 {t('instances_tab_servers')}
               </th>
               <th>{t('web_access_perms_label')}</th>
-              <th style={{ textAlign: 'right', width: 140 }}>{t('web_users_col_actions')}</th>
             </tr>
           </thead>
           <motion.tbody
@@ -172,7 +163,6 @@ export function AccessUsersTable({
               const enabled = u.enabled !== false;
               const isAdminUser = u.role === 'administrator';
               const isSelected = selectedUser === u.username;
-              const lastAdmin = isLastEnabledAdmin(u.username);
               const tabLabels = listUserTabLabels(u.tabs, t);
               const instanceLabels = listUserInstanceLabels(
                 u.instance_ids,
@@ -270,69 +260,6 @@ export function AccessUsersTable({
                         )}
                       </div>
                     )}
-                  </td>
-
-                  {/* 5. Actions */}
-                  <td
-                    className="access-users-table__col-actions"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="access-users-table__actions">
-                      <button
-                        type="button"
-                        className="btn btn--toolbar-icon access-users-table__action-btn"
-                        title={t('maintenance_menu_edit')}
-                        aria-label={t('maintenance_menu_edit')}
-                        onClick={() => onOpenEdit(u)}
-                      >
-                        <IconPencil size={16} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className={
-                          'btn btn--toolbar-icon access-users-table__action-btn' +
-                          (enabled ? '' : ' access-users-table__action-btn--activate')
-                        }
-                        disabled={enabled && lastAdmin}
-                        title={
-                          enabled
-                            ? t('maintenance_menu_deactivate')
-                            : t('maintenance_menu_activate')
-                        }
-                        aria-label={
-                          enabled
-                            ? t('maintenance_menu_deactivate')
-                            : t('maintenance_menu_activate')
-                        }
-                        onClick={() => onToggleEnabled(u)}
-                      >
-                        <IconPower size={16} />
-                      </button>
-
-                      {u.twoFactorEnabled && (
-                        <button
-                          type="button"
-                          className="btn btn--toolbar-icon access-users-table__action-btn access-users-table__action-btn--reset-2fa"
-                          title={t('web_user_reset_2fa')}
-                          aria-label={t('web_user_reset_2fa')}
-                          onClick={() => onReset2fa(u.username)}
-                        >
-                          <IconKey size={16} />
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className="btn btn--toolbar-icon access-users-table__action-btn access-users-table__action-btn--danger"
-                        disabled={lastAdmin}
-                        title={t('maintenance_menu_delete')}
-                        aria-label={t('maintenance_menu_delete')}
-                        onClick={() => onDeleteUser(u.username)}
-                      >
-                        <IconTrash size={16} />
-                      </button>
-                    </div>
                   </td>
                 </motion.tr>
               );
