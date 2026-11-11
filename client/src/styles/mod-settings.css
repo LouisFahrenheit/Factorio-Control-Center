@@ -40,7 +40,8 @@
   gap: 12px;
   flex: 0 0 auto;
   padding: 10px 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 78%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
 }
 
@@ -526,7 +527,8 @@
   align-items: center;
   gap: 8px;
   padding: 7px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 76%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 76%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%);
 }
 
@@ -586,7 +588,7 @@
 
 .mod-settings-row:hover {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border-dark) 65%);
-  background: color-mix(in srgb, var(--accent) 5%, var(--bg-widget) 95%);
+  background: var(--fcc-row-hover-bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
@@ -786,7 +788,8 @@
   font-size: 0.9em;
   line-height: 1.3;
   background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-dark) 70%);
+  border: 1px solid
+    color-mix(in srgb, var(--accent) 30%, var(--border-dark) 70%);
   color: var(--text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }

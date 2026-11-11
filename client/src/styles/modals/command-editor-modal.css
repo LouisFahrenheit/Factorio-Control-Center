@@ -1,0 +1,843 @@
+/* ==========================================================================
+   Command Editor & Command Items Modals
+   ========================================================================== */
+
+#commandEditorBackdrop.fu-modal-backdrop {
+  padding: 14px 18px;
+  align-items: center;
+}
+
+#commandEditorBackdrop.fu-modal-backdrop .fu-modal.command-editor-dialog,
+.fu-modal.command-editor-dialog {
+  margin: 0 auto;
+  flex: 0 1 auto;
+  width: min(1560px, 97vw);
+  max-width: 1560px;
+  height: min(880px, calc(100dvh - 28px));
+  max-height: calc(100dvh - 28px);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.55),
+    0 0 0 1px color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.command-editor-dialog .fu-modal__header {
+  flex: 0 0 auto;
+  min-height: 52px;
+  padding: 10px 20px;
+  background: var(--bg-modal-header);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.command-editor-dialog .fu-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 14px 18px;
+  background: var(--bg-modal);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.command-editor-dialog__toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+  margin-bottom: 0;
+}
+
+.command-editor-dialog__toolbar-sep {
+  width: 1px;
+  height: 22px;
+  min-height: 22px;
+  background: color-mix(in srgb, var(--border-dark) 90%, transparent);
+  margin: 0 4px;
+}
+
+.command-editor-dialog__layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(460px, 0.9fr) minmax(540px, 1.1fr);
+  gap: 16px;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .command-editor-dialog__layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.command-editor-dialog__nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.command-editor-dialog__nav-scroll.commands-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px;
+  background: color-mix(in srgb, var(--bg-main) 45%, var(--bg-widget) 55%);
+  column-count: 2;
+  column-gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 950px) {
+  .command-editor-dialog__nav-scroll.commands-grid {
+    column-count: 1;
+  }
+}
+
+.command-editor-dialog__cat-wrapper {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+.command-editor-dialog__cat-section {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  padding: 8px 9px 9px;
+  gap: 4px;
+  position: relative;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.command-editor-dialog__cat-section--active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.2),
+    0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.command-editor-dialog__cat-section.is-dragging {
+  opacity: 0.5;
+}
+
+.command-editor-dialog__cat-drop-slot {
+  min-height: 4px;
+  margin: 0;
+  border-radius: 3px;
+  transition:
+    min-height 120ms ease,
+    background 120ms ease;
+}
+
+.command-editor-dialog__nav-scroll.is-dragging-category
+  .command-editor-dialog__cat-drop-slot {
+  min-height: 12px;
+  margin: 2px 0;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.command-editor-dialog__cat-drop-slot.is-drop-target {
+  min-height: 16px;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.command-editor-dialog__category-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 6px 0;
+  padding: 4px 8px 4px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.command-editor-dialog__category-row:hover {
+  background: var(--fcc-interactive-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.command-editor-dialog__cat-section--active
+  .command-editor-dialog__category-row {
+  border-left-color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: var(--fcc-row-hover-selected-bg) !important;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.command-editor-dialog__drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  min-height: 22px;
+  color: var(--text-muted);
+  cursor: grab;
+  user-select: none;
+  border-radius: 4px;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.command-editor-dialog__drag-handle:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.command-editor-dialog__drag-handle:active {
+  cursor: grabbing;
+}
+
+.command-editor-dialog__category {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  background: transparent !important;
+  border: none !important;
+  padding: 1px 4px;
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.command-editor-dialog__category:hover {
+  color: #ffffff;
+}
+
+.command-editor-dialog__cat-section--active .command-editor-dialog__category {
+  color: #ffffff;
+}
+
+.command-editor-dialog__commands {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 6px;
+}
+
+.command-editor-dialog__command-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px 4px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 25%, var(--bg-widget) 75%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.command-editor-dialog__command-item:hover:not(.commands-item--selected) {
+  background: var(--fcc-interactive-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.command-editor-dialog__command-item.commands-item--selected {
+  background: var(--fcc-row-hover-selected-bg) !important;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.command-editor-dialog__command-item.is-dragging {
+  opacity: 0.45;
+}
+
+.command-editor-dialog__command-item.is-drop-target {
+  box-shadow: inset 0 0 0 2px var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 20%, transparent) !important;
+}
+
+.command-editor-dialog__command-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.command-editor-dialog__drop-empty {
+  padding: 10px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: center;
+  border: 1px dashed color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-radius: 6px;
+}
+
+.command-editor-dialog__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.command-editor-dialog__editor-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  padding-bottom: 8px;
+}
+
+.command-editor-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.command-editor-dialog__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.command-editor-dialog__field--default-val {
+  flex: none;
+  max-width: 220px;
+}
+
+.command-editor-dialog__field-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.command-editor-dialog__field .input,
+.command-editor-dialog__field select.input,
+.command-editor-dialog__field input.input {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.86rem;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.command-editor-dialog__field .input:focus,
+.command-editor-dialog__field select.input:focus,
+.command-editor-dialog__field input.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+.command-editor-dialog__command-text {
+  min-height: 140px;
+  flex: 1 1 auto;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
+  background: color-mix(in srgb, var(--bg-log) 85%, var(--bg-main) 15%);
+  color: var(--text);
+  font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  padding: 10px 12px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.command-editor-dialog__description {
+  min-height: 60px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.86rem;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  background: var(--bg-input);
+  color: var(--text);
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.command-editor-dialog__description:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+.command-editor-dialog__params {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.command-editor-dialog__params-legend {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 0 4px;
+}
+
+.command-editor-dialog__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+  user-select: none;
+}
+
+.command-editor-dialog__check input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border-radius: 4px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  cursor: pointer;
+  position: relative;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.command-editor-dialog__check input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.command-editor-dialog__check input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid #161616;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.command-editor-dialog__check input[type='checkbox']:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.command-editor-dialog__check input[type='checkbox']:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.command-editor-dialog .fu-modal__footer {
+  flex: 0 0 auto;
+  min-height: 52px;
+  padding: 10px 20px;
+  background: var(--bg-modal-footer);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#commandItemsEditorBackdrop.fu-modal-backdrop {
+  z-index: 10100;
+  padding: 16px;
+  align-items: center;
+}
+
+.fu-modal.command-items-editor {
+  width: min(780px, 95vw);
+  max-width: 780px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.55),
+    0 0 0 1px color-mix(in srgb, var(--border-dark) 85%, transparent);
+  background: var(--bg-modal);
+}
+
+.command-items-editor .fu-modal__header {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 10px 18px;
+  background: var(--bg-modal-header);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.command-items-editor .fu-modal__header-icon {
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+}
+
+.command-items-editor .fu-modal__body {
+  flex: 1 1 auto;
+  padding: 16px 18px;
+  background: var(--bg-modal);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.command-items-editor__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr);
+  gap: 14px;
+  min-height: 380px;
+}
+
+.command-items-editor__list-panel,
+.command-items-editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-widget);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.command-items-editor__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.command-items-editor__section-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.command-items-editor__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  min-width: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-main) 82%);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.command-items-editor__search-wrap {
+  display: flex;
+  width: 100%;
+}
+
+.command-items-editor__search-wrap .input-with-icon {
+  width: 100%;
+}
+
+.command-items-editor__search-wrap .input {
+  height: 34px;
+  min-height: 34px;
+  font-size: 0.86rem;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.command-items-editor__search-wrap .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+.command-items-editor__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-log) 60%, var(--bg-main) 40%);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  max-height: 290px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-sizing: border-box;
+}
+
+.command-items-editor__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 30%, var(--bg-widget) 70%);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+  user-select: none;
+}
+
+.command-items-editor__item:hover:not(.is-selected) {
+  background: var(--fcc-interactive-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.command-items-editor__item.is-selected {
+  background: var(--fcc-row-hover-selected-bg) !important;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.command-items-editor__item:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.command-items-editor__item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+  font-size: 0.84rem;
+}
+
+.command-items-editor__count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  flex-shrink: 0;
+}
+
+.command-items-editor__item.is-selected .command-items-editor__count-badge {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-main) 78%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.command-items-editor__empty {
+  padding: 16px 12px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-style: italic;
+  text-align: center;
+  margin: auto 0;
+}
+
+.command-items-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.command-items-editor__field-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.command-items-editor__field .input {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.86rem;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.command-items-editor__field .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+.command-items-editor__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.command-items-editor__actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.command-items-editor .fu-modal__footer {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 10px 18px;
+  background: color-mix(in srgb, var(--bg-main) 45%, var(--bg-widget) 55%);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 680px) {
+  .command-items-editor__layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .command-items-editor__list {
+    max-height: 200px;
+  }
+}

@@ -165,7 +165,8 @@
   box-shadow: none !important;
 }
 
-#tabPanelMods .mods-toolbar__switch.row__inline-switch:has(input:checked):hover {
+#tabPanelMods
+  .mods-toolbar__switch.row__inline-switch:has(input:checked):hover {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -201,11 +202,7 @@
 
 /* Subtle, polished active state */
 #tabPanelMods .mods-toolbar__switch > input:checked + .fcc-switch__track {
-  background: color-mix(
-    in srgb,
-    var(--accent) 42%,
-    var(--bg-main) 58%
-  );
+  background: color-mix(in srgb, var(--accent) 42%, var(--bg-main) 58%);
   border-color: color-mix(in srgb, var(--accent) 65%, var(--border-dark) 35%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
 }
@@ -232,7 +229,9 @@
   color: var(--text);
 }
 
-#tabPanelMods .mods-toolbar__switch:has(input:checked) .row__inline-switch-label {
+#tabPanelMods
+  .mods-toolbar__switch:has(input:checked)
+  .row__inline-switch-label {
   color: var(--text-secondary, #cbd5e1);
 }
 

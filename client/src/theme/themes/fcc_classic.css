@@ -1,0 +1,307 @@
+/* ==========================================================================
+   Factorio Control Center — Classic Theme (Default)
+   ========================================================================== */
+
+:root,
+:root[data-theme='fcc_classic'] {
+  --ui-font-size: 12pt;
+  --bg-main: #2a2a2a;
+  --bg-widget: #3d3d3d;
+  --bg-data: #3a3a3a;
+  --bg-card: var(--bg-data);
+  --bg-card-header: var(--bg-widget);
+  --bg-modal: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%);
+  --bg-modal-header: var(--bg-widget);
+  --bg-modal-footer: color-mix(
+    in srgb,
+    var(--bg-widget) 82%,
+    var(--bg-main) 18%
+  );
+  --bg-input: #2a2a2a;
+  --bg-log: #1e1e1e;
+  --border: #555555;
+  --border-dark: #222222;
+  --border-inset-t: #111111;
+  --text: #ffffff;
+  --text-muted: #aaaaaa;
+  --text-dim: #8c8c8c;
+  --accent: #da8216;
+  --accent-soft: #da8216;
+  --accent-selected: #f1be64;
+  --accent-rgb: 218, 130, 22;
+  --running: #78c840;
+  --stopped: #9a9a9a;
+  --starting: #f0c040;
+  --stopping: #e0a020;
+  --error: #e05030;
+  --flag-on: #ffffff;
+  --flag-off: #8a8a8a;
+  --online-green: #6a9a5c;
+  --btn-top: #686868;
+  --btn-mid: #535353;
+  --btn-bot: #414141;
+  --btn-hover-top: #787878;
+  --btn-hover-mid: #636363;
+  --btn-hover-bot: #515151;
+  --fcc-hover-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --fcc-row-hover-bg: color-mix(in srgb, var(--text) 4%, var(--bg-data) 96%);
+  --fcc-row-hover-ring: color-mix(in srgb, var(--border) 55%, transparent);
+  --fcc-row-hover-selected-bg: color-mix(
+    in srgb,
+    var(--text) 7%,
+    var(--bg-data) 93%
+  );
+  --fcc-interactive-hover-bg: color-mix(
+    in srgb,
+    var(--text) 5%,
+    var(--bg-widget) 95%
+  );
+  --fcc-interactive-hover-ring: color-mix(
+    in srgb,
+    var(--border) 60%,
+    transparent
+  );
+  --fcc-btn-bg: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  --fcc-btn-bg-hover: color-mix(
+    in srgb,
+    var(--accent) 15%,
+    var(--bg-widget) 85%
+  );
+  --fcc-btn-bg-active: color-mix(
+    in srgb,
+    var(--accent) 22%,
+    var(--bg-widget) 78%
+  );
+  --fcc-btn-bg-primary: var(--fcc-btn-bg);
+  --fcc-btn-bg-primary-hover: var(--fcc-btn-bg-hover);
+  --fcc-btn-bg-danger: var(--fcc-btn-bg);
+  --fcc-btn-bg-danger-hover: color-mix(
+    in srgb,
+    #e03131 24%,
+    var(--bg-widget) 76%
+  );
+  --fcc-btn-bg-disabled: color-mix(
+    in srgb,
+    var(--bg-main) 58%,
+    var(--bg-widget) 42%
+  );
+  --fcc-btn-border: color-mix(in srgb, var(--border-dark) 85%, transparent);
+  --fcc-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+:root:not([data-theme]) .login-screen__hud,
+:root[data-theme='fcc_classic'] .login-screen__hud {
+  background: linear-gradient(
+    to bottom,
+    var(--btn-top) 0%,
+    var(--btn-mid) 50%,
+    var(--btn-bot) 100%
+  );
+  border: 1px solid var(--border-dark);
+  border-top-color: var(--btn-top);
+  border-left-color: #6d6d6d;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  color: var(--text);
+}
+
+:root:not([data-theme]) .login-screen__hud-label,
+:root[data-theme='fcc_classic'] .login-screen__hud-label {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:root:not([data-theme]) .login-screen__hud-value,
+:root[data-theme='fcc_classic'] .login-screen__hud-value {
+  color: var(--text);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.55);
+}
+
+:root:not([data-theme]) .login-screen__hud-divider,
+:root[data-theme='fcc_classic'] .login-screen__hud-divider {
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+:root:not([data-theme]) .login-screen__caps,
+:root[data-theme='fcc_classic'] .login-screen__caps {
+  color: #ffb45c;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    0 0 6px rgba(255, 138, 58, 0.35);
+}
+
+:root:not([data-theme]) #root::before,
+:root[data-theme='fcc_classic'] #root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
+  mask-image: radial-gradient(
+    ellipse 95% 85% at 50% 20%,
+    black 0%,
+    black 60%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 95% 85% at 50% 20%,
+    black 0%,
+    black 60%,
+    transparent 100%
+  );
+  opacity: 0.75;
+}
+
+:root:not([data-theme]) #root:has(#loginScreen)::before,
+:root[data-theme='fcc_classic'] #root:has(#loginScreen)::before {
+  display: none !important;
+}
+
+:root:not([data-theme]) .panel-shell,
+:root:not([data-theme]) #instanceScreen.instance-screen,
+:root[data-theme='fcc_classic'] .panel-shell,
+:root[data-theme='fcc_classic'] #instanceScreen.instance-screen {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
+    color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
+  ) !important;
+  background-size: 100% 100% !important;
+  background-attachment: scroll !important;
+  background-repeat: no-repeat !important;
+}
+
+:root:not([data-theme]) .tab-panels,
+:root[data-theme='fcc_classic'] .tab-panels {
+  background-image: none !important;
+  background-color: color-mix(
+    in srgb,
+    var(--bg-main) 58%,
+    var(--bg-widget) 42%
+  ) !important;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__brand-primary,
+:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
+  color: #dc8000;
+  background: none;
+  -webkit-text-fill-color: #dc8000;
+  filter: none;
+  text-shadow:
+    1px 1px 0 #391e07,
+    2px 2px 0 #391e07,
+    3px 3px 0 #391e07,
+    4px 4px 0 #391e07,
+    5px 5px 0 #391e07,
+    7px 8px 14px rgba(57, 30, 7, 0.85);
+}
+
+:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
+  color: #e1dbcf;
+  -webkit-text-fill-color: #e1dbcf;
+}
+
+:root[data-theme='fcc_classic'] .login-screen {
+  --login-steel-rgb: 140, 140, 140;
+  --login-shimmer-a: rgba(218, 130, 22, 0.12);
+  --login-shimmer-b: rgba(var(--login-steel-rgb), 0.14);
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg {
+  background: #141312;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg-layer--glow {
+  background: radial-gradient(
+    ellipse 64% 54% at 50% 40%,
+    rgba(var(--accent-rgb), 0.06) 0%,
+    rgba(var(--login-steel-rgb), 0.05) 50%,
+    transparent 76%
+  );
+  opacity: 0.55;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__bg-layer--drift {
+  background:
+    radial-gradient(
+      circle at 22% 30%,
+      rgba(218, 130, 22, 0.045) 0,
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 62%,
+      rgba(var(--login-steel-rgb), 0.06) 0,
+      transparent 38%
+    );
+  opacity: 0.2;
+}
+
+:root[data-theme='fcc_classic'] .login-portal__telemetry-head {
+  background: color-mix(in srgb, var(--bg-widget) 22%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+:root[data-theme='fcc_classic']
+  .login-portal
+  .login-portal__telemetry.login-screen__hud {
+  background: transparent !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+:root[data-theme='fcc_classic'] .login-screen__panel.is-success {
+  animation: login-grant-pulse-classic 0.9s ease-out forwards;
+}
+
+:root[data-theme='fcc_classic'] .login-screen.is-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background: radial-gradient(
+    ellipse 90% 60% at 50% 50%,
+    rgba(var(--accent-rgb), 0.12) 0%,
+    transparent 68%
+  );
+  opacity: 0;
+  animation: login-classic-flash 1.05s ease-out forwards;
+}
+
+:root[data-theme='fcc_classic'] .login-screen.login-leaving--classic {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 520ms ease,
+    transform 520ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='fcc_classic'] .login-screen__panel.is-success,
+  :root[data-theme='fcc_classic'] .login-screen.is-success::before,
+  :root[data-theme='fcc_classic'] .login-screen.login-leaving--classic {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='fcc_classic']
+  .login-screen__panel.is-success,
+:root[data-web-disable-effects='1'][data-theme='fcc_classic']
+  .login-screen.is-success::before,
+:root[data-web-disable-effects='1'][data-theme='fcc_classic']
+  .login-screen.login-leaving--classic {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}

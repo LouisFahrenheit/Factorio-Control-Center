@@ -28,6 +28,8 @@ import './styles/players-tab.css';
 import './styles/history-tab.css';
 import './styles/circuit-wire.css';
 import './styles/panel-buttons.css';
+import './styles/modals/index.css';
+import './theme/index.css';
 
 applyEffectiveTheme();
 initDynamicFavicon();

@@ -1,0 +1,302 @@
+/* ==========================================================================
+   Public Server Edit Modal Styles
+   ========================================================================== */
+
+.fu-modal.public-server-edit-modal {
+  width: min(560px, 94vw);
+  max-height: calc(100dvh - 2 * max(14px, 2.5vh));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.public-server-edit-modal .fu-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-dark);
+  background: var(--bg-card-header);
+}
+
+.public-server-edit-modal__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
+  flex: 0 0 34px;
+}
+
+.public-server-edit-modal__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.public-server-edit-modal__title-wrap .fu-modal__title-text {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.public-server-edit-modal__server-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.public-server-edit-modal__server-name .instance-run-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.public-server-edit-modal__server-name .instance-run-dot--on {
+  background: var(--running);
+  box-shadow: 0 0 6px var(--running);
+}
+
+.public-server-edit-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  overflow-y: auto;
+}
+
+/* ── Visibility Card ─────────────────────────────────────────────────── */
+
+.public-server-edit-modal__visibility-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.public-server-edit-modal__visibility-card--active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 12px rgba(var(--accent-rgb), 0.1);
+}
+
+.public-server-edit-modal__visibility-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.public-server-edit-modal__visibility-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  flex: 0 0 36px;
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+  color: var(--text-muted);
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.public-server-edit-modal__visibility-card--active
+  .public-server-edit-modal__visibility-badge {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+}
+
+.public-server-edit-modal__visibility-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.public-server-edit-modal__visibility-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.public-server-edit-modal__visibility-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.public-server-edit-modal__visibility-card--active
+  .public-server-edit-modal__visibility-hint {
+  color: var(--accent-selected);
+}
+
+/* ── Field Containers ────────────────────────────────────────────────── */
+
+.public-server-edit-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.public-server-edit-modal__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.public-server-edit-modal__label-icon {
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.public-server-edit-modal__input {
+  height: 38px;
+  min-height: 38px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.public-server-edit-modal__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.public-server-edit-modal__textarea {
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 88px;
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.public-server-edit-modal__textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.public-server-edit-modal__field-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+}
+
+.public-server-edit-modal__field-hint-icon {
+  flex: 0 0 14px;
+  margin-top: 1px;
+  color: var(--accent);
+  opacity: 0.75;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+
+.public-server-edit-modal .fu-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border-dark);
+  background: var(--bg-card-header);
+}
+
+.public-server-edit-modal .fu-modal__footer .btn {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-sizing: border-box;
+}
+
+.public-server-edit-modal__save-btn {
+  background: var(--fcc-btn-bg);
+  border: 1px solid var(--fcc-btn-border);
+  color: var(--text);
+  box-shadow: var(--fcc-btn-shadow);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.public-server-edit-modal__save-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: var(--fcc-btn-bg-hover);
+  color: var(--accent-selected);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.public-server-edit-modal__save-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  background: var(--fcc-btn-bg-active);
+}
+
+.public-server-edit-modal__save-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}

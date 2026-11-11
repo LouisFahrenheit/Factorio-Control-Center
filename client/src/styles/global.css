@@ -1,4 +1,5 @@
 /* React-only tweaks — panel chrome lives in public/app.css */
+
 html,
 body,
 #root {
@@ -6,6 +7,7 @@ body,
 }
 
 /* React UI above body backdrops (stars, sea, ambient snow). */
+
 #root {
   position: relative;
   z-index: 1;
@@ -40,12 +42,6 @@ body {
   gap: 7px;
 }
 
-.fu-modal__header--with-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .mod-settings-page__title--with-icon {
   display: inline-flex;
   align-items: center;
@@ -78,6 +74,7 @@ body {
 }
 
 /* Motion-driven instance list — disable legacy CSS row stagger */
+
 .table-wrap--motion-list table.data tbody tr {
   animation: none !important;
 }
@@ -98,7 +95,7 @@ body {
   width: 100%;
 }
 
-.fcc-workspace-view>.app {
+.fcc-workspace-view > .app {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -130,39 +127,67 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item,
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item {
-    animation: fcc-context-menu-item-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item,
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item {
+    animation: fcc-context-menu-item-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)
+      backwards;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(1),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(1) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(1),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(1) {
     animation-delay: 0.03s;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(2),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(2) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(2),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(2) {
     animation-delay: 0.05s;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(3),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(3) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(3),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(3) {
     animation-delay: 0.07s;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(4),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(4) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(4),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(4) {
     animation-delay: 0.09s;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(5),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(5) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(5),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(5) {
     animation-delay: 0.11s;
   }
 
-  :root:not([data-web-disable-effects]) .fcc-context-menu .instance-row-menu__item:nth-child(n + 6),
-  :root:not([data-web-disable-effects]) .fcc-context-menu .maintenance-row-menu__item:nth-child(n + 6) {
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .instance-row-menu__item:nth-child(n + 6),
+  :root:not([data-web-disable-effects])
+    .fcc-context-menu
+    .maintenance-row-menu__item:nth-child(n + 6) {
     animation-delay: 0.13s;
   }
 }
@@ -194,9 +219,11 @@ body {
 
 .btn--toolbar-icon:hover:not(:disabled):not(.is-locked) {
   background: var(--fcc-btn-bg-hover);
-  border-color: color-mix(in srgb,
-      var(--accent) 28%,
-      var(--fcc-btn-border) 72%);
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 28%,
+    var(--fcc-btn-border) 72%
+  );
 }
 
 .fcc-switch {
@@ -208,7 +235,7 @@ body {
   user-select: none;
 }
 
-.fcc-switch>input[type='checkbox'] {
+.fcc-switch > input[type='checkbox'] {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -220,7 +247,7 @@ body {
   border: 0;
 }
 
-.fcc-switch>input[type='checkbox']:checked::after {
+.fcc-switch > input[type='checkbox']:checked::after {
   content: none;
 }
 
@@ -252,22 +279,22 @@ body {
     background-color 0.22s var(--fcc-hover-ease);
 }
 
-.fcc-switch>input:checked+.fcc-switch__track {
+.fcc-switch > input:checked + .fcc-switch__track {
   background: color-mix(in srgb, var(--accent) 42%, var(--bg-input) 58%);
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border-dark) 45%);
 }
 
-.fcc-switch>input:checked+.fcc-switch__track .fcc-switch__thumb {
+.fcc-switch > input:checked + .fcc-switch__track .fcc-switch__thumb {
   transform: translateX(18px);
   background: var(--accent-selected, var(--accent));
 }
 
-.fcc-switch>input:focus-visible+.fcc-switch__track {
+.fcc-switch > input:focus-visible + .fcc-switch__track {
   outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 
-.fcc-switch>input:disabled+.fcc-switch__track {
+.fcc-switch > input:disabled + .fcc-switch__track {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -286,7 +313,7 @@ body {
   user-select: none;
 }
 
-.fcc-check>input[type='checkbox'] {
+.fcc-check > input[type='checkbox'] {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -330,7 +357,7 @@ body {
     opacity 0.18s var(--fcc-hover-ease);
 }
 
-.fcc-check>input:checked+.fcc-check__box {
+.fcc-check > input:checked + .fcc-check__box {
   background: color-mix(in srgb, var(--accent) 42%, var(--bg-input) 58%);
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border-dark) 45%);
   box-shadow:
@@ -338,17 +365,17 @@ body {
     0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.fcc-check>input:checked+.fcc-check__box .fcc-check__mark {
+.fcc-check > input:checked + .fcc-check__box .fcc-check__mark {
   opacity: 1;
   transform: translate(-50%, -62%) rotate(45deg) scale(1);
 }
 
-.fcc-check>input:focus-visible+.fcc-check__box {
+.fcc-check > input:focus-visible + .fcc-check__box {
   outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 
-.fcc-check>input:disabled+.fcc-check__box {
+.fcc-check > input:disabled + .fcc-check__box {
   opacity: 0.55;
 }
 
@@ -368,204 +395,8 @@ body {
   gap: 6px;
 }
 
-.fcc-modal {
-  background: color-mix(in srgb,
-      var(--bg-widget) 90%,
-      var(--bg-main) 10%) !important;
-  border: 1px solid var(--border-dark) !important;
-  border-radius: 8px !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 12px 40px rgba(0, 0, 0, 0.45) !important;
-  overflow: hidden;
-}
-
-.fcc-modal .mantine-Modal-header {
-  background: color-mix(in srgb, var(--bg-main) 52%, var(--bg-widget) 48%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  padding: 12px 16px;
-}
-
-.fcc-modal .mantine-Modal-title {
-  color: var(--text);
-  font-weight: 700;
-  font-size: 11pt;
-}
-
-.fcc-modal .mantine-Modal-body {
-  padding: 14px 16px;
-  background: transparent;
-}
-
-.fcc-modal .mantine-Modal-footer {
-  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  padding: 10px 16px;
-  gap: 8px;
-}
-
-.fcc-modal--confirm {
-  --modal-size: auto !important;
-  flex: 0 1 auto !important;
-  width: max-content !important;
-  max-width: min(540px, 94vw) !important;
-  min-width: min(380px, 92vw) !important;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__header {
-  padding: 14px 16px 12px;
-}
-
-.fcc-modal--confirm .mantine-Modal-title {
-  font-size: 11.5pt;
-  letter-spacing: 0.01em;
-}
-
-.fcc-confirm-modal__title {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.fcc-confirm-modal__title-icon {
-  flex-shrink: 0;
-  color: color-mix(in srgb, var(--error) 88%, #fff 12%);
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__close {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  transition:
-    background-color 0.18s var(--fcc-hover-ease),
-    border-color 0.18s var(--fcc-hover-ease),
-    color 0.18s var(--fcc-hover-ease);
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__close:hover {
-  color: var(--text);
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-  border-color: color-mix(in srgb, var(--border-dark) 70%, transparent);
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__body {
-  padding: 0;
-}
-
-.fcc-confirm-modal__content {
-  padding: 16px 18px 14px;
-}
-
-.fcc-confirm-modal__lead {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--text);
-}
-
-.fcc-confirm-modal__callout {
-  margin-top: 12px;
-  padding: 11px 13px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  background: color-mix(in srgb, var(--bg-log) 55%, var(--bg-widget) 45%);
-}
-
-.fcc-confirm-modal__callout--danger {
-  border-color: color-mix(in srgb, var(--error) 28%, var(--border-dark) 72%);
-  background: color-mix(in srgb, var(--error) 9%, var(--bg-widget) 91%);
-}
-
-.fcc-confirm-modal__callout-list {
-  margin: 0;
-  padding-left: 1.15em;
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.fcc-confirm-modal__callout-list li+li {
-  margin-top: 4px;
-}
-
-.fcc-confirm-modal__question {
-  margin: 12px 0 0;
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.45;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions {
-  margin: 0 !important;
-  padding: 12px 16px;
-  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
-  justify-content: flex-end !important;
-  gap: 8px;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-root {
-  min-width: 104px;
-  height: 36px;
-  padding: 0 16px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 6px;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 6px;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section .app-icon,
-.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section svg {
-  flex-shrink: 0;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn .app-icon,
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn svg {
-  color: var(--text-muted);
-  transition: color 0.16s ease;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn:hover:not(:disabled) .app-icon,
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn:hover:not(:disabled) svg {
-  color: var(--accent);
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger {
-  background: color-mix(in srgb, #e03131 22%, var(--bg-widget) 78%) !important;
-  border: 1px solid color-mix(in srgb, #ff4d4d 60%, var(--border-dark) 40%) !important;
-  color: #ffb4b4 !important;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger .app-icon,
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger svg {
-  color: #ffb4b4 !important;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) {
-  background: color-mix(in srgb, #e03131 38%, var(--bg-widget) 62%) !important;
-  border-color: #ff4d4d !important;
-  color: #ffffff !important;
-  box-shadow:
-    0 2px 10px rgba(224, 49, 49, 0.40),
-    0 0 8px rgba(255, 77, 77, 0.25) !important;
-}
-
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) .app-icon,
-.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger:hover:not(:disabled) svg {
-  color: #ffffff !important;
-}
-
 /* ── Backup Restore Modal ─────────────────────────────────────── */
+
 .backup-restore-modal {
   width: min(520px, 94vw);
 }
@@ -573,7 +404,8 @@ body {
 .backup-restore-modal__header {
   padding: 14px 16px 12px;
   background: color-mix(in srgb, var(--bg-main) 52%, var(--bg-widget) 48%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 88%, transparent);
 }
 
 .backup-restore-modal__header-title {
@@ -689,17 +521,17 @@ body {
 }
 
 .backup-restore-modal__option:hover {
-  border-color: color-mix(in srgb,
-      var(--accent, #e58e26) 50%,
-      var(--border-dark) 50%);
+  border-color: color-mix(
+    in srgb,
+    var(--accent, #e58e26) 50%,
+    var(--border-dark) 50%
+  );
   background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
 }
 
 .backup-restore-modal__option--selected {
   border-color: var(--accent, #e58e26) !important;
-  background: color-mix(in srgb,
-      var(--accent, #e58e26) 12%,
-      var(--bg-widget) 88%) !important;
+  background: var(--fcc-row-hover-selected-bg) !important;
 }
 
 .backup-restore-modal__radio {
@@ -743,6 +575,7 @@ body {
 }
 
 /* ── Backup Tab Rich Styles ─────────────────────────────────────── */
+
 .backup-tab__table {
   width: 100%;
   border-collapse: separate;
@@ -750,13 +583,14 @@ body {
 }
 
 .backup-tab__table thead th {
-  padding: 12px 16px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  padding: 9px 12px;
+  font-size: 0.92em;
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
   background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
 }
 
@@ -770,9 +604,7 @@ table#tblBackups thead th.backup-sort-th {
 
 table#tblBackups thead th.backup-sort-th:hover {
   color: var(--text);
-  background: color-mix(in srgb,
-      var(--accent) 8%,
-      var(--bg-widget) 92%) !important;
+  background: var(--fcc-interactive-hover-bg) !important;
 }
 
 table#tblBackups thead th.backup-sort-th--active {
@@ -800,13 +632,12 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   cursor: pointer;
   user-select: none;
   transition: background-color 0.15s ease;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
 }
 
 .backup-tab__row:hover {
-  background: color-mix(in srgb,
-      var(--accent, #e58e26) 6%,
-      var(--bg-widget) 94%);
+  background: var(--fcc-row-hover-bg);
 }
 
 .backup-tab__cell {
@@ -990,22 +821,27 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__action-btn--restore:hover {
-  background: color-mix(in srgb,
-      var(--accent, #e58e26) 20%,
-      var(--bg-widget) 80%);
+  background: color-mix(
+    in srgb,
+    var(--accent, #e58e26) 20%,
+    var(--bg-widget) 80%
+  );
   color: var(--accent, #e58e26);
   border-color: var(--accent, #e58e26);
 }
 
 .backup-tab__action-btn--danger:hover {
-  background: color-mix(in srgb,
-      var(--error, #e05030) 20%,
-      var(--bg-widget) 80%);
+  background: color-mix(
+    in srgb,
+    var(--error, #e05030) 20%,
+    var(--bg-widget) 80%
+  );
   color: var(--error, #e05030);
   border-color: var(--error, #e05030);
 }
 
 /* ── 2K & High-Res Screen Enhancements (1440p / 1600px+) ────────── */
+
 @media (min-width: 1600px) or (min-height: 860px) {
   .backup-tab__table thead th {
     padding: 16px 20px;
@@ -1127,9 +963,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 #tblBackupsBody tr.backup-tab__row--selected td,
 .backup-tab__row--selected td {
-  background: color-mix(in srgb,
-      var(--accent, #da8216) 12%,
-      var(--bg-widget) 88%) !important;
+  background: var(--fcc-row-hover-selected-bg) !important;
   box-shadow: none !important;
 }
 
@@ -1170,6 +1004,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Modals */
+
 .backup-modal-title {
   display: inline-flex;
   align-items: center;
@@ -1184,7 +1019,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-modal__header {
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
   padding: 16px 20px;
 }
 
@@ -1314,7 +1150,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-opt-card--active {
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+  background: var(--fcc-row-hover-selected-bg);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 8%, transparent);
 }
@@ -1369,6 +1205,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* ── Backup Auto Hero Card ──────────────────────────────────────── */
+
 .backup-auto-hero {
   display: flex;
   align-items: center;
@@ -1387,7 +1224,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-auto-hero--active {
-  background: color-mix(in srgb, var(--accent) 9%, var(--bg-widget) 91%);
+  background: var(--bg-card);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 8%, transparent);
 }
@@ -1438,6 +1275,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* ── Section Disabled / Muted ───────────────────────────────────── */
+
 .backup-section--muted {
   opacity: 0.5;
   pointer-events: none;
@@ -1448,6 +1286,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* ── Auto Parameters Grid ───────────────────────────────────────── */
+
 .backup-auto-params-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1523,6 +1362,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* ── Status Card ────────────────────────────────────────────────── */
+
 .backup-auto-status-card {
   display: flex;
   flex-direction: column;
@@ -1586,7 +1426,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__card-header {
   padding: 10px 14px;
   background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1653,9 +1494,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__number-wrap {
   display: inline-flex;
   align-items: center;
-  background: color-mix(in srgb,
-      var(--bg-input, #1e1e1e) 90%,
-      var(--bg-main) 10%);
+  background: color-mix(
+    in srgb,
+    var(--bg-input, #1e1e1e) 90%,
+    var(--bg-main) 10%
+  );
   border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   border-radius: 6px;
   overflow: hidden;
@@ -1775,9 +1618,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-size-btn--active {
-  background: color-mix(in srgb,
-      var(--accent) 18%,
-      var(--bg-widget) 82%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 18%,
+    var(--bg-widget) 82%
+  ) !important;
   color: var(--accent) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
 }
@@ -1812,9 +1657,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .backup-tab__page-btn--active {
-  background: color-mix(in srgb,
-      var(--text) 18%,
-      var(--bg-widget) 82%) !important;
+  background: color-mix(
+    in srgb,
+    var(--text) 18%,
+    var(--bg-widget) 82%
+  ) !important;
   color: var(--text) !important;
   border-color: color-mix(in srgb, var(--text) 30%, transparent) !important;
 }
@@ -1825,6 +1672,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Changelog: ширина по самой длинной строке (до края экрана) */
+
 .fu-modal.fu-modal--changelog {
   width: max-content;
   min-width: min(420px, 92vw);
@@ -1852,6 +1700,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Mod dependency confirmation (install / update / startup) */
+
 .fcc-modal--mod-deps {
   width: min(520px, 94vw);
   max-height: min(85vh, 640px);
@@ -2018,8 +1867,16 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-deps-confirm__list-wrap--conflict {
-  border-color: color-mix(in srgb, var(--warning, #e3941c) 26%, var(--border-dark) 74%);
-  background: color-mix(in srgb, var(--warning, #e3941c) 4%, var(--bg-main) 96%);
+  border-color: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 26%,
+    var(--border-dark) 74%
+  );
+  background: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 4%,
+    var(--bg-main) 96%
+  );
 }
 
 .mod-deps-confirm__list {
@@ -2054,7 +1911,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-deps-confirm__item:hover {
   border-color: color-mix(in srgb, var(--accent) 42%, var(--border-dark) 58%);
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+  background: var(--fcc-row-hover-bg);
 }
 
 .mod-deps-confirm__item-icon {
@@ -2151,13 +2008,29 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 9px;
-  border-color: color-mix(in srgb, var(--warning, #e3941c) 22%, var(--border-dark) 78%);
-  background: color-mix(in srgb, var(--warning, #e3941c) 5%, var(--bg-widget) 95%);
+  border-color: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 22%,
+    var(--border-dark) 78%
+  );
+  background: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 5%,
+    var(--bg-widget) 95%
+  );
 }
 
 .mod-deps-confirm__item--conflict:hover {
-  border-color: color-mix(in srgb, var(--warning, #e3941c) 38%, var(--border-dark) 62%);
-  background: color-mix(in srgb, var(--warning, #e3941c) 9%, var(--bg-widget) 91%);
+  border-color: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 38%,
+    var(--border-dark) 62%
+  );
+  background: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 9%,
+    var(--bg-widget) 91%
+  );
 }
 
 .mod-deps-confirm__list--conflicts {
@@ -2173,7 +2046,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--warning, #e3941c) 18%, var(--bg-main) 82%);
+  background: color-mix(
+    in srgb,
+    var(--warning, #e3941c) 18%,
+    var(--bg-main) 82%
+  );
   border: 1px solid color-mix(in srgb, var(--warning, #e3941c) 42%, transparent);
   color: color-mix(in srgb, var(--warning, #e3941c) 92%, #fff 8%);
 }
@@ -2242,6 +2119,10 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: 0.88rem;
   font-weight: 600;
   border-radius: 7px;
+  background: var(--fcc-btn-bg);
+  border: 1px solid var(--fcc-btn-border);
+  color: var(--text);
+  box-shadow: var(--fcc-btn-shadow);
   cursor: pointer;
   box-sizing: border-box;
   user-select: none;
@@ -2255,46 +2136,17 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     transform 0.1s ease;
 }
 
-.mod-deps-confirm__footer .btn:not(.btn--primary) {
-  background: color-mix(in srgb, var(--bg-main) 42%, var(--bg-widget) 58%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
-}
-
-.mod-deps-confirm__footer .btn:not(.btn--primary):hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%);
+.mod-deps-confirm__footer .btn:hover:not(:disabled) {
+  background: var(--fcc-btn-bg-hover);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--text);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
 }
 
-.mod-deps-confirm__footer .btn:not(.btn--primary):active:not(:disabled) {
+.mod-deps-confirm__footer .btn:active:not(:disabled) {
   transform: translateY(1px);
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  background: var(--fcc-btn-bg-active);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.mod-deps-confirm__footer .btn.btn--primary {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
-  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
-  color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.26);
-}
-
-.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 32%, var(--bg-widget) 68%);
-  border-color: color-mix(in srgb, var(--accent) 85%, transparent);
-  color: #fff;
-  box-shadow:
-    0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent),
-    0 0 6px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.mod-deps-confirm__footer .btn.btn--primary:active:not(:disabled) {
-  transform: translateY(1px);
-  background: color-mix(in srgb, var(--accent) 40%, var(--bg-widget) 60%);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.38);
 }
 
 .mod-deps-confirm__footer .btn .app-icon,
@@ -2306,16 +2158,6 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .mod-deps-confirm__footer .btn:hover:not(:disabled) .app-icon,
 .mod-deps-confirm__footer .btn:hover:not(:disabled) svg {
   color: var(--accent);
-}
-
-.mod-deps-confirm__footer .btn.btn--primary .app-icon,
-.mod-deps-confirm__footer .btn.btn--primary svg {
-  color: var(--accent);
-}
-
-.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) .app-icon,
-.mod-deps-confirm__footer .btn.btn--primary:hover:not(:disabled) svg {
-  color: #fff;
 }
 
 @media (max-width: 768px) {
@@ -2339,18 +2181,36 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Mod operation / update progress modal */
+
 .server-update-dialog__step-badge {
   color: var(--text-muted) !important;
-  background: color-mix(in srgb, var(--bg-widget) 85%, var(--bg-main) 15%) !important;
-  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 85%,
+    var(--bg-main) 15%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--border-dark) 85%,
+    transparent
+  ) !important;
 }
 
 .server-update-dialog__status-card--done {
-  border-color: color-mix(in srgb, var(--border-dark) 84%, transparent) !important;
-  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--border-dark) 84%,
+    transparent
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 90%,
+    var(--bg-main) 10%
+  ) !important;
 }
 
 /* Update-all mods: unified multi-step flow */
+
 .fcc-modal--mod-update-all {
   width: min(760px, 96vw);
 }
@@ -2374,16 +2234,21 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   gap: 12px;
   padding: 14px 16px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  background: linear-gradient(180deg,
-      color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%) 0%,
-      color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%) 100%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%) 0%,
+    color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%) 100%
+  );
 }
 
 .mod-update-all-flow__header-icon {
   flex: 0 0 auto;
   color: var(--accent-selected);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 35%, transparent));
+  filter: drop-shadow(
+    0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)
+  );
 }
 
 .mod-update-all-flow__header-text {
@@ -2479,7 +2344,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-.mod-update-all-flow__mod-list li+li {
+.mod-update-all-flow__mod-list li + li {
   margin-top: 4px;
 }
 
@@ -2558,6 +2423,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Import mods from save dialog */
+
 .fu-modal.mods-from-save-dialog {
   width: min(760px, 96vw);
   padding: 0;
@@ -2596,7 +2462,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mods-from-save-dialog__stat--accent {
   border-color: color-mix(in srgb, var(--accent) 28%, var(--border-dark) 72%);
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+  background: var(--bg-card);
 }
 
 .mods-from-save-dialog__stat--ok {
@@ -2670,12 +2536,12 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     border-color 0.15s ease;
 }
 
-.mods-from-save-dialog__row+.mods-from-save-dialog__row {
+.mods-from-save-dialog__row + .mods-from-save-dialog__row {
   margin-top: 2px;
 }
 
 .mods-from-save-dialog__row:not(.mods-from-save-dialog__row--installed):hover {
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  background: var(--fcc-row-hover-bg);
 }
 
 .mods-from-save-dialog__row--installed {
@@ -2751,7 +2617,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
   }
 
-  .mods-from-save-dialog__row+.mods-from-save-dialog__row {
+  .mods-from-save-dialog__row + .mods-from-save-dialog__row {
     margin-top: 6px;
   }
 
@@ -2784,9 +2650,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   padding: 11px 14px;
   border-bottom: 1px solid color-mix(in srgb, var(--error) 42%, transparent);
   color: #ffe8e0;
-  background: linear-gradient(90deg,
-      color-mix(in srgb, var(--error) 28%, #2a1210 72%) 0%,
-      color-mix(in srgb, var(--error) 18%, var(--bg-widget) 82%) 100%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--error) 28%, #2a1210 72%) 0%,
+    color-mix(in srgb, var(--error) 18%, var(--bg-widget) 82%) 100%
+  );
   font-size: 0.95em;
   font-weight: 600;
   line-height: 1.45;
@@ -2814,7 +2682,6 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 @keyframes instances-access-tab-blink {
-
   0%,
   100% {
     border-color: var(--border-dark);
@@ -2832,14 +2699,17 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Failed history rows styling */
+
 .history-row--failed td:not(.history-col-date):not(.history-col-actor) {
   color: var(--error) !important;
 }
 
 .history-row--failed:hover {
-  background-color: color-mix(in srgb,
-      var(--error) 8%,
-      var(--bg-data, #3a3a3a)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--error) 8%,
+    var(--bg-data, #3a3a3a)
+  ) !important;
 }
 
 .monitoring-grid {
@@ -2853,18 +2723,15 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     grid-template-columns: 1fr 1fr;
   }
 
-  .monitoring-grid>*:last-child:nth-child(odd) {
+  .monitoring-grid > *:last-child:nth-child(odd) {
     grid-column: span 2;
   }
 }
 
 /* Ensure monitoring tab is always vertically scrollable across all themes (Dark Space, Ion Storm, Vulcanus, etc.) */
-.panel-shell>.tab-panels:has(#tabPanelMonitoring),
-.panel-shell>.tab-panels:has(.monitoring-tab),
-:root[data-theme='dark_space'] .panel-shell>.tab-panels:has(.monitoring-tab),
-:root[data-theme='ion_storm'] .panel-shell>.tab-panels:has(.monitoring-tab),
-:root[data-theme='vulcanus'] .panel-shell>.tab-panels:has(.monitoring-tab),
-:root[data-theme='cryogenics'] .panel-shell>.tab-panels:has(.monitoring-tab) {
+
+.panel-shell > .tab-panels:has(#tabPanelMonitoring),
+.panel-shell > .tab-panels:has(.monitoring-tab) {
   overflow-y: auto !important;
 }
 
@@ -2954,19 +2821,33 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   background: transparent;
 }
 
-#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__label,
-#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__control,
-#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__action,
-#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__footnote,
-#instanceTabIntegrations .settings-table__row:not(:last-child) .settings-table__inline-cell {
+#instanceTabIntegrations
+  .settings-table__row:not(:last-child)
+  .settings-table__label,
+#instanceTabIntegrations
+  .settings-table__row:not(:last-child)
+  .settings-table__control,
+#instanceTabIntegrations
+  .settings-table__row:not(:last-child)
+  .settings-table__action,
+#instanceTabIntegrations
+  .settings-table__row:not(:last-child)
+  .settings-table__footnote,
+#instanceTabIntegrations
+  .settings-table__row:not(:last-child)
+  .settings-table__inline-cell {
   border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
 }
 
-#instanceTabIntegrations .instance-settings-tables__minor .settings-table__label {
+#instanceTabIntegrations
+  .instance-settings-tables__minor
+  .settings-table__label {
   width: 44%;
 }
 
-#instanceTabIntegrations .instance-settings-tables__minor .settings-table__control {
+#instanceTabIntegrations
+  .instance-settings-tables__minor
+  .settings-table__control {
   width: 56%;
 }
 
@@ -3186,9 +3067,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .integrations-scope-btn--active {
   color: var(--text) !important;
-  background: linear-gradient(165deg,
-      color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
-      color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%) !important;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--accent) 18%, var(--bg-widget) 82%) 0%,
+    color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) 100%
+  ) !important;
   border-color: color-mix(in srgb, var(--accent) 36%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -3252,12 +3135,12 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .integrations-server-card:hover {
-  background: color-mix(in srgb, var(--accent) 7%, var(--bg-widget));
+  background: var(--fcc-interactive-hover-bg);
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
 }
 
 .integrations-server-card--active {
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-widget));
+  background: var(--fcc-row-hover-selected-bg);
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
@@ -3358,9 +3241,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   border-radius: 6px;
   font-size: calc(var(--ui-font-size) * 0.88);
   font-weight: 550;
-  background-color: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-widget) 30%);
+  background-color: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-widget) 30%
+  );
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   color: var(--text);
   cursor: pointer;
@@ -3372,9 +3257,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .integrations-override-select:hover {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  background-color: color-mix(in srgb,
-      var(--bg-main) 60%,
-      var(--bg-widget) 40%);
+  background-color: color-mix(
+    in srgb,
+    var(--bg-main) 60%,
+    var(--bg-widget) 40%
+  );
 }
 
 .integrations-override-select:focus {
@@ -3641,7 +3528,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .integrations-event-card:hover {
-  background: color-mix(in srgb, var(--accent) 7%, var(--bg-widget));
+  background: var(--fcc-interactive-hover-bg);
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
 }
 
@@ -3669,9 +3556,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: calc(var(--ui-font-size) * 0.84) !important;
   font-weight: 700 !important;
   border-radius: 4px !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 75%,
-      var(--bg-widget) 25%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 75%,
+    var(--bg-widget) 25%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
   color: var(--text) !important;
 }
@@ -3866,6 +3755,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 /* Mod portal versions picker dialog */
+
 .fu-modal.mod-portal-versions-dialog {
   width: min(860px, 96vw);
   padding: 0;
@@ -3887,7 +3777,8 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 95%, var(--bg-main) 5%);
 }
 
@@ -4124,8 +4015,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-portal-versions__row:hover {
-  background: var(--fcc-row-hover-bg,
-      color-mix(in srgb, var(--accent) 7%, var(--bg-data) 93%));
+  background: var(--fcc-row-hover-bg);
 }
 
 .mod-portal-versions__row--recommended {
@@ -4133,9 +4023,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 }
 
 .mod-portal-versions__row--installed {
-  background: color-mix(in srgb,
-      var(--accent-selected, #f1be64) 6%,
-      transparent);
+  background: var(--fcc-row-hover-selected-bg);
 }
 
 .mod-portal-versions__ver-cell {
@@ -4267,9 +4155,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__installed-tag {
   color: var(--running, #78c840);
-  background: color-mix(in srgb,
-      var(--running, #78c840) 12%,
-      var(--bg-main) 88%);
+  background: color-mix(
+    in srgb,
+    var(--running, #78c840) 12%,
+    var(--bg-main) 88%
+  );
   border: 1px solid color-mix(in srgb, var(--running, #78c840) 28%, transparent);
   font-weight: 600 !important;
   cursor: default;
@@ -4288,9 +4178,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__install-btn:hover:not(:disabled) {
   background: var(--fcc-btn-bg-hover) !important;
-  border-color: color-mix(in srgb,
-      var(--accent, #da8216) 30%,
-      var(--fcc-btn-border) 70%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent, #da8216) 30%,
+    var(--fcc-btn-border) 70%
+  ) !important;
   color: var(--text) !important;
 }
 
@@ -4315,9 +4207,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   justify-content: center !important;
   border-radius: 6px !important;
   color: var(--running, #78c840);
-  background: color-mix(in srgb,
-      var(--running, #78c840) 14%,
-      var(--bg-main) 86%);
+  background: color-mix(
+    in srgb,
+    var(--running, #78c840) 14%,
+    var(--bg-main) 86%
+  );
   border: 1px solid color-mix(in srgb, var(--running, #78c840) 30%, transparent);
   box-sizing: border-box !important;
   flex-shrink: 0;
@@ -4349,9 +4243,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__activate-btn:hover:not(:disabled) {
   color: var(--accent, #da8216);
-  border-color: color-mix(in srgb,
-      var(--accent, #da8216) 45%,
-      var(--fcc-btn-border) 55%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent, #da8216) 45%,
+    var(--fcc-btn-border) 55%
+  ) !important;
   background: var(--fcc-btn-bg-hover) !important;
 }
 
@@ -4380,9 +4276,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 .mod-portal-versions__delete-btn:hover:not(:disabled) {
   color: #ff5555;
-  border-color: color-mix(in srgb,
-      #ff5555 45%,
-      var(--fcc-btn-border) 55%) !important;
+  border-color: color-mix(
+    in srgb,
+    #ff5555 45%,
+    var(--fcc-btn-border) 55%
+  ) !important;
   background: var(--fcc-btn-bg-hover) !important;
 }
 
@@ -4517,9 +4415,11 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-weight: inherit !important;
   letter-spacing: inherit !important;
   color: var(--text, #ffffff) !important;
-  background-color: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-widget) 30%) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-widget) 30%
+  ) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaaaaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 7px center !important;
@@ -4537,11 +4437,14 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 
 #tblModsBody select.mods-version-select:hover:not(:disabled) {
   border-color: var(--accent, #da8216) !important;
-  background-color: color-mix(in srgb,
-      var(--bg-main) 50%,
-      var(--bg-widget) 50%) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--bg-main) 50%,
+    var(--bg-widget) 50%
+  ) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f1be64' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-  box-shadow: 0 0 4px color-mix(in srgb, var(--accent, #da8216) 25%, transparent);
+  box-shadow: 0 0 4px
+    color-mix(in srgb, var(--accent, #da8216) 25%, transparent);
 }
 
 #tblModsBody select.mods-version-select:focus {
@@ -4567,7 +4470,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: inherit !important;
 }
 
-body>.fu-modal-backdrop.mod-job-backdrop--top {
+body > .fu-modal-backdrop.mod-job-backdrop--top {
   z-index: 10200;
 }
 
@@ -4588,39 +4491,71 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 
 /* ── Instance Dashboard Host CPU, RAM & DISK Alerts ─────── */
 
-.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__icon,
-.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__icon,
-.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__icon {
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-warn
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-warn
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-warn
+  .instance-dashboard-stat__icon {
   color: var(--starting, #ffb833) !important;
-  background: color-mix(in srgb,
-      var(--starting, #ffb833) 14%,
-      var(--bg-main) 86%) !important;
-  border-color: color-mix(in srgb,
-      var(--starting, #ffb833) 30%,
-      transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--starting, #ffb833) 14%,
+    var(--bg-main) 86%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--starting, #ffb833) 30%,
+    transparent
+  ) !important;
 }
 
-.instance-dashboard-top .instance-dashboard-stat--cpu-warn .instance-dashboard-stat__value,
-.instance-dashboard-top .instance-dashboard-stat--ram-warn .instance-dashboard-stat__value,
-.instance-dashboard-top .instance-dashboard-stat--disk-warn .instance-dashboard-stat__value {
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-warn
+  .instance-dashboard-stat__value,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-warn
+  .instance-dashboard-stat__value,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-warn
+  .instance-dashboard-stat__value {
   color: var(--starting, #ffb833);
 }
 
-.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__icon,
-.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__icon,
-.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__icon {
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-danger
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-danger
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-danger
+  .instance-dashboard-stat__icon {
   color: var(--error, #ff4d4d) !important;
-  background: color-mix(in srgb,
-      var(--error, #ff4d4d) 16%,
-      var(--bg-main) 84%) !important;
-  border-color: color-mix(in srgb,
-      var(--error, #ff4d4d) 32%,
-      transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--error, #ff4d4d) 16%,
+    var(--bg-main) 84%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--error, #ff4d4d) 32%,
+    transparent
+  ) !important;
 }
 
-.instance-dashboard-top .instance-dashboard-stat--cpu-danger .instance-dashboard-stat__value,
-.instance-dashboard-top .instance-dashboard-stat--ram-danger .instance-dashboard-stat__value,
-.instance-dashboard-top .instance-dashboard-stat--disk-danger .instance-dashboard-stat__value {
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-danger
+  .instance-dashboard-stat__value,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-danger
+  .instance-dashboard-stat__value,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-danger
+  .instance-dashboard-stat__value {
   color: var(--error, #ff4d4d) !important;
 }
 
@@ -4692,16 +4627,20 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 
 .instance-dashboard-top .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-data) 30%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-data) 30%
+  ) !important;
   border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease;
 }
 
-.instance-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
+.instance-dashboard-top
+  .instance-dashboard-stat:hover
+  .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
 }
@@ -4751,6 +4690,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
    ========================================================================== */
 
 /* Общая высота и внутренние отступы для всех карточек в шапке панели */
+
 .panel-dashboard-top .instance-dashboard-stat {
   flex-shrink: 0;
   box-sizing: border-box;
@@ -4765,11 +4705,14 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
    По умолчанию: min-width: 140px. При желании можно задать фиксированную ширину
    (например, flex: 0 0 200px; width: 200px; min-width: 200px;) или max-width.
    Если название сервера не умещается в карточку, шрифт автоматически уменьшается. */
+
 .panel-dashboard-top .panel-dashboard-stat--name {
   min-width: 140px;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--name .instance-dashboard-stat__body {
+.panel-dashboard-top
+  .panel-dashboard-stat--name
+  .instance-dashboard-stat__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -4778,7 +4721,9 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   overflow: hidden;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--name .instance-dashboard-stat__value {
+.panel-dashboard-top
+  .panel-dashboard-stat--name
+  .instance-dashboard-stat__value {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4791,13 +4736,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* 2. Карточка «СТАТУС» (текущее состояние: Запущен, Остановлен, Обслуживание и др.) */
+
 .panel-dashboard-top .panel-dashboard-stat--status {
   flex: 0 0 170px;
   width: 170px;
   min-width: 170px;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__body {
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .instance-dashboard-stat__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -4805,12 +4753,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   justify-content: center;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__label {
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .instance-dashboard-stat__label {
   line-height: 1.2;
   white-space: nowrap;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__value {
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .instance-dashboard-stat__value {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4821,17 +4773,27 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Цвет статуса: зеленый при запуске (как в списке серверов), красный при ошибке (иконка остается нейтральной) */
-.panel-dashboard-top .panel-dashboard-stat--status.panel-dashboard-stat--running .instance-dashboard-stat__value,
-.panel-dashboard-top .panel-dashboard-stat--status .panel-dashboard-stat__value--running {
+
+.panel-dashboard-top
+  .panel-dashboard-stat--status.panel-dashboard-stat--running
+  .instance-dashboard-stat__value,
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .panel-dashboard-stat__value--running {
   color: #4ade80 !important;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--status.panel-dashboard-stat--error .instance-dashboard-stat__value,
-.panel-dashboard-top .panel-dashboard-stat--status .panel-dashboard-stat__value--error {
+.panel-dashboard-top
+  .panel-dashboard-stat--status.panel-dashboard-stat--error
+  .instance-dashboard-stat__value,
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .panel-dashboard-stat__value--error {
   color: var(--error, #ff4d4d) !important;
 }
 
 /* 3. Карточка «IP:ПОРТ» (сетевой bind адрес и порт сервера) */
+
 .panel-dashboard-top .panel-dashboard-stat--meta:first-of-type {
   flex: 0 0 144px;
   width: 144px;
@@ -4839,6 +4801,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* 4. Карточка «ВИДИМОСТЬ» (переключатели флагов видимости: LAN / PUB / RUV) */
+
 .panel-dashboard-top .panel-dashboard-stat--flags {
   flex: 0 0 174px;
   width: 174px;
@@ -4858,6 +4821,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* 5. Карточка «ВЕРСИЯ» (номер версии Factorio) */
+
 .panel-dashboard-top .panel-dashboard-stat--meta:last-of-type {
   flex: 0 0 98px;
   width: 98px;
@@ -4865,6 +4829,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* 6. Карточка «ИГРОКОВ ОНЛАЙН» (счетчик подключенных игроков) */
+
 .panel-dashboard-top .panel-dashboard-stat--online {
   flex: 0 0 168px;
   width: 168px;
@@ -4872,13 +4837,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* 7. Карточка «ВРЕМЯ РАБОТЫ» (аптайм сервера) */
+
 .panel-dashboard-top .panel-dashboard-stat--uptime {
   flex: 0 0 168px;
   width: 168px;
   min-width: 168px;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__body {
+.panel-dashboard-top
+  .panel-dashboard-stat--uptime
+  .instance-dashboard-stat__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -4888,12 +4856,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   text-align: center !important;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__label {
+.panel-dashboard-top
+  .panel-dashboard-stat--uptime
+  .instance-dashboard-stat__label {
   width: 100%;
   text-align: center !important;
 }
 
-.panel-dashboard-top .panel-dashboard-stat--uptime .instance-dashboard-stat__value {
+.panel-dashboard-top
+  .panel-dashboard-stat--uptime
+  .instance-dashboard-stat__value {
   width: 100%;
   text-align: center !important;
   display: block;
@@ -4905,11 +4877,15 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .panel-dashboard-top .instance-dashboard-stat .instance-dashboard-stat__icon,
-.panel-dashboard-top .panel-dashboard-stat--status .instance-dashboard-stat__icon {
+.panel-dashboard-top
+  .panel-dashboard-stat--status
+  .instance-dashboard-stat__icon {
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-data) 30%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-data) 30%
+  ) !important;
   border-color: color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
@@ -4917,7 +4893,9 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
     background-color 0.18s ease;
 }
 
-.panel-dashboard-top .instance-dashboard-stat:hover .instance-dashboard-stat__icon {
+.panel-dashboard-top
+  .instance-dashboard-stat:hover
+  .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
 }
@@ -4936,9 +4914,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   height: 44px;
   min-height: 44px;
   max-height: 44px;
-  border-color: color-mix(in srgb,
-      var(--accent) 30%,
-      var(--border-dark) 70%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 30%,
+    var(--border-dark) 70%
+  ) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.16) !important;
@@ -4950,12 +4930,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 
 .status-bar--panel .status-bar__back--nav .instance-dashboard-stat__icon {
   color: var(--accent, #da8216) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-data) 30%) !important;
-  border-color: color-mix(in srgb,
-      var(--accent) 26%,
-      var(--border) 74%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-data) 30%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 26%,
+    var(--border) 74%
+  ) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease,
@@ -4969,9 +4953,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .status-bar--panel .status-bar__back--nav:hover {
-  border-color: color-mix(in srgb,
-      var(--accent) 55%,
-      var(--border-dark) 45%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 55%,
+    var(--border-dark) 45%
+  ) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 2px 10px color-mix(in srgb, var(--accent) 18%, transparent) !important;
@@ -4979,21 +4965,27 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 
 .status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__icon {
   color: var(--accent-selected, #e59b2a) !important;
-  background: color-mix(in srgb,
-      var(--accent) 14%,
-      var(--bg-main) 86%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 14%,
+    var(--bg-main) 86%
+  ) !important;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
 }
 
-.status-bar--panel .status-bar__back--nav:hover .instance-dashboard-stat__value {
+.status-bar--panel
+  .status-bar__back--nav:hover
+  .instance-dashboard-stat__value {
   color: var(--accent-selected, #e59b2a) !important;
 }
 
 .status-bar--panel .status-bar__back--nav:active {
   transform: translateY(1px);
-  border-color: color-mix(in srgb,
-      var(--accent) 45%,
-      var(--border-dark) 55%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 45%,
+    var(--border-dark) 55%
+  ) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -5006,19 +4998,24 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 
 .monitoring-promo-banner:hover {
   border-color: rgba(255, 255, 255, 0.18) !important;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  ) !important;
 }
 
 .monitoring-gametime-card:hover {
   border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
-  background: linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 12%, transparent) 0%,
-      rgba(255, 255, 255, 0.025) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 12%, transparent) 0%,
+    rgba(255, 255, 255, 0.025) 100%
+  ) !important;
 }
 
 /* Rounded header bar in monitoring chart cards */
+
 .monitoring-tab .players-tab__card-header {
   min-height: 40px !important;
   max-height: 40px !important;
@@ -5030,19 +5027,29 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Monitoring range filter buttons hover/active states */
+
 .monitoring-range-btn:not(.monitoring-range-btn--active):hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 14%,
+    var(--bg-widget) 86%
+  ) !important;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
   color: var(--text) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .monitoring-range-btn--active:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 28%, var(--bg-widget) 72%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 28%,
+    var(--bg-widget) 72%
+  ) !important;
   border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
 }
 
 /* Monitoring chart configuration modal items & reorder buttons */
+
 .monitoring-settings-item:hover {
   border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
 }
@@ -5094,9 +5101,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   padding: 5px 12px 5px 8px !important;
   gap: 10px !important;
   border-radius: 9px;
-  background: linear-gradient(165deg,
-      color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%) !important;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
+    color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -5119,9 +5128,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   border-radius: 8px !important;
   flex: 0 0 auto;
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 70%,
-      var(--bg-data) 30%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-data) 30%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition:
@@ -5133,9 +5144,11 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-user:hover .instance-dashboard-user__avatar {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 60%,
-      var(--bg-data) 40%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 60%,
+    var(--bg-data) 40%
+  ) !important;
 }
 
 .instance-dashboard-user__body {
@@ -5167,16 +5180,19 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   border-radius: 4px !important;
   line-height: 1.2 !important;
   color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 65%,
-      var(--bg-data) 35%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 65%,
+    var(--bg-data) 35%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
   transition:
     color 0.18s ease,
     border-color 0.18s ease !important;
 }
 
-.instance-dashboard-user:hover .instance-dashboard-user__role.access-users-role {
+.instance-dashboard-user:hover
+  .instance-dashboard-user__role.access-users-role {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 65%, transparent) !important;
 }
@@ -5190,12 +5206,14 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Status bar: panel-style gradient backdrop matching the panel tabs area */
+
 .status-bar--instances,
 .status-bar--panel {
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
+    color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 92%, transparent) !important;
   border-radius: 12px !important;
   box-shadow:
@@ -5220,12 +5238,15 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Running instance status pill using active players tile emerald palette */
+
 .instance-status-pill--running {
   color: #4ade80 !important;
-  background: color-mix(in srgb,
-      #2ecc71 14%,
-      var(--bg-main) 50%,
-      var(--bg-widget) 40%) !important;
+  background: color-mix(
+    in srgb,
+    #2ecc71 14%,
+    var(--bg-main) 50%,
+    var(--bg-widget) 40%
+  ) !important;
   border-color: color-mix(in srgb, #2ecc71 45%, transparent) !important;
 }
 
@@ -5254,6 +5275,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Running dot in server name */
+
 .instance-run-dot--on {
   background: var(--running, #78c840) !important;
   box-shadow: 0 0 8px rgba(120, 200, 64, 0.75) !important;
@@ -5316,6 +5338,7 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 /* Availability / Visibility Flags in server table */
+
 .instance-access-cell .status-flags,
 .status-flags--side {
   display: inline-flex !important;
@@ -5335,12 +5358,16 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   line-height: 1.1 !important;
-  color: color-mix(in srgb,
-      var(--flag-off, #8a8a8a) 82%,
-      var(--text-muted, #aaaaaa) 18%) !important;
-  background: color-mix(in srgb,
-      var(--bg-main, #2a2a2a) 82%,
-      var(--bg-data, #3a3a3a) 18%) !important;
+  color: color-mix(
+    in srgb,
+    var(--flag-off, #8a8a8a) 82%,
+    var(--text-muted, #aaaaaa) 18%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main, #2a2a2a) 82%,
+    var(--bg-data, #3a3a3a) 18%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border, #555555) 70%, transparent) !important;
   transition:
     color 0.22s var(--fcc-hover-ease),
@@ -5352,22 +5379,29 @@ body>.fu-modal-backdrop.mod-job-backdrop--top {
 .instance-access-cell .status-flag--on,
 .status-flags--side .status-flag--on {
   color: var(--flag-on, #ffffff) !important;
-  background: color-mix(in srgb,
-      var(--flag-on, #ffffff) 14%,
-      var(--bg-main, #2a2a2a) 86%) !important;
-  border-color: color-mix(in srgb,
-      var(--flag-on, #ffffff) 28%,
-      transparent) !important;
-  box-shadow: 0 0 10px color-mix(in srgb, var(--flag-on, #ffffff) 12%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--flag-on, #ffffff) 14%,
+    var(--bg-main, #2a2a2a) 86%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--flag-on, #ffffff) 28%,
+    transparent
+  ) !important;
+  box-shadow: 0 0 10px
+    color-mix(in srgb, var(--flag-on, #ffffff) 12%, transparent) !important;
 }
 
 .table-wrap,
 .table-wrap--motion-list,
 #instanceTabServers .table-wrap,
 .mods-list-panel__table-wrap {
-  background: color-mix(in srgb,
-      var(--bg-main) 62%,
-      var(--bg-widget) 38%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 82%, transparent) !important;
   border-radius: 8px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
@@ -5380,40 +5414,49 @@ table.data.data--mods thead th,
 table.data.data--saves thead th,
 table#tblSaves thead th,
 table.data.data--save-mods thead th,
-table#tblSaveModsCompare thead th {
+table#tblSaveModsCompare thead th,
+table#tblPublicServers thead th,
+table.access-users-table thead th,
+table#tblBackups thead th,
+.backup-tab__table thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(in srgb,
-      var(--bg-widget) 92%,
-      var(--bg-main) 8%) !important;
+  padding: 9px 12px !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
   color: var(--text-muted) !important;
   font-size: 0.92em !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
 /* Header sort hover and active states across tables (matching Users tab: access-users-table) */
+
 table.data thead th:hover,
 table#tblInstances thead th.instances-sort-th:hover,
 table#tblSaves thead th.saves-sort-th:hover,
 table.data thead th.saves-sort-th:hover,
 table.data thead th.instances-sort-th:hover,
-table.data thead th.mods-sort-th:hover {
+table.data thead th.mods-sort-th:hover,
+table#tblPublicServers thead th.access-sort-th:hover {
   color: var(--text) !important;
-  background: color-mix(in srgb,
-      var(--accent) 8%,
-      var(--bg-widget) 92%) !important;
+  background: var(--fcc-interactive-hover-bg) !important;
 }
 
 table#tblInstances thead th.instances-sort-th--active,
 table.data thead th.instances-sort-th--active,
 table#tblSaves thead th.saves-sort-th--active,
 table.data thead th.saves-sort-th--active,
-table.data thead th.mods-sort-th--active {
+table.data thead th.mods-sort-th--active,
+table#tblPublicServers thead th.access-sort-th--active {
   color: var(--accent-soft) !important;
 }
 
@@ -5445,28 +5488,28 @@ table.data thead th.mods-sort-th--asc::after {
 }
 
 /* Table Body Rows & Cells */
+
 table.data tbody tr td,
 table#tblInstances tbody tr td {
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
   color: var(--text);
   padding: 9px 12px !important;
 }
 
 /* Table Row Hover */
+
 table.data tbody tr:hover td,
 table#tblInstances tbody tr:hover td {
-  background: color-mix(in srgb,
-      var(--accent) 5%,
-      var(--bg-widget) 95%) !important;
+  background: var(--fcc-row-hover-bg) !important;
 }
 
 /* Selected Row (matching across both tables) */
+
 #tblInstancesBody tr.instance-row-selected td,
 #tblModsBody tr.mods-row--selected td,
 #tblSavesBody tr.mods-row--selected td {
-  background: color-mix(in srgb,
-      var(--accent, #da8216) 12%,
-      var(--bg-widget) 88%) !important;
+  background: var(--fcc-row-hover-selected-bg) !important;
   box-shadow: none !important;
 }
 
@@ -5478,6 +5521,7 @@ table#tblInstances tbody tr:hover td {
 }
 
 /* Instance Save Column */
+
 td.instance-save-cell {
   max-width: 260px;
   min-width: 120px;
@@ -5510,57 +5554,11 @@ td.instance-save-cell {
    ========================================================================== */
 
 /* 1. Global Viewport Background Grid (underlay for the entire application) */
-:root:not([data-theme]) #root::before,
-:root[data-theme='fcc_classic'] #root::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
-  background-size: 24px 24px;
-  background-attachment: fixed;
-  mask-image: radial-gradient(ellipse 95% 85% at 50% 20%,
-      black 0%,
-      black 60%,
-      transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 20%,
-      black 0%,
-      black 60%,
-      transparent 100%);
-  opacity: 0.75;
-}
-
-:root:not([data-theme]) #root:has(#loginScreen)::before,
-:root[data-theme='fcc_classic'] #root:has(#loginScreen)::before {
-  display: none !important;
-}
 
 /* 2. Main Workspace & Panels Background (no inner grid pattern) */
-:root:not([data-theme]) .panel-shell,
-:root:not([data-theme]) #instanceScreen.instance-screen,
-:root[data-theme='fcc_classic'] .panel-shell,
-:root[data-theme='fcc_classic'] #instanceScreen.instance-screen {
-  background-image:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
-      color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%) !important;
-  background-size: 100% 100% !important;
-  background-attachment: scroll !important;
-  background-repeat: no-repeat !important;
-}
-
-:root:not([data-theme]) .tab-panels,
-:root[data-theme='fcc_classic'] .tab-panels {
-  background-image: none !important;
-  background-color: color-mix(in srgb,
-      var(--bg-main) 58%,
-      var(--bg-widget) 42%) !important;
-}
 
 /* Server IP Combobox */
+
 .server-ip-combobox {
   display: flex;
   align-items: center;
@@ -5582,62 +5580,6 @@ td.instance-save-cell {
   width: 0 !important;
   height: 0 !important;
   pointer-events: none !important;
-}
-
-.instance-editor-field .server-ip-combobox {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.instance-editor-field .server-ip-combobox input {
-  padding-right: 28px;
-}
-
-.instance-editor-field .server-ip-combobox__toggle {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  margin: 0;
-  z-index: 2;
-}
-
-.instance-editor-field .server-ip-combobox__toggle.is-open {
-  transform: translateY(-50%) rotate(180deg);
-}
-
-.instance-editor-card--net {
-  overflow: visible !important;
-  position: relative;
-  z-index: 40;
-}
-
-.instance-editor-card--net .instance-editor-card__header {
-  border-top-left-radius: 9px;
-  border-top-right-radius: 9px;
-}
-
-.instance-editor-card--net .instance-editor-card__body {
-  overflow: visible !important;
-}
-
-.instance-editor-card--net .instance-editor-net-grid,
-.instance-editor-card--net .instance-editor-net-col {
-  overflow: visible !important;
-  position: relative;
-}
-
-.instance-editor-field--ip,
-.instance-editor-field:has(.server-ip-combobox) {
-  position: relative;
-  z-index: 50;
-  overflow: visible !important;
-}
-
-.instance-editor-card--path {
-  position: relative;
-  z-index: 1;
 }
 
 .server-ip-combobox__toggle {
@@ -5750,7 +5692,8 @@ td.instance-save-cell {
   color: var(--text-muted);
   padding: 4px 8px 6px;
   user-select: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
@@ -5816,6 +5759,7 @@ td.instance-save-cell {
 }
 
 /* Server Save Select */
+
 .server-save-select {
   display: flex;
   align-items: center;
@@ -5930,7 +5874,8 @@ td.instance-save-cell {
   text-transform: uppercase;
   color: var(--text-muted);
   padding: 2px 6px 4px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
@@ -6078,18 +6023,27 @@ td.instance-save-cell {
 .server-save-select__badge--autosave,
 .save-type-badge--autosave {
   color: color-mix(in srgb, #7ea8d6 40%, var(--text-muted) 60%);
-  background: color-mix(in srgb, #60a5fa 4%, color-mix(in srgb, var(--text) 8%, transparent));
+  background: color-mix(
+    in srgb,
+    #60a5fa 4%,
+    color-mix(in srgb, var(--text) 8%, transparent)
+  );
   border-color: color-mix(in srgb, #60a5fa 14%, var(--border-dark) 86%);
 }
 
 .server-save-select__badge--save,
 .save-type-badge--save {
   color: color-mix(in srgb, var(--accent) 40%, var(--text-muted) 60%);
-  background: color-mix(in srgb, var(--accent) 4%, color-mix(in srgb, var(--text) 8%, transparent));
+  background: color-mix(
+    in srgb,
+    var(--accent) 4%,
+    color-mix(in srgb, var(--text) 8%, transparent)
+  );
   border-color: color-mix(in srgb, var(--accent) 14%, var(--border-dark) 86%);
 }
 
 /* Saves Table sorting headers */
+
 table.data thead th.saves-sort-th {
   cursor: pointer;
   user-select: none;
@@ -6100,9 +6054,7 @@ table.data thead th.saves-sort-th {
 
 table.data thead th.saves-sort-th:hover {
   color: var(--text) !important;
-  background: color-mix(in srgb,
-      var(--accent) 8%,
-      var(--bg-widget) 92%) !important;
+  background: var(--fcc-interactive-hover-bg) !important;
 }
 
 table.data thead th.saves-sort-th--active {
@@ -6127,13 +6079,15 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 /* Saves detail overview heading */
+
 .saves-detail-panel__overview {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 9px 12px;
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 78%, transparent);
   min-height: 52px;
   height: 52px;
   box-sizing: border-box;
@@ -6151,9 +6105,11 @@ table.data thead th.saves-sort-th--asc::after {
   max-height: 34px !important;
   box-sizing: border-box;
   padding: 0 12px 0 10px !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 60%,
-      var(--bg-widget) 40%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 60%,
+    var(--bg-widget) 40%
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
   border-left: 3.5px solid var(--accent) !important;
   border-radius: 6px !important;
@@ -6224,13 +6180,18 @@ table.data thead th.saves-sort-th--asc::after {
 
 .saves-mods-badge--ok {
   color: var(--online-green, #6a9a5c);
-  background: color-mix(in srgb,
-      var(--online-green, #6a9a5c) 14%,
-      var(--bg-main) 86%);
-  border-color: color-mix(in srgb,
-      var(--online-green, #6a9a5c) 36%,
-      transparent);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--online-green, #6a9a5c) 16%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--online-green, #6a9a5c) 14%,
+    var(--bg-main) 86%
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--online-green, #6a9a5c) 36%,
+    transparent
+  );
+  box-shadow: 0 0 6px
+    color-mix(in srgb, var(--online-green, #6a9a5c) 16%, transparent);
 }
 
 .saves-mods-badge--warn {
@@ -6311,7 +6272,8 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center;
   gap: 8px;
   padding: 9px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 78%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 78%, transparent);
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
   min-height: 52px;
   height: 52px;
@@ -6386,9 +6348,11 @@ table.data thead th.saves-sort-th--asc::after {
   min-height: 0;
   border: none !important;
   border-radius: 0 !important;
-  background: color-mix(in srgb,
-      var(--bg-main) 62%,
-      var(--bg-widget) 38%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
+  ) !important;
   box-shadow: none !important;
   overflow: auto;
 }
@@ -6397,15 +6361,18 @@ table.data thead th.saves-sort-th--asc::after {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(in srgb,
-      var(--bg-widget) 92%,
-      var(--bg-main) 8%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
   color: var(--text-muted) !important;
   font-size: 0.92em !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
@@ -6434,7 +6401,11 @@ table.data thead th.saves-sort-th--asc::after {
   min-height: 0;
   border: none !important;
   border-radius: 0 !important;
-  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
+  ) !important;
   box-shadow: none !important;
   overflow: auto;
 }
@@ -6443,17 +6414,23 @@ table.data thead th.saves-sort-th--asc::after {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
   color: var(--text-muted) !important;
   font-size: 0.92em !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
 /* Saves Split layout adjustment: balanced proportions (52% saves / 48% mods list) */
+
 @media (min-width: 901px) {
   #tabPanelSaves .saves-split {
     display: flex;
@@ -6488,7 +6465,8 @@ table.data thead th.saves-sort-th--asc::after {
 @media (min-width: 720px) {
   .control-tab__launch-grid {
     grid-template-columns:
-      minmax(7rem, 0.8fr) minmax(7.5rem, 9.5rem) minmax(0, 1.65fr) auto !important;
+      minmax(7rem, 0.8fr) minmax(7.5rem, 9.5rem) minmax(0, 1.65fr)
+      auto !important;
   }
 }
 
@@ -6546,7 +6524,8 @@ table.data thead th.saves-sort-th--asc::after {
   transform: translateY(1px);
 }
 
-.instance-servers-bar .instance-servers-toolbar__btn--danger:hover:not(:disabled) {
+.instance-servers-bar
+  .instance-servers-toolbar__btn--danger:hover:not(:disabled) {
   background: color-mix(in srgb, #e03131 28%, transparent);
   color: #ff9090;
 }
@@ -6603,7 +6582,8 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center;
   justify-content: space-between;
   padding: 4px 6px 6px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
   margin-bottom: 2px;
 }
 
@@ -6661,7 +6641,7 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 .instance-columns-dropdown__item:hover {
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+  background: var(--fcc-row-hover-bg);
 }
 
 .instance-columns-dropdown__item .fcc-switch {
@@ -6881,7 +6861,11 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 .server-settings-tab .settings-section:hover {
-  border-color: color-mix(in srgb, var(--border-dark) 80%, var(--accent) 20%) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--border-dark) 80%,
+    var(--accent) 20%
+  ) !important;
 }
 
 /* ── Section Header ──────────────────────────────────────────────────── */
@@ -6971,7 +6955,7 @@ table.data thead th.saves-sort-th--asc::after {
   box-sizing: border-box !important;
 }
 
-.server-settings-tab .settings-row__control>* {
+.server-settings-tab .settings-row__control > * {
   width: 100% !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
@@ -6990,7 +6974,11 @@ table.data thead th.saves-sort-th--asc::after {
   line-height: calc(var(--sst-input-height) - 2px) !important;
   padding: 0 clamp(9px, 0.8vw, 13px) !important;
   border-radius: 6px !important;
-  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-widget) 30%
+  ) !important;
   border: 1px solid var(--border-dark) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   color: var(--text) !important;
@@ -7005,7 +6993,11 @@ table.data thead th.saves-sort-th--asc::after {
 .server-settings-tab .settings-row__control .input:focus,
 .server-settings-tab .settings-row__control select.input:focus {
   border-color: var(--accent) !important;
-  background: color-mix(in srgb, var(--bg-main) 55%, var(--bg-widget) 45%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 55%,
+    var(--bg-widget) 45%
+  ) !important;
   box-shadow:
     inset 0 1px 2px rgba(0, 0, 0, 0.2),
     0 0 0 1px var(--accent) !important;
@@ -7101,7 +7093,11 @@ table.data thead th.saves-sort-th--asc::after {
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent !important;
   padding: 0 6px !important;
   border-radius: 6px !important;
-  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 70%,
+    var(--bg-widget) 30%
+  ) !important;
   border: 1px solid var(--border-dark) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   box-sizing: border-box !important;
@@ -7133,7 +7129,11 @@ table.data thead th.saves-sort-th--asc::after {
 
 .server-settings-tab .settings-tags-wrap:focus-within {
   border-color: var(--accent) !important;
-  background: color-mix(in srgb, var(--bg-main) 55%, var(--bg-widget) 45%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 55%,
+    var(--bg-widget) 45%
+  ) !important;
   box-shadow:
     inset 0 1px 2px rgba(0, 0, 0, 0.2),
     0 0 0 1px var(--accent) !important;
@@ -7150,8 +7150,13 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center !important;
   gap: 3px !important;
   height: calc(var(--sst-input-height) - 10px) !important;
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%) !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border-dark) 68%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 14%,
+    var(--bg-widget) 86%
+  ) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--accent) 32%, var(--border-dark) 68%) !important;
   border-radius: 4px !important;
   padding: 0 6px !important;
   font-size: calc(var(--sst-label-font) - 1.5px) !important;
@@ -7253,7 +7258,8 @@ table.data thead th.saves-sort-th--asc::after {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: var(--sst-row-gap) clamp(12px, 1vw, 20px) !important;
-  padding: clamp(4px, 0.6vh, 10px) var(--sst-card-pad-h) var(--sst-card-pad-v) var(--sst-card-pad-h) !important;
+  padding: clamp(4px, 0.6vh, 10px) var(--sst-card-pad-h) var(--sst-card-pad-v)
+    var(--sst-card-pad-h) !important;
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 50%, transparent) !important;
   margin-top: 2px !important;
 }

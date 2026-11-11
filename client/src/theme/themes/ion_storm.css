@@ -1,0 +1,1707 @@
+/* ==========================================================================
+   Factorio Control Center — Ion Storm Theme
+   ========================================================================== */
+
+:root[data-theme='ion_storm'] {
+  --bg-main: #120d10;
+  --bg-widget: #1f171c;
+  --bg-data: #1a1418;
+  --bg-card: var(--bg-data);
+  --bg-card-header: var(--bg-widget);
+  --bg-modal: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%);
+  --bg-modal-header: var(--bg-widget);
+  --bg-modal-footer: color-mix(
+    in srgb,
+    var(--bg-widget) 82%,
+    var(--bg-main) 18%
+  );
+  --bg-input: #140e12;
+  --bg-log: #0a0709;
+  --border: #3d2c38;
+  --border-dark: #0f0a0c;
+  --border-inset-t: #080506;
+  --text: #e8eef2;
+  --text-muted: #9a8a98;
+  --text-dim: #6d6270;
+  --accent: #38ddf0;
+  --accent-soft: #6aeef8;
+  --accent-selected: #d0fcff;
+  --accent-rgb: 56, 221, 240;
+  --running: #9ae64a;
+  --stopped: #6d6270;
+  --starting: #e89830;
+  --stopping: #d07020;
+  --error: #ff4a58;
+  --flag-on: #b8f8ff;
+  --flag-off: #6d6270;
+  --online-green: #9ae64a;
+  --btn-top: #342838;
+  --btn-mid: #281e2a;
+  --btn-bot: #1c141e;
+  --btn-hover-top: #423447;
+  --btn-hover-mid: #332637;
+  --btn-hover-bot: #241a28;
+  --ion-orbit-period: 80s;
+  --ion-aurora-period: 38s;
+  --ion-radial-period: 28s;
+  --fcc-btn-bg: #281e2a;
+  --fcc-btn-bg-hover: #36293a;
+  --fcc-btn-bg-active: #1c141e;
+  --fcc-btn-bg-primary: var(--fcc-btn-bg);
+  --fcc-btn-bg-primary-hover: var(--fcc-btn-bg-hover);
+  --fcc-btn-bg-danger: var(--fcc-btn-bg);
+  --fcc-btn-bg-danger-hover: color-mix(in srgb, var(--error) 24%, #281e2a 76%);
+  --fcc-btn-bg-disabled: #140e14;
+  --fcc-btn-border: #443246;
+  --fcc-btn-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='ion_storm']::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(56, 221, 240, 0) 0deg,
+    rgba(56, 221, 240, 0.048) 52deg,
+    rgba(130, 85, 195, 0) 118deg,
+    rgba(190, 120, 235, 0.042) 182deg,
+    rgba(56, 221, 240, 0) 248deg,
+    rgba(80, 210, 230, 0.038) 312deg,
+    rgba(56, 221, 240, 0) 360deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.5) 36%,
+    rgba(0, 0, 0, 0.12) 56%,
+    rgba(0, 0, 0, 0) 74%
+  );
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.5) 36%,
+    rgba(0, 0, 0, 0.12) 56%,
+    rgba(0, 0, 0, 0) 74%
+  );
+  animation: ion-storm-conic-orbit var(--ion-orbit-period, 80s) linear infinite;
+  transform-origin: 50% 50%;
+  opacity: 0.94;
+}
+
+:root[data-theme='ion_storm'] body::before {
+  background:
+    radial-gradient(
+      ellipse 95% 72% at 18% 88%,
+      rgba(56, 221, 240, 0.11),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 92% 70% at 84% 20%,
+      rgba(160, 90, 220, 0.09),
+      transparent 56%
+    ),
+    radial-gradient(
+      ellipse 78% 58% at 50% 6%,
+      rgba(255, 255, 255, 0.05),
+      transparent 52%
+    ),
+    linear-gradient(168deg, #0b0709 0%, #120d10 40%, #1a1420 100%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    50% 50%,
+    50% 50%,
+    50% 50%,
+    50% 50%;
+}
+
+:root[data-theme='ion_storm'] body.ion-storm-login::before,
+:root[data-theme='ion_storm'] body.ion-storm-cruise::before,
+:root[data-theme='ion_storm'] body.ion-storm-plasma::before {
+  background-size:
+    215% 195%,
+    205% 188%,
+    172% 148%,
+    100% 100%;
+  animation: ion-storm-aurora-orbit var(--ion-aurora-period, 38s)
+    cubic-bezier(0.42, 0.03, 0.28, 1) infinite;
+  will-change: background-position, filter;
+}
+
+:root[data-theme='ion_storm'] body.ion-storm-warp::before {
+  background-size:
+    210% 190%,
+    200% 185%,
+    168% 142%,
+    100% 100%;
+  animation: ion-storm-aurora-warp-soft var(--ion-aurora-period, 6s)
+    cubic-bezier(0.44, 0.1, 0.34, 1) infinite;
+  will-change: background-position, filter;
+}
+
+:root[data-theme='ion_storm'] body::after {
+  opacity: 1;
+  background:
+    radial-gradient(
+      circle 95vmin at 50% 50%,
+      rgba(56, 221, 240, 0.065) 0%,
+      rgba(130, 85, 185, 0.045) 32%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 92% 78% at 50% 50%,
+      transparent 52%,
+      rgba(10, 5, 14, 0.42) 100%
+    );
+  background-size:
+    100% 100%,
+    100% 100%;
+  transform-origin: 50% 50%;
+}
+
+:root[data-theme='ion_storm'] body.ion-storm-login::after,
+:root[data-theme='ion_storm']
+  body.ion-storm-cruise:not(.ion-storm-plasma)::after,
+:root[data-theme='ion_storm'] body.ion-storm-plasma::after {
+  animation: ion-storm-radial-breathe var(--ion-radial-period, 28s)
+    cubic-bezier(0.42, 0.06, 0.29, 1) infinite;
+  will-change: transform, opacity;
+}
+
+:root[data-theme='ion_storm'] body.ion-storm-warp::after {
+  animation: ion-storm-radial-warp var(--ion-radial-period, 5s)
+    cubic-bezier(0.44, 0.1, 0.34, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='ion_storm']::before,
+  :root[data-theme='ion_storm'] body.ion-storm-login::before,
+  :root[data-theme='ion_storm'] body.ion-storm-login::after,
+  :root[data-theme='ion_storm'] body.ion-storm-cruise::before,
+  :root[data-theme='ion_storm'] body.ion-storm-cruise::after,
+  :root[data-theme='ion_storm'] body.ion-storm-plasma::before,
+  :root[data-theme='ion_storm'] body.ion-storm-plasma::after,
+  :root[data-theme='ion_storm'] body.ion-storm-warp::before,
+  :root[data-theme='ion_storm'] body.ion-storm-warp::after {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='ion_storm']::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-login::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-login::after,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-cruise::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-cruise::after,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-plasma::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-plasma::after,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-warp::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  body.ion-storm-warp::after {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+:root[data-theme='ion_storm'] ::selection {
+  background: var(--accent-soft);
+  color: #0c060a;
+}
+
+:root[data-theme='ion_storm'] .login-screen {
+  transition:
+    opacity 580ms cubic-bezier(0.33, 0.06, 0.22, 1),
+    transform 680ms cubic-bezier(0.33, 0.06, 0.22, 1);
+}
+
+:root[data-theme='ion_storm'] .login-screen.is-leaving {
+  transition:
+    opacity 780ms cubic-bezier(0.36, 0.08, 0.22, 1),
+    transform 820ms cubic-bezier(0.34, 0.06, 0.2, 1);
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .panel__body {
+  transition:
+    opacity 0.62s cubic-bezier(0.34, 0.08, 0.22, 1),
+    transform 0.62s cubic-bezier(0.34, 0.08, 0.22, 1),
+    max-height 0.72s cubic-bezier(0.34, 0.08, 0.22, 1) 0.06s,
+    padding 0.72s cubic-bezier(0.34, 0.08, 0.22, 1) 0.06s,
+    margin 0.72s cubic-bezier(0.34, 0.08, 0.22, 1) 0.06s;
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .panel__title {
+  transition:
+    color 0.55s cubic-bezier(0.34, 0.08, 0.22, 1),
+    text-shadow 0.55s cubic-bezier(0.34, 0.08, 0.22, 1),
+    letter-spacing 0.62s cubic-bezier(0.28, 0.06, 0.22, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='ion_storm'] .app.is-reveal-from-ash,
+  :root[data-theme='ion_storm'] .app.is-reveal-from-ash::before,
+  :root[data-theme='ion_storm'] .app.is-reveal-from-ash::after,
+  :root[data-theme='ion_storm'] .login-screen.is-success::before,
+  :root[data-theme='ion_storm'] .login-screen.is-success::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .app.is-reveal-from-ash,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .app.is-reveal-from-ash::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .app.is-reveal-from-ash::after,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .login-screen.is-success::before,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .login-screen.is-success::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-theme='ion_storm'] .app {
+  position: relative;
+}
+
+:root[data-theme='ion_storm'] .app.is-reveal-from-ash {
+  opacity: 0;
+  transform: translateY(6px) scale(0.994);
+  filter: contrast(0.94) saturate(0.92) brightness(0.96);
+  transition:
+    opacity 1.05s cubic-bezier(0.33, 0.02, 0.25, 1),
+    transform 1.05s cubic-bezier(0.33, 0.02, 0.25, 1),
+    filter 1.05s cubic-bezier(0.33, 0.02, 0.25, 1);
+}
+
+:root[data-theme='ion_storm'] .app.is-reveal-from-ash.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: contrast(1) saturate(1) brightness(1);
+}
+
+:root[data-theme='ion_storm'] .app.is-reveal-from-ash::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background:
+    radial-gradient(
+      ellipse 130% 100% at 50% 58%,
+      rgba(40, 20, 50, 0) 0%,
+      rgba(24, 12, 36, 0.28) 50%,
+      rgba(8, 4, 14, 0.5) 100%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 32% 38%,
+      rgba(56, 221, 240, 0.11) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 74% 58%,
+      rgba(160, 90, 220, 0.06) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      185deg,
+      rgba(30, 50, 62, 0.22) 0%,
+      rgba(18, 28, 44, 0.36) 42%,
+      rgba(10, 8, 20, 0.44) 100%
+    );
+  opacity: 0;
+  animation: app-reveal-ds-veil 1.62s cubic-bezier(0.33, 0.02, 0.25, 1) forwards;
+}
+
+:root[data-theme='ion_storm'] .app.is-reveal-from-ash::after {
+  content: '';
+  position: fixed;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  background-image:
+    repeating-radial-gradient(
+      circle at 18% 34%,
+      rgba(120, 230, 255, 0.07) 0,
+      transparent 3px,
+      transparent 7px
+    ),
+    repeating-radial-gradient(
+      circle at 74% 52%,
+      rgba(180, 120, 240, 0.055) 0,
+      transparent 2px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      98deg,
+      transparent 0,
+      transparent 11px,
+      rgba(40, 28, 72, 0.035) 11px,
+      rgba(40, 28, 72, 0.035) 12px
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    200% 200%;
+  animation: app-reveal-ds-grain 1.62s cubic-bezier(0.33, 0.02, 0.2, 1) forwards;
+}
+
+:root[data-theme='ion_storm'] .saves-detail-panel {
+  border-color: #1a1a1a;
+  background: linear-gradient(165deg, #222222 0%, #1a1a1a 100%);
+}
+
+:root[data-theme='ion_storm'] .saves-mods-compare {
+  border-color: #1a1a1a;
+  background: #1c1c1c;
+}
+
+:root[data-theme='ion_storm'] .saves-mods-compare__body {
+  border-top-color: #1a1a1a;
+}
+
+:root[data-theme='ion_storm'] .save-factorio-version-line {
+  border-color: #1a1a1a;
+  background: #1c1c1c;
+}
+
+:root[data-theme='ion_storm'] #tblInstancesBody tr.instance-row-selected {
+  background: transparent;
+  outline: none;
+}
+
+:root[data-theme='ion_storm'] #tblInstancesBody tr.instance-row-selected td {
+  background: color-mix(in srgb, #69c9ff 12%, var(--bg-widget) 88%) !important;
+  box-shadow: none;
+}
+
+:root[data-theme='ion_storm']
+  #tblInstancesBody
+  tr.instance-row-selected
+  td:first-child {
+  box-shadow: inset 3px 0 0 #69c9ff;
+}
+
+:root[data-theme='ion_storm']
+  #tblInstancesBody
+  tr.instance-row-selected
+  td:last-child {
+  border-right: none;
+}
+
+:root[data-theme='ion_storm']
+  #tblModsBody
+  tr.mods-row--selected:hover
+  td:first-child {
+  box-shadow: inset 3px 0 0 #69c9ff;
+}
+
+:root[data-theme='ion_storm'] #tblModsBody tr.mods-row--selected {
+  background: transparent;
+  outline: none;
+}
+
+:root[data-theme='ion_storm'] #tblModsBody tr.mods-row--selected td {
+  background: color-mix(in srgb, #69c9ff 12%, var(--bg-widget) 88%) !important;
+  box-shadow: none;
+}
+
+:root[data-theme='ion_storm']
+  #tblModsBody
+  tr.mods-row--selected
+  td:first-child {
+  box-shadow: inset 3px 0 0 #69c9ff;
+}
+
+:root[data-theme='ion_storm'] #tblModsBody tr.mods-row--selected td:last-child {
+  border-right: none;
+}
+
+:root[data-theme='ion_storm']
+  #tblModsBody
+  tr.mods-row--disabled.mods-row--selected
+  td {
+  background: color-mix(in srgb, #69c9ff 8%, var(--bg-widget) 92%) !important;
+}
+
+:root[data-theme='ion_storm']
+  #tblModsBody
+  tr.mods-row--disabled.mods-row--selected:hover
+  td {
+  background: color-mix(in srgb, #69c9ff 10%, var(--bg-widget) 90%) !important;
+}
+
+:root[data-theme='ion_storm'] #tblModsBody td.mods-portal-newer {
+  color: #4db8e8;
+  text-shadow: 0 0 6px rgba(70, 190, 240, 0.45);
+  animation-name: mods-portal-newer-pulse-dark-space;
+}
+
+:root[data-theme='ion_storm'] .app__auth {
+  background: var(--bg-widget);
+  border: 1px solid #2a2a2a;
+}
+
+:root[data-theme='ion_storm'] .app {
+  background-color: transparent;
+  isolation: isolate;
+}
+
+:root[data-theme='ion_storm'] .workspace,
+:root[data-theme='ion_storm'] .workspace__main {
+  background-color: transparent;
+}
+
+:root[data-theme='ion_storm'] .panel {
+  background-color: var(--bg-main);
+  background-image: none;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='ion_storm'] .panel__title {
+  background: color-mix(in srgb, var(--bg-main) 72%, var(--bg-widget) 28%);
+  border-bottom: 1px solid #2a2a2a;
+  color: #a8a8a8;
+  text-shadow: none;
+}
+
+:root[data-theme='ion_storm'] .panel__title--sub {
+  border: none;
+  color: #a8a8a8;
+  background: color-mix(in srgb, var(--bg-main) 72%, var(--bg-widget) 28%);
+}
+
+:root[data-theme='ion_storm'] .panel__body {
+  background-color: var(--bg-main);
+  border-radius: 0;
+}
+
+:root[data-theme='ion_storm'] .status-bar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
+    color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--border-dark) 92%, transparent);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme='ion_storm'] .status-bar__label {
+  color: var(--text);
+}
+
+:root[data-theme='ion_storm'] .status-flag {
+  color: var(--flag-off);
+  letter-spacing: 0.04em;
+}
+
+:root[data-theme='ion_storm'] .status-flag--on {
+  color: var(--flag-on);
+  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4);
+}
+
+:root[data-theme='ion_storm'] .status-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--accent-rgb), 0.35),
+    rgba(0, 0, 0, 0.55)
+  );
+  box-shadow: 1px 0 0 rgba(var(--accent-rgb), 0.05);
+}
+
+:root[data-theme='ion_storm'] .tabs,
+:root[data-theme='ion_storm'] .sub-tabs,
+:root[data-theme='ion_storm'] .maintenance-inner-tabs {
+  background: color-mix(in srgb, var(--bg-widget) 92%, #000 8%);
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme='ion_storm'] .tabs__tab,
+:root[data-theme='ion_storm'] .sub-tabs__tab {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  font-weight: 650;
+}
+
+:root[data-theme='ion_storm'] .tabs__tab:hover,
+:root[data-theme='ion_storm'] .sub-tabs__tab:hover {
+  background: var(--fcc-interactive-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text);
+}
+
+:root[data-theme='ion_storm'] .tabs__tab--active,
+:root[data-theme='ion_storm'] .sub-tabs__tab--active {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.25);
+}
+
+:root[data-theme='ion_storm'] .tabs__sliding-highlight,
+:root[data-theme='ion_storm'] .sub-tabs__sliding-highlight,
+:root[data-theme='ion_storm']
+  .tabs__tab--active:not(:has(.tabs__sliding-highlight)),
+:root[data-theme='ion_storm']
+  .sub-tabs__tab--active:not(:has(.sub-tabs__sliding-highlight)) {
+  background: color-mix(in srgb, var(--accent) 14%, #1f1f1f 86%);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 14px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+:root[data-theme='ion_storm'] .tab-panels {
+  background: var(--bg-widget);
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-theme='ion_storm'] .panel-shell > .tab-panels {
+  overflow: auto;
+}
+
+:root[data-theme='ion_storm'] .tab-panels::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0) 10%,
+    rgba(var(--accent-rgb), 0.85) 50%,
+    rgba(var(--accent-rgb), 0) 90%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateY(0);
+}
+
+:root[data-theme='ion_storm'] .tab-panels.is-switching::before {
+  animation: tab-scan-sweep 0.42s cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+
+:root[data-theme='ion_storm'] .tab-panel.tab-panel--active {
+  animation: tab-panel-enter-hud 0.42s cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='ion_storm'] .tab-panel.tab-panel--active,
+  :root[data-theme='ion_storm'] .tab-panels.is-switching::before {
+    animation: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .tab-panel.tab-panel--active,
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .tab-panels.is-switching::before {
+  animation: none !important;
+}
+
+:root[data-theme='ion_storm'] .btn {
+  text-shadow: none;
+}
+
+:root[data-theme='ion_storm'] .btn:hover:not(:disabled):not(.is-locked) {
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .btn:active:not(:disabled):not(.is-locked) {
+  color: var(--accent-selected);
+}
+
+:root[data-theme='ion_storm'] .btn:disabled,
+:root[data-theme='ion_storm'] .btn.is-locked {
+  color: #555555;
+}
+
+:root[data-theme='ion_storm']
+  .btn--primary:hover:not(:disabled):not(.is-locked) {
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm']
+  .btn--danger:hover:not(:disabled):not(.is-locked) {
+  color: #ff8870;
+}
+
+:root[data-theme='ion_storm'] .input {
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid #2a2a2a;
+  border-radius: 0;
+}
+
+:root[data-theme='ion_storm'] .input:hover:not(:focus):not(:disabled) {
+  border-color: #3a3a3a;
+}
+
+:root[data-theme='ion_storm'] .input:focus {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25);
+}
+
+:root[data-theme='ion_storm'] select.input,
+:root[data-theme='ion_storm'] .settings-json {
+  background: var(--bg-input);
+}
+
+:root[data-theme='ion_storm'] select.input option {
+  background: var(--bg-data);
+  color: var(--text);
+}
+
+:root[data-theme='ion_storm'] input[type='checkbox'] {
+  background: var(--bg-input);
+  border: 1px solid #2a2a2a;
+  border-radius: 0;
+}
+
+:root[data-theme='ion_storm'] input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .log-view,
+:root[data-theme='ion_storm'] #chatLog,
+:root[data-theme='ion_storm'] .fu-log {
+  background: var(--bg-log);
+  color: #d6d6d6;
+  border: 1px solid #1a1a1a;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-theme='ion_storm'] table.data th {
+  background: #1a1a1a;
+  color: #a8a8a8;
+  border-bottom: 1px solid #2a2a2a;
+  font-weight: bold;
+}
+
+:root[data-theme='ion_storm'] table.data th:hover {
+  color: var(--accent);
+  border-bottom-color: rgba(var(--accent-rgb), 0.55);
+}
+
+:root[data-theme='ion_storm'] table.data th,
+:root[data-theme='ion_storm'] table.data td {
+  border-color: #1a1a1a;
+}
+
+:root[data-theme='ion_storm'] table.data tbody tr td {
+  background: transparent;
+}
+
+:root[data-theme='ion_storm'] #tblWebUsersBody tr.access-users-row--selected td,
+:root[data-theme='ion_storm'] #tblWebUsersBody tr.mods-row--selected td {
+  background: var(--fcc-row-hover-selected-bg);
+  color: var(--accent-selected);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.access-users-row--selected
+  td:first-child,
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.mods-row--selected
+  td:first-child {
+  box-shadow:
+    inset 1px 0 0 rgba(var(--accent-rgb), 0.38),
+    inset 0 1px 0 rgba(212, 232, 245, 0.08),
+    inset 0 -1px 0 rgba(var(--accent-rgb), 0.38),
+    0 0 12px rgba(var(--accent-rgb), 0.16);
+}
+
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.access-users-row--selected
+  td:last-child,
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.mods-row--selected
+  td:last-child {
+  box-shadow:
+    inset -1px 0 0 rgba(var(--accent-rgb), 0.38),
+    inset 0 1px 0 rgba(212, 232, 245, 0.08),
+    inset 0 -1px 0 rgba(var(--accent-rgb), 0.38),
+    0 0 12px rgba(var(--accent-rgb), 0.16);
+}
+
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.access-users-row--selected
+  td:not(:first-child):not(:last-child),
+:root[data-theme='ion_storm']
+  #tblWebUsersBody
+  tr.mods-row--selected
+  td:not(:first-child):not(:last-child) {
+  box-shadow:
+    inset 0 1px 0 rgba(212, 232, 245, 0.08),
+    inset 0 -1px 0 rgba(var(--accent-rgb), 0.38);
+}
+
+:root[data-theme='ion_storm'] .table-wrap {
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+  border: 1px solid #1c2230;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(170, 196, 214, 0.04);
+}
+
+:root[data-theme='ion_storm'] .commands-tab__card {
+  background: linear-gradient(165deg, #222222 0%, #1a1a1a 100%);
+  border-color: #1a1a1a;
+}
+
+:root[data-theme='ion_storm'] .commands-group {
+  background: color-mix(in srgb, #1c1c1c 88%, #242424 12%);
+  border: 1px solid #1a1a1a;
+  border-radius: 9px;
+}
+
+:root[data-theme='ion_storm'] .commands-group__title {
+  color: var(--accent);
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+:root[data-theme='ion_storm'] .commands-item {
+  background: color-mix(in srgb, #232323 90%, #1a1a1a 10%);
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+}
+
+:root[data-theme='ion_storm'] .commands-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, #1a1a1a);
+  background: var(--fcc-interactive-hover-bg);
+  box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
+:root[data-theme='ion_storm'] .commands-item--selected {
+  border-color: color-mix(in srgb, var(--accent) 42%, #1a1a1a);
+  background: var(--fcc-row-hover-selected-bg);
+  box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
+:root[data-theme='ion_storm'] .commands-editor {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel.panel {
+  background: var(--bg-main);
+  border: 1px solid #1a2030;
+  border-radius: 0;
+  box-shadow:
+    0 0 0 1px rgba(80, 160, 220, 0.05),
+    0 0 28px rgba(80, 160, 220, 0.08),
+    0 0 22px rgba(var(--accent-rgb), 0.06),
+    0 18px 38px rgba(0, 0, 0, 0.85);
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .panel__title {
+  background: linear-gradient(to bottom, #101722, #02040a);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border-bottom: 1px solid #1a3050;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 0 8px rgba(var(--accent-rgb), 0.35);
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .panel__body {
+  background: var(--bg-main);
+}
+
+:root[data-theme='ion_storm'] .login-screen__brand {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      rgba(80, 160, 220, 0.025) 3px,
+      rgba(80, 160, 220, 0.025) 4px
+    ),
+    linear-gradient(to bottom, rgba(8, 10, 18, 0.96), rgba(2, 4, 10, 0.98));
+  border: 1px solid #1a2030;
+  border-radius: 0;
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  text-shadow:
+    0 0 22px rgba(var(--accent-rgb), 0.55),
+    0 0 6px rgba(var(--accent-rgb), 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(80, 160, 220, 0.08),
+    0 0 36px rgba(80, 160, 220, 0.12),
+    0 0 24px rgba(var(--accent-rgb), 0.1),
+    0 16px 36px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+:root[data-theme='ion_storm'] .login-screen__corner {
+  filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.55))
+    drop-shadow(0 0 8px rgba(80, 160, 220, 0.2));
+}
+
+:root[data-theme='ion_storm'] .login-screen__hud {
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 10, 18, 0.92),
+    rgba(2, 4, 10, 0.96)
+  );
+  border: 1px solid #1a2030;
+  border-radius: 0;
+  color: #c0d4e0;
+  box-shadow:
+    0 0 0 1px rgba(80, 160, 220, 0.05),
+    0 0 18px rgba(80, 160, 220, 0.08),
+    0 6px 16px rgba(0, 0, 0, 0.7);
+}
+
+:root[data-theme='ion_storm'] .login-screen__hud-label {
+  color: rgba(120, 170, 200, 0.75);
+}
+
+:root[data-theme='ion_storm'] .login-screen__hud-value {
+  color: #e6e6e6;
+  text-shadow: 0 0 6px rgba(80, 160, 220, 0.2);
+}
+
+:root[data-theme='ion_storm'] .login-screen__hud-value--accent {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55);
+}
+
+:root[data-theme='ion_storm'] .login-screen__hud-divider {
+  background: rgba(80, 160, 220, 0.3);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme='ion_storm'] .login-screen__caps {
+  color: #ff8a3a;
+  text-shadow:
+    0 0 6px rgba(255, 138, 58, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+:root[data-theme='ion_storm'] .login-screen__label {
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #a8bdd0;
+  border-left-color: rgba(100, 170, 220, 0.9);
+  background: linear-gradient(
+    90deg,
+    rgba(80, 160, 220, 0.12) 0%,
+    rgba(var(--accent-rgb), 0.08) 45%,
+    transparent 100%
+  );
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(80, 160, 220, 0.15);
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .login-screen__field {
+  border-radius: 0;
+  background: #050608;
+  border: 1px solid #1a2030;
+  border-top-color: #020304;
+  border-left-color: #0a0e14;
+  box-shadow:
+    inset 0 0 0 1px rgba(80, 160, 220, 0.07),
+    inset 0 3px 8px rgba(0, 0, 0, 0.65);
+  color: #e8eef4;
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .login-screen__field:focus {
+  border-color: rgba(120, 185, 220, 0.75);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(80, 160, 220, 0.35),
+    0 0 16px rgba(80, 160, 220, 0.18);
+}
+
+:root[data-theme='ion_storm'] .login-screen__submit {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 9pt;
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel .login-screen__submit:hover {
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm']
+  .login-screen__panel
+  .login-screen__submit:active {
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .login-screen__pass-toggle {
+  color: rgba(140, 175, 200, 0.75);
+}
+
+:root[data-theme='ion_storm'] .login-screen__pass-toggle:hover {
+  color: var(--accent);
+  border-color: rgba(80, 160, 220, 0.35);
+}
+
+:root[data-theme='ion_storm'] .login-screen.is-success {
+  position: relative;
+}
+
+:root[data-theme='ion_storm'] .login-screen.is-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background:
+    radial-gradient(
+      circle 125vmax at 50% 50%,
+      rgba(56, 221, 240, 0.075) 0%,
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse 96% 90% at 50% 108%,
+      rgba(14, 8, 20, 0.44) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 74% 58% at 30% 40%,
+      rgba(70, 190, 215, 0.09) 0%,
+      transparent 56%
+    ),
+    radial-gradient(
+      ellipse 74% 58% at 70% 38%,
+      rgba(150, 95, 205, 0.075) 0%,
+      transparent 54%
+    );
+  opacity: 0;
+  animation: login-ion-radial-veil 2.85s cubic-bezier(0.34, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='ion_storm'] .login-screen.is-success::after {
+  content: '';
+  position: absolute;
+  inset: -9%;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  background-image:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 26%,
+      rgba(56, 221, 240, 0.055) 42%,
+      transparent 62%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 44%,
+      rgba(130, 85, 185, 0.048) 58%,
+      transparent 76%
+    ),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.022) 0,
+      transparent 3px,
+      transparent 11px
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    130% 130%;
+  animation: login-ion-radial-drift 2.95s cubic-bezier(0.34, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='ion_storm'] .login-screen__panel.is-success {
+  animation: login-grant-pulse-ion 1.35s cubic-bezier(0.34, 0.08, 0.22, 1);
+}
+
+:root[data-theme='ion_storm']
+  .login-screen__panel.is-success
+  .login-screen__corner {
+  animation: login-grant-corner-ion 1.25s cubic-bezier(0.34, 0.08, 0.26, 1);
+}
+
+:root[data-theme='ion_storm']
+  .login-screen.is-success
+  .login-screen__hud-pulse {
+  animation: login-pulse-grant-ion 1.15s cubic-bezier(0.34, 0.1, 0.24, 1)
+    forwards;
+}
+
+:root[data-theme='ion_storm'] .active-modpack-pill {
+  border: 0;
+  border-radius: 0;
+  background: rgba(var(--accent-rgb), 0.06);
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .admin-list {
+  background: var(--bg-data);
+  border: 1px solid #1a1a1a;
+}
+
+:root[data-theme='ion_storm'] .admin-list li {
+  border-bottom: 1px solid #1a1a1a;
+}
+
+:root[data-theme='ion_storm']
+  .online-list--players
+  li.is-admin
+  .online-list__name {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(var(--accent-rgb), 0.35);
+}
+
+:root[data-theme='ion_storm'] .fu-modal {
+  background: var(--bg-modal);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(170, 196, 214, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='ion_storm'] .fu-modal__header {
+  color: var(--text);
+  background: var(--bg-modal-header);
+  border-bottom: 1px solid #2a2a2a;
+}
+
+:root[data-theme='ion_storm'] .fu-progress {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+}
+
+:root[data-theme='ion_storm'] .fu-progress__bar {
+  background: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .fu-progress__bar--indeterminate {
+  background: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .fu-progress__text {
+  color: #eef2f6;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 1),
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    1px 0 1px rgba(0, 0, 0, 0.9),
+    -1px 0 1px rgba(0, 0, 0, 0.9),
+    0 -1px 1px rgba(0, 0, 0, 0.9);
+}
+
+:root[data-theme='ion_storm'] details.advanced {
+  border: 1px solid #2a2a2a;
+  background: var(--bg-widget);
+}
+
+:root[data-theme='ion_storm'] details.advanced summary {
+  color: var(--accent);
+}
+
+:root[data-theme='ion_storm'] .panel-shell > .tab-panels:has(.monitoring-tab) {
+  overflow-y: auto !important;
+}
+
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab) {
+  background: #281e2a;
+  border-color: #443246;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled) {
+  background: #36293a;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled) {
+  background: #1c141e;
+  border-color: #352636;
+}
+
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action {
+  background: #281e2a !important;
+  border-color: #443246 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-action:hover:not(:disabled) {
+  background: #36293a !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%) !important;
+}
+
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-action:active:not(:disabled) {
+  background: #1c141e !important;
+  border-color: #352636 !important;
+}
+
+:root[data-theme='ion_storm']
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn),
+:root[data-theme='ion_storm'] #instanceTabSettings .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] #instanceTabIntegrations .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .server-settings-tab .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .mod-settings-page .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .user-settings-modal .btn:not(.sub-tabs__tab),
+:root[data-theme='ion_storm'] .settings-table__control-stack .btn,
+:root[data-theme='ion_storm'] .modal .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab),
+:root[data-theme='ion_storm'] .access-users-bar__create-btn,
+:root[data-theme='ion_storm'] .instance-card__action-btn {
+  background: #281e2a;
+  border-color: #443246;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='ion_storm']
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  #instanceTabSettings
+  .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  #instanceTabIntegrations
+  .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .server-settings-tab
+  .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-settings-page
+  .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .user-settings-modal
+  .btn:not(.sub-tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .settings-table__control-stack
+  .btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__create-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .instance-card__action-btn:hover:not(:disabled) {
+  background: #36293a;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+:root[data-theme='ion_storm']
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):not(.panel-tab-bar__tab):not(
+    .btn--toolbar-icon
+  ):not(.mods-toolbar__field-version-btn):active:not(:disabled),
+:root[data-theme='ion_storm']
+  #instanceTabSettings
+  .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  #instanceTabIntegrations
+  .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .server-settings-tab
+  .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-settings-page
+  .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .user-settings-modal
+  .btn:not(.sub-tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .settings-table__control-stack
+  .btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .fu-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .command-editor-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .create-save-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .mod-job-modal
+  .btn:not(.sub-tabs__tab):not(.tabs__tab):active:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__create-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .instance-card__action-btn:active:not(:disabled) {
+  background: #1c141e;
+  border-color: #352636;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .workspace__main--panel .btn--toolbar-icon,
+:root[data-theme='ion_storm'] .panel-shell .btn--toolbar-icon,
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-version-btn,
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .panel-shell .mods-toolbar__field-action,
+:root[data-theme='ion_storm'] .access-users-bar__refresh-btn,
+:root[data-theme='ion_storm'] .access-users-bar__view-toggle-btn,
+:root[data-theme='ion_storm'] .access-users-bar__help-btn,
+:root[data-theme='ion_storm'] .instance-servers-bar__columns-btn,
+:root[data-theme='ion_storm'] .instance-dashboard-toolbar__btn {
+  background: #281e2a !important;
+  border-color: #443246 !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn--toolbar-icon:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-version-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-action:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__refresh-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__view-toggle-btn:hover:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__help-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .instance-servers-bar__columns-btn:hover:not(:disabled),
+:root[data-theme='ion_storm']
+  .instance-dashboard-toolbar__btn:hover:not(:disabled) {
+  background: #36293a !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #443246 45%) !important;
+}
+
+:root[data-theme='ion_storm'] .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .btn--toolbar-icon:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-version-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .workspace__main--panel
+  .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .panel-shell
+  .mods-toolbar__field-action:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__refresh-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .access-users-bar__view-toggle-btn:active:not(:disabled),
+:root[data-theme='ion_storm'] .access-users-bar__help-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .instance-servers-bar__columns-btn:active:not(:disabled),
+:root[data-theme='ion_storm']
+  .instance-dashboard-toolbar__btn:active:not(:disabled) {
+  background: #1c141e !important;
+  border-color: #352636 !important;
+}
+
+:root[data-theme='ion_storm'] .control-tab__card--actions {
+  background: #150f16;
+  border-color: #2e202e;
+}
+
+:root[data-theme='ion_storm'] .login-portal {
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 10, 18, 0.98),
+    rgba(2, 4, 10, 0.99)
+  );
+  border-color: #1a2030;
+}
+
+:root[data-theme='ion_storm'] .login-screen__brand-primary {
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  background: none;
+  filter: none;
+  text-shadow:
+    0 0 28px rgba(var(--accent-rgb), 0.55),
+    0 0 10px rgba(var(--accent-rgb), 0.85);
+}
+
+:root[data-theme='ion_storm'] .login-portal__input {
+  border-radius: 0;
+  background: transparent;
+  border-color: #1a2030;
+}
+
+:root[data-theme='ion_storm'] .login-portal__cta {
+  border-radius: 0;
+}
+
+:root[data-theme='ion_storm'] .login-portal__rim {
+  animation-duration: 22s;
+  opacity: 0.85;
+}
+
+:root[data-theme='ion_storm'] .login-portal__aura {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    rgba(56, 221, 240, 0.16) 0%,
+    rgba(150, 95, 205, 0.08) 42%,
+    transparent 70%
+  );
+}
+
+:root[data-theme='ion_storm'] .login-screen {
+  --login-shimmer-a: rgba(36, 140, 158, 0.1);
+  --login-shimmer-b: rgba(88, 58, 128, 0.11);
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg {
+  background: #080a14;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--shimmer {
+  animation-duration: 72s;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--glow {
+  background:
+    radial-gradient(
+      ellipse 56% 46% at 30% 36%,
+      rgba(36, 140, 158, 0.07) 0,
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 50% 42% at 72% 58%,
+      rgba(88, 58, 128, 0.06) 0,
+      transparent 72%
+    );
+  animation:
+    login-bg-breathe 26s ease-in-out infinite,
+    login-ion-aurora 42s ease-in-out infinite;
+}
+
+:root[data-theme='ion_storm'] .login-screen__bg-layer--drift {
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 40% 44%,
+      rgba(36, 140, 158, 0.04) 0,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 68% 56%,
+      rgba(88, 58, 128, 0.035) 0,
+      transparent 66%
+    );
+  animation: login-bg-drift 52s ease-in-out infinite alternate;
+}
+
+:root[data-theme='ion_storm']
+  .login-portal
+  .login-portal__telemetry.login-screen__hud {
+  border-top-color: #1a3050 !important;
+  box-shadow: inset 0 1px 0 rgba(80, 160, 220, 0.05) !important;
+}
+
+:root[data-theme='ion_storm'] .login-portal__telemetry-head {
+  border-bottom-color: #1a2838;
+  background: rgba(8, 10, 18, 0.28);
+}
+
+:root[data-theme='ion_storm']
+  .login-portal__telemetry-slot
+  + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.1);
+}
+
+:root[data-theme='ion_storm'] .login-portal__telemetry-slot--status {
+  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.16);
+}
+
+:root[data-theme='ion_storm'] .login-portal__telemetry-label {
+  color: rgba(100, 140, 170, 0.75);
+}
+
+:root[data-theme='ion_storm'] .login-portal__telemetry-value {
+  color: #dce8f0;
+  text-shadow: none;
+}
+
+:root[data-theme='ion_storm']
+  .login-portal
+  .login-portal__telemetry.login-screen__hud {
+  background: transparent !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+:root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm {
+  opacity: 0;
+  transform: scale(0.91) translateY(6px);
+  filter: brightness(1.25) saturate(1.15);
+  transition:
+    opacity 720ms cubic-bezier(0.36, 0.08, 0.22, 1),
+    transform 720ms cubic-bezier(0.34, 0.06, 0.2, 1),
+    filter 680ms cubic-bezier(0.33, 0.06, 0.22, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='ion_storm']
+  .login-screen.login-leaving--ion_storm {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+:root[data-theme='ion_storm'] .login-screen.login-leaving--ion_storm {
+  filter: none !important;
+}

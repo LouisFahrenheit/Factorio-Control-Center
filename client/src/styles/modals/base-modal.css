@@ -1,0 +1,575 @@
+/* ==========================================================================
+   Base Modal Chrome (.fu-modal, .fcc-modal, .fcc-confirm-modal)
+   ========================================================================== */
+
+.fu-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: max(12px, 2vh) 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+body > .fu-modal-backdrop.fu-modal-backdrop--portal {
+  z-index: 10000;
+  /* Pre-zoom size so after zoom the backdrop fills the viewport (same pattern as .login-screen). */
+  width: calc(100vw / var(--ui-scale));
+  height: calc(100dvh / var(--ui-scale));
+  min-height: calc(100dvh / var(--ui-scale));
+  max-height: calc(100dvh / var(--ui-scale));
+  zoom: var(--ui-scale);
+}
+
+.fu-modal-backdrop--portal .fu-modal {
+  flex-shrink: 0;
+  margin: auto;
+  /* Cap height in pre-zoom units so the footer stays on-screen at UI scale > 100%. */
+  max-height: min(
+    90vh,
+    calc(100dvh / var(--ui-scale) - 2 * max(12px, 2vh) - 8px)
+  );
+}
+
+@keyframes fu-modal-backdrop-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
+}
+
+@keyframes fu-modal-panel-in {
+  from {
+    transform: translate3d(0, 20px, 0) scale(0.96);
+    filter: brightness(0.92);
+  }
+  55% {
+    filter: brightness(1.02);
+  }
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+.fu-modal-backdrop:not(.hidden) {
+  animation: fu-modal-backdrop-in 0.3s cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+.fu-modal-backdrop:not(.hidden) .fu-modal {
+  transform-origin: 50% 45%;
+  animation: fu-modal-panel-in 0.4s cubic-bezier(0.22, 1, 0.34, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fu-modal-backdrop:not(.hidden),
+  .fu-modal-backdrop:not(.hidden) .fu-modal {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'] .fu-modal-backdrop:not(.hidden),
+:root[data-web-disable-effects='1'] .fu-modal-backdrop:not(.hidden) .fu-modal {
+  animation: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+.fu-modal {
+  background: var(--bg-modal);
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  width: min(680px, 92vw);
+  max-height: min(
+    90vh,
+    calc(100dvh / var(--ui-scale) - 2 * max(12px, 2vh) - 8px)
+  );
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.fu-modal-backdrop.fu-modal-backdrop--stacked {
+  z-index: 10010;
+}
+
+.fu-modal.fu-modal--pick {
+  width: min(300px, 92vw);
+}
+
+.fu-modal.fu-modal--pick .fu-modal__body {
+  padding: 16px 18px;
+  gap: 12px;
+}
+
+.fu-modal.fu-modal--pick #fuPickSection {
+  display: grid;
+  gap: 10px;
+}
+
+.fu-modal.fu-modal--pick #fuPickLabel {
+  font-size: 10pt;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.fu-modal.fu-modal--pick #fuVersionSelect {
+  width: min(260px, 100%);
+}
+
+.fu-modal__header {
+  padding: 12px 16px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: var(--bg-modal-header);
+  font-weight: bold;
+  font-size: 11pt;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.fu-modal__body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: transparent;
+}
+
+.fu-modal__footer {
+  padding: 10px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: var(--bg-modal-footer);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.fu-modal .btn,
+.fcc-modal .btn,
+.fcc-modal .mantine-Button-root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 14px;
+  margin: 0;
+  border: 1px solid var(--fcc-btn-border);
+  border-radius: 7px;
+  background: var(--fcc-btn-bg);
+  color: var(--text);
+  box-shadow: var(--fcc-btn-shadow);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.2;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.1s ease;
+}
+
+.fu-modal .btn svg,
+.fu-modal .btn .app-icon,
+.fcc-modal .btn svg,
+.fcc-modal .btn .app-icon,
+.fcc-modal .mantine-Button-root svg {
+  color: var(--text-muted);
+  transition: color 0.16s ease;
+}
+
+.fu-modal .btn.btn--primary,
+.fcc-modal .btn.btn--primary {
+  background: var(--fcc-btn-bg-primary);
+  border-color: var(--fcc-btn-border);
+}
+
+.fu-modal .btn:hover:not(:disabled):not(.is-locked),
+.fcc-modal .btn:hover:not(:disabled):not(.is-locked),
+.fcc-modal .mantine-Button-root:hover:not(:disabled):not([data-disabled]) {
+  background: var(--fcc-btn-bg-hover);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.fu-modal .btn:hover:not(:disabled):not(.is-locked) svg,
+.fu-modal .btn:hover:not(:disabled):not(.is-locked) .app-icon,
+.fcc-modal .btn:hover:not(:disabled):not(.is-locked) svg,
+.fcc-modal .btn:hover:not(:disabled):not(.is-locked) .app-icon,
+.fcc-modal .mantine-Button-root:hover:not(:disabled):not([data-disabled]) svg {
+  color: var(--accent);
+}
+
+.fu-modal .btn:active:not(:disabled):not(.is-locked),
+.fcc-modal .btn:active:not(:disabled):not(.is-locked),
+.fcc-modal .mantine-Button-root:active:not(:disabled):not([data-disabled]) {
+  transform: translateY(1px);
+  background: var(--fcc-btn-bg-active);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.fu-modal .btn.btn--primary:hover:not(:disabled):not(.is-locked),
+.fcc-modal .btn.btn--primary:hover:not(:disabled):not(.is-locked) {
+  background: var(--fcc-btn-bg-primary-hover);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.fu-modal .btn.btn--danger:hover:not(:disabled):not(.is-locked),
+.fcc-modal .btn.btn--danger:hover:not(:disabled):not(.is-locked) {
+  background: var(--fcc-btn-bg-danger-hover);
+  border-color: color-mix(in srgb, var(--error) 45%, transparent);
+  color: color-mix(in srgb, var(--error) 92%, var(--text) 8%);
+}
+
+.fu-modal .btn:disabled,
+.fu-modal .btn.is-locked,
+.fcc-modal .btn:disabled,
+.fcc-modal .btn.is-locked,
+.fcc-modal .mantine-Button-root:disabled,
+.fcc-modal .mantine-Button-root[data-disabled] {
+  background: var(--fcc-btn-bg-disabled);
+  border-color: color-mix(in srgb, var(--border-dark) 55%, transparent);
+  color: var(--text-muted);
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.fu-modal .btn:disabled:hover,
+.fu-modal .btn.is-locked:hover,
+.fcc-modal .btn:disabled:hover,
+.fcc-modal .btn.is-locked:hover,
+.fcc-modal .mantine-Button-root:disabled:hover,
+.fcc-modal .mantine-Button-root[data-disabled]:hover {
+  background: var(--fcc-btn-bg-disabled);
+  border-color: color-mix(in srgb, var(--border-dark) 55%, transparent);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.fu-modal.fu-modal--choice {
+  width: min(1000px, 98vw);
+}
+
+.fu-modal.fu-modal--choice.fu-modal--choice-wide {
+  width: min(1020px, 98vw);
+}
+
+.fu-modal__footer--choice-row {
+  flex-wrap: nowrap;
+  justify-content: stretch;
+  gap: 8px;
+}
+
+.fu-modal__footer--choice-row .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#uiDialogBackdrop .fu-modal {
+  width: min(520px, 92vw);
+}
+
+#uiDialogBackdrop[data-wide='1'] .fu-modal {
+  width: min(676px, 94vw);
+}
+
+#uiDialogBackdrop[data-mode='prompt'] .fu-modal {
+  width: min(480px, 90vw);
+}
+
+#uiDialogBackdrop #uiDialogHint {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.08);
+  color: var(--muted);
+  font-size: 9pt;
+  line-height: 1.4;
+}
+
+#uiDialogBackdrop[data-mode='prompt'] #uiDialogInput {
+  margin-top: 10px !important;
+}
+
+.fu-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fu-modal__header--with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fcc-modal {
+  background: var(--bg-modal) !important;
+  border: 1px solid var(--border-dark) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 12px 40px rgba(0, 0, 0, 0.45) !important;
+  overflow: hidden;
+}
+
+.fcc-modal .mantine-Modal-header {
+  background: var(--bg-modal-header);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  padding: 12px 16px;
+}
+
+.fcc-modal .mantine-Modal-title {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 11pt;
+}
+
+.fcc-modal .mantine-Modal-body {
+  padding: 14px 16px;
+  background: transparent;
+}
+
+.fcc-modal .mantine-Modal-footer {
+  background: var(--bg-modal-footer);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  padding: 10px 16px;
+  gap: 8px;
+}
+
+.fcc-modal--confirm {
+  --modal-size: auto !important;
+  flex: 0 1 auto !important;
+  width: max-content !important;
+  max-width: min(540px, 94vw) !important;
+  min-width: min(380px, 92vw) !important;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__header {
+  padding: 14px 16px 12px;
+}
+
+.fcc-modal--confirm .mantine-Modal-title {
+  font-size: 11.5pt;
+  letter-spacing: 0.01em;
+}
+
+.fcc-confirm-modal__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.fcc-confirm-modal__title-icon {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--error) 88%, #fff 12%);
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__close {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.18s var(--fcc-hover-ease),
+    border-color 0.18s var(--fcc-hover-ease),
+    color 0.18s var(--fcc-hover-ease);
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__close:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-color: color-mix(in srgb, var(--border-dark) 70%, transparent);
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__body {
+  padding: 0;
+}
+
+.fcc-confirm-modal__content {
+  padding: 16px 18px 14px;
+}
+
+.fcc-confirm-modal__lead {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.fcc-confirm-modal__callout {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: color-mix(in srgb, var(--bg-log) 55%, var(--bg-widget) 45%);
+}
+
+.fcc-confirm-modal__callout--danger {
+  border-color: color-mix(in srgb, var(--error) 28%, var(--border-dark) 72%);
+  background: color-mix(in srgb, var(--error) 9%, var(--bg-widget) 91%);
+}
+
+.fcc-confirm-modal__callout-list {
+  margin: 0;
+  padding-left: 1.15em;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.fcc-confirm-modal__callout-list li + li {
+  margin-top: 4px;
+}
+
+.fcc-confirm-modal__question {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions {
+  margin: 0 !important;
+  padding: 12px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  background: var(--bg-modal-footer);
+  justify-content: flex-end !important;
+  gap: 8px;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-root {
+  min-width: 104px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+}
+
+.fcc-modal--confirm
+  .fcc-confirm-modal__actions
+  .mantine-Button-section
+  .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .mantine-Button-section svg {
+  flex-shrink: 0;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn svg {
+  color: var(--text-muted);
+  transition: color 0.16s ease;
+}
+
+.fcc-modal--confirm
+  .fcc-confirm-modal__actions
+  .btn:hover:not(:disabled)
+  .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn:hover:not(:disabled) svg {
+  color: var(--accent);
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger {
+  background: color-mix(in srgb, #e03131 22%, var(--bg-widget) 78%) !important;
+  border: 1px solid color-mix(in srgb, #ff4d4d 60%, var(--border-dark) 40%) !important;
+  color: #ffb4b4 !important;
+}
+
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger .app-icon,
+.fcc-modal--confirm .fcc-confirm-modal__actions .btn--danger svg {
+  color: #ffb4b4 !important;
+}
+
+.fcc-modal--confirm
+  .fcc-confirm-modal__actions
+  .btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, #e03131 38%, var(--bg-widget) 62%) !important;
+  border-color: #ff4d4d !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 2px 10px rgba(224, 49, 49, 0.4),
+    0 0 8px rgba(255, 77, 77, 0.25) !important;
+}
+
+.fcc-modal--confirm
+  .fcc-confirm-modal__actions
+  .btn--danger:hover:not(:disabled)
+  .app-icon,
+.fcc-modal--confirm
+  .fcc-confirm-modal__actions
+  .btn--danger:hover:not(:disabled)
+  svg {
+  color: #ffffff !important;
+}
+
+/* ── Unified Modal Section Cards & Headers ─────────────────────────────── */
+
+.instance-editor-card,
+.web-user-modal-hero,
+.access-perm-group,
+.web-user-editor-modal .access-perm-group {
+  background: var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.instance-editor-card__header,
+.web-user-editor-modal .access-perm-group__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-card-header);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}

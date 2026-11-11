@@ -34,14 +34,23 @@
 }
 
 /* Плавный перелив фона в двух цветах — без видимых волн */
+
 .login-screen__bg-layer--shimmer {
   z-index: 0;
   inset: -18%;
   opacity: 0.72;
   filter: blur(72px);
   background:
-    radial-gradient(ellipse 72% 66% at 28% 36%, var(--login-shimmer-a) 0%, transparent 64%),
-    radial-gradient(ellipse 78% 72% at 74% 64%, var(--login-shimmer-b) 0%, transparent 66%);
+    radial-gradient(
+      ellipse 72% 66% at 28% 36%,
+      var(--login-shimmer-a) 0%,
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse 78% 72% at 74% 64%,
+      var(--login-shimmer-b) 0%,
+      transparent 66%
+    );
   animation: login-bg-shimmer-flow 72s ease-in-out infinite alternate;
 }
 
@@ -72,9 +81,21 @@
   opacity: 0.22;
   filter: blur(18px);
   background:
-    radial-gradient(circle at 18% 24%, rgba(var(--accent-rgb), 0.05) 0, transparent 34%),
-    radial-gradient(circle at 82% 68%, rgba(var(--accent-rgb), 0.04) 0, transparent 38%),
-    radial-gradient(circle at 52% 88%, rgba(var(--accent-rgb), 0.03) 0, transparent 32%);
+    radial-gradient(
+      circle at 18% 24%,
+      rgba(var(--accent-rgb), 0.05) 0,
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 82% 68%,
+      rgba(var(--accent-rgb), 0.04) 0,
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 52% 88%,
+      rgba(var(--accent-rgb), 0.03) 0,
+      transparent 32%
+    );
   animation: login-bg-drift 48s ease-in-out infinite alternate;
 }
 
@@ -87,7 +108,11 @@
 
 .login-screen__bg-layer--vignette {
   z-index: 2;
-  background: radial-gradient(ellipse 80% 74% at 50% 48%, transparent 38%, rgba(0, 0, 0, 0.58) 100%);
+  background: radial-gradient(
+    ellipse 80% 74% at 50% 48%,
+    transparent 38%,
+    rgba(0, 0, 0, 0.58) 100%
+  );
   opacity: 0.78;
 }
 
@@ -138,13 +163,12 @@
   flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
-  background:
-    linear-gradient(
-      168deg,
-      color-mix(in srgb, var(--bg-widget) 92%, white 2%) 0%,
-      color-mix(in srgb, var(--bg-main) 88%, black 4%) 48%,
-      color-mix(in srgb, var(--bg-widget) 85%, black 6%) 100%
-    );
+  background: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--bg-widget) 92%, white 2%) 0%,
+    color-mix(in srgb, var(--bg-main) 88%, black 4%) 48%,
+    color-mix(in srgb, var(--bg-widget) 85%, black 6%) 100%
+  );
   border: 1px solid color-mix(in srgb, var(--border) 70%, var(--accent) 8%);
   box-shadow:
     0 28px 64px rgba(0, 0, 0, 0.58),
@@ -168,6 +192,7 @@
 }
 
 /* FX layers */
+
 .login-portal__fx {
   position: absolute;
   inset: 0;
@@ -254,6 +279,7 @@
 }
 
 /* Corners on portal */
+
 .login-portal > .login-screen__corner {
   z-index: 4;
   width: 20px;
@@ -261,10 +287,25 @@
   opacity: 0.92;
 }
 
-.login-portal > .login-screen__corner--tl { top: 10px; left: 10px; }
-.login-portal > .login-screen__corner--tr { top: 10px; right: 10px; }
-.login-portal > .login-screen__corner--bl { bottom: 10px; left: 10px; }
-.login-portal > .login-screen__corner--br { bottom: 10px; right: 10px; }
+.login-portal > .login-screen__corner--tl {
+  top: 10px;
+  left: 10px;
+}
+
+.login-portal > .login-screen__corner--tr {
+  top: 10px;
+  right: 10px;
+}
+
+.login-portal > .login-screen__corner--bl {
+  bottom: 10px;
+  left: 10px;
+}
+
+.login-portal > .login-screen__corner--br {
+  bottom: 10px;
+  right: 10px;
+}
 
 /* ——— Brand / headline ——— */
 
@@ -383,7 +424,9 @@
   }
 }
 
-:root[data-web-disable-effects='1'] .login-portal__gate .panel__title.panel__title--blink,
+:root[data-web-disable-effects='1']
+  .login-portal__gate
+  .panel__title.panel__title--blink,
 :root[data-web-disable-effects='1'] .mobile-login__card-title--blink {
   animation: none;
 }
@@ -404,6 +447,7 @@
 }
 
 /* Input cards — icon | field, без заливки под текстом */
+
 .login-portal__input {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
@@ -518,6 +562,7 @@
 }
 
 /* Браузерный autofill — без цветной подложки под текстом */
+
 .login-portal__input-field:-webkit-autofill,
 .login-portal__input-field:-webkit-autofill:hover,
 .login-portal__input-field:-webkit-autofill:focus,
@@ -533,6 +578,7 @@
 }
 
 /* CTA */
+
 .login-portal__cta {
   display: inline-flex;
   align-items: center;
@@ -576,13 +622,21 @@
 
 .login-portal__cta:hover:not(:disabled) {
   background: var(--fcc-btn-bg-hover);
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--fcc-btn-border) 72%);
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 28%,
+    var(--fcc-btn-border) 72%
+  );
   color: var(--text);
 }
 
 .login-portal__cta:active:not(:disabled) {
   background: var(--fcc-btn-bg-active);
-  border-color: color-mix(in srgb, var(--accent) 34%, var(--fcc-btn-border) 66%);
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 34%,
+    var(--fcc-btn-border) 66%
+  );
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
@@ -617,7 +671,8 @@
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent) !important;
-  font-family: "Consolas", "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
+  font-family:
+    'Consolas', 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
   font-size: 1rem;
   color: var(--text);
   overflow: hidden;
@@ -698,7 +753,8 @@
 }
 
 .login-portal__telemetry-value,
-.login-portal__telemetry .login-screen__hud-value:not(.login-screen__hud-value--accent) {
+.login-portal__telemetry
+  .login-screen__hud-value:not(.login-screen__hud-value--accent) {
   min-width: 0;
   max-width: 100%;
   font-size: 1.08rem;
@@ -716,7 +772,8 @@
 
 .login-portal__telemetry-slot--status {
   background: transparent;
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--accent) 12%, var(--border) 88%);
+  box-shadow: inset 1px 0 0
+    color-mix(in srgb, var(--accent) 12%, var(--border) 88%);
 }
 
 .login-portal__telemetry-status {
@@ -763,30 +820,44 @@
 
 .login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied {
   background: color-mix(in srgb, var(--error) 6%, transparent);
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--error) 22%, var(--border) 78%);
+  box-shadow: inset 1px 0 0
+    color-mix(in srgb, var(--error) 22%, var(--border) 78%);
 }
 
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-value,
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-value--accent {
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied
+  .login-screen__hud-value,
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied
+  .login-screen__hud-value--accent {
   color: var(--error);
 }
 
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied .login-screen__hud-pulse {
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--denied
+  .login-screen__hud-pulse {
   background: var(--error);
   box-shadow: 0 0 7px color-mix(in srgb, var(--error) 65%, transparent);
 }
 
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-value,
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-value--accent,
-.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value,
-.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value--accent {
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted
+  .login-screen__hud-value,
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted
+  .login-screen__hud-value--accent,
+.login-screen.is-success
+  .login-portal__telemetry-slot--status
+  .login-screen__hud-value,
+.login-screen.is-success
+  .login-portal__telemetry-slot--status
+  .login-screen__hud-value--accent {
   color: var(--online-green, var(--accent));
 }
 
-.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted .login-screen__hud-pulse,
-.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-pulse {
+.login-portal__telemetry-slot--status.login-portal__telemetry-slot--granted
+  .login-screen__hud-pulse,
+.login-screen.is-success
+  .login-portal__telemetry-slot--status
+  .login-screen__hud-pulse {
   background: var(--online-green, var(--accent));
-  box-shadow: 0 0 7px color-mix(in srgb, var(--online-green, #6a9a5c) 55%, transparent);
+  box-shadow: 0 0 7px
+    color-mix(in srgb, var(--online-green, #6a9a5c) 55%, transparent);
 }
 
 .login-portal__foot {
@@ -840,7 +911,9 @@
   letter-spacing: 0.04em;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .login-theme-picker__trigger:hover,
@@ -877,27 +950,32 @@
 }
 
 .login-theme-picker__swatch[data-theme-chip='fcc_classic'],
-.login-theme-picker__option[data-theme-chip='fcc_classic'] .login-theme-picker__swatch {
+.login-theme-picker__option[data-theme-chip='fcc_classic']
+  .login-theme-picker__swatch {
   background: linear-gradient(135deg, #da8216, #8c8c8c);
 }
 
 .login-theme-picker__swatch[data-theme-chip='dark_space'],
-.login-theme-picker__option[data-theme-chip='dark_space'] .login-theme-picker__swatch {
+.login-theme-picker__option[data-theme-chip='dark_space']
+  .login-theme-picker__swatch {
   background: linear-gradient(135deg, #0a0a0c, #aac4d6);
 }
 
 .login-theme-picker__swatch[data-theme-chip='vulcanus'],
-.login-theme-picker__option[data-theme-chip='vulcanus'] .login-theme-picker__swatch {
+.login-theme-picker__option[data-theme-chip='vulcanus']
+  .login-theme-picker__swatch {
   background: linear-gradient(135deg, #ff6a1c, #ffc24a);
 }
 
 .login-theme-picker__swatch[data-theme-chip='ion_storm'],
-.login-theme-picker__option[data-theme-chip='ion_storm'] .login-theme-picker__swatch {
+.login-theme-picker__option[data-theme-chip='ion_storm']
+  .login-theme-picker__swatch {
   background: linear-gradient(135deg, #38ddf0, #9a6ae8);
 }
 
 .login-theme-picker__swatch[data-theme-chip='cryogenics'],
-.login-theme-picker__option[data-theme-chip='cryogenics'] .login-theme-picker__swatch {
+.login-theme-picker__option[data-theme-chip='cryogenics']
+  .login-theme-picker__swatch {
   background: linear-gradient(135deg, #8ec4e8, #c07838);
 }
 
@@ -920,8 +998,14 @@
 }
 
 @keyframes login-menu-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .login-theme-picker__option {
@@ -939,7 +1023,9 @@
   font-size: 0.68rem;
   font-weight: 600;
   text-align: left;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .login-theme-picker__option:hover {
@@ -955,208 +1041,9 @@
 
 /* ═══ Theme personalities ═══ */
 
-:root[data-theme='fcc_classic'] .login-screen__brand-primary,
-:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
-  color: #dc8000;
-  background: none;
-  -webkit-text-fill-color: #dc8000;
-  filter: none;
-  text-shadow:
-    1px 1px 0 #391e07,
-    2px 2px 0 #391e07,
-    3px 3px 0 #391e07,
-    4px 4px 0 #391e07,
-    5px 5px 0 #391e07,
-    7px 8px 14px rgba(57, 30, 7, 0.85);
-}
-
-:root[data-theme='fcc_classic'] .login-screen__brand-secondary {
-  color: #e1dbcf;
-  -webkit-text-fill-color: #e1dbcf;
-}
-
-:root[data-theme='dark_space'] .login-portal,
-:root[data-theme='ion_storm'] .login-portal {
-  border-radius: 4px;
-  background: linear-gradient(180deg, rgba(8, 10, 18, 0.98), rgba(2, 4, 10, 0.99));
-  border-color: #1a2030;
-}
-
-:root[data-theme='dark_space'] .login-screen__brand-primary,
-:root[data-theme='ion_storm'] .login-screen__brand-primary {
-  color: var(--accent);
-  -webkit-text-fill-color: var(--accent);
-  background: none;
-  filter: none;
-  text-shadow:
-    0 0 28px rgba(var(--accent-rgb), 0.55),
-    0 0 10px rgba(var(--accent-rgb), 0.85);
-}
-
-:root[data-theme='dark_space'] .login-portal__input,
-:root[data-theme='ion_storm'] .login-portal__input {
-  border-radius: 0;
-  background: transparent;
-  border-color: #1a2030;
-}
-
-:root[data-theme='dark_space'] .login-portal__cta,
-:root[data-theme='ion_storm'] .login-portal__cta {
-  border-radius: 0;
-}
-
-:root[data-theme='vulcanus'] .login-portal__cta {
-  border-radius: 0;
-}
-
-:root[data-theme='vulcanus'] .login-portal {
-  border-radius: 0;
-  background: linear-gradient(180deg, #1e1a16, #12100d);
-}
-
-:root[data-theme='vulcanus'] .login-screen__brand-primary {
-  color: #f2e0cc;
-  text-shadow: 0 0 20px rgba(255, 106, 28, 0.35);
-}
-
-:root[data-theme='cryogenics'] .login-portal {
-  border-color: var(--cryo-contour);
-  background: linear-gradient(180deg, #2e2e31, #242628);
-}
-
-:root[data-theme='cryogenics'] .login-screen__brand-primary {
-  color: var(--cryo-panel-text);
-}
-
-:root[data-theme='cryogenics'] .login-screen__brand-secondary {
-  color: color-mix(in srgb, var(--accent) 50%, rgb(var(--cryo-copper-rgb)) 50%);
-}
-
-:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__brand-primary,
-:root[data-theme='cryogenics'] .login-screen.is-success .login-screen__brand-secondary {
-  color: var(--accent);
-  -webkit-text-fill-color: var(--accent);
-  filter: none;
-  text-shadow: none;
-}
-
-:root[data-theme='ion_storm'] .login-portal__rim {
-  animation-duration: 22s;
-  opacity: 0.85;
-}
-
-:root[data-theme='ion_storm'] .login-portal__aura {
-  background: radial-gradient(
-    ellipse 70% 55% at 50% 0%,
-    rgba(56, 221, 240, 0.16) 0%,
-    rgba(150, 95, 205, 0.08) 42%,
-    transparent 70%
-  );
-}
-
 /* ——— Theme ambient backgrounds on login page ——— */
 
-:root[data-theme='fcc_classic'] .login-screen {
-  --login-steel-rgb: 140, 140, 140;
-  --login-shimmer-a: rgba(218, 130, 22, 0.12);
-  --login-shimmer-b: rgba(var(--login-steel-rgb), 0.14);
-}
-
-:root[data-theme='fcc_classic'] .login-screen__bg {
-  background: #141312;
-}
-
-:root[data-theme='fcc_classic'] .login-screen__bg-layer--glow {
-  background: radial-gradient(
-    ellipse 64% 54% at 50% 40%,
-    rgba(var(--accent-rgb), 0.06) 0%,
-    rgba(var(--login-steel-rgb), 0.05) 50%,
-    transparent 76%
-  );
-  opacity: 0.55;
-}
-
-:root[data-theme='fcc_classic'] .login-screen__bg-layer--drift {
-  background:
-    radial-gradient(circle at 22% 30%, rgba(218, 130, 22, 0.045) 0, transparent 34%),
-    radial-gradient(circle at 78% 62%, rgba(var(--login-steel-rgb), 0.06) 0, transparent 38%);
-  opacity: 0.2;
-}
-
 /* Dark Space — чёрный космос + звёздное поле (без перелива) */
-:root[data-theme='dark_space'] .login-screen__bg {
-  background: #000000;
-}
-
-:root[data-theme='dark_space'] .login-screen__bg-layer--shimmer,
-:root[data-theme='dark_space'] .login-screen__bg-layer--glow,
-:root[data-theme='dark_space'] .login-screen__bg-layer--drift {
-  display: none;
-}
-
-:root[data-theme='dark_space'] .login-screen__bg-layer--stars {
-  display: block;
-  animation: login-ds-stars-warp 22s linear infinite;
-}
-
-:root[data-theme='dark_space'] .login-screen__bg-layer--stars-b {
-  animation-delay: -11s;
-}
-
-:root[data-theme='dark_space'] .login-screen__bg-layer--stars-a {
-  background-image:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 1) 0 2.4px, transparent 3.6px),
-    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.96) 0 2.2px, transparent 3.4px),
-    radial-gradient(circle at 78% 24%, rgba(210, 228, 255, 0.95) 0 2px, transparent 3.2px),
-    radial-gradient(circle at 14% 72%, rgba(255, 238, 215, 0.92) 0 1.9px, transparent 3px),
-    radial-gradient(circle at 84% 76%, rgba(230, 238, 255, 0.92) 0 1.9px, transparent 3px),
-    radial-gradient(circle at 36% 36%, rgba(255, 255, 255, 0.9) 0 1.8px, transparent 2.9px),
-    radial-gradient(circle at 64% 62%, rgba(190, 218, 255, 0.9) 0 1.8px, transparent 2.9px),
-    radial-gradient(circle at 30% 84%, rgba(255, 246, 232, 0.88) 0 1.7px, transparent 2.7px),
-    radial-gradient(circle at 70% 12%, rgba(255, 255, 255, 0.88) 0 1.7px, transparent 2.7px),
-    radial-gradient(circle at 44% 22%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
-    radial-gradient(circle at 56% 78%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
-    radial-gradient(circle at 18% 44%, rgba(215, 232, 255, 0.68) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 82% 48%, rgba(255, 255, 255, 0.68) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 26% 58%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 74% 38%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 50% 86%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 8% 30%, rgba(255, 255, 255, 0.56) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 92% 64%, rgba(255, 255, 255, 0.56) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 40% 8%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 60% 92%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 12% 90%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 32% 50%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px),
-    radial-gradient(circle at 68% 50%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px);
-}
-
-:root[data-theme='dark_space'] .login-screen__bg-layer--stars-b {
-  background-image:
-    radial-gradient(circle at 38% 12%, rgba(255, 255, 255, 1) 0 2.4px, transparent 3.6px),
-    radial-gradient(circle at 62% 88%, rgba(215, 232, 255, 0.96) 0 2.2px, transparent 3.4px),
-    radial-gradient(circle at 88% 42%, rgba(255, 236, 210, 0.95) 0 2px, transparent 3.2px),
-    radial-gradient(circle at 12% 58%, rgba(255, 255, 255, 0.92) 0 1.9px, transparent 3px),
-    radial-gradient(circle at 50% 30%, rgba(235, 244, 255, 0.92) 0 1.9px, transparent 3px),
-    radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.9) 0 1.8px, transparent 2.9px),
-    radial-gradient(circle at 74% 70%, rgba(255, 244, 228, 0.88) 0 1.8px, transparent 2.9px),
-    radial-gradient(circle at 26% 30%, rgba(195, 220, 255, 0.88) 0 1.8px, transparent 2.9px),
-    radial-gradient(circle at 70% 26%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
-    radial-gradient(circle at 30% 74%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.1px),
-    radial-gradient(circle at 54% 50%, rgba(220, 235, 255, 0.68) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 46% 50%, rgba(255, 255, 255, 0.64) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 18% 36%, rgba(255, 255, 255, 0.62) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 82% 64%, rgba(255, 255, 255, 0.62) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 6% 14%, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 94% 86%, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 24% 6%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 76% 94%, rgba(255, 255, 255, 0.5) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 88% 22%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 12% 78%, rgba(255, 255, 255, 0.46) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 62% 18%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px),
-    radial-gradient(circle at 38% 82%, rgba(255, 255, 255, 0.42) 0 0.85px, transparent 1.4px);
-}
 
 @keyframes login-ds-stars-warp {
   0% {
@@ -1175,38 +1062,6 @@
   }
 }
 
-:root[data-theme='dark_space'] .login-screen__bg-layer--vignette {
-  opacity: 0.28;
-  background: radial-gradient(ellipse 82% 76% at 50% 48%, transparent 48%, rgba(0, 0, 0, 0.55) 100%);
-}
-
-:root[data-theme='ion_storm'] .login-screen {
-  --login-shimmer-a: rgba(36, 140, 158, 0.1);
-  --login-shimmer-b: rgba(88, 58, 128, 0.11);
-}
-
-:root[data-theme='ion_storm'] .login-screen__bg {
-  background: #080a14;
-}
-
-:root[data-theme='ion_storm'] .login-screen__bg-layer--shimmer {
-  animation-duration: 72s;
-}
-
-:root[data-theme='ion_storm'] .login-screen__bg-layer--glow {
-  background:
-    radial-gradient(ellipse 56% 46% at 30% 36%, rgba(36, 140, 158, 0.07) 0, transparent 74%),
-    radial-gradient(ellipse 50% 42% at 72% 58%, rgba(88, 58, 128, 0.06) 0, transparent 72%);
-  animation: login-bg-breathe 26s ease-in-out infinite, login-ion-aurora 42s ease-in-out infinite;
-}
-
-:root[data-theme='ion_storm'] .login-screen__bg-layer--drift {
-  background:
-    radial-gradient(ellipse 80% 60% at 40% 44%, rgba(36, 140, 158, 0.04) 0, transparent 68%),
-    radial-gradient(ellipse 70% 55% at 68% 56%, rgba(88, 58, 128, 0.035) 0, transparent 66%);
-  animation: login-bg-drift 52s ease-in-out infinite alternate;
-}
-
 @keyframes login-ion-aurora {
   0%,
   100% {
@@ -1217,47 +1072,7 @@
   }
 }
 
-:root[data-theme='vulcanus'] .login-screen__bg-layer--shimmer {
-  display: none;
-}
-
-:root[data-theme='vulcanus'] .login-screen__bg {
-  background: #120a06;
-}
-
-:root[data-theme='vulcanus'] .login-screen__bg-layer--glow {
-  background: radial-gradient(
-    ellipse 62% 50% at 50% 62%,
-    rgba(180, 72, 18, 0.08) 0%,
-    rgba(120, 48, 12, 0.04) 42%,
-    transparent 74%
-  );
-  opacity: 0.6;
-}
-
-:root[data-theme='vulcanus'] .login-screen__bg-layer--drift {
-  filter: blur(20px);
-  background:
-    radial-gradient(ellipse 70% 55% at 28% 38%, rgba(180, 72, 18, 0.045) 0, transparent 68%),
-    radial-gradient(ellipse 65% 50% at 72% 58%, rgba(120, 48, 12, 0.04) 0, transparent 66%);
-  opacity: 0.22;
-  animation: login-bg-drift 50s ease-in-out infinite alternate;
-}
-
 /* Cryogenics — море темы + снег, без перелива */
-:root[data-theme='cryogenics'] .login-screen__bg {
-  background: transparent;
-}
-
-:root[data-theme='cryogenics'] .login-screen__bg-layer--shimmer,
-:root[data-theme='cryogenics'] .login-screen__bg-layer--glow,
-:root[data-theme='cryogenics'] .login-screen__bg-layer--drift {
-  display: none;
-}
-
-:root[data-theme='cryogenics'] .login-screen__bg-layer--vignette {
-  opacity: 0.32;
-}
 
 /* ——— Login → servers handoff ——— */
 
@@ -1293,7 +1108,9 @@
   letter-spacing: 0.18em;
   color: var(--accent);
   text-shadow: none;
-  transition: color 0.45s ease, letter-spacing 0.55s ease;
+  transition:
+    color 0.45s ease,
+    letter-spacing 0.55s ease;
 }
 
 .login-screen.is-success .login-portal__cta,
@@ -1303,102 +1120,22 @@
   transition: opacity 0.4s ease;
 }
 
-.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value,
-.login-screen.is-success .login-portal__telemetry-slot--status .login-screen__hud-value--accent {
+.login-screen.is-success
+  .login-portal__telemetry-slot--status
+  .login-screen__hud-value,
+.login-screen.is-success
+  .login-portal__telemetry-slot--status
+  .login-screen__hud-value--accent {
   color: var(--online-green, var(--accent));
 }
 
 /* Углы при success — без вспышки */
+
 .login-portal:has(.login-screen__panel.is-success) > .login-screen__corner {
   animation: none;
 }
 
-:root[data-theme='dark_space'] .login-portal .login-portal__telemetry.login-screen__hud,
-:root[data-theme='ion_storm'] .login-portal .login-portal__telemetry.login-screen__hud {
-  border-top-color: #1a3050 !important;
-  box-shadow: inset 0 1px 0 rgba(80, 160, 220, 0.05) !important;
-}
-
-:root[data-theme='dark_space'] .login-portal__telemetry-head,
-:root[data-theme='ion_storm'] .login-portal__telemetry-head {
-  border-bottom-color: #1a2838;
-  background: rgba(8, 10, 18, 0.28);
-}
-
-:root[data-theme='dark_space'] .login-portal__telemetry-slot + .login-portal__telemetry-slot,
-:root[data-theme='ion_storm'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
-  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.1);
-}
-
-:root[data-theme='dark_space'] .login-portal__telemetry-slot--status,
-:root[data-theme='ion_storm'] .login-portal__telemetry-slot--status {
-  box-shadow: inset 1px 0 0 rgba(80, 160, 220, 0.16);
-}
-
-:root[data-theme='dark_space'] .login-portal__telemetry-label,
-:root[data-theme='ion_storm'] .login-portal__telemetry-label {
-  color: rgba(100, 140, 170, 0.75);
-}
-
-:root[data-theme='dark_space'] .login-portal__telemetry-value,
-:root[data-theme='ion_storm'] .login-portal__telemetry-value {
-  color: #dce8f0;
-  text-shadow: none;
-}
-
-:root[data-theme='fcc_classic'] .login-portal__telemetry-head {
-  background: color-mix(in srgb, var(--bg-widget) 22%, transparent);
-  border-bottom-color: color-mix(in srgb, var(--border) 65%, transparent);
-}
-
-:root[data-theme='vulcanus'] .login-portal .login-portal__telemetry.login-screen__hud {
-  border-top-color: color-mix(in srgb, var(--accent) 28%, var(--border) 72%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 140, 60, 0.06) !important;
-}
-
-:root[data-theme='vulcanus'] .login-portal__telemetry-head {
-  background: rgba(30, 26, 22, 0.35);
-  border-bottom-color: color-mix(in srgb, var(--accent) 18%, var(--border) 82%);
-}
-
-:root[data-theme='vulcanus'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--accent) 10%, var(--border) 90%);
-}
-
-:root[data-theme='cryogenics'] .login-portal .login-portal__telemetry.login-screen__hud {
-  border-top-color: var(--cryo-contour) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
-}
-
-:root[data-theme='cryogenics'] .login-portal__telemetry-head {
-  background: color-mix(in srgb, var(--bg-widget) 20%, transparent);
-  border-bottom-color: color-mix(in srgb, var(--cryo-contour) 55%, transparent);
-}
-
-:root[data-theme='cryogenics'] .login-portal__telemetry-slot + .login-portal__telemetry-slot {
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--cryo-contour) 45%, transparent);
-}
-
-:root[data-theme='cryogenics'] .login-portal__telemetry-label {
-  color: var(--cryo-panel-muted);
-}
-
-:root[data-theme='cryogenics'] .login-portal__telemetry-value {
-  color: var(--cryo-panel-text);
-  text-shadow: none;
-}
-
 /* Сброс legacy app.css — HUD не отдельная карточка, а низ портала */
-:root[data-theme='dark_space'] .login-portal .login-portal__telemetry.login-screen__hud,
-:root[data-theme='ion_storm'] .login-portal .login-portal__telemetry.login-screen__hud,
-:root[data-theme='vulcanus'] .login-portal .login-portal__telemetry.login-screen__hud,
-:root[data-theme='cryogenics'] .login-portal .login-portal__telemetry.login-screen__hud,
-:root[data-theme='fcc_classic'] .login-portal .login-portal__telemetry.login-screen__hud {
-  background: transparent !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-bottom: none !important;
-}
 
 @media (max-width: 520px) {
   .login-portal {
@@ -1478,10 +1215,5 @@
   .login-screen.is-success .login-portal__input {
     animation: none !important;
     transition: none !important;
-  }
-
-  :root[data-theme='dark_space'] .login-screen__bg-layer--stars {
-    transform: scale(1);
-    opacity: 0.88;
   }
 }

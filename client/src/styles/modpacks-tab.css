@@ -293,11 +293,7 @@
 }
 
 #tabPanelModpacks table.data tbody tr:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--bg-widget) 60%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--bg-widget) 60%, transparent);
 }
 
 #tabPanelModpacks table.data tbody tr.mods-row--selected {
@@ -378,11 +374,7 @@
   padding: 0 12px;
   flex: 0 0 44px;
   box-sizing: border-box;
-  background: color-mix(
-    in srgb,
-    var(--bg-widget) 92%,
-    var(--bg-main) 8%
-  );
+  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%);
   border-bottom: 1px solid
     color-mix(in srgb, var(--border-dark) 80%, transparent);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent);
@@ -441,7 +433,11 @@
 }
 
 /* Row animations */
-#tabPanelModpacks .modpacks-tab__table-wrap.table-wrap--enter table.data tbody tr {
+#tabPanelModpacks
+  .modpacks-tab__table-wrap.table-wrap--enter
+  table.data
+  tbody
+  tr {
   animation: tableRowEnter 0.22s var(--fcc-spring-ease) both;
 }
 
@@ -465,4 +461,3 @@
     min-height: 180px;
   }
 }
-

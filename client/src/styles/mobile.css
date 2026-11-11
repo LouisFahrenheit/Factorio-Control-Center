@@ -29,7 +29,8 @@ body.mobile-has-nav {
   gap: 10px;
   padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
   background: color-mix(in srgb, var(--bg-main) 86%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
   backdrop-filter: blur(14px) saturate(1.25);
   -webkit-backdrop-filter: blur(14px) saturate(1.25);
 }
@@ -59,7 +60,9 @@ body.mobile-has-nav {
 }
 
 .mobile-shell--with-nav .mobile-content {
-  padding-bottom: calc(var(--mobile-nav-h, 64px) + 24px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(
+    var(--mobile-nav-h, 64px) + 24px + env(safe-area-inset-bottom, 0px)
+  );
 }
 
 .mobile-view {
@@ -102,8 +105,13 @@ body.mobile-has-nav {
   justify-content: space-between;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 70%, transparent);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 70%, transparent);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
 }
 
 .mobile-section__title {
@@ -152,7 +160,10 @@ body.mobile-has-nav {
   background: linear-gradient(to bottom, var(--btn-top), var(--btn-bot));
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .mobile-icon-btn:hover {
@@ -544,7 +555,11 @@ body.mobile-has-nav {
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--bg-main);
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 60%, #000)
+  );
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -595,7 +610,10 @@ body.mobile-has-nav {
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .mobile-lang-chip__hint {
@@ -634,7 +652,10 @@ body.mobile-has-nav {
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .mobile-theme-chip__swatch {
@@ -753,7 +774,9 @@ body.mobile-has-nav {
   align-items: stretch;
   justify-content: space-around;
   gap: 0;
-  min-height: calc(var(--mobile-nav-h, 64px) + env(safe-area-inset-bottom, 0px));
+  min-height: calc(
+    var(--mobile-nav-h, 64px) + env(safe-area-inset-bottom, 0px)
+  );
   padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
   background: color-mix(in srgb, var(--bg-main) 94%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
@@ -879,8 +902,16 @@ body.mobile-has-nav {
   opacity: 0.68;
   filter: blur(56px);
   background:
-    radial-gradient(ellipse 70% 60% at 24% 30%, rgba(var(--accent-rgb), 0.1) 0%, transparent 62%),
-    radial-gradient(ellipse 72% 64% at 78% 72%, rgba(var(--accent-rgb), 0.06) 0%, transparent 66%);
+    radial-gradient(
+      ellipse 70% 60% at 24% 30%,
+      rgba(var(--accent-rgb), 0.1) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 72% 64% at 78% 72%,
+      rgba(var(--accent-rgb), 0.06) 0%,
+      transparent 66%
+    );
   animation: mobile-login-shimmer 56s ease-in-out infinite alternate;
 }
 
@@ -898,7 +929,11 @@ body.mobile-has-nav {
 .mobile-login__bg-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 120% 90% at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.55) 100%);
+  background: radial-gradient(
+    ellipse 120% 90% at 50% 50%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
 }
 
 @keyframes mobile-login-shimmer {
@@ -918,10 +953,8 @@ body.mobile-has-nav {
   flex-direction: column;
   justify-content: center;
   gap: 18px;
-  padding:
-    calc(14px + env(safe-area-inset-top, 0px))
-    max(14px, env(safe-area-inset-right, 0px))
-    16px
+  padding: calc(14px + env(safe-area-inset-top, 0px))
+    max(14px, env(safe-area-inset-right, 0px)) 16px
     max(14px, env(safe-area-inset-left, 0px));
 }
 
@@ -947,13 +980,12 @@ body.mobile-has-nav {
   overflow: hidden;
   border-radius: 18px;
   padding: 0 0 16px;
-  background:
-    linear-gradient(
-      168deg,
-      color-mix(in srgb, var(--bg-widget) 92%, white 2%) 0%,
-      color-mix(in srgb, var(--bg-main) 88%, black 4%) 52%,
-      color-mix(in srgb, var(--bg-widget) 86%, black 5%) 100%
-    );
+  background: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--bg-widget) 92%, white 2%) 0%,
+    color-mix(in srgb, var(--bg-main) 88%, black 4%) 52%,
+    color-mix(in srgb, var(--bg-widget) 86%, black 5%) 100%
+  );
   border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 10%);
   box-shadow:
     0 18px 42px rgba(0, 0, 0, 0.46),
@@ -1239,9 +1271,7 @@ body.mobile-has-nav {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   margin-top: auto;
-  padding:
-    0
-    max(14px, env(safe-area-inset-right, 0px))
+  padding: 0 max(14px, env(safe-area-inset-right, 0px))
     calc(10px + env(safe-area-inset-bottom, 0px))
     max(14px, env(safe-area-inset-left, 0px));
 }
@@ -1308,7 +1338,8 @@ body.mobile-has-nav {
 
 .mobile-login__dock-item.is-granted .mobile-login__dock-pulse {
   background: var(--success, #4caf50);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--success, #4caf50) 65%, transparent);
+  box-shadow: 0 0 8px
+    color-mix(in srgb, var(--success, #4caf50) 65%, transparent);
 }
 
 .mobile-login__dock-item.is-granted .mobile-login__dock-value--accent {

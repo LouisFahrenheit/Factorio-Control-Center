@@ -1,0 +1,1122 @@
+/* ==========================================================================
+   Factorio Control Center — Vulcanus Theme
+   ========================================================================== */
+
+:root[data-theme='vulcanus'] {
+  --bg-main: #17130f;
+  --bg-widget: #262220;
+  --bg-data: #1c1916;
+  --bg-card: var(--bg-data);
+  --bg-card-header: var(--bg-widget);
+  --bg-modal: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%);
+  --bg-modal-header: var(--bg-widget);
+  --bg-modal-footer: color-mix(
+    in srgb,
+    var(--bg-widget) 82%,
+    var(--bg-main) 18%
+  );
+  --bg-input: #161411;
+  --bg-log: #0d0b09;
+  --border: #3a3128;
+  --border-dark: #14110d;
+  --border-inset-t: #070604;
+  --text: #f0e0c8;
+  --text-muted: #998a78;
+  --text-dim: #6a6054;
+  --accent: #ff6a1c;
+  --accent-soft: #ff8a3a;
+  --accent-selected: #ffc24a;
+  --accent-rgb: 255, 106, 28;
+  --running: #ffc24a;
+  --stopped: #6a6054;
+  --starting: #ff8a3a;
+  --stopping: #ff6a1c;
+  --error: #ff3010;
+  --flag-on: #ffc24a;
+  --flag-off: #6a6054;
+  --online-green: #ffc24a;
+  --btn-top: #2e2a24;
+  --btn-mid: #25221d;
+  --btn-bot: #1c1916;
+  --btn-hover-top: #ff8a3a;
+  --btn-hover-mid: #ff6a1c;
+  --btn-hover-bot: #c8480c;
+  --forbidden: #c8200c;
+  --forbidden-bright: #e83018;
+  --fcc-btn-bg: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  --fcc-btn-bg-hover: color-mix(
+    in srgb,
+    var(--accent) 15%,
+    var(--bg-widget) 85%
+  );
+  --fcc-btn-bg-active: color-mix(
+    in srgb,
+    var(--accent) 22%,
+    var(--bg-widget) 78%
+  );
+  --fcc-btn-bg-primary: var(--fcc-btn-bg);
+  --fcc-btn-bg-primary-hover: var(--fcc-btn-bg-hover);
+  --fcc-btn-bg-danger: var(--fcc-btn-bg);
+  --fcc-btn-bg-danger-hover: color-mix(
+    in srgb,
+    var(--forbidden) 24%,
+    var(--bg-widget) 76%
+  );
+  --fcc-btn-bg-disabled: color-mix(
+    in srgb,
+    var(--bg-main) 65%,
+    var(--bg-widget) 35%
+  );
+  --fcc-btn-border: color-mix(in srgb, var(--border) 85%, transparent);
+  --fcc-btn-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 220, 180, 0.05);
+}
+
+:root[data-theme='vulcanus'] body::before {
+  background:
+    radial-gradient(
+      700px 380px at 10% 96%,
+      rgba(255, 120, 40, 0.12),
+      transparent 65%
+    ),
+    radial-gradient(
+      640px 360px at 92% 94%,
+      rgba(200, 60, 20, 0.09),
+      transparent 65%
+    ),
+    radial-gradient(
+      1000px 500px at 50% -15%,
+      rgba(20, 14, 10, 0.7),
+      transparent 70%
+    ),
+    linear-gradient(to bottom, #100d0a 0%, #17130f 50%, #1b1613 100%);
+}
+
+:root[data-theme='vulcanus'] body::after {
+  opacity: 1;
+  animation: none;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(200, 32, 12, 0.7) 0,
+    rgba(200, 32, 12, 0.7) 14px,
+    rgba(12, 6, 4, 0) 14px,
+    rgba(12, 6, 4, 0) 28px
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 78% 72% at 50% 50%,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 62%,
+    rgba(0, 0, 0, 0.55) 80%,
+    rgba(0, 0, 0, 0.9) 92%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 78% 72% at 50% 50%,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 62%,
+    rgba(0, 0, 0, 0.55) 80%,
+    rgba(0, 0, 0, 0.9) 92%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vulcanus'] .app.is-reveal-from-ash,
+  :root[data-theme='vulcanus'] .app.is-reveal-from-ash::before,
+  :root[data-theme='vulcanus'] .app.is-reveal-from-ash::after,
+  :root[data-theme='vulcanus'] .login-screen.is-success::before,
+  :root[data-theme='vulcanus'] .login-screen.is-success::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .app.is-reveal-from-ash,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .app.is-reveal-from-ash::before,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .app.is-reveal-from-ash::after,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen.is-success::before,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen.is-success::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-theme='vulcanus'] .app {
+  position: relative;
+}
+
+:root[data-theme='vulcanus'] .app.is-reveal-from-ash {
+  opacity: 0;
+  transform: translateY(6px) scale(0.994);
+  filter: contrast(0.94) saturate(0.9) brightness(0.96);
+
+  transition:
+    opacity 0.9s cubic-bezier(0.33, 0.02, 0.25, 1),
+    transform 0.9s cubic-bezier(0.33, 0.02, 0.25, 1),
+    filter 0.9s cubic-bezier(0.33, 0.02, 0.25, 1);
+}
+
+:root[data-theme='vulcanus'] .app.is-reveal-from-ash.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: contrast(1) saturate(1) brightness(1);
+}
+
+:root[data-theme='vulcanus'] .app.is-reveal-from-ash::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background:
+    radial-gradient(
+      ellipse 130% 100% at 50% 58%,
+      rgba(45, 36, 30, 0) 0%,
+      rgba(28, 22, 18, 0.26) 50%,
+      rgba(14, 11, 9, 0.52) 100%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 38% 35%,
+      rgba(255, 110, 40, 0.08) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 72% 62%,
+      rgba(255, 180, 90, 0.04) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      185deg,
+      rgba(75, 62, 52, 0.2) 0%,
+      rgba(38, 32, 28, 0.38) 42%,
+      rgba(16, 12, 10, 0.45) 100%
+    );
+  opacity: 0;
+  animation: app-reveal-ash-smoke 1.45s cubic-bezier(0.33, 0.02, 0.25, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .app.is-reveal-from-ash::after {
+  content: '';
+  position: fixed;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  background-image:
+    repeating-radial-gradient(
+      circle at 16% 31%,
+      rgba(200, 175, 150, 0.07) 0,
+      transparent 3px,
+      transparent 7px
+    ),
+    repeating-radial-gradient(
+      circle at 71% 54%,
+      rgba(130, 110, 95, 0.06) 0,
+      transparent 2px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      102deg,
+      transparent 0,
+      transparent 11px,
+      rgba(35, 28, 24, 0.03) 11px,
+      rgba(35, 28, 24, 0.03) 12px
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    200% 200%;
+  animation: app-reveal-ash-dust 1.45s cubic-bezier(0.33, 0.02, 0.2, 1) forwards;
+}
+
+:root[data-theme='vulcanus'] .saves-detail-panel {
+  border-color: #2a2620;
+  background: linear-gradient(165deg, #252018 0%, #1a1610 100%);
+}
+
+:root[data-theme='vulcanus'] .saves-mods-compare {
+  border-color: #2a2620;
+  background: #1d1a15;
+}
+
+:root[data-theme='vulcanus'] .saves-mods-compare__body {
+  border-top-color: #2a2620;
+}
+
+:root[data-theme='vulcanus'] .save-factorio-version-line {
+  border-color: #2a2620;
+  background: #1d1a15;
+}
+
+:root[data-theme='vulcanus'] #tblInstancesBody tr.instance-row-selected {
+  background: transparent;
+  outline: none;
+}
+
+:root[data-theme='vulcanus'] #tblInstancesBody tr.instance-row-selected td {
+  background: color-mix(in srgb, #ff9b3d 12%, var(--bg-widget) 88%) !important;
+  box-shadow: none;
+}
+
+:root[data-theme='vulcanus']
+  #tblInstancesBody
+  tr.instance-row-selected
+  td:first-child {
+  box-shadow: inset 3px 0 0 #ff9b3d;
+}
+
+:root[data-theme='vulcanus']
+  #tblInstancesBody
+  tr.instance-row-selected
+  td:last-child {
+  border-right: none;
+}
+
+:root[data-theme='vulcanus']
+  #tblModsBody
+  tr.mods-row--selected:hover
+  td:first-child {
+  box-shadow: inset 3px 0 0 #ff9b3d;
+}
+
+:root[data-theme='vulcanus'] #tblModsBody tr.mods-row--selected {
+  background: transparent;
+  outline: none;
+}
+
+:root[data-theme='vulcanus'] #tblModsBody tr.mods-row--selected td {
+  background: color-mix(in srgb, #ff9b3d 12%, var(--bg-widget) 88%) !important;
+  box-shadow: none;
+}
+
+:root[data-theme='vulcanus'] #tblModsBody tr.mods-row--selected td:first-child {
+  box-shadow: inset 3px 0 0 #ff9b3d;
+}
+
+:root[data-theme='vulcanus'] #tblModsBody tr.mods-row--selected td:last-child {
+  border-right: none;
+}
+
+:root[data-theme='vulcanus']
+  #tblModsBody
+  tr.mods-row--disabled.mods-row--selected
+  td {
+  background: color-mix(in srgb, #ff9b3d 8%, var(--bg-widget) 92%) !important;
+}
+
+:root[data-theme='vulcanus']
+  #tblModsBody
+  tr.mods-row--disabled.mods-row--selected:hover
+  td {
+  background: color-mix(in srgb, #ff9b3d 10%, var(--bg-widget) 90%) !important;
+}
+
+:root[data-theme='vulcanus'] .app {
+  background-color: transparent;
+  isolation: isolate;
+}
+
+:root[data-theme='vulcanus'] .workspace,
+:root[data-theme='vulcanus'] .workspace__main {
+  background-color: transparent;
+}
+
+:root[data-theme='vulcanus'] .app__auth {
+  background: var(--bg-widget);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='vulcanus'] .panel {
+  background-color: var(--bg-main);
+  background-image: none;
+  border: 1px solid var(--border);
+  border-top-color: #504434;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='vulcanus'] .panel__title {
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-main) 94%);
+  border-bottom: 1px solid var(--border);
+  color: #e0b890;
+  text-shadow: none;
+}
+
+:root[data-theme='vulcanus'] .panel__title--sub {
+  border: none;
+  color: #b89880;
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-main) 94%);
+}
+
+:root[data-theme='vulcanus'] .panel__body {
+  background-color: var(--bg-main);
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel .panel__body {
+  background: var(--bg-main);
+}
+
+:root[data-theme='vulcanus'] .status-bar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%) 0%,
+    color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--border-dark) 92%, transparent);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme='vulcanus'] .status-bar__label {
+  color: var(--text);
+}
+
+:root[data-theme='vulcanus'] .status-flag {
+  color: var(--flag-off);
+  letter-spacing: 0.04em;
+}
+
+:root[data-theme='vulcanus'] .status-flag--on {
+  color: var(--flag-on);
+  text-shadow: 0 0 6px rgba(255, 194, 74, 0.55);
+}
+
+:root[data-theme='vulcanus'] .status-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 106, 28, 0.45),
+    rgba(0, 0, 0, 0.55)
+  );
+  box-shadow: 1px 0 0 rgba(255, 106, 28, 0.06);
+}
+
+:root[data-theme='vulcanus'] .status-bar__value--stop {
+  color: var(--forbidden-bright);
+  text-shadow: 0 0 6px rgba(232, 48, 24, 0.4);
+}
+
+:root[data-theme='vulcanus'] .status-bar__value--running {
+  color: var(--running);
+  background-image: linear-gradient(
+    100deg,
+    #7a3820 0%,
+    #b03810 16%,
+    #ff6a1c 32%,
+    #ffc24a 48%,
+    #fff0d0 52%,
+    #ffc24a 56%,
+    #ff6a1c 68%,
+    #8a3018 84%,
+    #5c2418 100%
+  );
+  background-size: 280% 100%;
+  background-position: 0% 50%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: vulcan-molten-running 5.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px rgba(255, 106, 28, 0.28))
+    drop-shadow(0 0 10px rgba(255, 140, 60, 0.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vulcanus'] .status-bar__value--running {
+    animation: none;
+    background: none;
+    background-clip: unset;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: var(--running);
+    filter: none;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .status-bar__value--running {
+  animation: none;
+  background: none;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  color: var(--running);
+  filter: none;
+}
+
+:root[data-theme='vulcanus'] .tabs,
+:root[data-theme='vulcanus'] .sub-tabs,
+:root[data-theme='vulcanus'] .maintenance-inner-tabs {
+  background: color-mix(in srgb, var(--bg-widget) 90%, #14110e 10%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme='vulcanus'] .tabs__tab,
+:root[data-theme='vulcanus'] .sub-tabs__tab {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  font-weight: 650;
+}
+
+:root[data-theme='vulcanus'] .tabs__tab:hover,
+:root[data-theme='vulcanus'] .sub-tabs__tab:hover {
+  background: var(--fcc-interactive-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent-soft);
+}
+
+:root[data-theme='vulcanus'] .tabs__tab--active,
+:root[data-theme='vulcanus'] .sub-tabs__tab--active {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 106, 28, 0.35);
+}
+
+:root[data-theme='vulcanus'] .tabs__sliding-highlight,
+:root[data-theme='vulcanus'] .sub-tabs__sliding-highlight,
+:root[data-theme='vulcanus']
+  .tabs__tab--active:not(:has(.tabs__sliding-highlight)),
+:root[data-theme='vulcanus']
+  .sub-tabs__tab--active:not(:has(.sub-tabs__sliding-highlight)) {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-widget) 86%);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 14px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+:root[data-theme='vulcanus'] .tab-panels {
+  background: var(--bg-widget);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-theme='vulcanus'] .panel-shell > .tab-panels {
+  overflow: auto;
+}
+
+:root[data-theme='vulcanus'] .tab-panels::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 138, 58, 0) 10%,
+    rgba(255, 138, 58, 0.95) 35%,
+    rgba(255, 194, 74, 0.95) 65%,
+    rgba(255, 138, 58, 0) 90%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateY(0);
+}
+
+:root[data-theme='vulcanus'] .tab-panels.is-switching::before {
+  animation: tab-scan-sweep 0.42s cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+
+:root[data-theme='vulcanus'] .tab-panel.tab-panel--active {
+  animation: tab-panel-enter-hud 0.42s cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vulcanus'] .tab-panel.tab-panel--active,
+  :root[data-theme='vulcanus'] .tab-panels.is-switching::before {
+    animation: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .tab-panel.tab-panel--active,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .tab-panels.is-switching::before {
+  animation: none !important;
+}
+
+:root[data-theme='vulcanus'] .btn {
+  text-shadow: none;
+}
+
+:root[data-theme='vulcanus'] .btn:hover:not(:disabled):not(.is-locked) {
+  color: var(--accent-soft);
+}
+
+:root[data-theme='vulcanus'] .btn:active:not(:disabled):not(.is-locked) {
+  color: var(--accent);
+}
+
+:root[data-theme='vulcanus'] .btn:disabled,
+:root[data-theme='vulcanus'] .btn.is-locked {
+  color: #6a6054;
+}
+
+:root[data-theme='vulcanus']
+  .btn--primary:hover:not(:disabled):not(.is-locked) {
+  color: var(--accent);
+}
+
+:root[data-theme='vulcanus'] .btn--danger:hover:not(:disabled):not(.is-locked) {
+  color: #f5e0c0;
+}
+
+:root[data-theme='vulcanus'] .input {
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid #322d26;
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .input:hover:not(:focus):not(:disabled) {
+  border-color: #4a4036;
+}
+
+:root[data-theme='vulcanus'] .input:focus {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 1px rgba(255, 106, 28, 0.3);
+}
+
+:root[data-theme='vulcanus'] select.input,
+:root[data-theme='vulcanus'] .settings-json {
+  background: var(--bg-input);
+}
+
+:root[data-theme='vulcanus'] select.input option {
+  background: var(--bg-data);
+  color: var(--text);
+}
+
+:root[data-theme='vulcanus'] input[type='checkbox'] {
+  background: var(--bg-input);
+  border: 1px solid #322d26;
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] input[type='checkbox']:checked {
+  background: var(--accent-selected);
+  border-color: var(--accent-selected);
+}
+
+:root[data-theme='vulcanus'] .log-view,
+:root[data-theme='vulcanus'] #chatLog,
+:root[data-theme='vulcanus'] .fu-log {
+  background: var(--bg-log);
+  color: #d8c8b0;
+  border: 1px solid #2a2620;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-theme='vulcanus'] table.data th {
+  background: var(--bg-data);
+  color: #b8a890;
+  border-bottom: 1px solid #2a2620;
+  font-weight: bold;
+}
+
+:root[data-theme='vulcanus'] table.data th:hover {
+  color: var(--accent);
+  border-bottom-color: rgba(255, 106, 28, 0.6);
+}
+
+:root[data-theme='vulcanus'] table.data th,
+:root[data-theme='vulcanus'] table.data td {
+  border-color: #2a2620;
+}
+
+:root[data-theme='vulcanus'] table.data tbody tr td {
+  background: transparent;
+}
+
+:root[data-theme='vulcanus'] .table-wrap {
+  background: color-mix(in srgb, var(--bg-widget) 90%, var(--bg-main) 10%);
+  border: 1px solid #2a2620;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme='vulcanus'] .commands-tab__card {
+  background: linear-gradient(165deg, #252018 0%, #1a1610 100%);
+  border-color: #2a2620;
+}
+
+:root[data-theme='vulcanus'] .commands-group {
+  background: color-mix(in srgb, #1f1c17 88%, #262220 12%);
+  border: 1px solid #2a2620;
+  border-radius: 9px;
+}
+
+:root[data-theme='vulcanus'] .commands-group__title {
+  color: var(--accent-soft);
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+:root[data-theme='vulcanus'] .commands-item {
+  background: color-mix(in srgb, #262220 90%, #1a1714 10%);
+  border: 1px solid #2a2620;
+  border-radius: 8px;
+}
+
+:root[data-theme='vulcanus'] .commands-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, #2a2620);
+  background: var(--fcc-interactive-hover-bg);
+  box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
+:root[data-theme='vulcanus'] .commands-item--selected {
+  border-color: color-mix(in srgb, var(--accent) 42%, #2a2620);
+  background: var(--fcc-row-hover-selected-bg);
+  box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
+:root[data-theme='vulcanus'] .commands-editor {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel.panel {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(255, 106, 28, 0.08);
+}
+
+:root[data-theme='vulcanus'] .login-screen__brand {
+  background: linear-gradient(to bottom, #2e2a24 0%, #241f1a 50%, #181410 100%);
+  border: 1px solid var(--border);
+  border-top-color: #50483c;
+  border-radius: 0;
+  color: var(--accent);
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.85),
+    0 0 22px rgba(255, 106, 28, 0.35);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(200, 80, 20, 0.12);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud {
+  background: linear-gradient(to bottom, #22201c, #16130f);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 200, 150, 0.04);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud-label {
+  color: var(--text-dim);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud-value {
+  color: var(--text);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud-value--accent {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(255, 106, 28, 0.45);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud-divider {
+  background: rgba(255, 106, 28, 0.28);
+  box-shadow: 1px 0 0 rgba(255, 106, 28, 0.06);
+}
+
+:root[data-theme='vulcanus'] .login-screen__caps {
+  color: var(--forbidden-bright);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    0 0 6px rgba(232, 48, 24, 0.45);
+}
+
+:root[data-theme='vulcanus'] .login-screen__hud-pulse {
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(255, 106, 28, 0.7);
+}
+
+:root[data-theme='vulcanus'] .login-screen__label {
+  font-size: 10pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e8d8c0;
+  border-left-color: var(--accent);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 106, 28, 0.22) 0%,
+    rgba(255, 138, 58, 0.08) 50%,
+    transparent 100%
+  );
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 0 12px rgba(255, 106, 28, 0.12);
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel .login-screen__field {
+  border-radius: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-top-color: var(--border-inset-t);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.58),
+    inset 0 0 0 1px rgba(255, 106, 28, 0.06);
+  color: var(--text);
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel .login-screen__field:focus {
+  border-color: var(--accent-soft);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 106, 28, 0.35),
+    0 0 16px rgba(255, 106, 28, 0.18);
+}
+
+:root[data-theme='vulcanus'] .login-screen__submit {
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  font-size: 9pt;
+  color: #f0e0c8;
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel .login-screen__submit:hover {
+  color: var(--accent);
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel .login-screen__submit:active {
+  color: var(--text);
+}
+
+:root[data-theme='vulcanus'] .login-screen__pass-toggle {
+  color: var(--text-dim);
+}
+
+:root[data-theme='vulcanus'] .login-screen__pass-toggle:hover {
+  color: var(--accent-soft);
+  border-color: rgba(255, 106, 28, 0.35);
+}
+
+:root[data-theme='vulcanus'] .login-screen.is-success {
+  position: relative;
+}
+
+:root[data-theme='vulcanus'] .login-screen.is-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background:
+    radial-gradient(
+      ellipse 92% 72% at 50% 104%,
+      rgba(52, 40, 32, 0.42) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 86% 54% at 28% 38%,
+      rgba(115, 82, 58, 0.16) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 70% 46% at 82% 36%,
+      rgba(255, 100, 40, 0.06) 0%,
+      transparent 54%
+    ),
+    linear-gradient(
+      185deg,
+      rgba(28, 22, 18, 0.05) 0%,
+      rgba(18, 14, 12, 0.28) 100%
+    );
+  opacity: 0;
+  animation: login-vulcan-ash-cloud 2.15s cubic-bezier(0.33, 0.02, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .login-screen.is-success::after {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  background-image:
+    repeating-radial-gradient(
+      circle at 18% 68%,
+      rgba(215, 188, 162, 0.1) 0,
+      transparent 3px,
+      transparent 7px
+    ),
+    repeating-radial-gradient(
+      circle at 74% 28%,
+      rgba(135, 112, 92, 0.08) 0,
+      transparent 2px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      100deg,
+      transparent 0,
+      transparent 10px,
+      rgba(42, 34, 28, 0.04) 10px,
+      rgba(42, 34, 28, 0.04) 11px
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    220% 220%;
+  animation: login-vulcan-ash-dust 2.2s cubic-bezier(0.33, 0.02, 0.2, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .active-modpack-pill {
+  border: 0;
+  border-radius: 0;
+  background: rgba(255, 106, 28, 0.08);
+  color: var(--accent);
+}
+
+:root[data-theme='vulcanus'] .admin-list {
+  background: var(--bg-data);
+  border: 1px solid #2a2620;
+}
+
+:root[data-theme='vulcanus'] .admin-list li {
+  border-bottom: 1px solid #2a2620;
+}
+
+:root[data-theme='vulcanus']
+  .online-list--players
+  li.is-admin
+  .online-list__name {
+  color: var(--accent-selected);
+  text-shadow: 0 0 4px rgba(255, 194, 74, 0.4);
+}
+
+:root[data-theme='vulcanus'] .fu-modal {
+  background: var(--bg-modal);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='vulcanus'] .fu-modal__header {
+  color: var(--text);
+  background: var(--bg-modal-header);
+  border-bottom: 1px solid var(--border);
+}
+
+:root[data-theme='vulcanus'] .fu-progress {
+  background-color: #0c0604;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(200, 32, 12, 0.55) 0,
+    rgba(200, 32, 12, 0.55) 8px,
+    rgba(12, 6, 4, 0) 8px,
+    rgba(12, 6, 4, 0) 16px
+  );
+  border: 1px solid var(--forbidden);
+}
+
+:root[data-theme='vulcanus'] .fu-progress__bar {
+  background: linear-gradient(to right, #c8480c 0%, #ff6a1c 50%, #ffc24a 100%);
+  box-shadow: 0 0 12px rgba(255, 106, 28, 0.55);
+}
+
+:root[data-theme='vulcanus'] .fu-progress__bar--indeterminate {
+  background: linear-gradient(
+    to right,
+    #c8480c,
+    #ff6a1c,
+    #ffc24a,
+    #ff6a1c,
+    #c8480c
+  );
+}
+
+:root[data-theme='vulcanus'] details.advanced {
+  border: 1px solid var(--border);
+  background: var(--bg-widget);
+}
+
+:root[data-theme='vulcanus'] details.advanced summary {
+  color: var(--accent);
+}
+
+:root[data-theme='vulcanus'] .panel-shell > .tab-panels:has(.monitoring-tab) {
+  overflow-y: auto !important;
+}
+
+:root[data-theme='vulcanus'] .login-portal__cta {
+  border-radius: 0;
+}
+
+:root[data-theme='vulcanus'] .login-portal {
+  border-radius: 0;
+  background: linear-gradient(180deg, #1e1a16, #12100d);
+}
+
+:root[data-theme='vulcanus'] .login-screen__brand-primary {
+  color: #f2e0cc;
+  text-shadow: 0 0 20px rgba(255, 106, 28, 0.35);
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--shimmer {
+  display: none;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg {
+  background: #120a06;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--glow {
+  background: radial-gradient(
+    ellipse 62% 50% at 50% 62%,
+    rgba(180, 72, 18, 0.08) 0%,
+    rgba(120, 48, 12, 0.04) 42%,
+    transparent 74%
+  );
+  opacity: 0.6;
+}
+
+:root[data-theme='vulcanus'] .login-screen__bg-layer--drift {
+  filter: blur(20px);
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 28% 38%,
+      rgba(180, 72, 18, 0.045) 0,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 65% 50% at 72% 58%,
+      rgba(120, 48, 12, 0.04) 0,
+      transparent 66%
+    );
+  opacity: 0.22;
+  animation: login-bg-drift 50s ease-in-out infinite alternate;
+}
+
+:root[data-theme='vulcanus']
+  .login-portal
+  .login-portal__telemetry.login-screen__hud {
+  border-top-color: color-mix(
+    in srgb,
+    var(--accent) 28%,
+    var(--border) 72%
+  ) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 140, 60, 0.06) !important;
+}
+
+:root[data-theme='vulcanus'] .login-portal__telemetry-head {
+  background: rgba(30, 26, 22, 0.35);
+  border-bottom-color: color-mix(in srgb, var(--accent) 18%, var(--border) 82%);
+}
+
+:root[data-theme='vulcanus']
+  .login-portal__telemetry-slot
+  + .login-portal__telemetry-slot {
+  box-shadow: inset 1px 0 0
+    color-mix(in srgb, var(--accent) 10%, var(--border) 90%);
+}
+
+:root[data-theme='vulcanus']
+  .login-portal
+  .login-portal__telemetry.login-screen__hud {
+  background: transparent !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+:root[data-theme='vulcanus'] body.vulcanus-login-granted::before {
+  animation: vulcanus-forge-ignite 1.35s cubic-bezier(0.33, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .login-screen__panel.is-success {
+  animation: login-grant-pulse-vulcan 1.25s cubic-bezier(0.33, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus']
+  .login-screen__panel.is-success
+  .login-screen__corner {
+  animation: login-grant-corner-vulcan 1.15s cubic-bezier(0.33, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .login-screen.is-success .login-screen__hud-pulse {
+  animation: login-pulse-grant-vulcan 1.05s cubic-bezier(0.33, 0.06, 0.22, 1)
+    forwards;
+}
+
+:root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus {
+  opacity: 0;
+  transform: scale(1.025) translateY(12px);
+  filter: blur(5px) sepia(0.22) brightness(0.86);
+  transition:
+    opacity 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    transform 680ms cubic-bezier(0.33, 0.02, 0.22, 1),
+    filter 650ms cubic-bezier(0.33, 0.02, 0.22, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vulcanus'] body.vulcanus-login-granted::before,
+  :root[data-theme='vulcanus'] .login-screen__panel.is-success,
+  :root[data-theme='vulcanus']
+    .login-screen__panel.is-success
+    .login-screen__corner,
+  :root[data-theme='vulcanus']
+    .login-screen.is-success
+    .login-screen__hud-pulse,
+  :root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  body.vulcanus-login-granted::before,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen__panel.is-success,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen__panel.is-success
+  .login-screen__corner,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen.is-success
+  .login-screen__hud-pulse,
+:root[data-web-disable-effects='1'][data-theme='vulcanus']
+  .login-screen.login-leaving--vulcanus {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+:root[data-theme='vulcanus'] .login-screen.login-leaving--vulcanus {
+  filter: none !important;
+}
+
+:root[data-theme='vulcanus'] body.vulcanus-login-granted::before {
+  animation: none !important;
+  filter: none !important;
+}

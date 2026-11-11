@@ -246,7 +246,7 @@
 }
 
 #tabPanelStats table.data tbody tr:hover td {
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  background: var(--fcc-row-hover-bg);
 }
 
 #tabPanelStats .player-stats__name-cell {
@@ -314,13 +314,13 @@
 }
 
 #tabPanelStats .players-online-list__item:hover {
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  background: var(--fcc-row-hover-bg);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--text);
 }
 
 #tabPanelStats .players-online-list__item.is-selected {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  background: var(--fcc-row-hover-selected-bg);
   border-color: var(--accent);
   color: var(--accent-light, #ffd580);
 }
@@ -350,13 +350,13 @@
 }
 
 #tabPanelStats .players-online-list__item:hover {
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-widget) 88%);
+  background: var(--fcc-row-hover-bg);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--text);
 }
 
 #tabPanelStats .players-online-list__item.is-selected {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-widget) 78%);
+  background: var(--fcc-row-hover-selected-bg);
   border-color: var(--accent);
   color: var(--accent-light, #ffd580);
 }
@@ -558,7 +558,7 @@
 }
 
 #tabPanelStats .players-admin-list li:hover {
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-widget) 92%);
+  background: var(--fcc-row-hover-bg);
 }
 
 #tabPanelStats .players-admin-list__name {
