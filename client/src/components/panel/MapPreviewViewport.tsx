@@ -10,9 +10,11 @@ import {
 import { IconMapPin } from '@tabler/icons-react';
 import { previewPlanetCoordinates } from '../../lib/mapGen/previewCoordinates';
 import {
+  clientToFrameLocal,
   clientToImageNorm,
   emptyMapPreviewAnnotations,
   eraseAt,
+  frameCssScale,
   imageContentRect,
   MAP_PREVIEW_MARKER_ICON_SIZE,
   MAP_PREVIEW_MARKER_STROKE_WIDTH,
@@ -118,32 +120,36 @@ export type MapPreviewViewportHandle = {
   recenter: () => void;
   clearAnnotations: () => void;
   getAnnotations: () => MapPreviewAnnotations;
-  getMarkerExportOptions: (exportImageWidth: number) => { markerIconPx: number };
+  getMarkerExportOptions: (exportImageWidth: number) => {
+    markerIconPx: number;
+  };
 };
 
-export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPreviewViewportProps>(
-  function MapPreviewViewport(
-    {
-      previewUrl,
-      previewPlanet,
-      planetLabel,
-      mapSeed,
-      loading,
-      refining,
-      emptyLabel,
-      connectingStages,
-      refiningLabel,
-      crashSiteLabel,
-      onInteractionLockChange,
-      onFirstPreviewReady,
-      showCenterMarker = false,
-      annotationTool = 'pan',
-      annotationColor = MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
-      markerLabel = '',
-      onAnnotationsChange,
-    },
-    ref,
-  ) {
+export const MapPreviewViewport = forwardRef<
+  MapPreviewViewportHandle,
+  MapPreviewViewportProps
+>(function MapPreviewViewport(
+  {
+    previewUrl,
+    previewPlanet,
+    planetLabel,
+    mapSeed,
+    loading,
+    refining,
+    emptyLabel,
+    connectingStages,
+    refiningLabel,
+    crashSiteLabel,
+    onInteractionLockChange,
+    onFirstPreviewReady,
+    showCenterMarker = false,
+    annotationTool = 'pan',
+    annotationColor = MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
+    markerLabel = '',
+    onAnnotationsChange,
+  },
+  ref,
+) {
   const [pan, setPan] = useState<Pan>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(PREVIEW_ZOOM_DEFAULT);
   const [panSmooth, setPanSmooth] = useState(false);
@@ -168,7 +174,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
   const [planetCaptionVisible, setPlanetCaptionVisible] = useState(false);
   const [planetCaptionName, setPlanetCaptionName] = useState('');
   const [planetCaptionCoords, setPlanetCaptionCoords] = useState('');
-  const [planetCaptionPhase, setPlanetCaptionPhase] = useState<'name' | 'coords' | 'done'>('name');
+  const [planetCaptionPhase, setPlanetCaptionPhase] = useState<
+    'name' | 'coords' | 'done'
+  >('name');
   const [planetCaptionFading, setPlanetCaptionFading] = useState(false);
   const [crashSiteVisible, setCrashSiteVisible] = useState(false);
   const [crashSiteTyped, setCrashSiteTyped] = useState('');
@@ -197,6 +205,8 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     startY: number;
     panX: number;
     panY: number;
+    scaleX: number;
+    scaleY: number;
   } | null>(null);
   const pendingGridKeyRef = useRef(0);
   const wasLoadingRef = useRef(false);
@@ -204,7 +214,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
   const previewInteractionLockedRef = useRef(false);
   const firstPreviewReadyFiredRef = useRef(false);
   const annotationIdRef = useRef(0);
-  const activeStrokeRef = useRef<{ id: string; pointerId: number } | null>(null);
+  const activeStrokeRef = useRef<{ id: string; pointerId: number } | null>(
+    null,
+  );
   const annotationToolRef = useRef(annotationTool);
   const annotationColorRef = useRef(annotationColor);
   const markerLabelRef = useRef(markerLabel);
@@ -245,7 +257,12 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     if (!frame || !img?.naturalWidth) return;
     const fw = frame.clientWidth;
     const fh = frame.clientHeight;
-    const content = imageContentRect(fw, fh, img.naturalWidth, img.naturalHeight);
+    const content = imageContentRect(
+      fw,
+      fh,
+      img.naturalWidth,
+      img.naturalHeight,
+    );
     setImageOverlayRect({
       left: (content.x / fw) * 100,
       top: (content.y / fh) * 100,
@@ -269,19 +286,26 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     );
   }, []);
 
-  const appendStrokePoint = useCallback((strokeId: string, point: { x: number; y: number }) => {
-    setAnnotations((current) => {
-      const strokes = current.strokes.map((stroke) => {
-        if (stroke.id !== strokeId) return stroke;
-        const last = stroke.points[stroke.points.length - 1];
-        if (last && Math.hypot(last.x - point.x, last.y - point.y) < ANNOTATION_MIN_POINT_DIST) {
-          return stroke;
-        }
-        return { ...stroke, points: [...stroke.points, point] };
+  const appendStrokePoint = useCallback(
+    (strokeId: string, point: { x: number; y: number }) => {
+      setAnnotations((current) => {
+        const strokes = current.strokes.map((stroke) => {
+          if (stroke.id !== strokeId) return stroke;
+          const last = stroke.points[stroke.points.length - 1];
+          if (
+            last &&
+            Math.hypot(last.x - point.x, last.y - point.y) <
+              ANNOTATION_MIN_POINT_DIST
+          ) {
+            return stroke;
+          }
+          return { ...stroke, points: [...stroke.points, point] };
+        });
+        return { ...current, strokes };
       });
-      return { ...current, strokes };
-    });
-  }, []);
+    },
+    [],
+  );
 
   const fireFirstPreviewReady = useCallback(() => {
     if (firstPreviewReadyFiredRef.current) return;
@@ -346,7 +370,11 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
         }, PLANET_CAPTION_HOLD_MS);
       };
 
-      const typeLine = (text: string, phase: 'name' | 'coords', onDone: () => void) => {
+      const typeLine = (
+        text: string,
+        phase: 'name' | 'coords',
+        onDone: () => void,
+      ) => {
         if (webEffectsReduced() || !text) {
           if (phase === 'name') setPlanetCaptionName(text);
           else setPlanetCaptionCoords(text);
@@ -461,7 +489,8 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
 
   useEffect(() => {
     if (webEffectsReduced()) {
-      if (!displayUrl || !previewPlanet || !planetLabel || satelliteScan) return;
+      if (!displayUrl || !previewPlanet || !planetLabel || satelliteScan)
+        return;
       if (seenPlanetsRef.current.has(previewPlanet)) return;
       seenPlanetsRef.current.add(previewPlanet);
       startPlanetCaption(
@@ -474,7 +503,13 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       return;
     }
 
-    if (wasScanningRef.current && !satelliteScan && displayUrl && previewPlanet && planetLabel) {
+    if (
+      wasScanningRef.current &&
+      !satelliteScan &&
+      displayUrl &&
+      previewPlanet &&
+      planetLabel
+    ) {
       if (!seenPlanetsRef.current.has(previewPlanet)) {
         seenPlanetsRef.current.add(previewPlanet);
         startPlanetCaption(
@@ -582,7 +617,12 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       getAnnotations: () => annotations,
       getMarkerExportOptions,
     }),
-    [animatePanZoomToCenter, clearAnnotations, annotations, getMarkerExportOptions],
+    [
+      animatePanZoomToCenter,
+      clearAnnotations,
+      annotations,
+      getMarkerExportOptions,
+    ],
   );
 
   useEffect(() => {
@@ -664,7 +704,14 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     })();
 
     return clearScanTimers;
-  }, [previewUrl, clearScanTimers, finishScan, resetPanZoom, fireFirstPreviewReady, clearAnnotations]);
+  }, [
+    previewUrl,
+    clearScanTimers,
+    finishScan,
+    resetPanZoom,
+    fireFirstPreviewReady,
+    clearAnnotations,
+  ]);
 
   useLayoutEffect(() => {
     if (!displayUrl || satelliteScan) return;
@@ -690,14 +737,15 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       const img = imgRef.current;
       if (!frameEl || !img?.naturalWidth) return;
 
-      const rect = frameEl.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+      const { mx, my } = clientToFrameLocal(e.clientX, e.clientY, frameEl);
       const frameW = frameEl.clientWidth;
       const frameH = frameEl.clientHeight;
 
       const oldZoom = zoomRef.current;
-      const factor = e.deltaY < 0 ? PREVIEW_ZOOM_WHEEL_FACTOR : 1 / PREVIEW_ZOOM_WHEEL_FACTOR;
+      const factor =
+        e.deltaY < 0
+          ? PREVIEW_ZOOM_WHEEL_FACTOR
+          : 1 / PREVIEW_ZOOM_WHEEL_FACTOR;
       const newZoom = Math.min(
         PREVIEW_ZOOM_MAX,
         Math.max(PREVIEW_ZOOM_MIN, oldZoom * factor),
@@ -746,17 +794,21 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
   }, []);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || !displayUrl || previewInteractionLockedRef.current) return;
+    if (e.button !== 0 || !displayUrl || previewInteractionLockedRef.current)
+      return;
     if (annotationToolRef.current !== 'pan') return;
     syncBounds();
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
+    const { scaleX, scaleY } = frameCssScale(e.currentTarget);
     dragRef.current = {
       pointerId: e.pointerId,
       startX: e.clientX,
       startY: e.clientY,
       panX: pan.x,
       panY: pan.y,
+      scaleX,
+      scaleY,
     };
     setPanning(true);
   };
@@ -769,8 +821,8 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     setPan(
       clampPan(
         {
-          x: drag.panX + e.clientX - drag.startX,
-          y: drag.panY + e.clientY - drag.startY,
+          x: drag.panX + (e.clientX - drag.startX) * drag.scaleX,
+          y: drag.panY + (e.clientY - drag.startY) * drag.scaleY,
         },
         maxX,
         maxY,
@@ -808,7 +860,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     }
 
     if (tool === 'eraser') {
-      setAnnotations((current) => eraseAt(current, point, ANNOTATION_ERASE_RADIUS));
+      setAnnotations((current) =>
+        eraseAt(current, point, ANNOTATION_ERASE_RADIUS),
+      );
       return;
     }
 
@@ -835,7 +889,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       if (e.buttons !== 1) return;
       const point = pointerToImageNorm(e.clientX, e.clientY);
       if (!point) return;
-      setAnnotations((current) => eraseAt(current, point, ANNOTATION_ERASE_RADIUS));
+      setAnnotations((current) =>
+        eraseAt(current, point, ANNOTATION_ERASE_RADIUS),
+      );
       return;
     }
     if (tool !== 'pen' || !active || active.pointerId !== e.pointerId) return;
@@ -877,8 +933,13 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
   const satelliteConnecting = !displayUrl && satellitePending;
   const showSatelliteOverlay = scanOverlayVisible || satellitePending;
   const overlayConnecting = satellitePending && !satelliteScan;
-  const connectStageHoldIndex = Math.max(0, (connectingStages?.length ?? 1) - 2);
-  const showFinalConnectStage = Boolean(previewUrl && !displayUrl && satelliteConnecting);
+  const connectStageHoldIndex = Math.max(
+    0,
+    (connectingStages?.length ?? 1) - 2,
+  );
+  const showFinalConnectStage = Boolean(
+    previewUrl && !displayUrl && satelliteConnecting,
+  );
   const connectLineCount =
     connectingStages?.length && satelliteConnecting
       ? Math.min(connectStageIndex + 1, connectingStages.length)
@@ -896,7 +957,12 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       );
     }, SATELLITE_CONNECT_STAGE_MS);
     return () => window.clearInterval(timer);
-  }, [satelliteConnecting, connectingStages?.length, connectStageHoldIndex, pendingGridKey]);
+  }, [
+    satelliteConnecting,
+    connectingStages?.length,
+    connectStageHoldIndex,
+    pendingGridKey,
+  ]);
 
   useEffect(() => {
     if (!showFinalConnectStage || !connectingStages?.length) return;
@@ -907,7 +973,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     'create-save__preview-frame' +
     (refining ? ' create-save__preview-frame--refining' : '') +
     (loading && !displayUrl ? ' create-save__preview-frame--busy' : '') +
-    (satellitePending ? ' create-save__preview-frame--satellite-connecting' : '') +
+    (satellitePending
+      ? ' create-save__preview-frame--satellite-connecting'
+      : '') +
     (displayUrl && !previewInteractionLocked && annotationTool === 'pan'
       ? ' create-save__preview-frame--pannable'
       : '') +
@@ -925,7 +993,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
     (previewInteractionLocked ? ' create-save__preview-frame--scan-lock' : '');
 
   const annotationLayerActive =
-    Boolean(displayUrl) && !previewInteractionLocked && annotationTool !== 'pan';
+    Boolean(displayUrl) &&
+    !previewInteractionLocked &&
+    annotationTool !== 'pan';
   const hasAnnotations =
     annotations.strokes.length > 0 || annotations.markers.length > 0;
 
@@ -988,7 +1058,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
             <div
               className={
                 'create-save__preview-annotations' +
-                (annotationLayerActive ? ' create-save__preview-annotations--active' : '')
+                (annotationLayerActive
+                  ? ' create-save__preview-annotations--active'
+                  : '')
               }
               style={{
                 left: `${imageOverlayRect.left}%`,
@@ -1042,7 +1114,9 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
                   aria-hidden
                 >
                   {marker.label ? (
-                    <span className="create-save__preview-annotation-label">{marker.label}</span>
+                    <span className="create-save__preview-annotation-label">
+                      {marker.label}
+                    </span>
                   ) : null}
                   <IconMapPin
                     size={MAP_PREVIEW_MARKER_ICON_SIZE}
@@ -1056,19 +1130,27 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
             <div
               className={
                 'create-save__preview-crash-site' +
-                (crashSiteFading ? ' create-save__preview-crash-site--fading' : '')
+                (crashSiteFading
+                  ? ' create-save__preview-crash-site--fading'
+                  : '')
               }
               aria-live="polite"
             >
               <div className="create-save__preview-crash-pin">
                 <div className="create-save__preview-crash-label">
-                  <span className="create-save__preview-crash-label-sizing" aria-hidden>
+                  <span
+                    className="create-save__preview-crash-label-sizing"
+                    aria-hidden
+                  >
                     {crashSiteLabel}
                   </span>
                   <span className="create-save__preview-crash-label-content">
                     <span>{crashSiteTyped}</span>
                     {crashSiteTyping ? (
-                      <span className="create-save__preview-planet-caption-cursor" aria-hidden>
+                      <span
+                        className="create-save__preview-planet-caption-cursor"
+                        aria-hidden
+                      >
                         ▌
                       </span>
                     ) : null}
@@ -1083,64 +1165,101 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       ) : (
         <div
           className={
-            'create-save__preview-empty' + (satelliteConnecting ? ' create-save__preview-empty--connecting' : '')
+            'create-save__preview-empty' +
+            (satelliteConnecting
+              ? ' create-save__preview-empty--connecting'
+              : '')
           }
         >
           {!satelliteConnecting ? (
-            <AppIcon name="start_save" size={40} className="create-save__preview-empty-icon" />
+            <AppIcon
+              name="start_save"
+              size={40}
+              className="create-save__preview-empty-icon"
+            />
           ) : null}
           {satelliteConnecting && connectingStages?.length ? (
             <div className="create-save__preview-console" aria-live="polite">
-              {connectingStages.slice(0, connectLineCount).map((line, index) => {
-                const done = index < connectStageIndex;
-                return (
-                  <div
-                    key={index}
-                    className={
-                      'create-save__preview-console-line' +
-                      (done ? ' create-save__preview-console-line--done' : '') +
-                      (index === connectStageIndex ? ' create-save__preview-console-line--active' : '')
-                    }
-                  >
-                    <span className="create-save__preview-console-text">{line}</span>
-                    {done ? <span className="create-save__preview-console-ok">OK</span> : null}
-                  </div>
-                );
-              })}
+              {connectingStages
+                .slice(0, connectLineCount)
+                .map((line, index) => {
+                  const done = index < connectStageIndex;
+                  return (
+                    <div
+                      key={index}
+                      className={
+                        'create-save__preview-console-line' +
+                        (done
+                          ? ' create-save__preview-console-line--done'
+                          : '') +
+                        (index === connectStageIndex
+                          ? ' create-save__preview-console-line--active'
+                          : '')
+                      }
+                    >
+                      <span className="create-save__preview-console-text">
+                        {line}
+                      </span>
+                      {done ? (
+                        <span className="create-save__preview-console-ok">
+                          OK
+                        </span>
+                      ) : null}
+                    </div>
+                  );
+                })}
             </div>
           ) : (
-            <span className="create-save__preview-placeholder">{emptyLabel}</span>
+            <span className="create-save__preview-placeholder">
+              {emptyLabel}
+            </span>
           )}
         </div>
       )}
       {displayUrl && (loading || refining) && (
-        <span className="create-save__preview-refining-badge">{refiningLabel}</span>
+        <span className="create-save__preview-refining-badge">
+          {refiningLabel}
+        </span>
       )}
       {showSatelliteOverlay ? (
         <div
           className={
             'create-save__preview-satellite-scan' +
-            (overlayConnecting ? ' create-save__preview-satellite-scan--connecting' : '') +
-            (scanOverlayFading ? ' create-save__preview-satellite-scan--fading-out' : '')
+            (overlayConnecting
+              ? ' create-save__preview-satellite-scan--connecting'
+              : '') +
+            (scanOverlayFading
+              ? ' create-save__preview-satellite-scan--fading-out'
+              : '')
           }
           aria-hidden
         >
-          <span key={overlayConnecting ? pendingGridKey : 'scan'} className="create-save__preview-satellite-grid" />
-          {!overlayConnecting ? <span className="create-save__preview-satellite-beam" /> : null}
+          <span
+            key={overlayConnecting ? pendingGridKey : 'scan'}
+            className="create-save__preview-satellite-grid"
+          />
+          {!overlayConnecting ? (
+            <span className="create-save__preview-satellite-beam" />
+          ) : null}
         </div>
       ) : null}
       {planetCaptionVisible && displayUrl ? (
         <div
           className={
             'create-save__preview-planet-caption' +
-            (planetCaptionFading ? ' create-save__preview-planet-caption--fading' : '')
+            (planetCaptionFading
+              ? ' create-save__preview-planet-caption--fading'
+              : '')
           }
           aria-live="polite"
         >
           <div className="create-save__preview-planet-caption-name">
             <span>{planetCaptionName}</span>
             {planetCaptionPhase === 'name' ? (
-              <span className="create-save__preview-planet-caption-cursor" aria-hidden>
+              <span
+                className="create-save__preview-planet-caption-cursor"
+                aria-hidden
+              >
                 ▌
               </span>
             ) : null}
@@ -1149,7 +1268,10 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
             <div className="create-save__preview-planet-caption-coords">
               <span>{planetCaptionCoords}</span>
               {planetCaptionPhase === 'coords' ? (
-                <span className="create-save__preview-planet-caption-cursor" aria-hidden>
+                <span
+                  className="create-save__preview-planet-caption-cursor"
+                  aria-hidden
+                >
                   ▌
                 </span>
               ) : null}
@@ -1159,5 +1281,4 @@ export const MapPreviewViewport = forwardRef<MapPreviewViewportHandle, MapPrevie
       ) : null}
     </div>
   );
-},
-);
+});

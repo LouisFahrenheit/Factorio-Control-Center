@@ -35,7 +35,8 @@ export const MAP_PREVIEW_ANNOTATION_COLORS = [
   { id: 'white', value: '#f2f2f2' },
 ] as const;
 
-export type MapPreviewAnnotationColorId = (typeof MAP_PREVIEW_ANNOTATION_COLORS)[number]['id'];
+export type MapPreviewAnnotationColorId =
+  (typeof MAP_PREVIEW_ANNOTATION_COLORS)[number]['id'];
 
 export function emptyMapPreviewAnnotations(): MapPreviewAnnotations {
   return { strokes: [], markers: [] };
@@ -67,6 +68,37 @@ export function imageContentRect(
   };
 }
 
+export function clientToFrameLocal(
+  clientX: number,
+  clientY: number,
+  frameEl: HTMLElement,
+): { mx: number; my: number } {
+  const frameRect = frameEl.getBoundingClientRect();
+  const frameW = frameEl.clientWidth;
+  const frameH = frameEl.clientHeight;
+  const scaleX =
+    frameRect.width > 0 && frameW > 0 ? frameW / frameRect.width : 1;
+  const scaleY =
+    frameRect.height > 0 && frameH > 0 ? frameH / frameRect.height : 1;
+  return {
+    mx: (clientX - frameRect.left) * scaleX,
+    my: (clientY - frameRect.top) * scaleY,
+  };
+}
+
+export function frameCssScale(frameEl: HTMLElement): {
+  scaleX: number;
+  scaleY: number;
+} {
+  const frameRect = frameEl.getBoundingClientRect();
+  const frameW = frameEl.clientWidth;
+  const frameH = frameEl.clientHeight;
+  return {
+    scaleX: frameRect.width > 0 && frameW > 0 ? frameW / frameRect.width : 1,
+    scaleY: frameRect.height > 0 && frameH > 0 ? frameH / frameRect.height : 1,
+  };
+}
+
 export function clientToImageNorm(
   clientX: number,
   clientY: number,
@@ -76,13 +108,11 @@ export function clientToImageNorm(
   naturalW: number,
   naturalH: number,
 ): MapPreviewDrawPoint | null {
-  const frameRect = frameEl.getBoundingClientRect();
   const frameW = frameEl.clientWidth;
   const frameH = frameEl.clientHeight;
   if (frameW <= 0 || frameH <= 0 || naturalW <= 0 || naturalH <= 0) return null;
 
-  const mx = clientX - frameRect.left;
-  const my = clientY - frameRect.top;
+  const { mx, my } = clientToFrameLocal(clientX, clientY, frameEl);
   const panLocalX = (mx - frameW / 2 - pan.x) / zoom + frameW / 2;
   const panLocalY = (my - frameH / 2 - pan.y) / zoom + frameH / 2;
   const content = imageContentRect(frameW, frameH, naturalW, naturalH);
@@ -94,7 +124,10 @@ export function clientToImageNorm(
   return { x, y };
 }
 
-export function distNorm(a: MapPreviewDrawPoint, b: MapPreviewDrawPoint): number {
+export function distNorm(
+  a: MapPreviewDrawPoint,
+  b: MapPreviewDrawPoint,
+): number {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return Math.hypot(dx, dy);
@@ -108,8 +141,13 @@ export function eraseAt(
   const strokes = annotations.strokes.filter(
     (stroke) => !stroke.points.some((p) => distNorm(p, point) <= radius),
   );
-  const markers = annotations.markers.filter((m) => distNorm(m, point) <= radius);
-  if (strokes.length === annotations.strokes.length && markers.length === annotations.markers.length) {
+  const markers = annotations.markers.filter(
+    (m) => distNorm(m, point) <= radius,
+  );
+  if (
+    strokes.length === annotations.strokes.length &&
+    markers.length === annotations.markers.length
+  ) {
     return annotations;
   }
   return { strokes, markers };
@@ -119,7 +157,9 @@ export function strokePolylinePoints(stroke: MapPreviewStroke): string {
   return stroke.points.map((p) => `${p.x * 100},${p.y * 100}`).join(' ');
 }
 
-export function hasMapPreviewAnnotations(annotations: MapPreviewAnnotations): boolean {
+export function hasMapPreviewAnnotations(
+  annotations: MapPreviewAnnotations,
+): boolean {
   return annotations.strokes.length > 0 || annotations.markers.length > 0;
 }
 
@@ -152,13 +192,18 @@ export function mapPreviewMarkerIconExportPx(
 
 function buildMapPreviewMarkerSvg(iconSize: number, color: string): string {
   const strokeWidth = (MAP_PREVIEW_MARKER_STROKE_WIDTH * 24) / iconSize;
-  const paths = MAP_PREVIEW_MARKER_SVG_PATHS.map((d) => `<path d="${d}"/>`).join('');
+  const paths = MAP_PREVIEW_MARKER_SVG_PATHS.map(
+    (d) => `<path d="${d}"/>`,
+  ).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 }
 
 const markerIconCache = new Map<string, Promise<HTMLImageElement>>();
 
-function loadMapPreviewMarkerIcon(iconSize: number, color: string): Promise<HTMLImageElement> {
+function loadMapPreviewMarkerIcon(
+  iconSize: number,
+  color: string,
+): Promise<HTMLImageElement> {
   const cacheKey = `${iconSize}|${color}`;
   const cached = markerIconCache.get(cacheKey);
   if (cached) return cached;
@@ -269,7 +314,13 @@ function drawAnnotationMarker(
   ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
   ctx.shadowBlur = Math.max(1, iconSize * 0.09);
   ctx.shadowOffsetY = Math.max(1, iconSize * 0.045);
-  ctx.drawImage(pinImg, tipX - iconSize / 2, tipY - iconSize, iconSize, iconSize);
+  ctx.drawImage(
+    pinImg,
+    tipX - iconSize / 2,
+    tipY - iconSize,
+    iconSize,
+    iconSize,
+  );
   ctx.restore();
 
   if (marker.label) {
@@ -299,7 +350,11 @@ export async function drawMapPreviewAnnotationsOnCanvas(
     options.markerIconPx ??
     mapPreviewMarkerIconExportPx(w, Math.max(1, Math.round(w * 0.2)));
 
-  const markerColors = [...new Set(annotations.markers.map((m) => normalizeAnnotationColor(m.color)))];
+  const markerColors = [
+    ...new Set(
+      annotations.markers.map((m) => normalizeAnnotationColor(m.color)),
+    ),
+  ];
   const pinImages = new Map<string, HTMLImageElement>();
   await Promise.all(
     markerColors.map(async (color) => {
