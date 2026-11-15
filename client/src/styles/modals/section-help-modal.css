@@ -4,7 +4,7 @@
    ========================================================================== */
 
 .fu-modal.section-help-modal {
-  width: min(720px, 98vw);
+  width: min(980px, 96vw);
   max-height: calc(100dvh - 2 * max(12px, 2vh) - 8px);
 }
 
@@ -36,24 +36,28 @@
 }
 
 .section-help-modal__intro-card {
-  padding: 12px 14px;
+  padding: 14px 18px;
   border-radius: 10px;
-  background: var(--bg-card);
+  background: color-mix(in srgb, var(--bg-card-header) 85%, var(--bg-card));
   border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-left: 3px solid var(--accent-selected);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .section-help-modal__intro {
   margin: 0;
   color: var(--text);
-  line-height: 1.5;
-  font-size: 0.9rem;
+  line-height: 1.48;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .section-help-modal__sections {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  align-items: stretch;
 }
 
 .section-help-modal__card {
@@ -64,6 +68,20 @@
   background: var(--bg-card);
   border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.section-help-modal__card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .section-help-modal__sections {
+    grid-template-columns: 1fr;
+  }
+
+  .section-help-modal__card:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
 }
 
 .section-help-modal__card-head {
@@ -133,7 +151,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin-top: 0;
+  margin-top: auto;
   margin-bottom: 12px;
   padding: 10px 12px;
   border-radius: 8px;

@@ -40,6 +40,8 @@ const PREFIX_GROUPS = [
   'history_action_',
   'history_player_category_',
   'section_help_',
+  'monitoring_help_',
+  'public_help_',
   'mod_job_log_',
   'headless_',
   'panel_startup_',

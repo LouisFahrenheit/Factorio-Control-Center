@@ -5,6 +5,8 @@ import {
   IconRefresh,
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import { SectionHelpButton } from '../SectionHelpModal';
+import { BACKUP_HELP } from '../../lib/instanceHelpContent';
 
 interface BackupBarProps {
   search: string;
@@ -139,6 +141,13 @@ export function BackupBar({
             </>
           )}
         </button>
+
+        <SectionHelpButton
+          idPrefix="backup"
+          content={BACKUP_HELP}
+          label={t('backup_help_btn')}
+          t={t}
+        />
       </div>
     </div>
   );
