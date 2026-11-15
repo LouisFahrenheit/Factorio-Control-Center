@@ -9,6 +9,7 @@ import {
   statSync,
 } from 'fs';
 import { basename, dirname, join } from 'path';
+import { type LiteZip, openLiteZip } from './zip-lite.util';
 
 export type LocaleSections = Record<string, Record<string, string>>;
 
@@ -196,19 +197,32 @@ export function resolveModPackagePath(pkgPath: string): string {
   return pkgPath;
 }
 
-const admZipCache = new Map<string, { mtime: number; zip: AdmZip }>();
+// Caches only zip directories (entry names and offsets), not archive contents.
+const zipCache = new Map<string, { mtime: number; zip: LiteZip }>();
 
-function getAdmZipCached(zipPath: string): AdmZip | null {
+/** Fallback for archives the lite reader rejects (e.g. zip64); loads the whole file. */
+function openAdmZipAsLite(zipPath: string): LiteZip {
+  const zip = new AdmZip(zipPath);
+  return {
+    names: zip
+      .getEntries()
+      .filter((e) => !e.isDirectory)
+      .map((e) => e.entryName),
+    readText: (name: string) => zip.readAsText(name, 'utf8'),
+  };
+}
+
+function getZipCached(zipPath: string): LiteZip | null {
   try {
     const resolved = resolveModPackagePath(zipPath);
     const stat = statSync(resolved);
-    const cached = admZipCache.get(resolved);
+    const cached = zipCache.get(resolved);
     if (cached && cached.mtime === stat.mtimeMs) return cached.zip;
-    const zip = new AdmZip(resolved);
-    admZipCache.set(resolved, { mtime: stat.mtimeMs, zip });
-    if (admZipCache.size > 200) {
-      const firstKey = admZipCache.keys().next().value as string | undefined;
-      if (firstKey) admZipCache.delete(firstKey);
+    const zip = openLiteZip(resolved) ?? openAdmZipAsLite(resolved);
+    zipCache.set(resolved, { mtime: stat.mtimeMs, zip });
+    if (zipCache.size > 200) {
+      const firstKey = zipCache.keys().next().value as string | undefined;
+      if (firstKey) zipCache.delete(firstKey);
     }
     return zip;
   } catch {
@@ -234,15 +248,12 @@ function mergeLocaleOneMod(
           }
         }
       } else if (pkg.toLowerCase().endsWith('.zip')) {
-        const zip = getAdmZipCached(pkg);
+        const zip = getZipCached(pkg);
         if (!zip) continue;
-        for (const name of zip
-          .getEntries()
-          .map((e) => e.entryName)
-          .sort()) {
+        for (const name of [...zip.names].sort()) {
           if (!zipEntryIsLocaleCfg(name, lc)) continue;
           try {
-            mergeLocaleText(sections, zip.readAsText(name, 'utf8'));
+            mergeLocaleText(sections, zip.readText(name));
           } catch {
             /* ignore */
           }
@@ -329,16 +340,12 @@ function readTitleFromZip(
   sections: LocaleSections,
 ): string | null {
   try {
-    const zip = getAdmZipCached(zipPath);
+    const zip = getZipCached(zipPath);
     if (!zip) return null;
-    for (const ent of zip.getEntries()) {
-      if (ent.isDirectory) continue;
-      const parts = ent.entryName.replace(/\\/g, '/').split('/');
+    for (const name of zip.names) {
+      const parts = name.replace(/\\/g, '/').split('/');
       if (parts.length === 2 && parts[1] === 'info.json') {
-        const info = JSON.parse(zip.readAsText(ent, 'utf8')) as Record<
-          string,
-          unknown
-        >;
+        const info = JSON.parse(zip.readText(name)) as Record<string, unknown>;
         const got = displayTitleFromInfoDict(info, sections);
         if (got) return got;
       }
@@ -569,13 +576,12 @@ function getVersionFromInfo(pkgPath: string): string {
         }
       }
     } else {
-      const zip = getAdmZipCached(pkgPath);
+      const zip = getZipCached(pkgPath);
       if (!zip) return '';
-      for (const ent of zip.getEntries()) {
-        if (ent.isDirectory) continue;
-        const parts = ent.entryName.replace(/\\/g, '/').split('/');
+      for (const name of zip.names) {
+        const parts = name.replace(/\\/g, '/').split('/');
         if (parts.length === 2 && parts[1] === 'info.json') {
-          const info = JSON.parse(zip.readAsText(ent, 'utf8')) as {
+          const info = JSON.parse(zip.readText(name)) as {
             version?: unknown;
           };
           if (typeof info.version === 'string' && info.version.trim()) {
