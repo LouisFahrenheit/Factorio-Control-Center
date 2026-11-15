@@ -291,7 +291,6 @@
   overflow: hidden;
 }
 
-/* Absolute so the SVG's viewBox size never feeds back into the layout height. */
 .instance-monitoring-chart-svg {
   position: absolute;
   inset: 0;

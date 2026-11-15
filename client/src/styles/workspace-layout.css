@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Workspace layout
+   ========================================================================== */
+
+/* Servers screen: lock the view to the viewport exactly like .workspace__main--panel
+   (public/app.css) so every tab ends at the same bottom edge; long content scrolls
+   inside .panel__body. */
+.fcc-workspace-view:has(.workspace__main.instance-view-servers) {
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.fcc-workspace-view:has(.workspace__main.instance-view-servers) > .app {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.workspace__main.instance-view-servers > #instanceScreen {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+.workspace__main.instance-view-servers > #instanceScreen > .panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
