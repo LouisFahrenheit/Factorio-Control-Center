@@ -136,7 +136,9 @@ export function InstanceScreen({
   const [viewMode, setViewMode] = useUserServerListViewMode();
   const {
     columns: listColumns,
+    order: listColumnOrder,
     setColumn: setListColumn,
+    moveColumn: moveListColumn,
     resetColumns: resetListColumns,
   } = useUserServerListColumns();
   const tableWrapRef = useRef<HTMLDivElement>(null);
@@ -552,7 +554,9 @@ export function InstanceScreen({
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
                     columns={listColumns}
+                    columnOrder={listColumnOrder}
                     onToggleColumn={setListColumn}
+                    onMoveColumn={moveListColumn}
                     onResetColumns={resetListColumns}
                     hasServers={hasServers}
                     onAdd={() => instanceEditor.openAdd()}
@@ -618,6 +622,7 @@ export function InstanceScreen({
                       onRowClick={onRowClick}
                       onRowDoubleClick={onRowDoubleClick}
                       columns={listColumns}
+                      columnOrder={listColumnOrder}
                       tableWrapRef={tableWrapRef}
                       t={t}
                     />

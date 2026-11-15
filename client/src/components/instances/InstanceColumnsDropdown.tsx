@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { IconColumns, IconX, IconCheck, IconRotateClockwise } from '@tabler/icons-react';
+import {
+  IconColumns,
+  IconX,
+  IconCheck,
+  IconRotateClockwise,
+  IconChevronUp,
+  IconChevronDown,
+} from '@tabler/icons-react';
 import { FccSwitch } from '../FccSwitch';
 import { webEffectsReduced } from '../../theme/webEffects';
 import type {
@@ -8,7 +15,12 @@ import type {
   ServerListColumnVisibility,
 } from '../../lib/userPrefs';
 
-const COLUMN_CONFIG: { key: ServerListColumnKey; labelKey: string }[] = [
+interface ColumnConfigItem {
+  key: ServerListColumnKey;
+  labelKey: string;
+}
+
+const COLUMN_CONFIG: ColumnConfigItem[] = [
   { key: 'save', labelKey: 'instances_col_save' },
   { key: 'access', labelKey: 'instances_col_access' },
   { key: 'port', labelKey: 'instances_col_server_port' },
@@ -22,14 +34,18 @@ const COLUMN_CONFIG: { key: ServerListColumnKey; labelKey: string }[] = [
 
 interface InstanceColumnsDropdownProps {
   columns: ServerListColumnVisibility;
+  order: readonly ServerListColumnKey[];
   onToggleColumn: (key: ServerListColumnKey, visible: boolean) => void;
+  onMoveColumn: (key: ServerListColumnKey, direction: 'up' | 'down') => void;
   onReset: () => void;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
 export function InstanceColumnsDropdown({
   columns,
+  order,
   onToggleColumn,
+  onMoveColumn,
   onReset,
   t,
 }: InstanceColumnsDropdownProps) {
@@ -64,16 +80,16 @@ export function InstanceColumnsDropdown({
     };
   }, [isOpen]);
 
-  const hiddenCount = COLUMN_CONFIG.filter((col) => !columns[col.key]).length;
+  const orderedColumns = order
+    .map((key) => COLUMN_CONFIG.find((col) => col.key === key))
+    .filter((col): col is ColumnConfigItem => col !== undefined);
 
   return (
     <div className="instance-columns-dropdown-wrap" ref={containerRef}>
       <button
         type="button"
         id="btnInstanceColumnsToggle"
-        className={`btn btn--toolbar-icon instance-servers-bar__columns-btn ${
-          hiddenCount > 0 ? 'instance-servers-bar__columns-btn--customized' : ''
-        }`}
+        className="btn btn--toolbar-icon instance-servers-bar__columns-btn"
         title={t('instances_customize_columns') || 'Настройка колонок'}
         aria-label={t('instances_customize_columns') || 'Настройка колонок'}
         aria-expanded={isOpen}
@@ -81,12 +97,6 @@ export function InstanceColumnsDropdown({
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <IconColumns size={18} />
-        {hiddenCount > 0 && (
-          <span
-            className="instance-columns-badge"
-            title={`${t('instances_customize_columns')}: -${hiddenCount}`}
-          />
-        )}
       </button>
 
       <AnimatePresence>
@@ -122,15 +132,37 @@ export function InstanceColumnsDropdown({
 
             {/* Column Options List */}
             <div className="instance-columns-dropdown__list">
-              {COLUMN_CONFIG.map((col) => {
+              {orderedColumns.map((col, index) => {
                 const isChecked = columns[col.key] !== false;
                 const labelText = t(col.labelKey);
 
                 return (
-                  <div
+                  <motion.div
                     key={col.key}
+                    layout={!reduced}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                     className="instance-columns-dropdown__item"
                   >
+                    <div className="instance-columns-dropdown__reorder">
+                      <button
+                        type="button"
+                        className="monitoring-settings-reorder-btn"
+                        aria-label={`${t('monitoring_settings_move_up') || 'Выше'}: ${labelText}`}
+                        disabled={index === 0}
+                        onClick={() => onMoveColumn(col.key, 'up')}
+                      >
+                        <IconChevronUp size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        className="monitoring-settings-reorder-btn"
+                        aria-label={`${t('monitoring_settings_move_down') || 'Ниже'}: ${labelText}`}
+                        disabled={index === orderedColumns.length - 1}
+                        onClick={() => onMoveColumn(col.key, 'down')}
+                      >
+                        <IconChevronDown size={12} />
+                      </button>
+                    </div>
                     <FccSwitch
                       id={`col_toggle_${col.key}`}
                       checked={isChecked}
@@ -138,7 +170,7 @@ export function InstanceColumnsDropdown({
                       label={labelText}
                       labelClassName="instance-columns-dropdown__label"
                     />
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>

@@ -19,7 +19,9 @@ interface InstanceServersBarProps {
   viewMode: ServerListViewMode;
   onViewModeChange: (mode: ServerListViewMode) => void;
   columns?: ServerListColumnVisibility;
+  columnOrder?: readonly ServerListColumnKey[];
   onToggleColumn?: (key: ServerListColumnKey, visible: boolean) => void;
+  onMoveColumn?: (key: ServerListColumnKey, direction: 'up' | 'down') => void;
   onResetColumns?: () => void;
   hasServers: boolean;
   onAdd: () => void;
@@ -41,7 +43,9 @@ export function InstanceServersBar({
   viewMode,
   onViewModeChange,
   columns,
+  columnOrder,
   onToggleColumn,
+  onMoveColumn,
   onResetColumns,
   hasServers,
   onAdd,
@@ -178,11 +182,15 @@ export function InstanceServersBar({
 
         {viewMode === 'list' &&
           columns &&
+          columnOrder &&
           onToggleColumn &&
+          onMoveColumn &&
           onResetColumns && (
             <InstanceColumnsDropdown
               columns={columns}
+              order={columnOrder}
               onToggleColumn={onToggleColumn}
+              onMoveColumn={onMoveColumn}
               onReset={onResetColumns}
               t={t}
             />

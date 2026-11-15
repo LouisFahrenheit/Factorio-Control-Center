@@ -189,13 +189,13 @@ export function MonitoringSettingsModal({
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
-            padding: '16px 20px',
+            gap: '8px',
+            padding: '12px 16px',
           }}
         >
           <p
             style={{
-              margin: '0 0 4px 0',
+              margin: 0,
               fontSize: '0.85rem',
               color: 'var(--text-muted, var(--mantine-color-dimmed))',
               lineHeight: 1.45,
@@ -209,7 +209,7 @@ export function MonitoringSettingsModal({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px',
+              gap: '4px',
             }}
           >
             {config.map((item, index) => {
@@ -228,7 +228,7 @@ export function MonitoringSettingsModal({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '8px 12px',
+                    padding: '5px 10px',
                     borderRadius: '8px',
                     background: item.enabled
                       ? 'color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%)'
@@ -288,8 +288,8 @@ export function MonitoringSettingsModal({
                     {/* Metric Icon */}
                     <div
                       style={{
-                        width: '32px',
-                        height: '32px',
+                        width: '28px',
+                        height: '28px',
                         borderRadius: '6px',
                         background:
                           'color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%)',

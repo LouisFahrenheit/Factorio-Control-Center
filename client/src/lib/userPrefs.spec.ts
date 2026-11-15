@@ -4,6 +4,9 @@ import {
   setUserServerListViewMode,
   readUserServerListColumns,
   setUserServerListColumns,
+  readUserServerListColumnOrder,
+  setUserServerListColumnOrder,
+  DEFAULT_SERVER_LIST_COLUMN_ORDER,
   readUserServerLogColorize,
   setUserServerLogColorize,
   readUserCircuitWireEnabled,
@@ -114,6 +117,43 @@ describe('userPrefs - serverListColumns', () => {
     const cols = readUserServerListColumns();
     expect(cols.port).toBe(true);
     expect(cols.mods).toBe(false);
+  });
+});
+
+describe('userPrefs - serverListColumnOrder', () => {
+  beforeEach(() => {
+    localStorage.removeItem('fcc_user_server_list_column_order');
+  });
+
+  it('returns default order when nothing is saved', () => {
+    expect(readUserServerListColumnOrder()).toEqual([
+      ...DEFAULT_SERVER_LIST_COLUMN_ORDER,
+    ]);
+  });
+
+  it('saves and reads custom order', () => {
+    const custom = [...DEFAULT_SERVER_LIST_COLUMN_ORDER].reverse();
+    setUserServerListColumnOrder(custom);
+    expect(readUserServerListColumnOrder()).toEqual(custom);
+  });
+
+  it('drops unknown and duplicate keys and appends missing ones', () => {
+    localStorage.setItem(
+      'fcc_user_server_list_column_order',
+      JSON.stringify(['status', 'bogus', 'status', 42, 'port']),
+    );
+    const order = readUserServerListColumnOrder();
+    expect(order.slice(0, 2)).toEqual(['status', 'port']);
+    expect([...order].sort()).toEqual(
+      [...DEFAULT_SERVER_LIST_COLUMN_ORDER].sort(),
+    );
+  });
+
+  it('falls back to default order on invalid JSON', () => {
+    localStorage.setItem('fcc_user_server_list_column_order', '{not json');
+    expect(readUserServerListColumnOrder()).toEqual([
+      ...DEFAULT_SERVER_LIST_COLUMN_ORDER,
+    ]);
   });
 });
 

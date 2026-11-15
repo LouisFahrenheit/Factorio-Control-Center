@@ -2,9 +2,10 @@ import { motion } from 'motion/react';
 import { useRef, type MouseEvent, type RefObject } from 'react';
 import { formatUptime, instanceMaintenanceManualMode } from '../../lib/instanceUtils';
 import type { InstanceSortColumn } from '../../lib/instanceListUtils';
-import type {
-  ServerListColumnKey,
-  ServerListColumnVisibility,
+import {
+  DEFAULT_SERVER_LIST_COLUMN_ORDER,
+  type ServerListColumnKey,
+  type ServerListColumnVisibility,
 } from '../../lib/userPrefs';
 import {
   LIST_CONTAINER_VARIANTS,
@@ -80,6 +81,7 @@ interface InstanceTableProps {
   onRowClick: (item: InstanceItem, rowEl: HTMLTableRowElement, ev: MouseEvent) => void;
   onRowDoubleClick: (item: InstanceItem, ev: MouseEvent) => void;
   columns?: ServerListColumnVisibility;
+  columnOrder?: readonly ServerListColumnKey[];
   tableWrapRef?: RefObject<HTMLDivElement | null>;
   t: (key: string, ...args: (string | number)[]) => string;
 }
@@ -96,12 +98,14 @@ export function InstanceTable({
   onRowClick,
   onRowDoubleClick,
   columns,
+  columnOrder,
   tableWrapRef,
   t,
 }: InstanceTableProps) {
   const placeholder = t('server_uptime_placeholder');
-  const isColVisible = (key: ServerListColumnKey) =>
-    columns ? columns[key] !== false : true;
+  const visibleOrder = (columnOrder ?? DEFAULT_SERVER_LIST_COLUMN_ORDER).filter((key) =>
+    columns ? columns[key] !== false : true,
+  );
   const { ready: listIconsReady, isAvailable: isListIconAvailable } = useServerListIconsProbe();
   const showModBadges = useUserShowServerListModBadges();
   const showSABadge = useUserShowServerListSpaceAgeBadge();
@@ -139,24 +143,23 @@ export function InstanceTable({
         <thead>
           <tr>
             <SortableTh col={SORTABLE_COLUMNS[0]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
-            {isColVisible('save') && (
-              <SortableTh col={SORTABLE_COLUMNS[1]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
-            )}
-            {isColVisible('access') && (
-              <th data-i18n="instances_col_access">{t('instances_col_access')}</th>
-            )}
-            {SORTABLE_COLUMNS.slice(2).map((col) =>
-              isColVisible(col.key as ServerListColumnKey) ? (
+            {visibleOrder.map((key) => {
+              const sortable = SORTABLE_COLUMNS.find((col) => col.key === key);
+              return sortable ? (
                 <SortableTh
-                  key={col.key}
-                  col={col}
+                  key={key}
+                  col={sortable}
                   sortColumn={sortColumn}
                   sortAsc={sortAsc}
                   onSortColumn={onSortColumn}
                   t={t}
                 />
-              ) : null
-            )}
+              ) : (
+                <th key={key} data-i18n="instances_col_access">
+                  {t('instances_col_access')}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <motion.tbody
@@ -281,62 +284,75 @@ export function InstanceTable({
                     </span>
                   </span>
                 </td>
-                {isColVisible('save') && (
-                  <td className="instance-save-cell">
-                    {saveDisplayName ? (
-                      <span className="instance-save-text" title={saveFullTitle}>
-                        <span className="instance-save-name">{saveDisplayName}</span>
-                      </span>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
-                )}
-                {isColVisible('access') && (
-                  <td className="instance-access-cell">
-                    <span className="status-flags status-flags--side">
-                      <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>LAN</span>
-                      <span className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}>PUB</span>
-                      <span className={'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')}>
-                        RUV
-                      </span>
-                    </span>
-                  </td>
-                )}
-                {isColVisible('port') && <td>{String(it.port || '')}</td>}
-                {isColVisible('rconPort') && <td>{String(it.rconPort || '')}</td>}
-                {isColVisible('version') && (
-                  <td>
-                    <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
-                  </td>
-                )}
-                {isColVisible('mods') && <td>{modsText}</td>}
-                {isColVisible('online') && <td>{String(it.onlineCount || 0)}</td>}
-                {isColVisible('uptime') && <td>{uptimeText}</td>}
-                {isColVisible('status') && (
-                  <td>
-                    <span
-                      className={
-                        'instance-status-line' + (isMaintRow ? ' instance-status-line--maintenance' : '')
-                      }
-                    >
-                      <span
-                        className={
-                          'instance-status-pill ' +
-                          (isMaintManual
-                            ? 'instance-status-pill--maintenance-manual'
-                            : isMaintLocked
-                              ? 'instance-status-pill--maintenance'
-                              : isRunning
-                                ? 'instance-status-pill--running'
-                                : 'instance-status-pill--stopped')
-                        }
-                      >
-                        {rowStatus}
-                      </span>
-                    </span>
-                  </td>
-                )}
+                {visibleOrder.map((key) => {
+                  switch (key) {
+                    case 'save':
+                      return (
+                        <td key={key} className="instance-save-cell">
+                          {saveDisplayName ? (
+                            <span className="instance-save-text" title={saveFullTitle}>
+                              <span className="instance-save-name">{saveDisplayName}</span>
+                            </span>
+                          ) : (
+                            <span className="muted">—</span>
+                          )}
+                        </td>
+                      );
+                    case 'access':
+                      return (
+                        <td key={key} className="instance-access-cell">
+                          <span className="status-flags status-flags--side">
+                            <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>LAN</span>
+                            <span className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}>PUB</span>
+                            <span className={'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')}>
+                              RUV
+                            </span>
+                          </span>
+                        </td>
+                      );
+                    case 'port':
+                      return <td key={key}>{String(it.port || '')}</td>;
+                    case 'rconPort':
+                      return <td key={key}>{String(it.rconPort || '')}</td>;
+                    case 'version':
+                      return (
+                        <td key={key}>
+                          <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
+                        </td>
+                      );
+                    case 'mods':
+                      return <td key={key}>{modsText}</td>;
+                    case 'online':
+                      return <td key={key}>{String(it.onlineCount || 0)}</td>;
+                    case 'uptime':
+                      return <td key={key}>{uptimeText}</td>;
+                    case 'status':
+                      return (
+                        <td key={key}>
+                          <span
+                            className={
+                              'instance-status-line' + (isMaintRow ? ' instance-status-line--maintenance' : '')
+                            }
+                          >
+                            <span
+                              className={
+                                'instance-status-pill ' +
+                                (isMaintManual
+                                  ? 'instance-status-pill--maintenance-manual'
+                                  : isMaintLocked
+                                    ? 'instance-status-pill--maintenance'
+                                    : isRunning
+                                      ? 'instance-status-pill--running'
+                                      : 'instance-status-pill--stopped')
+                              }
+                            >
+                              {rowStatus}
+                            </span>
+                          </span>
+                        </td>
+                      );
+                  }
+                })}
               </motion.tr>
             );
           })}

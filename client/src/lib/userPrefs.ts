@@ -257,3 +257,60 @@ export function setUserServerListColumns(cols: ServerListColumnVisibility): void
   }
 }
 
+/** Stored separately from visibility so older saved visibility maps stay valid. */
+const SERVER_LIST_COLUMN_ORDER_KEY = 'fcc_user_server_list_column_order';
+
+export const DEFAULT_SERVER_LIST_COLUMN_ORDER: readonly ServerListColumnKey[] = [
+  'save',
+  'access',
+  'port',
+  'rconPort',
+  'version',
+  'mods',
+  'online',
+  'uptime',
+  'status',
+];
+
+/** Drops unknown/duplicate keys and appends columns missing from the stored order. */
+function normalizeServerListColumnOrder(value: unknown): ServerListColumnKey[] {
+  const valid = new Set<string>(DEFAULT_SERVER_LIST_COLUMN_ORDER);
+  const result: ServerListColumnKey[] = [];
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (typeof item === 'string' && valid.has(item)) {
+        const key = item as ServerListColumnKey;
+        if (!result.includes(key)) result.push(key);
+      }
+    }
+  }
+  for (const key of DEFAULT_SERVER_LIST_COLUMN_ORDER) {
+    if (!result.includes(key)) result.push(key);
+  }
+  return result;
+}
+
+export function readUserServerListColumnOrder(): ServerListColumnKey[] {
+  try {
+    if (typeof localStorage === 'undefined') return [...DEFAULT_SERVER_LIST_COLUMN_ORDER];
+    const raw = localStorage.getItem(SERVER_LIST_COLUMN_ORDER_KEY);
+    if (!raw) return [...DEFAULT_SERVER_LIST_COLUMN_ORDER];
+    return normalizeServerListColumnOrder(JSON.parse(raw) as unknown);
+  } catch {
+    return [...DEFAULT_SERVER_LIST_COLUMN_ORDER];
+  }
+}
+
+export function setUserServerListColumnOrder(order: readonly ServerListColumnKey[]): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(
+      SERVER_LIST_COLUMN_ORDER_KEY,
+      JSON.stringify(normalizeServerListColumnOrder(order)),
+    );
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}
+
