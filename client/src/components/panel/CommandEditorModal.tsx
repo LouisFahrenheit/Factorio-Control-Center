@@ -40,7 +40,16 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
             id="commandEditorHeading"
           >
             <IconTerminal2 size={20} />
-            {t('commands_title')}
+            <span>{t('commands_title')}</span>
+            <button
+              type="button"
+              className="command-editor-dialog__close"
+              onClick={editor.closeDialog}
+              aria-label={t('close')}
+              title={t('close')}
+            >
+              <IconX size={18} />
+            </button>
           </div>
           <div className="fu-modal__body">
             <div className="command-editor-dialog__toolbar">
@@ -275,16 +284,6 @@ export function CommandEditorModal({ editor, t }: CommandEditorModalProps) {
                 )}
               </div>
             </div>
-          </div>
-          <div className="fu-modal__footer">
-            <button
-              type="button"
-              className="btn btn--with-icon"
-              onClick={editor.closeDialog}
-            >
-              <IconX size={16} />
-              {t('close')}
-            </button>
           </div>
         </div>
       </ModalBackdrop>
