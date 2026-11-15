@@ -858,6 +858,7 @@
   "map_gen_preview_color_cyan": "Голубой",
   "map_gen_preview_color_pink": "Розовый",
   "map_gen_preview_color_white": "Белый",
+  "map_gen_preview_stroke_width_label": "Толщина линии",
   "map_gen_preview_marker_label": "Подпись метки",
   "map_gen_planet_nauvis": "Наувис",
   "map_gen_planet_vulcanus": "Вулкан",

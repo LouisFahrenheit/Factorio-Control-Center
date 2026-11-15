@@ -858,6 +858,7 @@
   "map_gen_preview_color_cyan": "Cyan",
   "map_gen_preview_color_pink": "Pink",
   "map_gen_preview_color_white": "White",
+  "map_gen_preview_stroke_width_label": "Line thickness",
   "map_gen_preview_marker_label": "Marker label",
   "map_gen_planet_nauvis": "Nauvis",
   "map_gen_planet_vulcanus": "Vulcanus",

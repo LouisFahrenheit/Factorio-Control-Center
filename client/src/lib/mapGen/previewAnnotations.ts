@@ -6,7 +6,30 @@ export type MapPreviewStroke = {
   id: string;
   points: MapPreviewDrawPoint[];
   color: string;
+  width?: number;
 };
+
+export const MAP_PREVIEW_STROKE_WIDTH_MIN = 1;
+export const MAP_PREVIEW_STROKE_WIDTH_MAX = 50;
+export const MAP_PREVIEW_STROKE_WIDTH_DEFAULT = 2;
+
+export function normalizeAnnotationStrokeWidth(
+  width: number | undefined,
+): number {
+  const n = Number(width);
+  if (!Number.isFinite(n)) return MAP_PREVIEW_STROKE_WIDTH_DEFAULT;
+  return Math.min(
+    MAP_PREVIEW_STROKE_WIDTH_MAX,
+    Math.max(MAP_PREVIEW_STROKE_WIDTH_MIN, Math.round(n)),
+  );
+}
+
+export function annotationSvgStrokeWidth(width: number | undefined): number {
+  return (
+    (normalizeAnnotationStrokeWidth(width) / MAP_PREVIEW_STROKE_WIDTH_DEFAULT) *
+    0.55
+  );
+}
 
 export type MapPreviewMarker = {
   id: string;
@@ -220,8 +243,14 @@ function loadMapPreviewMarkerIcon(
   return promise;
 }
 
-function annotationStrokeWidthPx(imageSize: number): number {
-  return Math.max(1.5, imageSize * 0.0016);
+function annotationStrokeWidthPx(
+  imageSize: number,
+  strokeWidth?: number,
+): number {
+  const factor =
+    normalizeAnnotationStrokeWidth(strokeWidth) /
+    MAP_PREVIEW_STROKE_WIDTH_DEFAULT;
+  return Math.max(1, imageSize * 0.0016 * factor);
 }
 
 function drawAnnotationStroke(
@@ -229,9 +258,10 @@ function drawAnnotationStroke(
   stroke: MapPreviewStroke,
   w: number,
   h: number,
-  lineWidth: number,
+  imageSize: number,
 ): void {
   if (stroke.points.length === 0) return;
+  const lineWidth = annotationStrokeWidthPx(imageSize, stroke.width);
 
   ctx.save();
   ctx.strokeStyle = normalizeAnnotationColor(stroke.color);
@@ -244,8 +274,9 @@ function drawAnnotationStroke(
   if (stroke.points.length === 1) {
     const p = stroke.points[0];
     ctx.beginPath();
-    ctx.arc(p.x * w, p.y * h, lineWidth * 0.45, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.arc(p.x * w, p.y * h, lineWidth * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = normalizeAnnotationColor(stroke.color);
+    ctx.fill();
     ctx.restore();
     return;
   }
@@ -338,10 +369,9 @@ export async function drawMapPreviewAnnotationsOnCanvas(
   if (!hasMapPreviewAnnotations(annotations)) return;
 
   const imageSize = Math.min(w, h);
-  const lineWidth = annotationStrokeWidthPx(imageSize);
 
   for (const stroke of annotations.strokes) {
-    drawAnnotationStroke(ctx, stroke, w, h, lineWidth);
+    drawAnnotationStroke(ctx, stroke, w, h, imageSize);
   }
 
   if (annotations.markers.length === 0) return;

@@ -1,8 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
+  annotationSvgStrokeWidth,
   clientToFrameLocal,
   clientToImageNorm,
   frameCssScale,
+  MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
+  MAP_PREVIEW_STROKE_WIDTH_MAX,
+  MAP_PREVIEW_STROKE_WIDTH_MIN,
+  normalizeAnnotationStrokeWidth,
 } from './previewAnnotations';
 
 function createMockFrameElement(options: {
@@ -121,5 +126,24 @@ describe('previewAnnotations coordinate mapping across UI scales', () => {
       expect(point?.y).toBeCloseTo(targetNorm.y, 6);
     }
   });
-});
 
+  it('clamps and normalizes annotation stroke width and computes SVG stroke width', () => {
+    expect(normalizeAnnotationStrokeWidth(undefined)).toBe(
+      MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
+    );
+    expect(normalizeAnnotationStrokeWidth(0)).toBe(
+      MAP_PREVIEW_STROKE_WIDTH_MIN,
+    );
+    expect(normalizeAnnotationStrokeWidth(99)).toBe(
+      MAP_PREVIEW_STROKE_WIDTH_MAX,
+    );
+    expect(normalizeAnnotationStrokeWidth(4.4)).toBe(4);
+
+    expect(
+      annotationSvgStrokeWidth(MAP_PREVIEW_STROKE_WIDTH_DEFAULT),
+    ).toBeCloseTo(0.55, 6);
+    expect(
+      annotationSvgStrokeWidth(MAP_PREVIEW_STROKE_WIDTH_DEFAULT * 2),
+    ).toBeCloseTo(1.1, 6);
+  });
+});

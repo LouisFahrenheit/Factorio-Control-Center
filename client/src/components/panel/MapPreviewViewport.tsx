@@ -10,6 +10,7 @@ import {
 import { IconMapPin } from '@tabler/icons-react';
 import { previewPlanetCoordinates } from '../../lib/mapGen/previewCoordinates';
 import {
+  annotationSvgStrokeWidth,
   clientToFrameLocal,
   clientToImageNorm,
   emptyMapPreviewAnnotations,
@@ -20,7 +21,9 @@ import {
   MAP_PREVIEW_MARKER_STROKE_WIDTH,
   mapPreviewMarkerIconExportPx,
   MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
+  MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
   normalizeAnnotationColor,
+  normalizeAnnotationStrokeWidth,
   strokePolylinePoints,
   type MapPreviewAnnotationTool,
   type MapPreviewAnnotations,
@@ -44,7 +47,6 @@ const PLANET_CAPTION_FADE_MS = 800;
 const PREVIEW_PAN_ANIM_MS = 420;
 const ANNOTATION_ERASE_RADIUS = 0.035;
 const ANNOTATION_MIN_POINT_DIST = 0.002;
-const ANNOTATION_STROKE_WIDTH = 0.55;
 
 type Pan = { x: number; y: number };
 
@@ -110,6 +112,7 @@ interface MapPreviewViewportProps {
   showCenterMarker?: boolean;
   annotationTool?: MapPreviewAnnotationTool;
   annotationColor?: string;
+  annotationStrokeWidth?: number;
   markerLabel?: string;
   onAnnotationsChange?: (annotations: MapPreviewAnnotations) => void;
 }
@@ -145,6 +148,7 @@ export const MapPreviewViewport = forwardRef<
     showCenterMarker = false,
     annotationTool = 'pan',
     annotationColor = MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
+    annotationStrokeWidth = MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
     markerLabel = '',
     onAnnotationsChange,
   },
@@ -219,9 +223,11 @@ export const MapPreviewViewport = forwardRef<
   );
   const annotationToolRef = useRef(annotationTool);
   const annotationColorRef = useRef(annotationColor);
+  const annotationStrokeWidthRef = useRef(annotationStrokeWidth);
   const markerLabelRef = useRef(markerLabel);
   annotationToolRef.current = annotationTool;
   annotationColorRef.current = annotationColor;
+  annotationStrokeWidthRef.current = annotationStrokeWidth;
   markerLabelRef.current = markerLabel;
 
   const nextAnnotationId = useCallback(() => {
@@ -876,6 +882,9 @@ export const MapPreviewViewport = forwardRef<
           id,
           points: [point],
           color: normalizeAnnotationColor(annotationColorRef.current),
+          width: normalizeAnnotationStrokeWidth(
+            annotationStrokeWidthRef.current,
+          ),
         },
       ],
     }));
@@ -1080,27 +1089,32 @@ export const MapPreviewViewport = forwardRef<
                 preserveAspectRatio="none"
                 aria-hidden
               >
-                {annotations.strokes.map((stroke) =>
-                  stroke.points.length >= 2 ? (
+                {annotations.strokes.map((stroke) => {
+                  const strokeWidth = annotationSvgStrokeWidth(stroke.width);
+                  return stroke.points.length >= 2 ? (
                     <polyline
                       key={stroke.id}
                       className="create-save__preview-annotation-stroke"
                       points={strokePolylinePoints(stroke)}
-                      style={{ stroke: normalizeAnnotationColor(stroke.color) }}
+                      style={{
+                        stroke: normalizeAnnotationColor(stroke.color),
+                        strokeWidth,
+                      }}
                       vectorEffect="non-scaling-stroke"
                     />
                   ) : stroke.points.length === 1 ? (
-                    <circle
+                    <polyline
                       key={stroke.id}
                       className="create-save__preview-annotation-stroke"
-                      cx={stroke.points[0].x * 100}
-                      cy={stroke.points[0].y * 100}
-                      r={ANNOTATION_STROKE_WIDTH * 0.45}
-                      style={{ stroke: normalizeAnnotationColor(stroke.color) }}
+                      points={`${stroke.points[0].x * 100},${stroke.points[0].y * 100} ${stroke.points[0].x * 100},${stroke.points[0].y * 100}`}
+                      style={{
+                        stroke: normalizeAnnotationColor(stroke.color),
+                        strokeWidth,
+                      }}
                       vectorEffect="non-scaling-stroke"
                     />
-                  ) : null,
-                )}
+                  ) : null;
+                })}
               </svg>
               {annotations.markers.map((marker) => (
                 <span

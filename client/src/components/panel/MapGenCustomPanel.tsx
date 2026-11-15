@@ -1,5 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { AnimatePresence, motion, type Transition, type Variants } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  type Transition,
+  type Variants,
+} from 'motion/react';
 import {
   IconDice,
   IconEraser,
@@ -52,18 +57,31 @@ import {
   percentToAsteroidSliderIndex,
   percentToAutoplaceSliderIndex,
 } from '../../lib/mapGen/sliderScale';
-import { mapGenPlanetIconUrl, mapGenResourceIconUrl } from '../../lib/mapGen/mapGenIcons';
+import {
+  mapGenPlanetIconUrl,
+  mapGenResourceIconUrl,
+} from '../../lib/mapGen/mapGenIcons';
 import type { ControlUi, MapGenUiState } from '../../lib/mapGen/types';
 import { MapGenIcon } from './MapGenIcon';
 import {
   hasMapPreviewAnnotations,
   MAP_PREVIEW_ANNOTATION_COLORS,
   MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
+  MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
+  MAP_PREVIEW_STROKE_WIDTH_MAX,
+  MAP_PREVIEW_STROKE_WIDTH_MIN,
+  normalizeAnnotationStrokeWidth,
   type MapPreviewAnnotationTool,
 } from '../../lib/mapGen/previewAnnotations';
-import { userPresetPickerValue, parseUserPresetPickerValue } from '../../lib/mapGen/mapGenUserPresets';
+import {
+  userPresetPickerValue,
+  parseUserPresetPickerValue,
+} from '../../lib/mapGen/mapGenUserPresets';
 import { MAP_GEN_SEED_HISTORY_SIZE } from '../../lib/mapGen/seedHistory';
-import { MapPreviewViewport, type MapPreviewViewportHandle } from './MapPreviewViewport';
+import {
+  MapPreviewViewport,
+  type MapPreviewViewportHandle,
+} from './MapPreviewViewport';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { FCC_EASE_OUT } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
@@ -71,7 +89,10 @@ import { webEffectsReduced } from '../../theme/webEffects';
 const GEN_TABS: MapGenTabId[] = ['resources', 'terrain', 'enemy', 'advanced'];
 
 const PRESET_MENU_ENTER: Transition = { duration: 0.2, ease: FCC_EASE_OUT };
-const PRESET_MENU_EXIT: Transition = { duration: 0.14, ease: [0.4, 0, 0.7, 0.2] };
+const PRESET_MENU_EXIT: Transition = {
+  duration: 0.14,
+  ease: [0.4, 0, 0.7, 0.2],
+};
 
 const PRESET_MENU_LIST: Variants = {
   hidden: {},
@@ -142,7 +163,9 @@ function GenSlider({
 
   const storedValue = clamp(value);
   const safeValue =
-    kind === 'autoplace' && invertFreq ? invertAutoplaceSliderIndex(storedValue) : storedValue;
+    kind === 'autoplace' && invertFreq
+      ? invertAutoplaceSliderIndex(storedValue)
+      : storedValue;
 
   const pctLabel =
     kind === 'bias'
@@ -150,12 +173,18 @@ function GenSlider({
       : kind === 'asteroid'
         ? `${asteroidPercentAt(storedValue)}%`
         : compact && autoplaceField
-          ? formatAutoplaceFieldPercent(storedValue, autoplaceField, { terrainFeature })
+          ? formatAutoplaceFieldPercent(storedValue, autoplaceField, {
+              terrainFeature,
+            })
           : formatAutoplaceFieldPercent(storedValue, 'size');
 
   const handleChange = (raw: number) => {
     const uiIdx = clamp(raw);
-    onChange(kind === 'autoplace' && invertFreq ? invertAutoplaceSliderIndex(uiIdx) : uiIdx);
+    onChange(
+      kind === 'autoplace' && invertFreq
+        ? invertAutoplaceSliderIndex(uiIdx)
+        : uiIdx,
+    );
   };
 
   if (compact) {
@@ -176,7 +205,8 @@ function GenSlider({
         {showPercent ? (
           <span
             className={
-              'create-save__slider-pct' + (kind === 'bias' ? ' create-save__slider-pct--decimal' : '')
+              'create-save__slider-pct' +
+              (kind === 'bias' ? ' create-save__slider-pct--decimal' : '')
             }
           >
             {pctLabel}
@@ -221,11 +251,17 @@ function GenMapGenPercentSteps({
   disabled?: boolean;
 }) {
   const minIndex =
-    variant === 'asteroid' ? MAP_GEN_ASTEROID_MIN_INDEX : MAP_GEN_AUTOPLACE_MIN_INDEX;
+    variant === 'asteroid'
+      ? MAP_GEN_ASTEROID_MIN_INDEX
+      : MAP_GEN_AUTOPLACE_MIN_INDEX;
   const clamp =
-    variant === 'asteroid' ? clampAsteroidSliderIndex : clampAutoplaceSliderIndex;
+    variant === 'asteroid'
+      ? clampAsteroidSliderIndex
+      : clampAutoplaceSliderIndex;
   const index = clamp(
-    variant === 'asteroid' ? percentToAsteroidSliderIndex(value) : percentToAutoplaceSliderIndex(value),
+    variant === 'asteroid'
+      ? percentToAsteroidSliderIndex(value)
+      : percentToAutoplaceSliderIndex(value),
   );
   const pctLabel =
     variant === 'asteroid'
@@ -247,7 +283,9 @@ function GenMapGenPercentSteps({
         onChange={(e) => {
           const idx = clamp(Number(e.target.value));
           onChange(
-            variant === 'asteroid' ? asteroidPercentAt(idx) : autoplaceFieldPercent(idx, 'size'),
+            variant === 'asteroid'
+              ? asteroidPercentAt(idx)
+              : autoplaceFieldPercent(idx, 'size'),
           );
         }}
       />
@@ -319,7 +357,15 @@ function GenNumericRow({
         value={sliderIndex}
         disabled={disabled}
         aria-label={label}
-        onChange={(e) => commit(valueForSliderIndex(Number(e.target.value), spec, MAP_GEN_SLIDER_MAX))}
+        onChange={(e) =>
+          commit(
+            valueForSliderIndex(
+              Number(e.target.value),
+              spec,
+              MAP_GEN_SLIDER_MAX,
+            ),
+          )
+        }
       />
       <div className="create-save__numeric-input-wrap">
         <input
@@ -336,7 +382,9 @@ function GenNumericRow({
             if (Number.isFinite(n)) commit(n);
           }}
         />
-        {unit ? <span className="create-save__numeric-unit">{unit}</span> : null}
+        {unit ? (
+          <span className="create-save__numeric-unit">{unit}</span>
+        ) : null}
       </div>
     </div>
   );
@@ -351,7 +399,12 @@ function updateControl(
   const planets = { ...ui.planets };
   const planet = { ...(planets[planetId] || {}) };
   planet[controlId] = {
-    ...(planet[controlId] || { enabled: true, frequency: 5, size: 5, richness: 5 }),
+    ...(planet[controlId] || {
+      enabled: true,
+      frequency: 5,
+      size: 5,
+      richness: 5,
+    }),
     ...patch,
   };
   planets[planetId] = planet;
@@ -362,7 +415,11 @@ function defaultControl(): ControlUi {
   return { enabled: true, frequency: 5, size: 5, richness: 5 };
 }
 
-function getControl(ui: MapGenUiState, planetId: string, controlId: string): ControlUi {
+function getControl(
+  ui: MapGenUiState,
+  planetId: string,
+  controlId: string,
+): ControlUi {
   return ui.planets[planetId]?.[controlId] || defaultControl();
 }
 
@@ -424,7 +481,10 @@ function MapGenAnimatedPicker({
   }, [disabled]);
 
   return (
-    <div ref={rootRef} className={'create-save__gen-preset-picker' + (open ? ' is-open' : '')}>
+    <div
+      ref={rootRef}
+      className={'create-save__gen-preset-picker' + (open ? ' is-open' : '')}
+    >
       <button
         type="button"
         id={triggerId}
@@ -435,8 +495,13 @@ function MapGenAnimatedPicker({
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="create-save__gen-preset-trigger-text">{selectedLabel}</span>
-        <span className="create-save__gen-preset-trigger-chevron" aria-hidden="true" />
+        <span className="create-save__gen-preset-trigger-text">
+          {selectedLabel}
+        </span>
+        <span
+          className="create-save__gen-preset-trigger-chevron"
+          aria-hidden="true"
+        />
       </button>
       <AnimatePresence>
         {open ? (
@@ -456,13 +521,18 @@ function MapGenAnimatedPicker({
                   key={option.value}
                   role="presentation"
                   variants={reduced ? undefined : PRESET_MENU_ITEM}
-                  style={reduced ? undefined : { transformOrigin: 'top center' }}
+                  style={
+                    reduced ? undefined : { transformOrigin: 'top center' }
+                  }
                 >
                   <button
                     type="button"
                     role="option"
                     aria-selected={active}
-                    className={'create-save__gen-preset-option' + (active ? ' is-active' : '')}
+                    className={
+                      'create-save__gen-preset-option' +
+                      (active ? ' is-active' : '')
+                    }
                     onClick={() => {
                       onChange(option.value);
                       setOpen(false);
@@ -491,10 +561,17 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
   const previewSizeLabelId = useId();
   const markCenterSwitchId = useId();
   const [genTab, setGenTab] = useState<MapGenTabId>('resources');
-  const [previewInteractionLocked, setPreviewInteractionLocked] = useState(false);
+  const [previewInteractionLocked, setPreviewInteractionLocked] =
+    useState(false);
   const [showCenterMarker, setShowCenterMarker] = useState(false);
-  const [annotationTool, setAnnotationTool] = useState<MapPreviewAnnotationTool>('pan');
-  const [annotationColor, setAnnotationColor] = useState(MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR);
+  const [annotationTool, setAnnotationTool] =
+    useState<MapPreviewAnnotationTool>('pan');
+  const [annotationColor, setAnnotationColor] = useState(
+    MAP_PREVIEW_ANNOTATION_DEFAULT_COLOR,
+  );
+  const [annotationStrokeWidth, setAnnotationStrokeWidth] = useState(
+    MAP_PREVIEW_STROKE_WIDTH_DEFAULT,
+  );
   const [markerLabel, setMarkerLabel] = useState('');
   const [previewHasAnnotations, setPreviewHasAnnotations] = useState(false);
   const previewViewportRef = useRef<MapPreviewViewportHandle>(null);
@@ -515,7 +592,9 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
     previewPlanetId,
   );
   const initialPreviewLocked = cs.initialPreviewPending;
-  const selectedUserPresetId = parseUserPresetPickerValue(cs.selectedPresetValue);
+  const selectedUserPresetId = parseUserPresetPickerValue(
+    cs.selectedPresetValue,
+  );
   const presetOptions = [
     ...cs.presetIds.map((id) => ({
       value: id,
@@ -529,463 +608,632 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
 
   return (
     <div className="create-save__custom">
-
       <div className="create-save__layout">
         <div className="create-save__settings map-gen-card">
-          <fieldset disabled={initialPreviewLocked} className="create-save__fieldset-lock">
-          <div className="create-save__gen-toolbar">
-            <div className="create-save__gen-preset">
-              <span className="create-save__gen-preset-label" id={presetLabelId}>
-                {t('map_gen_preset_label')}
-              </span>
-              <div className="create-save__gen-preset-row">
-                <MapGenAnimatedPicker
-                  labelledBy={presetLabelId}
-                  value={cs.selectedPresetValue}
-                  options={presetOptions}
-                  onChange={cs.setPreset}
-                />
-                <button
-                  type="button"
-                  className="btn btn--icon create-save__gen-preset-action"
-                  title={t('map_gen_reset_btn')}
-                  aria-label={t('map_gen_reset_btn')}
-                  onClick={cs.resetMapGenSettings}
+          <fieldset
+            disabled={initialPreviewLocked}
+            className="create-save__fieldset-lock"
+          >
+            <div className="create-save__gen-toolbar">
+              <div className="create-save__gen-preset">
+                <span
+                  className="create-save__gen-preset-label"
+                  id={presetLabelId}
                 >
-                  <AppIcon name="reset" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--icon create-save__gen-preset-action"
-                  title={t('map_gen_user_preset_save_btn')}
-                  aria-label={t('map_gen_user_preset_save_btn')}
-                  onClick={cs.openSavePresetDialog}
-                >
-                  <AppIcon name="save" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--icon create-save__gen-preset-action"
-                  title={t('map_gen_preset_import_btn')}
-                  aria-label={t('map_gen_preset_import_btn')}
-                  onClick={() => presetImportRef.current?.click()}
-                >
-                  <AppIcon name="upload" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--icon create-save__gen-preset-action"
-                  title={t('map_gen_preset_export_btn')}
-                  aria-label={t('map_gen_preset_export_btn')}
-                  onClick={cs.openPresetExportDialog}
-                >
-                  <AppIcon name="download" size={16} />
-                </button>
-                {selectedUserPresetId ? (
+                  {t('map_gen_preset_label')}
+                </span>
+                <div className="create-save__gen-preset-row">
+                  <MapGenAnimatedPicker
+                    labelledBy={presetLabelId}
+                    value={cs.selectedPresetValue}
+                    options={presetOptions}
+                    onChange={cs.setPreset}
+                  />
                   <button
                     type="button"
-                    className="btn btn--icon create-save__gen-preset-action create-save__gen-preset-action--danger"
-                    title={t('map_gen_user_preset_delete_btn')}
-                    aria-label={t('map_gen_user_preset_delete_btn')}
-                    onClick={() => cs.removeUserPreset(selectedUserPresetId)}
+                    className="btn btn--icon create-save__gen-preset-action"
+                    title={t('map_gen_reset_btn')}
+                    aria-label={t('map_gen_reset_btn')}
+                    onClick={cs.resetMapGenSettings}
                   >
-                    <AppIcon name="delete" size={16} />
+                    <AppIcon name="reset" size={16} />
                   </button>
-                ) : null}
-                <input
-                  ref={presetImportRef}
-                  type="file"
-                  accept=".fcc,application/json"
-                  hidden
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = '';
-                    if (file) void cs.handlePresetImportFile(file);
-                  }}
-                />
+                  <button
+                    type="button"
+                    className="btn btn--icon create-save__gen-preset-action"
+                    title={t('map_gen_user_preset_save_btn')}
+                    aria-label={t('map_gen_user_preset_save_btn')}
+                    onClick={cs.openSavePresetDialog}
+                  >
+                    <AppIcon name="save" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--icon create-save__gen-preset-action"
+                    title={t('map_gen_preset_import_btn')}
+                    aria-label={t('map_gen_preset_import_btn')}
+                    onClick={() => presetImportRef.current?.click()}
+                  >
+                    <AppIcon name="upload" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--icon create-save__gen-preset-action"
+                    title={t('map_gen_preset_export_btn')}
+                    aria-label={t('map_gen_preset_export_btn')}
+                    onClick={cs.openPresetExportDialog}
+                  >
+                    <AppIcon name="download" size={16} />
+                  </button>
+                  {selectedUserPresetId ? (
+                    <button
+                      type="button"
+                      className="btn btn--icon create-save__gen-preset-action create-save__gen-preset-action--danger"
+                      title={t('map_gen_user_preset_delete_btn')}
+                      aria-label={t('map_gen_user_preset_delete_btn')}
+                      onClick={() => cs.removeUserPreset(selectedUserPresetId)}
+                    >
+                      <AppIcon name="delete" size={16} />
+                    </button>
+                  ) : null}
+                  <input
+                    ref={presetImportRef}
+                    type="file"
+                    accept=".fcc,application/json"
+                    hidden
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      if (file) void cs.handlePresetImportFile(file);
+                    }}
+                  />
+                </div>
+              </div>
+              <div
+                className="create-save__gen-tabs"
+                role="tablist"
+                aria-label={t('map_gen_mode_custom')}
+              >
+                {GEN_TABS.map((id) => {
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      id={`map-gen-tab-${id}`}
+                      aria-selected={genTab === id}
+                      aria-controls={`map-gen-panel-${id}`}
+                      className={
+                        'create-save__gen-tab' +
+                        (genTab === id ? ' is-active' : '')
+                      }
+                      onClick={() => setGenTab(id)}
+                    >
+                      {tabLabel(id)}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <div className="create-save__gen-tabs" role="tablist" aria-label={t('map_gen_mode_custom')}>
-              {GEN_TABS.map((id) => {
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    role="tab"
-                    id={`map-gen-tab-${id}`}
-                    aria-selected={genTab === id}
-                    aria-controls={`map-gen-panel-${id}`}
-                    className={'create-save__gen-tab' + (genTab === id ? ' is-active' : '')}
-                    onClick={() => setGenTab(id)}
-                  >
-                    {tabLabel(id)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          <div
-            className="create-save__gen-panel"
-            role="tabpanel"
-            id={`map-gen-panel-${genTab}`}
-            aria-labelledby={`map-gen-tab-${genTab}`}
-          >
-            <TabPanelsTransition activeKey={genTab} stageClassName="create-save__gen-panel-stage">
-              {genTab === 'resources' && (
-                <ResourcesTab cs={cs} t={t} label={label} spaceAge={cs.spaceAge} />
-              )}
-              {genTab === 'terrain' && (
-                <TerrainTab cs={cs} t={t} label={label} spaceAge={cs.spaceAge} />
-              )}
-              {genTab === 'enemy' && (
-                <EnemyTab cs={cs} t={t} label={label} spaceAge={cs.spaceAge} />
-              )}
-              {genTab === 'advanced' && <AdvancedTab cs={cs} t={t} spaceAge={cs.spaceAge} />}
-            </TabPanelsTransition>
-          </div>
+            <div
+              className="create-save__gen-panel"
+              role="tabpanel"
+              id={`map-gen-panel-${genTab}`}
+              aria-labelledby={`map-gen-tab-${genTab}`}
+            >
+              <TabPanelsTransition
+                activeKey={genTab}
+                stageClassName="create-save__gen-panel-stage"
+              >
+                {genTab === 'resources' && (
+                  <ResourcesTab
+                    cs={cs}
+                    t={t}
+                    label={label}
+                    spaceAge={cs.spaceAge}
+                  />
+                )}
+                {genTab === 'terrain' && (
+                  <TerrainTab
+                    cs={cs}
+                    t={t}
+                    label={label}
+                    spaceAge={cs.spaceAge}
+                  />
+                )}
+                {genTab === 'enemy' && (
+                  <EnemyTab
+                    cs={cs}
+                    t={t}
+                    label={label}
+                    spaceAge={cs.spaceAge}
+                  />
+                )}
+                {genTab === 'advanced' && (
+                  <AdvancedTab cs={cs} t={t} spaceAge={cs.spaceAge} />
+                )}
+              </TabPanelsTransition>
+            </div>
           </fieldset>
         </div>
 
         <div className="create-save__preview-panel map-gen-card map-gen-card--preview">
-          <div className="map-gen-card__header">
-            <span className="map-gen-card__title">{t('map_gen_preview_title')}</span>
+          <div className="map-gen-card__header map-gen-card__header--preview">
+            <span className="map-gen-card__title">
+              {t('map_gen_preview_title')}
+            </span>
+            <button
+              type="button"
+              className="mod-update-all-flow__close create-save__dialog-close"
+              title={t('close')}
+              aria-label={t('close')}
+              disabled={cs.submitting}
+              onClick={cs.closeDialog}
+            >
+              <AppIcon name="close" size={16} />
+            </button>
           </div>
           <div className="map-gen-card__body map-gen-card__body--preview">
             <div className="create-save__preview-row">
               <aside className="create-save__preview-controls">
-                <fieldset disabled={initialPreviewLocked} className="create-save__fieldset-lock">
-                <label className="create-save__preview-field">
-                  <span className="create-save__preview-field-label">{t('map_gen_seed_label')}</span>
-                  <div className="create-save__seed-row">
-                    <input
-                      type="text"
-                      className="input"
-                      inputMode="numeric"
-                      placeholder={t('map_gen_seed_placeholder')}
-                      value={ui.seed}
-                      onChange={(e) => cs.setMapGenUi((p) => ({ ...p, seed: e.target.value }))}
+                <fieldset
+                  disabled={initialPreviewLocked}
+                  className="create-save__fieldset-lock"
+                >
+                  <label className="create-save__preview-field">
+                    <span className="create-save__preview-field-label">
+                      {t('map_gen_seed_label')}
+                    </span>
+                    <div className="create-save__seed-row">
+                      <input
+                        type="text"
+                        className="input"
+                        inputMode="numeric"
+                        placeholder={t('map_gen_seed_placeholder')}
+                        value={ui.seed}
+                        onChange={(e) =>
+                          cs.setMapGenUi((p) => ({
+                            ...p,
+                            seed: e.target.value,
+                          }))
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="btn create-save__seed-random"
+                        title={t('map_gen_seed_random')}
+                        aria-label={t('map_gen_seed_random')}
+                        onClick={() => cs.randomizeSeed()}
+                      >
+                        <IconDice size={18} stroke={1.75} aria-hidden />
+                      </button>
+                    </div>
+                  </label>
+
+                  <div
+                    className={
+                      'create-save__seed-history-panel' +
+                      (initialPreviewLocked
+                        ? ' create-save__seed-history-panel--locked'
+                        : '')
+                    }
+                    aria-label={t('map_gen_seed_history_label')}
+                  >
+                    <span className="create-save__seed-history-label">
+                      {t('map_gen_seed_history_label')}
+                    </span>
+                    <div className="create-save__seed-history-slots">
+                      {Array.from(
+                        { length: MAP_GEN_SEED_HISTORY_SIZE },
+                        (_, index) => {
+                          const seed = cs.seedHistory[index] ?? null;
+                          if (!seed) {
+                            return (
+                              <span
+                                key={`seed-slot-empty-${index}`}
+                                className="create-save__seed-history-slot create-save__seed-history-slot--empty"
+                                aria-hidden
+                              />
+                            );
+                          }
+                          const active = seed === ui.seed;
+                          return (
+                            <button
+                              key={seed}
+                              type="button"
+                              className={
+                                'input create-save__seed-history-btn' +
+                                (active ? ' is-active' : '')
+                              }
+                              title={t('map_gen_seed_history_apply', seed)}
+                              aria-label={t('map_gen_seed_history_apply', seed)}
+                              aria-current={active ? 'true' : undefined}
+                              disabled={initialPreviewLocked || active}
+                              onClick={() => cs.applySeed(seed)}
+                            >
+                              {seed}
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="create-save__preview-field create-save__preview-download-size">
+                    <span
+                      className="create-save__preview-field-label"
+                      id={previewSizeLabelId}
+                    >
+                      {t('map_gen_preview_download_size')}
+                    </span>
+                    <MapGenAnimatedPicker
+                      labelledBy={previewSizeLabelId}
+                      value={String(cs.downloadPreviewSize)}
+                      disabled={cs.downloadPreviewLoading}
+                      options={MAP_PREVIEW_DOWNLOAD_SIZES.map((px) => ({
+                        value: String(px),
+                        label: t('map_gen_preview_size_option', px, px),
+                      }))}
+                      onChange={(v) =>
+                        cs.setDownloadPreviewSize(
+                          Number(v) as typeof cs.downloadPreviewSize,
+                        )
+                      }
                     />
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn--with-icon create-save__preview-download-btn"
+                    disabled={cs.downloadPreviewLoading || cs.previewLoading}
+                    onClick={() => void cs.downloadPreview()}
+                  >
+                    <AppIcon name="download" size={16} />
+                    {cs.downloadPreviewLoading
+                      ? t('map_gen_preview_downloading')
+                      : t('map_gen_preview_download')}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn--with-icon create-save__preview-download-btn"
+                    disabled={
+                      !previewHasAnnotations ||
+                      cs.downloadAnnotatedLoading ||
+                      cs.downloadPreviewLoading ||
+                      cs.previewLoading
+                    }
+                    onClick={() => {
+                      const viewport = previewViewportRef.current;
+                      void cs.downloadPreviewWithAnnotations(
+                        viewport?.getAnnotations() ?? {
+                          strokes: [],
+                          markers: [],
+                        },
+                        viewport?.getMarkerExportOptions(
+                          cs.downloadPreviewSize,
+                        ) ?? {},
+                      );
+                    }}
+                  >
+                    <AppIcon name="download" size={16} />
+                    {cs.downloadAnnotatedLoading
+                      ? t('map_gen_preview_downloading')
+                      : t('map_gen_preview_download_marked')}
+                  </button>
+
+                  <div className="create-save__preview-exchange">
                     <button
                       type="button"
-                      className="btn create-save__seed-random"
-                      title={t('map_gen_seed_random')}
-                      aria-label={t('map_gen_seed_random')}
-                      onClick={() => cs.randomizeSeed()}
+                      className="btn btn--with-icon"
+                      onClick={cs.openExchangeImport}
                     >
-                      <IconDice size={18} stroke={1.75} aria-hidden />
+                      <AppIcon name="upload" size={16} />
+                      {t('map_gen_exchange_import_btn')}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn--with-icon"
+                      disabled={cs.exchangeDialogBusy}
+                      onClick={() => void cs.openExchangeExport()}
+                    >
+                      <AppIcon name="download" size={16} />
+                      {t('map_gen_exchange_export_btn')}
+                    </button>
+                    <div className="create-save__preview-center-row">
+                      <button
+                        type="button"
+                        className="btn btn--icon create-save__preview-recenter-btn"
+                        title={t('map_gen_preview_recenter')}
+                        aria-label={t('map_gen_preview_recenter')}
+                        disabled={!cs.previewUrl || previewInteractionLocked}
+                        onClick={() => previewViewportRef.current?.recenter()}
+                      >
+                        <IconFocus2 size={18} stroke={1.75} aria-hidden />
+                      </button>
+                      <FccSwitch
+                        id={markCenterSwitchId}
+                        className="create-save__preview-center-marker-option"
+                        labelClassName="create-save__preview-center-marker-option-label"
+                        checked={showCenterMarker}
+                        onChange={setShowCenterMarker}
+                        label={t('map_gen_preview_mark_center')}
+                      />
+                    </div>
+                  </div>
+
+                  {cs.previewError && (
+                    <p className="create-save__preview-error">
+                      {cs.previewError}
+                    </p>
+                  )}
+                  {cs.downloadPreviewError && (
+                    <p className="create-save__preview-error">
+                      {cs.downloadPreviewError}
+                    </p>
+                  )}
+                  {cs.downloadAnnotatedError && (
+                    <p className="create-save__preview-error">
+                      {cs.downloadAnnotatedError}
+                    </p>
+                  )}
+                  {cs.error ? (
+                    <p className="create-save__preview-error modpack-import-dialog__error">
+                      {cs.error}
+                    </p>
+                  ) : null}
+
+                  <div className="create-save__preview-actions">
+                    <button
+                      type="button"
+                      className="btn btn--primary btn--with-icon"
+                      disabled={cs.submitting}
+                      onClick={cs.openSaveNameDialog}
+                    >
+                      <AppIcon name="add" size={16} />
+                      {t('create_save_btn')}
                     </button>
                   </div>
-                </label>
+                </fieldset>
+              </aside>
 
-                <div
-                  className={
-                    'create-save__seed-history-panel' +
-                    (initialPreviewLocked ? ' create-save__seed-history-panel--locked' : '')
-                  }
-                  aria-label={t('map_gen_seed_history_label')}
+              <div className="create-save__preview-slot">
+                <fieldset
+                  disabled={initialPreviewLocked}
+                  className="create-save__fieldset-lock create-save__preview-slot-lock"
                 >
-                  <span className="create-save__seed-history-label">{t('map_gen_seed_history_label')}</span>
-                  <div className="create-save__seed-history-slots">
-                    {Array.from({ length: MAP_GEN_SEED_HISTORY_SIZE }, (_, index) => {
-                      const seed = cs.seedHistory[index] ?? null;
-                      if (!seed) {
-                        return (
+                  <div className="create-save__preview-toolbar">
+                    <div className="create-save__preview-tool-block">
+                      <div
+                        className="create-save__preview-tools"
+                        role="toolbar"
+                        aria-label={t('map_gen_preview_tools_label')}
+                      >
+                        {PREVIEW_ANNOTATION_TOOLS.map(
+                          ({ id, icon: ToolIcon, labelKey }) => (
+                            <button
+                              key={id}
+                              type="button"
+                              className={
+                                'btn btn--icon create-save__preview-tool-btn' +
+                                (annotationTool === id ? ' is-active' : '')
+                              }
+                              title={t(labelKey)}
+                              aria-label={t(labelKey)}
+                              aria-pressed={annotationTool === id}
+                              disabled={
+                                !cs.previewUrl || previewInteractionLocked
+                              }
+                              onClick={() => setAnnotationTool(id)}
+                            >
+                              <ToolIcon size={18} stroke={1.75} aria-hidden />
+                            </button>
+                          ),
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn--icon create-save__preview-tool-btn create-save__preview-tool-btn--clear"
+                          title={t('map_gen_preview_tool_clear')}
+                          aria-label={t('map_gen_preview_tool_clear')}
+                          disabled={!cs.previewUrl || previewInteractionLocked}
+                          onClick={() =>
+                            previewViewportRef.current?.clearAnnotations()
+                          }
+                        >
+                          <IconTrash size={18} stroke={1.75} aria-hidden />
+                        </button>
+                      </div>
+                      <div className="create-save__preview-style-row">
+                        <div
+                          className="create-save__preview-colors"
+                          role="group"
+                          aria-label={t('map_gen_preview_color_label')}
+                        >
+                          {MAP_PREVIEW_ANNOTATION_COLORS.map((color) => (
+                            <button
+                              key={color.id}
+                              type="button"
+                              className={
+                                'create-save__preview-color-btn' +
+                                (annotationColor === color.value
+                                  ? ' is-active'
+                                  : '')
+                              }
+                              style={{ backgroundColor: color.value }}
+                              title={t(`map_gen_preview_color_${color.id}`)}
+                              aria-label={t(
+                                `map_gen_preview_color_${color.id}`,
+                              )}
+                              aria-pressed={annotationColor === color.value}
+                              disabled={
+                                !cs.previewUrl || previewInteractionLocked
+                              }
+                              onClick={() => setAnnotationColor(color.value)}
+                            />
+                          ))}
+                        </div>
+                        <label
+                          className="create-save__preview-stroke-width"
+                          title={`${t('map_gen_preview_stroke_width_label')}: ${annotationStrokeWidth}`}
+                        >
                           <span
-                            key={`seed-slot-empty-${index}`}
-                            className="create-save__seed-history-slot create-save__seed-history-slot--empty"
+                            className="create-save__preview-stroke-dot-box"
                             aria-hidden
+                          >
+                            <span
+                              className="create-save__preview-stroke-dot"
+                              style={{
+                                width: `${Math.round(
+                                  3 +
+                                    ((annotationStrokeWidth -
+                                      MAP_PREVIEW_STROKE_WIDTH_MIN) /
+                                      Math.max(
+                                        1,
+                                        MAP_PREVIEW_STROKE_WIDTH_MAX -
+                                          MAP_PREVIEW_STROKE_WIDTH_MIN,
+                                      )) *
+                                      11,
+                                )}px`,
+                                height: `${Math.round(
+                                  3 +
+                                    ((annotationStrokeWidth -
+                                      MAP_PREVIEW_STROKE_WIDTH_MIN) /
+                                      Math.max(
+                                        1,
+                                        MAP_PREVIEW_STROKE_WIDTH_MAX -
+                                          MAP_PREVIEW_STROKE_WIDTH_MIN,
+                                      )) *
+                                      11,
+                                )}px`,
+                                backgroundColor: annotationColor,
+                              }}
+                            />
+                          </span>
+                          <input
+                            type="range"
+                            className="create-save__range create-save__preview-stroke-range"
+                            min={MAP_PREVIEW_STROKE_WIDTH_MIN}
+                            max={MAP_PREVIEW_STROKE_WIDTH_MAX}
+                            step={1}
+                            value={annotationStrokeWidth}
+                            aria-label={t('map_gen_preview_stroke_width_label')}
+                            disabled={
+                              !cs.previewUrl || previewInteractionLocked
+                            }
+                            onChange={(e) =>
+                              setAnnotationStrokeWidth(
+                                normalizeAnnotationStrokeWidth(
+                                  Number(e.target.value),
+                                ),
+                              )
+                            }
                           />
-                        );
-                      }
-                      const active = seed === ui.seed;
+                          <span className="create-save__preview-stroke-value">
+                            {annotationStrokeWidth}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                    <div className="create-save__preview-mode-content">
+                      {annotationTool === 'marker' ? (
+                        <label className="create-save__preview-marker-label-field">
+                          <p className="create-save__preview-hint create-save__preview-hint--above-field">
+                            {t('map_gen_preview_tool_hint_marker')}
+                          </p>
+                          <input
+                            type="text"
+                            className="input create-save__preview-marker-input"
+                            maxLength={48}
+                            value={markerLabel}
+                            placeholder={t('map_gen_preview_marker_label')}
+                            disabled={
+                              !cs.previewUrl || previewInteractionLocked
+                            }
+                            onChange={(e) => setMarkerLabel(e.target.value)}
+                          />
+                        </label>
+                      ) : (
+                        <p className="create-save__preview-hint">
+                          {annotationTool === 'pan'
+                            ? t('map_gen_preview_controls_hint')
+                            : t(`map_gen_preview_tool_hint_${annotationTool}`)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="create-save__preview-viewport-wrap">
+                    <div className="create-save__preview-square">
+                      <MapPreviewViewport
+                        ref={previewViewportRef}
+                        onInteractionLockChange={setPreviewInteractionLocked}
+                        onFirstPreviewReady={cs.markInitialPreviewReady}
+                        onAnnotationsChange={(annotations) =>
+                          setPreviewHasAnnotations(
+                            hasMapPreviewAnnotations(annotations),
+                          )
+                        }
+                        showCenterMarker={showCenterMarker}
+                        annotationTool={annotationTool}
+                        annotationColor={annotationColor}
+                        annotationStrokeWidth={annotationStrokeWidth}
+                        markerLabel={markerLabel}
+                        previewUrl={cs.previewUrl}
+                        previewPlanet={previewPlanetId}
+                        planetLabel={previewPlanetName}
+                        mapSeed={ui.seed}
+                        loading={cs.previewLoading}
+                        refining={cs.previewRefining}
+                        emptyLabel={t('map_gen_preview_empty')}
+                        connectingStages={[
+                          t('map_gen_preview_satellite_1'),
+                          t('map_gen_preview_satellite_2'),
+                          t('map_gen_preview_satellite_3'),
+                          t('map_gen_preview_satellite_4'),
+                          t('map_gen_preview_satellite_5'),
+                        ]}
+                        refiningLabel={t('map_gen_preview_refining')}
+                        crashSiteLabel={t('map_gen_preview_crash_site')}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="create-save__planet-picker create-save__planet-picker--preview"
+                    role="radiogroup"
+                    aria-label={t('map_gen_preview_planet')}
+                  >
+                    {planets.map((p) => {
+                      const name = label(planetLabelKey(p.id), p.id);
+                      const active = ui.previewPlanet === p.previewId;
                       return (
                         <button
-                          key={seed}
+                          key={p.id}
                           type="button"
+                          role="radio"
+                          aria-checked={active}
                           className={
-                            'input create-save__seed-history-btn' + (active ? ' is-active' : '')
+                            'create-save__planet-picker-btn' +
+                            (active ? ' is-active' : '')
                           }
-                          title={t('map_gen_seed_history_apply', seed)}
-                          aria-label={t('map_gen_seed_history_apply', seed)}
-                          aria-current={active ? 'true' : undefined}
-                          disabled={initialPreviewLocked || active}
-                          onClick={() => cs.applySeed(seed)}
+                          title={name}
+                          onClick={() =>
+                            cs.setMapGenUi((prev) => ({
+                              ...prev,
+                              previewPlanet: p.previewId,
+                            }))
+                          }
                         >
-                          {seed}
+                          <MapGenIcon
+                            src={mapGenPlanetIconUrl(p.id)}
+                            alt={name}
+                            tier="medium"
+                            size={28}
+                            className="create-save__planet-picker-icon"
+                          />
                         </button>
                       );
                     })}
                   </div>
-                </div>
-
-                <div className="create-save__preview-field create-save__preview-download-size">
-                  <span className="create-save__preview-field-label" id={previewSizeLabelId}>
-                    {t('map_gen_preview_download_size')}
-                  </span>
-                  <MapGenAnimatedPicker
-                    labelledBy={previewSizeLabelId}
-                    value={String(cs.downloadPreviewSize)}
-                    disabled={cs.downloadPreviewLoading}
-                    options={MAP_PREVIEW_DOWNLOAD_SIZES.map((px) => ({
-                      value: String(px),
-                      label: t('map_gen_preview_size_option', px, px),
-                    }))}
-                    onChange={(v) =>
-                      cs.setDownloadPreviewSize(
-                        Number(v) as typeof cs.downloadPreviewSize,
-                      )
-                    }
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn--with-icon create-save__preview-download-btn"
-                  disabled={cs.downloadPreviewLoading || cs.previewLoading}
-                  onClick={() => void cs.downloadPreview()}
-                >
-                  <AppIcon name="download" size={16} />
-                  {cs.downloadPreviewLoading
-                    ? t('map_gen_preview_downloading')
-                    : t('map_gen_preview_download')}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn--with-icon create-save__preview-download-btn"
-                  disabled={
-                    !previewHasAnnotations ||
-                    cs.downloadAnnotatedLoading ||
-                    cs.downloadPreviewLoading ||
-                    cs.previewLoading
-                  }
-                  onClick={() => {
-                    const viewport = previewViewportRef.current;
-                    void cs.downloadPreviewWithAnnotations(
-                      viewport?.getAnnotations() ?? { strokes: [], markers: [] },
-                      viewport?.getMarkerExportOptions(cs.downloadPreviewSize) ?? {},
-                    );
-                  }}
-                >
-                  <AppIcon name="download" size={16} />
-                  {cs.downloadAnnotatedLoading
-                    ? t('map_gen_preview_downloading')
-                    : t('map_gen_preview_download_marked')}
-                </button>
-
-                <div className="create-save__preview-exchange">
-                  <button type="button" className="btn btn--with-icon" onClick={cs.openExchangeImport}>
-                    <AppIcon name="upload" size={16} />
-                    {t('map_gen_exchange_import_btn')}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn--with-icon"
-                    disabled={cs.exchangeDialogBusy}
-                    onClick={() => void cs.openExchangeExport()}
-                  >
-                    <AppIcon name="download" size={16} />
-                    {t('map_gen_exchange_export_btn')}
-                  </button>
-                  <div className="create-save__preview-center-row">
-                    <button
-                      type="button"
-                      className="btn btn--icon create-save__preview-recenter-btn"
-                      title={t('map_gen_preview_recenter')}
-                      aria-label={t('map_gen_preview_recenter')}
-                      disabled={!cs.previewUrl || previewInteractionLocked}
-                      onClick={() => previewViewportRef.current?.recenter()}
-                    >
-                      <IconFocus2 size={18} stroke={1.75} aria-hidden />
-                    </button>
-                    <FccSwitch
-                      id={markCenterSwitchId}
-                      className="create-save__preview-center-marker-option"
-                      labelClassName="create-save__preview-center-marker-option-label"
-                      checked={showCenterMarker}
-                      onChange={setShowCenterMarker}
-                      label={t('map_gen_preview_mark_center')}
-                    />
-                  </div>
-                </div>
-
-                {cs.previewError && <p className="create-save__preview-error">{cs.previewError}</p>}
-                {cs.downloadPreviewError && (
-                  <p className="create-save__preview-error">{cs.downloadPreviewError}</p>
-                )}
-                {cs.downloadAnnotatedError && (
-                  <p className="create-save__preview-error">{cs.downloadAnnotatedError}</p>
-                )}
-                {cs.error ? (
-                  <p className="create-save__preview-error modpack-import-dialog__error">{cs.error}</p>
-                ) : null}
-
-                <div className="create-save__preview-actions">
-                  <button
-                    type="button"
-                    className="btn btn--primary btn--with-icon"
-                    disabled={cs.submitting}
-                    onClick={cs.openSaveNameDialog}
-                  >
-                    <AppIcon name="add" size={16} />
-                    {t('create_save_btn')}
-                  </button>
-                </div>
-                </fieldset>
-                <div className="create-save__preview-actions">
-                  <CancelButton onClick={cs.closeDialog} disabled={cs.submitting} t={t} />
-                </div>
-              </aside>
-
-              <div className="create-save__preview-slot">
-                <fieldset disabled={initialPreviewLocked} className="create-save__fieldset-lock create-save__preview-slot-lock">
-                <div className="create-save__preview-toolbar">
-                  <div className="create-save__preview-tool-block">
-                    <div
-                      className="create-save__preview-tools"
-                      role="toolbar"
-                      aria-label={t('map_gen_preview_tools_label')}
-                    >
-                      {PREVIEW_ANNOTATION_TOOLS.map(({ id, icon: ToolIcon, labelKey }) => (
-                        <button
-                          key={id}
-                          type="button"
-                          className={
-                            'btn btn--icon create-save__preview-tool-btn' +
-                            (annotationTool === id ? ' is-active' : '')
-                          }
-                          title={t(labelKey)}
-                          aria-label={t(labelKey)}
-                          aria-pressed={annotationTool === id}
-                          disabled={!cs.previewUrl || previewInteractionLocked}
-                          onClick={() => setAnnotationTool(id)}
-                        >
-                          <ToolIcon size={18} stroke={1.75} aria-hidden />
-                        </button>
-                      ))}
-                      <button
-                        type="button"
-                        className="btn btn--icon create-save__preview-tool-btn create-save__preview-tool-btn--clear"
-                        title={t('map_gen_preview_tool_clear')}
-                        aria-label={t('map_gen_preview_tool_clear')}
-                        disabled={!cs.previewUrl || previewInteractionLocked}
-                        onClick={() => previewViewportRef.current?.clearAnnotations()}
-                      >
-                        <IconTrash size={18} stroke={1.75} aria-hidden />
-                      </button>
-                    </div>
-                    <div
-                      className="create-save__preview-colors"
-                      role="group"
-                      aria-label={t('map_gen_preview_color_label')}
-                    >
-                      {MAP_PREVIEW_ANNOTATION_COLORS.map((color) => (
-                        <button
-                          key={color.id}
-                          type="button"
-                          className={
-                            'create-save__preview-color-btn' +
-                            (annotationColor === color.value ? ' is-active' : '')
-                          }
-                          style={{ backgroundColor: color.value }}
-                          title={t(`map_gen_preview_color_${color.id}`)}
-                          aria-label={t(`map_gen_preview_color_${color.id}`)}
-                          aria-pressed={annotationColor === color.value}
-                          disabled={!cs.previewUrl || previewInteractionLocked}
-                          onClick={() => setAnnotationColor(color.value)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="create-save__preview-mode-content">
-                    {annotationTool === 'marker' ? (
-                      <label className="create-save__preview-marker-label-field">
-                        <p className="create-save__preview-hint create-save__preview-hint--above-field">
-                          {t('map_gen_preview_tool_hint_marker')}
-                        </p>
-                        <input
-                          type="text"
-                          className="input create-save__preview-marker-input"
-                          maxLength={48}
-                          value={markerLabel}
-                          placeholder={t('map_gen_preview_marker_label')}
-                          disabled={!cs.previewUrl || previewInteractionLocked}
-                          onChange={(e) => setMarkerLabel(e.target.value)}
-                        />
-                      </label>
-                    ) : (
-                      <p className="create-save__preview-hint">
-                        {annotationTool === 'pan'
-                          ? t('map_gen_preview_controls_hint')
-                          : t(`map_gen_preview_tool_hint_${annotationTool}`)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="create-save__preview-viewport-wrap">
-                  <div className="create-save__preview-square">
-                    <MapPreviewViewport
-                      ref={previewViewportRef}
-                      onInteractionLockChange={setPreviewInteractionLocked}
-                      onFirstPreviewReady={cs.markInitialPreviewReady}
-                      onAnnotationsChange={(annotations) =>
-                        setPreviewHasAnnotations(hasMapPreviewAnnotations(annotations))
-                      }
-                      showCenterMarker={showCenterMarker}
-                      annotationTool={annotationTool}
-                      annotationColor={annotationColor}
-                      markerLabel={markerLabel}
-                      previewUrl={cs.previewUrl}
-                      previewPlanet={previewPlanetId}
-                      planetLabel={previewPlanetName}
-                      mapSeed={ui.seed}
-                      loading={cs.previewLoading}
-                      refining={cs.previewRefining}
-                      emptyLabel={t('map_gen_preview_empty')}
-                      connectingStages={[
-                        t('map_gen_preview_satellite_1'),
-                        t('map_gen_preview_satellite_2'),
-                        t('map_gen_preview_satellite_3'),
-                        t('map_gen_preview_satellite_4'),
-                        t('map_gen_preview_satellite_5'),
-                      ]}
-                      refiningLabel={t('map_gen_preview_refining')}
-                      crashSiteLabel={t('map_gen_preview_crash_site')}
-                    />
-                  </div>
-                </div>
-                <div
-                  className="create-save__planet-picker create-save__planet-picker--preview"
-                  role="radiogroup"
-                  aria-label={t('map_gen_preview_planet')}
-                >
-                  {planets.map((p) => {
-                    const name = label(planetLabelKey(p.id), p.id);
-                    const active = ui.previewPlanet === p.previewId;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        className={'create-save__planet-picker-btn' + (active ? ' is-active' : '')}
-                        title={name}
-                        onClick={() =>
-                          cs.setMapGenUi((prev) => ({ ...prev, previewPlanet: p.previewId }))
-                        }
-                      >
-                        <MapGenIcon
-                          src={mapGenPlanetIconUrl(p.id)}
-                          alt={name}
-                          tier="medium"
-                          size={28}
-                          className="create-save__planet-picker-icon"
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
                 </fieldset>
               </div>
             </div>
@@ -1028,7 +1276,11 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
           </div>
           <div className="fu-modal__footer">
             <CancelButton onClick={cs.closeSavePresetDialog} t={t} />
-            <button type="button" className="btn btn--primary" onClick={cs.confirmSaveUserPreset}>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={cs.confirmSaveUserPreset}
+            >
               {t('map_gen_user_preset_save_confirm')}
             </button>
           </div>
@@ -1050,18 +1302,26 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
             {t('map_gen_preset_import_dialog_title')}
           </div>
           <div className="fu-modal__body">
-            <p className="modpack-import-dialog__desc">{t('map_gen_preset_import_dialog_hint')}</p>
+            <p className="modpack-import-dialog__desc">
+              {t('map_gen_preset_import_dialog_hint')}
+            </p>
             <ul className="modpack-import-dialog__mods create-save__preset-transfer-list">
               {cs.presetImportCandidates.map((candidate) => {
                 const checked = cs.presetImportSelected.includes(candidate.key);
                 return (
-                  <li key={candidate.key} className={candidate.exists ? 'is-disabled' : undefined}>
+                  <li
+                    key={candidate.key}
+                    className={candidate.exists ? 'is-disabled' : undefined}
+                  >
                     <label className="modpack-import-dialog__option">
                       <input
                         type="checkbox"
                         checked={checked}
                         onChange={(e) =>
-                          cs.togglePresetImportSelection(candidate.key, e.target.checked)
+                          cs.togglePresetImportSelection(
+                            candidate.key,
+                            e.target.checked,
+                          )
                         }
                       />
                       <span>
@@ -1079,11 +1339,17 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
               })}
             </ul>
             {cs.presetImportError ? (
-              <p className="create-save__preview-error">{cs.presetImportError}</p>
+              <p className="create-save__preview-error">
+                {cs.presetImportError}
+              </p>
             ) : null}
           </div>
           <div className="fu-modal__footer">
-            <CancelButton onClick={cs.closePresetImportDialog} t={t} disabled={cs.presetImportBusy} />
+            <CancelButton
+              onClick={cs.closePresetImportDialog}
+              t={t}
+              disabled={cs.presetImportBusy}
+            />
             <button
               type="button"
               className="btn btn--primary"
@@ -1111,7 +1377,9 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
             {t('map_gen_preset_export_dialog_title')}
           </div>
           <div className="fu-modal__body">
-            <p className="modpack-import-dialog__desc">{t('map_gen_preset_export_dialog_hint')}</p>
+            <p className="modpack-import-dialog__desc">
+              {t('map_gen_preset_export_dialog_hint')}
+            </p>
             <ul className="modpack-import-dialog__mods create-save__preset-transfer-list">
               {cs.userPresets.map((preset) => {
                 const checked = cs.presetExportSelected.includes(preset.id);
@@ -1122,7 +1390,10 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
                         type="checkbox"
                         checked={checked}
                         onChange={(e) =>
-                          cs.togglePresetExportSelection(preset.id, e.target.checked)
+                          cs.togglePresetExportSelection(
+                            preset.id,
+                            e.target.checked,
+                          )
                         }
                       />
                       <span>{preset.name}</span>
@@ -1132,12 +1403,18 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
               })}
             </ul>
             {cs.presetExportError ? (
-              <p className="create-save__preview-error">{cs.presetExportError}</p>
+              <p className="create-save__preview-error">
+                {cs.presetExportError}
+              </p>
             ) : null}
           </div>
           <div className="fu-modal__footer">
             <CancelButton onClick={cs.closePresetExportDialog} t={t} />
-            <button type="button" className="btn btn--primary" onClick={cs.confirmPresetExport}>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={cs.confirmPresetExport}
+            >
               {t('map_gen_preset_export_confirm')}
             </button>
           </div>
@@ -1158,7 +1435,9 @@ function PlanetBadge({
   const icon = mapGenPlanetIconUrl(planetId);
   return (
     <span
-      className={'create-save__planet-badge create-save__planet-badge--' + planetId}
+      className={
+        'create-save__planet-badge create-save__planet-badge--' + planetId
+      }
       title={name}
     >
       {icon ? (
@@ -1187,7 +1466,13 @@ function ResourceLabel({
   return (
     <>
       {icon ? (
-        <MapGenIcon src={icon} alt="" tier="medium" size={32} className="create-save__resource-icon" />
+        <MapGenIcon
+          src={icon}
+          alt=""
+          tier="medium"
+          size={32}
+          className="create-save__resource-icon"
+        />
       ) : null}
       <span>{name}</span>
     </>
@@ -1214,7 +1499,9 @@ function ResourcesTab({
         <thead>
           <tr>
             <th className="create-save__th-resource" scope="col" />
-            <th className="create-save__th-planet">{t('map_gen_col_appears_on')}</th>
+            <th className="create-save__th-planet">
+              {t('map_gen_col_appears_on')}
+            </th>
             <th>{t('map_gen_freq')}</th>
             <th>{t('map_gen_size')}</th>
             <th>{t('map_gen_richness')}</th>
@@ -1233,7 +1520,9 @@ function ResourcesTab({
                       checked={ctrl.enabled}
                       onChange={(e) =>
                         cs.setMapGenUi((p) =>
-                          updateControl(p, planetId, control.id, { enabled: e.target.checked }),
+                          updateControl(p, planetId, control.id, {
+                            enabled: e.target.checked,
+                          }),
                         )
                       }
                     />
@@ -1252,7 +1541,11 @@ function ResourcesTab({
                     value={ctrl.frequency}
                     disabled={!ctrl.enabled}
                     onChange={(v) =>
-                      cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { frequency: v }))
+                      cs.setMapGenUi((p) =>
+                        updateControl(p, planetId, control.id, {
+                          frequency: v,
+                        }),
+                      )
                     }
                   />
                 </td>
@@ -1265,7 +1558,9 @@ function ResourcesTab({
                     value={ctrl.size}
                     disabled={!ctrl.enabled}
                     onChange={(v) =>
-                      cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { size: v }))
+                      cs.setMapGenUi((p) =>
+                        updateControl(p, planetId, control.id, { size: v }),
+                      )
                     }
                   />
                 </td>
@@ -1279,7 +1574,11 @@ function ResourcesTab({
                       value={ctrl.richness}
                       disabled={!ctrl.enabled}
                       onChange={(v) =>
-                        cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { richness: v }))
+                        cs.setMapGenUi((p) =>
+                          updateControl(p, planetId, control.id, {
+                            richness: v,
+                          }),
+                        )
                       }
                     />
                   ) : (
@@ -1319,7 +1618,9 @@ function AutoplaceTable({
         <thead>
           <tr>
             <th className="create-save__th-resource" scope="col" />
-            <th className="create-save__th-planet">{t('map_gen_col_appears_on')}</th>
+            <th className="create-save__th-planet">
+              {t('map_gen_col_appears_on')}
+            </th>
             <th>{t('map_gen_freq')}</th>
             <th>{sizeColumnLabel}</th>
           </tr>
@@ -1337,7 +1638,9 @@ function AutoplaceTable({
                       checked={ctrl.enabled}
                       onChange={(e) =>
                         cs.setMapGenUi((p) =>
-                          updateControl(p, planetId, control.id, { enabled: e.target.checked }),
+                          updateControl(p, planetId, control.id, {
+                            enabled: e.target.checked,
+                          }),
                         )
                       }
                     />
@@ -1357,7 +1660,11 @@ function AutoplaceTable({
                     value={ctrl.frequency}
                     disabled={!ctrl.enabled}
                     onChange={(v) =>
-                      cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { frequency: v }))
+                      cs.setMapGenUi((p) =>
+                        updateControl(p, planetId, control.id, {
+                          frequency: v,
+                        }),
+                      )
                     }
                   />
                 </td>
@@ -1371,7 +1678,9 @@ function AutoplaceTable({
                     value={ctrl.size}
                     disabled={!ctrl.enabled}
                     onChange={(v) =>
-                      cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { size: v }))
+                      cs.setMapGenUi((p) =>
+                        updateControl(p, planetId, control.id, { size: v }),
+                      )
                     }
                   />
                 </td>
@@ -1399,8 +1708,10 @@ function NauvisPropertyTable({
       name: t('map_gen_moisture'),
       scale: ui.moistureScale,
       value: ui.moistureBias,
-      onScale: (v: number) => cs.setMapGenUi((p) => ({ ...p, moistureScale: v })),
-      onValue: (v: number) => cs.setMapGenUi((p) => ({ ...p, moistureBias: v })),
+      onScale: (v: number) =>
+        cs.setMapGenUi((p) => ({ ...p, moistureScale: v })),
+      onValue: (v: number) =>
+        cs.setMapGenUi((p) => ({ ...p, moistureBias: v })),
     },
     {
       id: 'terrain_type',
@@ -1418,7 +1729,9 @@ function NauvisPropertyTable({
         <thead>
           <tr>
             <th className="create-save__th-resource" scope="col" />
-            <th className="create-save__th-planet">{t('map_gen_col_appears_on')}</th>
+            <th className="create-save__th-planet">
+              {t('map_gen_col_appears_on')}
+            </th>
             <th>{t('map_gen_col_scale')}</th>
             <th>{t('map_gen_col_value')}</th>
           </tr>
@@ -1555,7 +1868,9 @@ function EnemyTab({
               <thead>
                 <tr>
                   <th className="create-save__th-resource" scope="col" />
-                  <th className="create-save__th-planet">{t('map_gen_col_appears_on')}</th>
+                  <th className="create-save__th-planet">
+                    {t('map_gen_col_appears_on')}
+                  </th>
                   <th>{t('map_gen_freq')}</th>
                   <th>{t('map_gen_size')}</th>
                 </tr>
@@ -1573,7 +1888,9 @@ function EnemyTab({
                             checked={ctrl.enabled}
                             onChange={(e) =>
                               cs.setMapGenUi((p) =>
-                                updateControl(p, planetId, control.id, { enabled: e.target.checked }),
+                                updateControl(p, planetId, control.id, {
+                                  enabled: e.target.checked,
+                                }),
                               )
                             }
                           />
@@ -1592,7 +1909,11 @@ function EnemyTab({
                           value={ctrl.frequency}
                           disabled={!ctrl.enabled}
                           onChange={(v) =>
-                            cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { frequency: v }))
+                            cs.setMapGenUi((p) =>
+                              updateControl(p, planetId, control.id, {
+                                frequency: v,
+                              }),
+                            )
                           }
                         />
                       </td>
@@ -1605,7 +1926,11 @@ function EnemyTab({
                           value={ctrl.size}
                           disabled={!ctrl.enabled}
                           onChange={(v) =>
-                            cs.setMapGenUi((p) => updateControl(p, planetId, control.id, { size: v }))
+                            cs.setMapGenUi((p) =>
+                              updateControl(p, planetId, control.id, {
+                                size: v,
+                              }),
+                            )
                           }
                         />
                       </td>
@@ -1623,7 +1948,9 @@ function EnemyTab({
           <input
             type="checkbox"
             checked={ui.noEnemiesMode}
-            onChange={(e) => cs.setMapGenUi((p) => ({ ...p, noEnemiesMode: e.target.checked }))}
+            onChange={(e) =>
+              cs.setMapGenUi((p) => ({ ...p, noEnemiesMode: e.target.checked }))
+            }
           />
           <span>{t('map_gen_no_enemies')}</span>
         </label>
@@ -1631,7 +1958,9 @@ function EnemyTab({
           <input
             type="checkbox"
             checked={ui.peacefulMode}
-            onChange={(e) => cs.setMapGenUi((p) => ({ ...p, peacefulMode: e.target.checked }))}
+            onChange={(e) =>
+              cs.setMapGenUi((p) => ({ ...p, peacefulMode: e.target.checked }))
+            }
           />
           <span>{t('map_gen_peaceful')}</span>
         </label>
@@ -1667,7 +1996,9 @@ function AdvancedTab({
   return (
     <div className="create-save__gen-sections">
       <section className="create-save__gen-section">
-        <h4 className="create-save__gen-section-title">{t('map_gen_section_map')}</h4>
+        <h4 className="create-save__gen-section-title">
+          {t('map_gen_section_map')}
+        </h4>
         <div className="create-save__row-2">
           <label className="modpack-import-dialog__field">
             <span>{t('map_gen_map_width')}</span>
@@ -1678,7 +2009,10 @@ function AdvancedTab({
               value={ui.mapWidth || ''}
               placeholder={t('map_gen_unlimited')}
               onChange={(e) =>
-                cs.setMapGenUi((p) => ({ ...p, mapWidth: Math.max(0, Number(e.target.value) || 0) }))
+                cs.setMapGenUi((p) => ({
+                  ...p,
+                  mapWidth: Math.max(0, Number(e.target.value) || 0),
+                }))
               }
             />
           </label>
@@ -1691,7 +2025,10 @@ function AdvancedTab({
               value={ui.mapHeight || ''}
               placeholder={t('map_gen_unlimited')}
               onChange={(e) =>
-                cs.setMapGenUi((p) => ({ ...p, mapHeight: Math.max(0, Number(e.target.value) || 0) }))
+                cs.setMapGenUi((p) => ({
+                  ...p,
+                  mapHeight: Math.max(0, Number(e.target.value) || 0),
+                }))
               }
             />
           </label>
@@ -1699,9 +2036,13 @@ function AdvancedTab({
       </section>
 
       <section className="create-save__gen-section create-save__gen-section--divider">
-        <h4 className="create-save__gen-section-title">{t('map_gen_section_technology')}</h4>
+        <h4 className="create-save__gen-section-title">
+          {t('map_gen_section_technology')}
+        </h4>
         <div className="create-save__numeric-row create-save__numeric-row--value-only">
-          <span className="create-save__slider-label">{t('map_gen_tech_price_multiplier')}</span>
+          <span className="create-save__slider-label">
+            {t('map_gen_tech_price_multiplier')}
+          </span>
           <div className="create-save__numeric-input-wrap">
             <input
               type="number"
@@ -1727,23 +2068,31 @@ function AdvancedTab({
 
       {spaceAge && (
         <section className="create-save__gen-section create-save__gen-section--divider">
-          <h4 className="create-save__gen-section-title">{t('map_gen_section_asteroids')}</h4>
+          <h4 className="create-save__gen-section-title">
+            {t('map_gen_section_asteroids')}
+          </h4>
           <GenMapGenPercentSteps
             label={t('map_gen_asteroids_spawning_rate')}
             value={ui.asteroidsSpawningRatePercent}
             variant="asteroid"
-            onChange={(v) => cs.setMapGenUi((p) => ({ ...p, asteroidsSpawningRatePercent: v }))}
+            onChange={(v) =>
+              cs.setMapGenUi((p) => ({ ...p, asteroidsSpawningRatePercent: v }))
+            }
           />
         </section>
       )}
 
       <section className="create-save__gen-section create-save__gen-section--divider">
-        <h4 className="create-save__gen-section-title">{t('map_gen_section_spoiling')}</h4>
+        <h4 className="create-save__gen-section-title">
+          {t('map_gen_section_spoiling')}
+        </h4>
         <GenMapGenPercentSteps
           label={t('map_gen_spoiling_rate')}
           value={ui.spoilingRatePercent}
           variant="autoplace"
-          onChange={(v) => cs.setMapGenUi((p) => ({ ...p, spoilingRatePercent: v }))}
+          onChange={(v) =>
+            cs.setMapGenUi((p) => ({ ...p, spoilingRatePercent: v }))
+          }
         />
       </section>
     </div>
@@ -1766,7 +2115,12 @@ function PollutionSection({
         <input
           type="checkbox"
           checked={p.enabled}
-          onChange={(e) => setUi((s) => ({ ...s, pollution: { ...s.pollution, enabled: e.target.checked } }))}
+          onChange={(e) =>
+            setUi((s) => ({
+              ...s,
+              pollution: { ...s.pollution, enabled: e.target.checked },
+            }))
+          }
         />
         <span>{t('map_gen_section_pollution')}</span>
       </label>
@@ -1776,7 +2130,10 @@ function PollutionSection({
         spec={POLLUTION_FIELD_SPECS.absorptionModifierPercent}
         disabled={!p.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, pollution: { ...s.pollution, absorptionModifierPercent: v } }))
+          setUi((s) => ({
+            ...s,
+            pollution: { ...s.pollution, absorptionModifierPercent: v },
+          }))
         }
       />
       <GenPercentRow
@@ -1785,7 +2142,10 @@ function PollutionSection({
         spec={POLLUTION_FIELD_SPECS.attackCostModifierPercent}
         disabled={!p.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, pollution: { ...s.pollution, attackCostModifierPercent: v } }))
+          setUi((s) => ({
+            ...s,
+            pollution: { ...s.pollution, attackCostModifierPercent: v },
+          }))
         }
       />
       <GenNumericRow
@@ -1794,7 +2154,10 @@ function PollutionSection({
         spec={POLLUTION_FIELD_SPECS.minPollutionToDamageTrees}
         disabled={!p.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, pollution: { ...s.pollution, minPollutionToDamageTrees: v } }))
+          setUi((s) => ({
+            ...s,
+            pollution: { ...s.pollution, minPollutionToDamageTrees: v },
+          }))
         }
       />
       <GenNumericRow
@@ -1803,7 +2166,10 @@ function PollutionSection({
         spec={POLLUTION_FIELD_SPECS.pollutionAbsorbedPerTree}
         disabled={!p.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, pollution: { ...s.pollution, pollutionAbsorbedPerTree: v } }))
+          setUi((s) => ({
+            ...s,
+            pollution: { ...s.pollution, pollutionAbsorbedPerTree: v },
+          }))
         }
       />
       <GenPercentRow
@@ -1812,7 +2178,10 @@ function PollutionSection({
         spec={POLLUTION_FIELD_SPECS.diffusionRatioPercent}
         disabled={!p.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, pollution: { ...s.pollution, diffusionRatioPercent: v } }))
+          setUi((s) => ({
+            ...s,
+            pollution: { ...s.pollution, diffusionRatioPercent: v },
+          }))
         }
       />
     </>
@@ -1836,7 +2205,13 @@ function EvolutionSection({
           type="checkbox"
           checked={ev.enabled}
           onChange={(e) =>
-            setUi((s) => ({ ...s, enemyEvolution: { ...s.enemyEvolution, enabled: e.target.checked } }))
+            setUi((s) => ({
+              ...s,
+              enemyEvolution: {
+                ...s.enemyEvolution,
+                enabled: e.target.checked,
+              },
+            }))
           }
         />
         <span>{t('map_gen_evolution_enabled')}</span>
@@ -1846,14 +2221,24 @@ function EvolutionSection({
         value={ev.timeFactor}
         spec={EVOLUTION_FIELD_SPECS.timeFactor}
         disabled={!ev.enabled}
-        onChange={(v) => setUi((s) => ({ ...s, enemyEvolution: { ...s.enemyEvolution, timeFactor: v } }))}
+        onChange={(v) =>
+          setUi((s) => ({
+            ...s,
+            enemyEvolution: { ...s.enemyEvolution, timeFactor: v },
+          }))
+        }
       />
       <GenNumericRow
         label={t('map_gen_evolution_destroy')}
         value={ev.destroyFactor}
         spec={EVOLUTION_FIELD_SPECS.destroyFactor}
         disabled={!ev.enabled}
-        onChange={(v) => setUi((s) => ({ ...s, enemyEvolution: { ...s.enemyEvolution, destroyFactor: v } }))}
+        onChange={(v) =>
+          setUi((s) => ({
+            ...s,
+            enemyEvolution: { ...s.enemyEvolution, destroyFactor: v },
+          }))
+        }
       />
       <GenNumericRow
         label={t('map_gen_evolution_pollution')}
@@ -1861,7 +2246,10 @@ function EvolutionSection({
         spec={EVOLUTION_FIELD_SPECS.pollutionFactor}
         disabled={!ev.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, enemyEvolution: { ...s.enemyEvolution, pollutionFactor: v } }))
+          setUi((s) => ({
+            ...s,
+            enemyEvolution: { ...s.enemyEvolution, pollutionFactor: v },
+          }))
         }
       />
     </>
@@ -1885,7 +2273,13 @@ function ExpansionSection({
           type="checkbox"
           checked={ex.enabled}
           onChange={(e) =>
-            setUi((s) => ({ ...s, enemyExpansion: { ...s.enemyExpansion, enabled: e.target.checked } }))
+            setUi((s) => ({
+              ...s,
+              enemyExpansion: {
+                ...s.enemyExpansion,
+                enabled: e.target.checked,
+              },
+            }))
           }
         />
         <span>{t('map_gen_expansion_enabled')}</span>
@@ -1896,7 +2290,10 @@ function ExpansionSection({
         spec={EXPANSION_FIELD_SPECS.maxExpansionDistance}
         disabled={!ex.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, enemyExpansion: { ...s.enemyExpansion, maxExpansionDistance: v } }))
+          setUi((s) => ({
+            ...s,
+            enemyExpansion: { ...s.enemyExpansion, maxExpansionDistance: v },
+          }))
         }
       />
       <GenNumericRow
@@ -1906,7 +2303,10 @@ function ExpansionSection({
         disabled={!ex.enabled}
         onChange={(v) =>
           setUi((s) => {
-            const groups = normalizeSettlerGroupSizes(v, s.enemyExpansion.settlerGroupMax);
+            const groups = normalizeSettlerGroupSizes(
+              v,
+              s.enemyExpansion.settlerGroupMax,
+            );
             return { ...s, enemyExpansion: { ...s.enemyExpansion, ...groups } };
           })
         }
@@ -1918,7 +2318,10 @@ function ExpansionSection({
         disabled={!ex.enabled}
         onChange={(v) =>
           setUi((s) => {
-            const groups = normalizeSettlerGroupSizes(s.enemyExpansion.settlerGroupMin, v);
+            const groups = normalizeSettlerGroupSizes(
+              s.enemyExpansion.settlerGroupMin,
+              v,
+            );
             return { ...s, enemyExpansion: { ...s.enemyExpansion, ...groups } };
           })
         }
@@ -1930,7 +2333,10 @@ function ExpansionSection({
         unit={t('map_gen_minutes_abbr')}
         disabled={!ex.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, enemyExpansion: { ...s.enemyExpansion, minCooldownMinutes: v } }))
+          setUi((s) => ({
+            ...s,
+            enemyExpansion: { ...s.enemyExpansion, minCooldownMinutes: v },
+          }))
         }
       />
       <GenNumericRow
@@ -1940,7 +2346,10 @@ function ExpansionSection({
         unit={t('map_gen_minutes_abbr')}
         disabled={!ex.enabled}
         onChange={(v) =>
-          setUi((s) => ({ ...s, enemyExpansion: { ...s.enemyExpansion, maxCooldownMinutes: v } }))
+          setUi((s) => ({
+            ...s,
+            enemyExpansion: { ...s.enemyExpansion, maxCooldownMinutes: v },
+          }))
         }
       />
     </>
