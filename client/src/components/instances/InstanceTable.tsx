@@ -311,21 +311,21 @@ export function InstanceTable({
                         </td>
                       );
                     case 'port':
-                      return <td key={key}>{String(it.port || '')}</td>;
+                      return <td key={key} className="instance-mono-cell">{String(it.port || '')}</td>;
                     case 'rconPort':
-                      return <td key={key}>{String(it.rconPort || '')}</td>;
+                      return <td key={key} className="instance-mono-cell">{String(it.rconPort || '')}</td>;
                     case 'version':
                       return (
-                        <td key={key}>
+                        <td key={key} className="instance-mono-cell">
                           <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
                         </td>
                       );
                     case 'mods':
-                      return <td key={key}>{modsText}</td>;
+                      return <td key={key} className="instance-num-cell">{modsText}</td>;
                     case 'online':
-                      return <td key={key}>{String(it.onlineCount || 0)}</td>;
+                      return <td key={key} className="instance-num-cell">{String(it.onlineCount || 0)}</td>;
                     case 'uptime':
-                      return <td key={key}>{uptimeText}</td>;
+                      return <td key={key} className="instance-mono-cell">{uptimeText}</td>;
                     case 'status':
                       return (
                         <td key={key}>

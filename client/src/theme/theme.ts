@@ -18,8 +18,10 @@ export const fccMantineTheme = createTheme({
   colors: {
     fcc: fccAccent,
   },
-  fontFamily: "'Segoe UI', system-ui, sans-serif",
-  fontFamilyMonospace: 'ui-monospace, "Cascadia Code", monospace',
+  fontFamily:
+    "var(--font-sans, 'Onest Variable', 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans CJK SC', sans-serif)",
+  fontFamilyMonospace:
+    "var(--font-mono, 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans CJK SC', monospace)",
   defaultRadius: 'md',
   cursorType: 'pointer',
   focusRing: 'auto',

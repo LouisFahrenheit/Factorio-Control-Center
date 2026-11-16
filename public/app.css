@@ -20,7 +20,19 @@ body {
   min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text);
-  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-family: var(
+    --font-sans,
+    'Onest Variable',
+    'Onest',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'PingFang SC',
+    'Microsoft YaHei UI',
+    'Noto Sans CJK SC',
+    sans-serif
+  );
   font-size: 10pt;
   position: relative;
   overflow-x: hidden;
@@ -7138,8 +7150,6 @@ table#tblInstances thead th.instances-sort-th--asc::after {
   height: 0;
 }
 
-
-
 @media (max-width: 720px) {
   .maintenance-editor-weekdays__grid {
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
@@ -11600,8 +11610,20 @@ table#tblMods thead th[data-mods-sort].mods-sort-th--active {
   border: 1px solid #191919;
   border-top-color: #101010;
   border-left-color: #101010;
-  font-family: Consolas, 'Courier New', monospace;
+  font-family: var(
+    --font-mono,
+    'JetBrains Mono Variable',
+    'JetBrains Mono',
+    ui-monospace,
+    'Cascadia Code',
+    Consolas,
+    'PingFang SC',
+    'Microsoft YaHei UI',
+    'Noto Sans CJK SC',
+    monospace
+  );
   font-size: 9pt;
+  line-height: 1.48;
   padding: 8px;
   min-height: 200px;
   max-height: 360px;
