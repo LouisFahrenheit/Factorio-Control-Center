@@ -15,8 +15,9 @@
 
 .maintenance-tab__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
+  gap: 10px;
   flex: 0 0 auto;
   margin-bottom: 12px;
   width: 100%;
@@ -27,7 +28,68 @@
 .maintenance-tab__header .maintenance-inner-tabs,
 .maintenance-tab__sub-tabs {
   margin: 0;
-  align-self: flex-start;
+  align-self: center;
+  flex: 0 0 auto;
+}
+
+.maintenance-tab__header-divider {
+  width: 1px;
+  height: 22px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+  flex: 0 0 auto;
+}
+
+.maintenance-tab__header .maintenance-tasks-bar,
+.maintenance-tab__header .maintenance-reports-bar {
+  flex: 1 1 560px;
+  min-width: 0;
+}
+
+.maintenance-tab__header .access-users-bar__search {
+  flex: 1 1 180px;
+  max-width: none;
+  min-width: 140px;
+}
+
+.maintenance-tab__header .access-users-bar__search .input {
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 1100px) {
+  .maintenance-tab__header-divider {
+    display: none;
+  }
+}
+
+.maintenance-tab__header-divider {
+  width: 1px;
+  height: 22px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+  flex: 0 0 auto;
+}
+
+.maintenance-tab__header .maintenance-tasks-bar,
+.maintenance-tab__header .maintenance-reports-bar {
+  flex: 1 1 560px;
+  min-width: 0;
+}
+
+.maintenance-tab__header .access-users-bar__search {
+  flex: 1 1 180px;
+  max-width: none;
+  min-width: 140px;
+}
+
+.maintenance-tab__header .access-users-bar__search .input {
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 1100px) {
+  .maintenance-tab__header-divider {
+    display: none;
+  }
 }
 
 .maintenance-tasks-layout {

@@ -352,14 +352,10 @@ export function InstanceMaintenanceTab({
             </span>
           </button>
         </div>
-      </div>
 
-      {innerTab === 'tasks' && (
-        <div
-          id="maintPanelTasks"
-          className="access-layout maintenance-tasks-layout"
-        >
-          {/* Toolbar: Search, Filters, View toggle, Actions */}
+        <span className="maintenance-tab__header-divider" aria-hidden="true" />
+
+        {innerTab === 'tasks' ? (
           <MaintenanceTasksBar
             search={search}
             onSearchChange={setSearch}
@@ -379,7 +375,118 @@ export function InstanceMaintenanceTab({
             onOpenHelp={onOpenHelp}
             t={t}
           />
+        ) : (
+          <div
+            className="access-users-bar maintenance-reports-toolbar maintenance-reports-bar"
+            role="toolbar"
+            aria-label={t('maintenance_inner_tab_reports')}
+          >
+            <SearchField
+              id="maintenanceReportsSearchInput"
+              className="access-users-bar__search maintenance-reports-bar__search"
+              placeholder={t('search_placeholder')}
+              autoComplete="off"
+              spellCheck={false}
+              value={reportSearch}
+              onChange={(e) => setReportSearch(e.target.value)}
+            />
 
+            <div className="access-users-bar__filters">
+              <select
+                className="input access-users-bar__select"
+                value={reportInstanceFilter}
+                onChange={(e) => setReportInstanceFilter(e.target.value)}
+                aria-label={t('maintenance_reports_filter_instance')}
+              >
+                <option value="">{t('maintenance_filter_all_servers')}</option>
+                {reportInstanceOptions.map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="input access-users-bar__select"
+                value={reportKindFilter}
+                onChange={(e) =>
+                  setReportKindFilter(e.target.value as ReportKindFilter)
+                }
+                aria-label={t('maintenance_reports_filter_type')}
+              >
+                <option value="">
+                  {t('maintenance_reports_filter_all_types')}
+                </option>
+                <option value="manual_session">
+                  {t('audit_report_kind_manual_session')}
+                </option>
+                <option value="maintenance_run">
+                  {t('audit_report_kind_maintenance_run')}
+                </option>
+              </select>
+
+              <select
+                className="input access-users-bar__select"
+                value={eventKindFilter}
+                onChange={(e) =>
+                  setEventKindFilter(e.target.value as EventKindFilter)
+                }
+                aria-label={t('maintenance_reports_filter_event')}
+              >
+                <option value="">
+                  {t('maintenance_reports_filter_all_events')}
+                </option>
+                <option value="mod">
+                  {t('maintenance_reports_filter_event_mod')}
+                </option>
+                <option value="server_settings">
+                  {t('maintenance_reports_filter_event_settings')}
+                </option>
+                <option value="save">
+                  {t('maintenance_reports_filter_event_save')}
+                </option>
+                <option value="modpack">
+                  {t('maintenance_reports_filter_event_modpack')}
+                </option>
+                <option value="factorio_update">
+                  {t('maintenance_reports_filter_event_factorio')}
+                </option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="btn access-users-bar__refresh-btn"
+              title={t('update_list_btn') || 'Обновить'}
+              aria-label={t('update_list_btn') || 'Обновить'}
+              onClick={() => void maintenance.refreshReports()}
+              disabled={maintenance.reportsLoading}
+            >
+              <IconRefresh size={18} />
+            </button>
+
+            {onOpenHelp && (
+              <div className="access-users-bar__actions">
+                <button
+                  type="button"
+                  className="btn access-users-bar__help-btn"
+                  title={t('instances_help_modal_title')}
+                  aria-label={t('instances_help_modal_title')}
+                  onClick={onOpenHelp}
+                >
+                  <IconHelp size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {innerTab === 'tasks' && (
+        <div
+          id="maintPanelTasks"
+          className="access-layout maintenance-tasks-layout"
+        >
           {/* Content Area */}
           <div className="maintenance-tasks-layout__content">
             {maintenance.tasksLoading && !maintenance.tasks.length ? (
@@ -442,128 +549,6 @@ export function InstanceMaintenanceTab({
 
       {innerTab === 'reports' && (
         <div className="maintenance-tasks-layout maintenance-reports-layout">
-          <div
-            className="access-users-bar maintenance-reports-toolbar maintenance-reports-bar"
-            role="toolbar"
-            aria-label={t('maintenance_inner_tab_reports')}
-          >
-            {/* 1. Поиск */}
-            <SearchField
-              id="maintenanceReportsSearchInput"
-              className="access-users-bar__search maintenance-reports-bar__search"
-              placeholder={t('search_placeholder')}
-              autoComplete="off"
-              spellCheck={false}
-              value={reportSearch}
-              onChange={(e) => setReportSearch(e.target.value)}
-            />
-
-            {/* 2. Фильтры */}
-            <div className="access-users-bar__filters maintenance-reports-bar__filters">
-              <label className="maintenance-reports-filter">
-                <span className="maintenance-reports-filter__label">
-                  {t('maintenance_reports_filter_instance')}
-                </span>
-                <select
-                  className="input access-users-bar__select maintenance-reports-filter__select"
-                  value={reportInstanceFilter}
-                  onChange={(e) => setReportInstanceFilter(e.target.value)}
-                  aria-label={t('maintenance_reports_filter_instance')}
-                >
-                  <option value="">
-                    {t('maintenance_reports_filter_all')}
-                  </option>
-                  {reportInstanceOptions.map(([id, name]) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="maintenance-reports-filter">
-                <span className="maintenance-reports-filter__label">
-                  {t('maintenance_reports_filter_type')}
-                </span>
-                <select
-                  className="input access-users-bar__select maintenance-reports-filter__select"
-                  value={reportKindFilter}
-                  onChange={(e) =>
-                    setReportKindFilter(e.target.value as ReportKindFilter)
-                  }
-                  aria-label={t('maintenance_reports_filter_type')}
-                >
-                  <option value="">
-                    {t('maintenance_reports_filter_all')}
-                  </option>
-                  <option value="manual_session">
-                    {t('audit_report_kind_manual_session')}
-                  </option>
-                  <option value="maintenance_run">
-                    {t('audit_report_kind_maintenance_run')}
-                  </option>
-                </select>
-              </label>
-
-              <label className="maintenance-reports-filter">
-                <span className="maintenance-reports-filter__label">
-                  {t('maintenance_reports_filter_event')}
-                </span>
-                <select
-                  className="input access-users-bar__select maintenance-reports-filter__select"
-                  value={eventKindFilter}
-                  onChange={(e) =>
-                    setEventKindFilter(e.target.value as EventKindFilter)
-                  }
-                  aria-label={t('maintenance_reports_filter_event')}
-                >
-                  <option value="">
-                    {t('maintenance_reports_filter_all')}
-                  </option>
-                  <option value="mod">
-                    {t('maintenance_reports_filter_event_mod')}
-                  </option>
-                  <option value="server_settings">
-                    {t('maintenance_reports_filter_event_settings')}
-                  </option>
-                  <option value="save">
-                    {t('maintenance_reports_filter_event_save')}
-                  </option>
-                  <option value="modpack">
-                    {t('maintenance_reports_filter_event_modpack')}
-                  </option>
-                  <option value="factorio_update">
-                    {t('maintenance_reports_filter_event_factorio')}
-                  </option>
-                </select>
-              </label>
-            </div>
-
-            <div className="access-users-bar__actions">
-              <button
-                type="button"
-                className="btn access-users-bar__refresh-btn"
-                title={t('update_list_btn') || 'Обновить'}
-                aria-label={t('update_list_btn') || 'Обновить'}
-                onClick={() => void maintenance.refreshReports()}
-                disabled={maintenance.reportsLoading}
-              >
-                <IconRefresh size={18} />
-              </button>
-              {onOpenHelp && (
-                <button
-                  type="button"
-                  className="btn access-users-bar__help-btn"
-                  title={t('instances_help_modal_title')}
-                  aria-label={t('instances_help_modal_title')}
-                  onClick={onOpenHelp}
-                >
-                  <IconHelp size={18} />
-                </button>
-              )}
-            </div>
-          </div>
-
           <div className="maintenance-reports-split">
             <div className="maintenance-reports-split__list">
               <div className="maintenance-reports-split__list-head">

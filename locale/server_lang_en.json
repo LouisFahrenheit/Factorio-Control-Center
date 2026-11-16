@@ -257,6 +257,8 @@
   "maintenance_reports_filter_instance": "Server",
   "maintenance_reports_filter_event": "Event type",
   "maintenance_reports_filter_all": "All",
+  "maintenance_reports_filter_all_types": "All types",
+  "maintenance_reports_filter_all_events": "All events",
   "maintenance_reports_filter_event_mod": "Mods",
   "maintenance_reports_filter_event_settings": "Settings",
   "maintenance_reports_filter_event_save": "Saves",

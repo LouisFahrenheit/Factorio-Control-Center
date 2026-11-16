@@ -38,6 +38,10 @@
 /* ── Sub-tabs Header Bar ─────────────────────────────────────────────────── */
 
 #tabPanelHistory .history-tab__header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   flex: 0 0 auto;
   padding: 10px 14px;
   background: color-mix(in srgb, var(--bg-main) 35%, var(--bg-widget) 65%);
@@ -46,8 +50,23 @@
   box-sizing: border-box;
 }
 
+#tabPanelHistory .history-tab__header-divider {
+  width: 1px;
+  height: 22px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+  flex: 0 0 auto;
+}
+
 #tabPanelHistory .history-tab__sub-tabs {
-  margin: 0;
+  margin: 0 !important;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+@media (max-width: 1180px) {
+  #tabPanelHistory .history-tab__header-divider {
+    display: none;
+  }
 }
 
 #tabPanelHistory .history-tab__tab-badge {
@@ -95,21 +114,23 @@
 
 #tabPanelHistory .history-tab__toolbar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex: 0 0 auto;
+  gap: 8px;
+  margin-bottom: 0;
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 #tabPanelHistory .history-tab__search {
-  flex: 0 1 320px;
-  min-width: 200px;
+  flex: 1 1 180px;
+  max-width: none;
+  min-width: 140px;
 }
 
 #tabPanelHistory .history-tab__search .input {
   width: 100%;
+  max-width: none;
   height: 36px;
   min-height: 36px;
   padding: 0 12px 0 34px;

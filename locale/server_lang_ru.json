@@ -258,6 +258,8 @@
   "maintenance_reports_filter_instance": "Сервер",
   "maintenance_reports_filter_event": "Тип события",
   "maintenance_reports_filter_all": "Все",
+  "maintenance_reports_filter_all_types": "Все типы",
+  "maintenance_reports_filter_all_events": "Все события",
   "maintenance_reports_filter_event_mod": "Моды",
   "maintenance_reports_filter_event_settings": "Настройки",
   "maintenance_reports_filter_event_save": "Сохранения",

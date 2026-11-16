@@ -1,4 +1,10 @@
-import { useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import {
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import {
   IconSettings,
   IconPackage,
@@ -171,12 +177,12 @@ function HistoryFilterToolbar({
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
       />
-      <label className="history-tab__filter">
-        <span className="history-tab__filter-label">{t(filterLabelKey)}</span>
+      <div className="history-tab__filter">
         <select
           id={categoryId}
           className="input input--narrow history-tab__filter-select"
           value={category}
+          aria-label={t(filterLabelKey)}
           onChange={(e) => onCategoryChange(e.target.value)}
         >
           {categoryOptions.map((key) => (
@@ -185,7 +191,7 @@ function HistoryFilterToolbar({
             </option>
           ))}
         </select>
-      </label>
+      </div>
     </div>
   );
 }
@@ -420,6 +426,85 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
         <div id="playersRootPanelHistory" className="history-tab__body">
           <section className="history-tab__card">
             <div className="history-tab__header-bar">
+              {historyTab === 'player' && (
+                <HistoryFilterToolbar
+                  searchId="playerHistorySearch"
+                  searchPlaceholder={t('search_placeholder')}
+                  search={playerSearch}
+                  onSearchChange={setPlayerSearch}
+                  categoryId="playerHistoryCategory"
+                  category={playerCategory}
+                  onCategoryChange={(value) =>
+                    setPlayerCategory(value as PlayerHistoryCategory)
+                  }
+                  categoryOptions={PLAYER_HISTORY_CATEGORY_KEYS}
+                  categoryOptionLabel={(key) =>
+                    playerHistoryFilterTypeLabel(
+                      key as PlayerHistoryCategory,
+                      t,
+                    )
+                  }
+                  filterLabelKey="history_player_type_column"
+                  t={t}
+                />
+              )}
+              {historyTab === 'server' && (
+                <HistoryFilterToolbar
+                  searchId="serverHistorySearch"
+                  searchPlaceholder={t('search_placeholder')}
+                  search={serverSearch}
+                  onSearchChange={setServerSearch}
+                  categoryId="serverHistoryAction"
+                  category={effectiveServerActionFilter}
+                  onCategoryChange={setServerActionFilter}
+                  categoryOptions={serverFilterActions}
+                  categoryOptionLabel={(key) =>
+                    serverHistoryActionFilterLabel(key, t)
+                  }
+                  filterLabelKey="action"
+                  t={t}
+                />
+              )}
+              {historyTab === 'mods' && (
+                <HistoryFilterToolbar
+                  searchId="modsHistorySearch"
+                  searchPlaceholder={t('search_placeholder')}
+                  search={modsSearch}
+                  onSearchChange={setModsSearch}
+                  categoryId="modsHistoryAction"
+                  category={effectiveModsActionFilter}
+                  onCategoryChange={setModsActionFilter}
+                  categoryOptions={modsFilterActions}
+                  categoryOptionLabel={(key) =>
+                    modsHistoryActionFilterLabel(key, t)
+                  }
+                  filterLabelKey="action"
+                  t={t}
+                />
+              )}
+              {historyTab === 'commands' && (
+                <HistoryFilterToolbar
+                  searchId="commandsHistorySearch"
+                  searchPlaceholder={t('search_placeholder')}
+                  search={commandsSearch}
+                  onSearchChange={setCommandsSearch}
+                  categoryId="commandsHistoryAction"
+                  category={effectiveCommandsActionFilter}
+                  onCategoryChange={setCommandsActionFilter}
+                  categoryOptions={commandsFilterActions}
+                  categoryOptionLabel={(key) =>
+                    commandsHistoryActionFilterLabel(key, t)
+                  }
+                  filterLabelKey="action"
+                  t={t}
+                />
+              )}
+
+              <span
+                className="history-tab__header-divider"
+                aria-hidden="true"
+              />
+
               <div
                 ref={subTabsRef}
                 className="sub-tabs history-tab__sub-tabs"
@@ -446,7 +531,9 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                         <Icon size={16} />
                         {t(i18n)}
                         {count > 0 ? (
-                          <span className="history-tab__tab-badge">{count}</span>
+                          <span className="history-tab__tab-badge">
+                            {count}
+                          </span>
                         ) : null}
                       </span>
                     </button>
@@ -462,26 +549,6 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                   className="sub-tab-panel sub-tab-panel--active"
                   role="tabpanel"
                 >
-                  <HistoryFilterToolbar
-                    searchId="playerHistorySearch"
-                    searchPlaceholder={t('search_placeholder')}
-                    search={playerSearch}
-                    onSearchChange={setPlayerSearch}
-                    categoryId="playerHistoryCategory"
-                    category={playerCategory}
-                    onCategoryChange={(value) =>
-                      setPlayerCategory(value as PlayerHistoryCategory)
-                    }
-                    categoryOptions={PLAYER_HISTORY_CATEGORY_KEYS}
-                    categoryOptionLabel={(key) =>
-                      playerHistoryFilterTypeLabel(
-                        key as PlayerHistoryCategory,
-                        t,
-                      )
-                    }
-                    filterLabelKey="history_player_type_column"
-                    t={t}
-                  />
                   <HistoryTableWrap
                     empty={!filteredPlayerHistoryRows.length}
                     emptyMessage={playerHistoryEmptyMessage}
@@ -539,21 +606,6 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                   className="sub-tab-panel sub-tab-panel--active"
                   role="tabpanel"
                 >
-                  <HistoryFilterToolbar
-                    searchId="serverHistorySearch"
-                    searchPlaceholder={t('search_placeholder')}
-                    search={serverSearch}
-                    onSearchChange={setServerSearch}
-                    categoryId="serverHistoryAction"
-                    category={effectiveServerActionFilter}
-                    onCategoryChange={setServerActionFilter}
-                    categoryOptions={serverFilterActions}
-                    categoryOptionLabel={(key) =>
-                      serverHistoryActionFilterLabel(key, t)
-                    }
-                    filterLabelKey="action"
-                    t={t}
-                  />
                   <HistoryTableWrap
                     empty={!filteredServerHistoryRows.length}
                     emptyMessage={serverHistoryEmptyMessage}
@@ -622,21 +674,6 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                   className="sub-tab-panel sub-tab-panel--active"
                   role="tabpanel"
                 >
-                  <HistoryFilterToolbar
-                    searchId="modsHistorySearch"
-                    searchPlaceholder={t('search_placeholder')}
-                    search={modsSearch}
-                    onSearchChange={setModsSearch}
-                    categoryId="modsHistoryAction"
-                    category={effectiveModsActionFilter}
-                    onCategoryChange={setModsActionFilter}
-                    categoryOptions={modsFilterActions}
-                    categoryOptionLabel={(key) =>
-                      modsHistoryActionFilterLabel(key, t)
-                    }
-                    filterLabelKey="action"
-                    t={t}
-                  />
                   <HistoryTableWrap
                     empty={!filteredModsHistoryRows.length}
                     emptyMessage={modsHistoryEmptyMessage}
@@ -709,21 +746,6 @@ export function HistoryTab({ players, t }: HistoryTabProps) {
                   className="sub-tab-panel sub-tab-panel--active"
                   role="tabpanel"
                 >
-                  <HistoryFilterToolbar
-                    searchId="commandsHistorySearch"
-                    searchPlaceholder={t('search_placeholder')}
-                    search={commandsSearch}
-                    onSearchChange={setCommandsSearch}
-                    categoryId="commandsHistoryAction"
-                    category={effectiveCommandsActionFilter}
-                    onCategoryChange={setCommandsActionFilter}
-                    categoryOptions={commandsFilterActions}
-                    categoryOptionLabel={(key) =>
-                      commandsHistoryActionFilterLabel(key, t)
-                    }
-                    filterLabelKey="action"
-                    t={t}
-                  />
                   <HistoryTableWrap
                     empty={!filteredCommandsHistoryRows.length}
                     emptyMessage={commandsHistoryEmptyMessage}
