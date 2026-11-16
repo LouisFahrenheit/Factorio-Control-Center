@@ -341,6 +341,11 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   gap: 8px;
 }
 
+.fu-modal__header--with-icon > svg:first-child {
+  color: var(--accent-selected);
+  opacity: 0.9;
+}
+
 .fcc-modal {
   background: var(--bg-modal) !important;
   border: 1px solid var(--border-dark) !important;

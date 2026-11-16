@@ -30,7 +30,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  color: var(--accent);
+  color: var(--accent-selected);
   flex: 0 0 34px;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .public-settings-modal__label-icon {
-  color: var(--accent);
+  color: var(--accent-selected);
   flex-shrink: 0;
 }
 
@@ -171,7 +171,7 @@
   .public-settings-modal__toggle-badge {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  color: var(--accent);
+  color: var(--accent-selected);
 }
 
 .public-settings-modal__toggle-info {
@@ -208,7 +208,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  color: var(--accent-selected);
   pointer-events: none;
   z-index: 1;
 }
@@ -234,4 +234,3 @@
   align-items: center;
   gap: 7px;
 }
-

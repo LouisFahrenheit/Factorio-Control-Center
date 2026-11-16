@@ -56,4 +56,5 @@ export interface PublicUserView {
   instance_ids: string[];
   enabled: boolean;
   twoFactorEnabled?: boolean;
+  createdAt?: string;
 }

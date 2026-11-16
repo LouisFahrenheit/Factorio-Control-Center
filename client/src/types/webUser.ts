@@ -9,6 +9,7 @@ export interface WebUser {
   instance_ids?: string[];
   enabled?: boolean;
   twoFactorEnabled?: boolean;
+  createdAt?: string;
 }
 
 export interface WebAccessInstance {

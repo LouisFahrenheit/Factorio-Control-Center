@@ -235,14 +235,23 @@ select.access-users-bar__select,
 /* ── Role Text (clean, neutral, no color, no icon) ──────────────────── */
 
 .access-users-role-text {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  color: var(--text);
   white-space: nowrap;
 }
 
+.access-users-created-text {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.access-user-card .access-users-role-text {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
 .access-users-role-text--disabled {
-  opacity: 0.55;
+  color: var(--text-muted);
+  opacity: 0.65;
 }
 
 /* ── Status Label (clean text, no neon background) ──────────────────── */
@@ -267,20 +276,21 @@ select.access-users-bar__select,
 
 .access-users-chip-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-wrap: nowrap;
+  gap: 8px;
   align-items: center;
+  overflow: hidden;
 }
 
 .access-users-chip {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 5px;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   line-height: 1.35;
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
   background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
   color: var(--text);
   white-space: nowrap;
@@ -288,28 +298,15 @@ select.access-users-bar__select,
 
 .access-users-chip--all-servers {
   color: var(--text);
-  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
-  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
   font-weight: 500;
 }
 
 .access-users-chip--server {
   color: var(--text);
-  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-data) 30%);
-  border-color: color-mix(in srgb, var(--border-dark) 85%, transparent);
 }
 
 .access-users-chip--perm {
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--bg-main) 80%, var(--bg-widget) 20%);
-  border-color: color-mix(in srgb, var(--border-dark) 90%, transparent);
-  font-size: 0.78rem;
-  padding: 2px 8px;
-}
-
-.access-users-chip--perm:hover {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--border) 75%, transparent);
 }
 
 .access-users-chip-muted {
@@ -346,13 +343,10 @@ select.access-users-bar__select,
   min-height: 0;
   height: 100%;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
-  background: color-mix(in srgb, var(--bg-data) 88%, var(--bg-widget) 12%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: var(--bg-widget);
   position: relative;
   overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .access-users-table-container {
@@ -369,6 +363,14 @@ select.access-users-bar__select,
 table.access-users-table {
   width: 100%;
   border-collapse: separate;
+  border-spacing: 0;
+  padding: 0;
+}
+
+#tblWebUsers.access-users-table {
+  table-layout: fixed;
+  width: 100%;
+  padding: 0;
   border-spacing: 0;
 }
 
@@ -431,15 +433,20 @@ table.access-users-table tbody tr.access-users-row {
 }
 
 table.access-users-table tbody tr.access-users-row td {
-  padding: 13px 18px;
+  padding: 9px 12px;
+  border: none;
   border-bottom: 1px solid
-    color-mix(in srgb, var(--border-dark) 60%, transparent);
+    color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border-radius: 0;
   background: transparent;
   vertical-align: middle;
+  text-align: left;
+  box-shadow: none;
 }
 
 table.access-users-table tbody tr.access-users-row:hover td {
   background: var(--fcc-row-hover-bg);
+  box-shadow: none;
 }
 
 table.access-users-table tbody tr.access-users-row--selected td {
@@ -447,22 +454,18 @@ table.access-users-table tbody tr.access-users-row--selected td {
   box-shadow: none !important;
 }
 
-table.access-users-table tbody tr.access-users-row--selected td:first-child {
-  box-shadow: inset 3px 0 0 var(--accent, #da8216) !important;
-  border-left: none !important;
-}
-
 .access-user-table-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .access-user-avatar-wrap {
   position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -473,14 +476,13 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 }
 
 .access-user-status-dot {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 9px;
-  height: 9px;
+  align-self: flex-start;
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--text-muted);
-  border: 2px solid var(--bg-widget);
   transition: all 0.2s ease;
 }
 
@@ -493,16 +495,19 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .access-users-row__name {
-  font-weight: 600;
-  font-size: 0.98rem;
+  font-weight: 500;
   color: var(--text);
-  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .access-user-2fa-badge {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -515,41 +520,24 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   color: var(--text-muted);
 }
 
-.access-users-role-text {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.access-users-role-text--disabled {
-  color: var(--text-muted);
-  opacity: 0.65;
-}
-
 .access-users-chip-list {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .access-users-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 9px;
-  border-radius: 5px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
   color: var(--text);
   white-space: nowrap;
 }
 
 .access-users-chip--full-access {
   font-weight: 600;
-  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
 }
 
 .access-users-chip-muted {
@@ -846,6 +834,205 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
   text-overflow: ellipsis;
 }
 
+/* ── Compact Summary List & Floating Popover (Table + Cards) ─────────── */
+
+.access-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.access-summary--table {
+  width: 100%;
+}
+
+.access-summary__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.access-summary--card .access-summary__text {
+  font-size: 0.86rem;
+}
+
+.access-summary__text--highlight {
+  font-weight: 500;
+}
+
+.access-summary__empty {
+  color: var(--text-muted);
+}
+
+.access-summary__more {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1;
+  color: var(--accent-soft, var(--accent));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-main) 88%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.access-summary__more:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-main) 78%);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.access-summary-popover {
+  z-index: 12000;
+  min-width: 210px;
+  max-width: min(440px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-widget) 96%, var(--bg-main) 4%);
+  border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.access-summary-popover__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 6px;
+  margin-bottom: 7px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-summary-popover__title {
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.access-summary-popover__count {
+  font-size: 0.74rem;
+  font-weight: 650;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-main) 70%, var(--bg-widget) 30%);
+}
+
+.access-summary-popover__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px 12px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.access-summary-popover__list--two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.access-summary-popover__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.access-summary-popover__dot {
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.85;
+}
+
+.access-summary-popover__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Card Scope Block (Uniform Height Servers + Permissions) ─────────── */
+
+.access-user-card__scope {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+}
+
+.access-user-card__scope-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.access-user-card__scope-row + .access-user-card__scope-row {
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 75%, transparent);
+}
+
+.access-user-card__scope-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.access-user-card__full-inline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.access-user-card__full-inline-sub {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 /* ── Card Meta (Servers) ─────────────────────────────────────────────── */
 
 .access-user-card__meta {
@@ -994,75 +1181,3 @@ table.access-users-table tbody tr.access-users-row--selected td:first-child {
 /* Instances List */
 
 /* Responsive collapse on smaller viewports */
-
-/* ── 2K / Large Screen Responsive Media Queries ───────────────────────── */
-
-@media (min-width: 2000px) {
-  table.access-users-table thead th {
-    padding: 16px 22px;
-    font-size: 0.95rem;
-  }
-
-  table.access-users-table tbody tr.access-users-row td {
-    padding: 18px 22px;
-    font-size: 1.05rem;
-  }
-
-  .access-user-avatar-wrap {
-    width: 44px;
-    height: 44px;
-    border-radius: 11px;
-  }
-
-  .access-user-avatar-wrap svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .access-users-row__name {
-    font-size: 1.12rem;
-  }
-
-  .access-users-role-text {
-    font-size: 0.96rem;
-  }
-
-  .access-users-chip {
-    padding: 5px 12px;
-    font-size: 0.9rem;
-  }
-
-  .access-users-table__action-btn {
-    width: 38px;
-    height: 38px;
-  }
-
-  .access-users-table__action-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .access-users-pagination {
-    padding: 14px 24px;
-  }
-
-  .access-users-pagination-info {
-    font-size: 0.98rem;
-  }
-
-  .access-users-page-size-label {
-    font-size: 0.92rem;
-  }
-
-  .access-users-page-size-btn {
-    height: 28px;
-    min-width: 32px;
-    font-size: 0.88rem;
-  }
-
-  .access-users-page-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 0.92rem;
-  }
-}

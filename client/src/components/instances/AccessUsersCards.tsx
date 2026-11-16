@@ -6,6 +6,7 @@ import {
   listUserTabLabels,
   roleLabel,
 } from '../../lib/webUserUtils';
+import { AccessSummaryList } from './AccessSummaryList';
 import {
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,
@@ -125,68 +126,50 @@ export function AccessUsersCards({
               </div>
             </div>
 
-            {/* 2. Scope Meta */}
-            <div className="access-user-card__meta">
-              <div className="access-user-card__meta-item access-user-card__meta-item--servers">
-                <AppIcon
-                  name="lan"
-                  size={14}
-                  className="access-user-card__meta-icon"
+            {/* 2. Servers & Permissions Scope */}
+            <div className="access-user-card__scope">
+              <div className="access-user-card__scope-row">
+                <span className="access-user-card__scope-label">
+                  <AppIcon
+                    name="lan"
+                    size={13}
+                    className="access-user-card__meta-icon"
+                  />
+                  <span>{t('instances_tab_servers')}</span>
+                </span>
+                <AccessSummaryList
+                  items={instanceLabels}
+                  maxVisible={2}
+                  variant="card"
+                  title={t('instances_tab_servers')}
                 />
-                <div className="access-user-card__servers-list">
-                  {instanceLabels.length ? (
-                    instanceLabels.map((label, idx) => (
-                      <span
-                        key={`${u.username}-srv-${idx}`}
-                        className={
-                          'access-users-chip ' +
-                          (label === t('web_user_instances_all')
-                            ? 'access-users-chip--all-servers'
-                            : 'access-users-chip--server')
-                        }
-                      >
-                        {label}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="access-users-chip-muted">—</span>
-                  )}
-                </div>
               </div>
-            </div>
 
-            {/* 3. Permissions Section */}
-            <div className="access-user-card__perms-section">
-              <span className="access-user-card__perms-title">
-                {t('web_access_perms_label')}
-              </span>
-              {isAdminUser ? (
-                <div className="access-user-card__admin-full-box">
-                  <div className="access-user-card__admin-full-badge">
-                    <span className="access-user-card__admin-full-title">
+              <div className="access-user-card__scope-row">
+                <span className="access-user-card__scope-label">
+                  <span>{t('web_access_perms_label')}</span>
+                </span>
+                {isAdminUser ? (
+                  <div
+                    className="access-user-card__full-inline"
+                    title={t('web_users_full_perms_desc')}
+                  >
+                    <span className="access-summary__text access-summary__text--highlight">
                       {t('web_users_full_perms')}
                     </span>
+                    <span className="access-user-card__full-inline-sub">
+                      — {t('web_users_full_perms_desc')}
+                    </span>
                   </div>
-                  <span className="access-user-card__admin-perms-desc">
-                    {t('web_users_full_perms_desc')}
-                  </span>
-                </div>
-              ) : (
-                <div className="access-users-chip-list">
-                  {tabLabels.length ? (
-                    tabLabels.map((label, idx) => (
-                      <span
-                        key={`${u.username}-perm-${idx}`}
-                        className="access-users-chip access-users-chip--perm"
-                      >
-                        {label}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="access-users-chip-muted">—</span>
-                  )}
-                </div>
-              )}
+                ) : (
+                  <AccessSummaryList
+                    items={tabLabels}
+                    maxVisible={3}
+                    variant="card"
+                    title={t('web_access_perms_label')}
+                  />
+                )}
+              </div>
             </div>
 
             {/* 4. Action Buttons Footer */}

@@ -185,6 +185,12 @@ export class UsersService implements OnModuleInit {
       instance_ids: inst,
       enabled: u.enabled !== false,
       twoFactorEnabled: !!u.twoFactorEnabled,
+      createdAt:
+        u.createdAt instanceof Date
+          ? u.createdAt.toISOString()
+          : u.createdAt
+            ? String(u.createdAt)
+            : undefined,
     };
   }
 

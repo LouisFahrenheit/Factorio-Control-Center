@@ -712,13 +712,14 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   color: var(--text);
   line-height: 1.25;
   text-align: left;
+  white-space: nowrap;
 }
 
 .backup-tab__file-name {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  word-break: break-all;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
   line-height: 1.25;
   text-align: left;
 }
@@ -726,21 +727,18 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__size-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  background: color-mix(in srgb, var(--bg-log) 80%, var(--bg-widget) 20%);
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 70%, transparent);
   white-space: nowrap;
 }
 
 .backup-tab__tags {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
   align-items: center;
+  overflow: hidden;
 }
 
 .backup-tab__tag {
@@ -751,6 +749,7 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
   background: color-mix(in srgb, var(--bg-main) 75%, var(--bg-widget) 25%);
   color: var(--text-muted);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
@@ -765,31 +764,22 @@ table#tblBackups thead th.backup-sort-th--asc::after {
 .backup-tab__type-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
   white-space: nowrap;
 }
 
 .backup-tab__type-badge--auto {
-  background: color-mix(in srgb, var(--text-muted) 12%, transparent);
   color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
 }
 
 .backup-tab__type-badge--manual {
-  background: color-mix(in srgb, var(--bg-main) 80%, var(--bg-widget) 20%);
-  color: var(--text-muted);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  color: var(--text);
 }
 
 .backup-tab__type-badge--uploaded {
-  background: color-mix(in srgb, var(--bg-main) 80%, var(--bg-widget) 20%);
-  color: var(--text-muted);
-  border: 1px dashed color-mix(in srgb, var(--border-dark) 90%, transparent);
+  color: var(--text);
 }
 
 .backup-tab__actions {

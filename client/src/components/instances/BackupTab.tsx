@@ -1,32 +1,37 @@
-import { useState, useMemo, useRef, useCallback, useEffect, type ChangeEvent, type MouseEvent } from "react";
+import {
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+  useEffect,
+  type ChangeEvent,
+  type MouseEvent,
+} from 'react';
 import {
   IconArchive,
-  IconDownload,
-  IconRotateClockwise,
-  IconTrash,
-  IconClock,
-  IconUser,
-  IconCloudUpload,
   IconUpload,
   IconSparkles,
   IconChevronLeft,
   IconChevronRight,
-} from "@tabler/icons-react";
-import { motion } from "motion/react";
-import { TabLoadingPlaceholder, tabInitialLoad } from "../TabLoadingPlaceholder";
+} from '@tabler/icons-react';
+import { motion } from 'motion/react';
+import {
+  TabLoadingPlaceholder,
+  tabInitialLoad,
+} from '../TabLoadingPlaceholder';
 import {
   SCREEN_BODY_VARIANTS,
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,
-} from "../../lib/motionPresets";
-import { webEffectsReduced } from "../../theme/webEffects";
-import { openFccConfirmModal } from "../../lib/fccConfirmModal";
-import { BackupRestoreModal } from "../modals/BackupRestoreModal";
-import { BackupCreateModal } from "../modals/BackupCreateModal";
-import { BackupAutoSettingsModal } from "../modals/BackupAutoSettingsModal";
-import { BackupBar } from "./BackupBar";
-import { BackupRowMenu } from "./BackupRowMenu";
-import type { useBackup, BackupEntry } from "../../hooks/useBackup";
+} from '../../lib/motionPresets';
+import { webEffectsReduced } from '../../theme/webEffects';
+import { openFccConfirmModal } from '../../lib/fccConfirmModal';
+import { BackupRestoreModal } from '../modals/BackupRestoreModal';
+import { BackupCreateModal } from '../modals/BackupCreateModal';
+import { BackupAutoSettingsModal } from '../modals/BackupAutoSettingsModal';
+import { BackupBar } from './BackupBar';
+import { BackupRowMenu } from './BackupRowMenu';
+import type { useBackup, BackupEntry } from '../../hooks/useBackup';
 
 type BackupApi = ReturnType<typeof useBackup>;
 
@@ -38,12 +43,13 @@ interface BackupTabProps {
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024)
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
 function formatDate(iso: string): string {
-  if (!iso) return "—";
+  if (!iso) return '—';
   try {
     return new Date(iso).toLocaleString();
   } catch {
@@ -77,8 +83,8 @@ export function BackupTab({ backup, t }: BackupTabProps) {
   const [isUploadDragOver, setIsUploadDragOver] = useState(false);
 
   // Search & Filter
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   // Modals
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -162,7 +168,9 @@ export function BackupTab({ backup, t }: BackupTabProps) {
   const [autoEnabled, setAutoEnabled] = useState<boolean | null>(null);
   const [autoInterval, setAutoInterval] = useState<string | null>(null);
   const [autoMaxCount, setAutoMaxCount] = useState<string | null>(null);
-  const [autoIncludeMetrics, setAutoIncludeMetrics] = useState<boolean | null>(null);
+  const [autoIncludeMetrics, setAutoIncludeMetrics] = useState<boolean | null>(
+    null,
+  );
   const [autoIncludeLogs, setAutoIncludeLogs] = useState<boolean | null>(null);
 
   const s = backup.autoSettings;
@@ -187,11 +195,11 @@ export function BackupTab({ backup, t }: BackupTabProps) {
 
   const handleDelete = (id: string, filename: string) => {
     openFccConfirmModal({
-      title: t("backup_delete_confirm_title"),
-      message: `${t("backup_delete_confirm_msg")}\n\n${filename}`,
-      confirmLabel: t("backup_delete_btn"),
-      cancelLabel: t("cancel"),
-      variant: "danger",
+      title: t('backup_delete_confirm_title'),
+      message: `${t('backup_delete_confirm_msg')}\n\n${filename}`,
+      confirmLabel: t('backup_delete_btn'),
+      cancelLabel: t('cancel'),
+      variant: 'danger',
       onConfirm: () => {
         const entry = backup.items.find((x) => x.id === id);
         if (entry) void backup.deleteBackup(entry);
@@ -208,8 +216,14 @@ export function BackupTab({ backup, t }: BackupTabProps) {
   const handleSaveAutoSettings = () => {
     void backup.saveAutoSettings({
       enabled: effectiveEnabled,
-      intervalHours: Math.max(1, Math.min(8760, parseInt(effectiveInterval, 10) || 24)),
-      maxCount: Math.max(1, Math.min(100, parseInt(effectiveMaxCount, 10) || 5)),
+      intervalHours: Math.max(
+        1,
+        Math.min(8760, parseInt(effectiveInterval, 10) || 24),
+      ),
+      maxCount: Math.max(
+        1,
+        Math.min(100, parseInt(effectiveMaxCount, 10) || 5),
+      ),
       includeMetrics: effectiveAutoMetrics,
       includeLogs: effectiveAutoLogs,
     });
@@ -249,8 +263,8 @@ export function BackupTab({ backup, t }: BackupTabProps) {
       if (q) {
         const nameMatch = (entry.filename || '').toLowerCase().includes(q);
         const dateMatch = formatDate(entry.createdAt).toLowerCase().includes(q);
-        const tagMatch = (entry.sections || []).some(
-          (sec) => (TAG_LABELS[sec] || sec).toLowerCase().includes(q)
+        const tagMatch = (entry.sections || []).some((sec) =>
+          (TAG_LABELS[sec] || sec).toLowerCase().includes(q),
         );
         if (!nameMatch && !dateMatch && !tagMatch) return false;
       }
@@ -291,7 +305,9 @@ export function BackupTab({ backup, t }: BackupTabProps) {
   const endIndex = Math.min(safePage * pageSize, sortedItems.length);
 
   if (isLoading) {
-    return <TabLoadingPlaceholder variant="form" label={t("tab_data_loading")} />;
+    return (
+      <TabLoadingPlaceholder variant="form" label={t('tab_data_loading')} />
+    );
   }
 
   return (
@@ -301,8 +317,8 @@ export function BackupTab({ backup, t }: BackupTabProps) {
       role="tabpanel"
       aria-labelledby="instanceTabBackupBtn"
       variants={reduced ? undefined : SCREEN_BODY_VARIANTS}
-      initial={reduced ? false : "hidden"}
-      animate={reduced ? undefined : "show"}
+      initial={reduced ? false : 'hidden'}
+      animate={reduced ? undefined : 'show'}
     >
       {/* ── Restore confirm modal ─────────────────────────────────────── */}
       <BackupRestoreModal
@@ -364,10 +380,23 @@ export function BackupTab({ backup, t }: BackupTabProps) {
       {/* ── Restore in progress overlay ───────────────────────────────── */}
       {backup.restoring && (
         <div className="modal-backdrop" id="backupRestoringOverlay">
-          <div className="fcc-modal" role="status" style={{ padding: 24, textAlign: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <div
+            className="fcc-modal"
+            role="status"
+            style={{ padding: 24, textAlign: 'center' }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
               <div className="spinner" />
-              <p style={{ margin: 0, fontWeight: 500 }}>{t("backup_restoring_label")}</p>
+              <p style={{ margin: 0, fontWeight: 500 }}>
+                {t('backup_restoring_label')}
+              </p>
             </div>
           </div>
         </div>
@@ -409,7 +438,10 @@ export function BackupTab({ backup, t }: BackupTabProps) {
 
         {/* ── Таблица архивов (Drag & Drop зона) ────────────────────────── */}
         <div
-          className={'table-wrap table-wrap--motion-list backup-tab__table-wrap fcc-drop-target' + (isUploadDragOver ? ' is-drag-over' : '')}
+          className={
+            'table-wrap table-wrap--motion-list backup-tab__table-wrap fcc-drop-target' +
+            (isUploadDragOver ? ' is-drag-over' : '')
+          }
           onDragOver={(ev) => {
             if (ev.dataTransfer.types.includes('Files')) {
               ev.preventDefault();
@@ -437,13 +469,18 @@ export function BackupTab({ backup, t }: BackupTabProps) {
           {isUploadDragOver && (
             <div className="fcc-drop-overlay">
               <IconUpload size={32} className="fcc-drop-overlay__icon" />
-              <span className="fcc-drop-overlay__text" style={{ fontSize: '0.95rem', fontWeight: 600 }}>
+              <span
+                className="fcc-drop-overlay__text"
+                style={{ fontSize: '0.95rem', fontWeight: 600 }}
+              >
                 {t('upload_drop_zone_hint') || 'Перетащите архив бэкапа сюда'}
               </span>
             </div>
           )}
 
-          <div className={`backup-tab__table-container ${isTableEntering ? 'backup-tab__table-container--entering' : ''}`}>
+          <div
+            className={`backup-tab__table-container ${isTableEntering ? 'backup-tab__table-container--entering' : ''}`}
+          >
             {filteredItems.length === 0 ? (
               <div className="backup-tab__empty-state">
                 <div className="backup-tab__empty-icon-wrap">
@@ -451,37 +488,46 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                 </div>
                 <span className="backup-tab__empty-title">
                   {backup.items.length === 0
-                    ? t("backup_list_empty")
-                    : (t("instances_search_no_results") || "Ничего не найдено по заданным фильтрам")}
+                    ? t('backup_list_empty')
+                    : t('instances_search_no_results') ||
+                      'Ничего не найдено по заданным фильтрам'}
                 </span>
               </div>
             ) : (
-              <table className="data backup-tab__table" id="tblBackups">
+              <table
+                className="data backup-tab__table"
+                id="tblBackups"
+                style={{ width: '100%' }}
+              >
                 <thead>
                   <tr>
+                    <th style={{ textAlign: 'left' }}>
+                      {t('backup_col_name') || 'Название'}
+                    </th>
                     <th
-                      style={{ textAlign: 'left', minWidth: 260 }}
+                      style={{ textAlign: 'left' }}
                       className={`backup-sort-th ${sortCol === 'date' ? 'backup-sort-th--active' : ''} ${sortCol === 'date' && sortAsc ? 'backup-sort-th--asc' : ''}`}
                       onClick={() => handleSort('date')}
                     >
-                      {t("backup_col_date")}
+                      {t('backup_col_date')}
                     </th>
                     <th
-                      style={{ textAlign: 'center', width: 110 }}
+                      style={{ textAlign: 'center' }}
                       className={`backup-sort-th ${sortCol === 'type' ? 'backup-sort-th--active' : ''} ${sortCol === 'type' && sortAsc ? 'backup-sort-th--asc' : ''}`}
                       onClick={() => handleSort('type')}
                     >
-                      {t("backup_col_type")}
+                      {t('backup_col_type')}
                     </th>
                     <th
-                      style={{ textAlign: 'center', width: 95 }}
+                      style={{ textAlign: 'center' }}
                       className={`backup-sort-th ${sortCol === 'size' ? 'backup-sort-th--active' : ''} ${sortCol === 'size' && sortAsc ? 'backup-sort-th--asc' : ''}`}
                       onClick={() => handleSort('size')}
                     >
-                      {t("backup_col_size")}
+                      {t('backup_col_size')}
                     </th>
-                    <th style={{ textAlign: 'left', minWidth: 180 }}>{t("backup_col_sections")}</th>
-                    <th style={{ textAlign: 'right', width: 130 }}>{t("backup_col_actions")}</th>
+                    <th style={{ textAlign: 'left' }}>
+                      {t('backup_col_sections')}
+                    </th>
                   </tr>
                 </thead>
                 <motion.tbody
@@ -505,53 +551,64 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                         key={entry.id}
                         className={rowClass}
                         variants={reduced ? undefined : LIST_ROW_VARIANTS}
-                        onClick={(ev) => onRowClick(entry, ev.currentTarget, ev)}
+                        onClick={(ev) =>
+                          onRowClick(entry, ev.currentTarget, ev)
+                        }
                       >
-                        {/* Дата и имя архива */}
+                        {/* Имя архива */}
                         <td className="backup-tab__cell">
-                          <div className="backup-tab__file-info">
-                            <div className="backup-tab__file-icon">
-                              <IconArchive size={20} />
-                            </div>
-                            <div className="backup-tab__file-details">
-                              <div className="backup-tab__file-header">
-                                <span className="backup-tab__file-date">{formatDate(entry.createdAt)}</span>
-                                {entry.id === latestBackupId && (
-                                  <span className="backup-tab__badge-latest" title={t("backup_badge_latest")}>
-                                    <IconSparkles size={11} />
-                                    {t("backup_badge_latest")}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="backup-tab__file-name">{entry.filename}</span>
-                            </div>
+                          <div className="backup-tab__file-header">
+                            <span className="backup-tab__file-name">
+                              {entry.filename.replace(/\.zip$/i, '')}
+                            </span>
+                            {entry.id === latestBackupId && (
+                              <span
+                                className="backup-tab__badge-latest"
+                                title={t('backup_badge_latest')}
+                              >
+                                <IconSparkles size={11} />
+                                {t('backup_badge_latest')}
+                              </span>
+                            )}
                           </div>
                         </td>
 
+                        {/* Дата */}
+                        <td className="backup-tab__cell">
+                          <span className="backup-tab__file-date">
+                            {formatDate(entry.createdAt)}
+                          </span>
+                        </td>
+
                         {/* Тип (Auto / Manual / Uploaded) */}
-                        <td className="backup-tab__cell" style={{ textAlign: 'center' }}>
+                        <td
+                          className="backup-tab__cell"
+                          style={{ textAlign: 'center' }}
+                        >
                           {entry.type === 'auto' ? (
                             <span className="backup-tab__type-badge backup-tab__type-badge--auto">
-                              <IconClock size={13} />
-                              {t("backup_type_auto")}
+                              {t('backup_type_auto')}
                             </span>
                           ) : entry.type === 'uploaded' ? (
                             <span className="backup-tab__type-badge backup-tab__type-badge--uploaded">
-                              <IconCloudUpload size={13} />
-                              {t("backup_type_uploaded")}
+                              {t('backup_type_uploaded')}
                             </span>
                           ) : (
                             <span className="backup-tab__type-badge backup-tab__type-badge--manual">
-                              <IconUser size={13} />
-                              {t("backup_type_manual")}
+                              {t('backup_type_manual')}
                             </span>
                           )}
                         </td>
 
                         {/* Размер */}
-                        <td className="backup-tab__cell" style={{ textAlign: 'center' }}>
+                        <td
+                          className="backup-tab__cell"
+                          style={{ textAlign: 'center' }}
+                        >
                           <span className="backup-tab__size-badge">
-                            {entry.sizeBytes > 0 ? formatBytes(entry.sizeBytes) : "—"}
+                            {entry.sizeBytes > 0
+                              ? formatBytes(entry.sizeBytes)
+                              : '—'}
                           </span>
                         </td>
 
@@ -567,51 +624,6 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                             ) : (
                               <span className="backup-tab__tag">DB</span>
                             )}
-                          </div>
-                        </td>
-
-                        {/* Кнопки действий */}
-                        <td className="backup-tab__cell" style={{ textAlign: 'right' }}>
-                          <div className="backup-tab__actions">
-                            <button
-                              type="button"
-                              className="backup-tab__action-btn"
-                              id={`backupDownloadBtn-${entry.id}`}
-                              title={t("backup_download_btn")}
-                              aria-label={t("backup_download_btn")}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                backup.downloadBackup(entry);
-                              }}
-                            >
-                              <IconDownload size={18} />
-                            </button>
-                            <button
-                              type="button"
-                              className="backup-tab__action-btn backup-tab__action-btn--restore"
-                              id={`backupRestoreBtn-${entry.id}`}
-                              title={t("backup_restore_btn")}
-                              aria-label={t("backup_restore_btn")}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                handleRestore(entry.id);
-                              }}
-                            >
-                              <IconRotateClockwise size={18} />
-                            </button>
-                            <button
-                              type="button"
-                              className="backup-tab__action-btn backup-tab__action-btn--danger"
-                              id={`backupDeleteBtn-${entry.id}`}
-                              title={t("backup_delete_btn")}
-                              aria-label={t("backup_delete_btn")}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                handleDelete(entry.id, entry.filename);
-                              }}
-                            >
-                              <IconTrash size={18} />
-                            </button>
                           </div>
                         </td>
                       </motion.tr>
@@ -653,28 +665,32 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                     className="backup-tab__page-btn"
                     disabled={safePage <= 1}
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    title={t("previous") || "Previous"}
+                    title={t('previous') || 'Previous'}
                   >
                     <IconChevronLeft size={16} />
                   </button>
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      className={`backup-tab__page-btn ${p === safePage ? 'backup-tab__page-btn--active' : ''}`}
-                      onClick={() => setCurrentPage(p)}
-                    >
-                      {p}
-                    </button>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        className={`backup-tab__page-btn ${p === safePage ? 'backup-tab__page-btn--active' : ''}`}
+                        onClick={() => setCurrentPage(p)}
+                      >
+                        {p}
+                      </button>
+                    ),
+                  )}
 
                   <button
                     type="button"
                     className="backup-tab__page-btn"
                     disabled={safePage >= totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    title={t("next") || "Next"}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    title={t('next') || 'Next'}
                   >
                     <IconChevronRight size={16} />
                   </button>

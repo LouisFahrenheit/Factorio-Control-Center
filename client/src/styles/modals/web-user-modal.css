@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .fu-modal.web-user-editor-modal {
-  width: min(780px, 96vw);
+  width: min(820px, 96vw);
   max-height: calc(100dvh - 2 * max(14px, 2.5vh));
   border-radius: 12px;
   box-shadow:
@@ -308,9 +308,9 @@
   justify-content: center;
   padding: 4px 12px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-main) 88%);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
-  color: var(--accent-selected);
+  background: color-mix(in srgb, var(--bg-main) 65%, var(--bg-widget) 35%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.8rem;
   user-select: none;
@@ -328,8 +328,8 @@
   display: flex;
   flex-direction: column;
   padding: 10px 12px;
-  gap: 2px;
-  max-height: 290px;
+  gap: 3px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
@@ -360,7 +360,7 @@
   flex-direction: column;
   padding: 10px 12px;
   gap: 4px;
-  max-height: 290px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
@@ -391,11 +391,6 @@
   .access-instance-check:hover:not(:has(> input:disabled)) {
   background: color-mix(in srgb, var(--bg-main) 60%, transparent);
   border-color: color-mix(in srgb, var(--border) 40%, transparent);
-}
-
-.web-user-editor-modal .access-instance-check:has(> input:checked) {
-  background: var(--fcc-row-hover-selected-bg);
-  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
 .web-user-editor-modal .access-instance-check__label {

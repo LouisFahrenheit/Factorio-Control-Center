@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useEffect, useMemo, type MouseEvent } from 'react';
 import {
-  IconUser,
   IconShieldCheck,
   IconChevronLeft,
   IconChevronRight,
@@ -11,6 +10,8 @@ import {
   listUserTabLabels,
   roleLabel,
 } from '../../lib/webUserUtils';
+import { formatPanelDateTime } from '../../lib/datetimeUtils';
+import { AccessSummaryList } from './AccessSummaryList';
 import {
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,
@@ -36,7 +37,7 @@ interface AccessUsersTableProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-type UserSortCol = 'username' | 'role' | 'servers' | 'status';
+type UserSortCol = 'username' | 'role' | 'servers' | 'createdAt' | 'status';
 
 export function AccessUsersTable({
   users,
@@ -86,6 +87,11 @@ export function AccessUsersTable({
         const aCount = a.instance_ids ? a.instance_ids.length : 999;
         const bCount = b.instance_ids ? b.instance_ids.length : 999;
         cmp = aCount - bCount;
+      } else if (sortCol === 'createdAt') {
+        const aMs = a.createdAt ? Date.parse(a.createdAt) : 0;
+        const bMs = b.createdAt ? Date.parse(b.createdAt) : 0;
+        cmp =
+          (Number.isFinite(aMs) ? aMs : 0) - (Number.isFinite(bMs) ? bMs : 0);
       }
       return sortAsc ? cmp : -cmp;
     });
@@ -133,23 +139,32 @@ export function AccessUsersTable({
               <th
                 className={`access-sort-th ${sortCol === 'username' ? 'access-sort-th--active' : ''} ${sortCol === 'username' && sortAsc ? 'access-sort-th--asc' : ''}`}
                 onClick={() => handleSort('username')}
+                style={{ width: '19%' }}
               >
                 {t('web_user_label')}
               </th>
               <th
                 className={`access-sort-th ${sortCol === 'role' ? 'access-sort-th--active' : ''} ${sortCol === 'role' && sortAsc ? 'access-sort-th--asc' : ''}`}
                 onClick={() => handleSort('role')}
-                style={{ width: 170 }}
+                style={{ width: '13%' }}
               >
                 {t('web_role_label')}
               </th>
               <th
                 className={`access-sort-th ${sortCol === 'servers' ? 'access-sort-th--active' : ''} ${sortCol === 'servers' && sortAsc ? 'access-sort-th--asc' : ''}`}
                 onClick={() => handleSort('servers')}
+                style={{ width: '24%' }}
               >
                 {t('instances_tab_servers')}
               </th>
-              <th>{t('web_access_perms_label')}</th>
+              <th style={{ width: '28%' }}>{t('web_access_perms_label')}</th>
+              <th
+                className={`access-sort-th ${sortCol === 'createdAt' ? 'access-sort-th--active' : ''} ${sortCol === 'createdAt' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                onClick={() => handleSort('createdAt')}
+                style={{ width: '16%' }}
+              >
+                {t('web_user_created_at_label')}
+              </th>
             </tr>
           </thead>
           <motion.tbody
@@ -192,17 +207,23 @@ export function AccessUsersTable({
                   {/* 1. User */}
                   <td className="access-users-table__col-user">
                     <div className="access-user-table-cell">
-                      <div className="access-user-avatar-wrap">
-                        <IconUser size={18} />
-                        <span
-                          className={`access-user-status-dot ${enabled ? 'access-user-status-dot--on' : ''}`}
-                          title={enabled ? t('web_enabled_label') : t('web_user_status_off')}
-                        />
-                      </div>
+                      <span
+                        className={`access-user-status-dot ${enabled ? 'access-user-status-dot--on' : ''}`}
+                        title={
+                          enabled
+                            ? t('web_enabled_label')
+                            : t('web_user_status_off')
+                        }
+                      />
                       <div className="access-user-identity">
-                        <span className="access-users-row__name">{u.username}</span>
+                        <span className="access-users-row__name">
+                          {u.username}
+                        </span>
                         {u.twoFactorEnabled && (
-                          <span className="access-user-2fa-badge" title={t('web_2fa_enabled_badge')}>
+                          <span
+                            className="access-user-2fa-badge"
+                            title={t('web_2fa_enabled_badge')}
+                          >
                             <IconShieldCheck size={13} />
                             <span>2FA</span>
                           </span>
@@ -222,44 +243,39 @@ export function AccessUsersTable({
 
                   {/* 3. Servers */}
                   <td className="access-users-table__col-servers">
-                    <div className="access-users-chip-list">
-                      {instanceLabels.length ? (
-                        instanceLabels.map((label, index) => (
-                          <span
-                            key={`${u.username}-srv-${index}`}
-                            className="access-users-chip"
-                          >
-                            {label}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="access-users-chip-muted">—</span>
-                      )}
-                    </div>
+                    <AccessSummaryList
+                      items={instanceLabels}
+                      maxVisible={2}
+                      variant="table"
+                      title={t('instances_tab_servers')}
+                    />
                   </td>
 
                   {/* 4. Permissions */}
                   <td className="access-users-table__col-perms">
                     {isAdminUser ? (
-                      <span className="access-users-chip access-users-chip--full-access">
-                        {t('web_users_full_perms')}
-                      </span>
+                      <AccessSummaryList
+                        items={[t('web_users_full_perms')]}
+                        maxVisible={1}
+                        variant="table"
+                        title={t('web_access_perms_label')}
+                        highlightSingle
+                      />
                     ) : (
-                      <div className="access-users-chip-list">
-                        {tabLabels.length ? (
-                          tabLabels.map((label, index) => (
-                            <span
-                              key={`${u.username}-perm-${index}`}
-                              className="access-users-chip"
-                            >
-                              {label}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="access-users-chip-muted">—</span>
-                        )}
-                      </div>
+                      <AccessSummaryList
+                        items={tabLabels}
+                        maxVisible={2}
+                        variant="table"
+                        title={t('web_access_perms_label')}
+                      />
                     )}
+                  </td>
+
+                  {/* 5. Created At */}
+                  <td className="access-users-table__col-created">
+                    <span className="access-users-created-text">
+                      {formatPanelDateTime(u.createdAt)}
+                    </span>
                   </td>
                 </motion.tr>
               );
@@ -319,7 +335,9 @@ export function AccessUsersTable({
                 type="button"
                 className="access-users-page-btn"
                 disabled={safePage >= totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 title={t('next') || 'Next'}
               >
                 <IconChevronRight size={16} />

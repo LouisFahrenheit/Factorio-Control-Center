@@ -1,6 +1,5 @@
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
-import { FccCheck } from '../FccCheck';
 import { FccSwitch } from '../FccSwitch';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { WEB_USER_TABS, tabsDisabledForRole } from '../../lib/webUserUtils';
@@ -294,7 +293,7 @@ export function WebUserEditorModal({ webUsers, t }: WebUserEditorModalProps) {
                   className="access-perm-grid access-perm-grid--instances"
                 >
                   <div className="access-instance-check-wrap access-instance-check-wrap--all">
-                    <FccCheck
+                    <FccSwitch
                       id="webUserInstAll"
                       className="access-instance-check access-instance-check--all"
                       labelClassName="access-instance-check__label"
@@ -320,7 +319,7 @@ export function WebUserEditorModal({ webUsers, t }: WebUserEditorModalProps) {
                       const checked =
                         editor.allInstances || editor.instanceIds.includes(id);
                       return (
-                        <FccCheck
+                        <FccSwitch
                           key={id}
                           id={`webUserInst-${id}`}
                           className="access-instance-check"
