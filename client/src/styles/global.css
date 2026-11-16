@@ -852,27 +852,9 @@ table#tblBackups thead th.backup-sort-th--asc::after {
     border-radius: 10px;
   }
 
-  .backup-tab__file-date {
-    font-size: 1.1rem;
-  }
-
-  .backup-tab__file-name {
-    font-size: 0.88rem;
-  }
-
   .backup-tab__badge-latest {
     font-size: 0.78rem;
     padding: 3px 10px;
-  }
-
-  .backup-tab__size-badge {
-    padding: 6px 14px;
-    font-size: 0.94rem;
-  }
-
-  .backup-tab__type-badge {
-    padding: 6px 14px;
-    font-size: 0.88rem;
   }
 
   .backup-tab__tags {
