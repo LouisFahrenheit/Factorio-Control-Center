@@ -235,9 +235,11 @@
 }
 
 .pub-filter-btn--active {
-  background: color-mix(in srgb,
-      var(--accent) 22%,
-      var(--bg-widget) 78%) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 22%,
+    var(--bg-widget) 78%
+  ) !important;
   color: var(--accent) !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
@@ -275,9 +277,11 @@ table#tblPublicServers thead th {
   letter-spacing: 0.02em !important;
   text-transform: none !important;
   line-height: 1.35 !important;
-  background: color-mix(in srgb,
-      var(--bg-widget) 92%,
-      var(--bg-main) 8%) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 92%,
+    var(--bg-main) 8%
+  ) !important;
 }
 
 .pub-servers-table-container {
@@ -295,7 +299,15 @@ table#tblPublicServers thead th {
 .pub-servers-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.86rem;
+  text-align: left;
+}
+
+#tblPublicServers.access-users-table {
+  width: 100%;
+}
+
+#tblPublicServers thead th,
+#tblPublicServers tbody td {
   text-align: left;
 }
 
@@ -307,7 +319,8 @@ table#tblPublicServers thead th {
 
 .pub-servers-row td {
   padding: 10px 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 60%, transparent);
   vertical-align: middle;
 }
 
@@ -343,13 +356,13 @@ table#tblPublicServers thead th {
 
 .pub-server-cell .instance-run-dot--on {
   background: var(--running, #78c840);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--running, #78c840) 70%, transparent);
+  box-shadow: 0 0 6px
+    color-mix(in srgb, var(--running, #78c840) 70%, transparent);
 }
 
 .pub-server-name {
   font-weight: 650;
   color: var(--text);
-  font-size: 0.92rem;
   line-height: 1.35;
 }
 
@@ -358,20 +371,12 @@ table#tblPublicServers thead th {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.2;
   user-select: none;
-  background: color-mix(in srgb, var(--bg-main) 75%, var(--bg-widget) 25%);
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .pub-visibility-badge--on {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--border) 80%, transparent);
 }
 
 .pub-visibility-badge--on svg {
@@ -379,8 +384,7 @@ table#tblPublicServers thead th {
 }
 
 .pub-visibility-badge--off {
-  color: var(--text-muted);
-  opacity: 0.75;
+  color: var(--text);
 }
 
 .pub-visibility-badge--off svg {
@@ -406,19 +410,12 @@ table#tblPublicServers thead th {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-mono, monospace);
-  font-size: 0.78rem;
-  padding: 3px 7px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--bg-main) 80%, black 20%);
-  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   color: var(--text);
   white-space: nowrap;
 }
 
 .pub-address-badge--auto {
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--text);
 }
 
 .pub-col-desc {
@@ -435,7 +432,6 @@ table#tblPublicServers thead th {
   text-overflow: ellipsis;
   color: var(--text);
   line-height: 1.35;
-  font-size: 0.82rem;
 }
 
 .pub-desc-text--empty {

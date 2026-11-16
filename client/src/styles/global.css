@@ -5274,57 +5274,28 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-status-pill {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  padding: 2px 9px !important;
-  border-radius: 999px !important;
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.02em !important;
   white-space: nowrap !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
 }
 
 .instance-status-pill--running {
-  color: #4ade80 !important;
-  background: rgba(74, 222, 128, 0.12) !important;
-  border: 1px solid rgba(74, 222, 128, 0.35) !important;
-}
-
-.instance-status-pill--running::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
-  flex-shrink: 0;
+  color: var(--text) !important;
 }
 
 .instance-status-pill--stopped {
-  color: #b0b7c4 !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-.instance-status-pill--stopped::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #717a88;
-  flex-shrink: 0;
+  color: var(--text) !important;
 }
 
 .instance-status-pill--maintenance {
-  color: #ffe8b8 !important;
-  background: rgba(224, 160, 32, 0.16) !important;
-  border: 1px solid rgba(224, 160, 32, 0.35) !important;
+  color: var(--text) !important;
 }
 
 .instance-status-pill--maintenance-manual {
-  color: #fff4d0 !important;
-  background: rgba(216, 184, 74, 0.16) !important;
-  border: 1px solid rgba(216, 184, 74, 0.35) !important;
+  color: var(--text) !important;
 }
 
 /* Availability / Visibility Flags in server table */
@@ -5537,6 +5508,7 @@ td.instance-save-cell {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text);
 }
 
 /* ==========================================================================

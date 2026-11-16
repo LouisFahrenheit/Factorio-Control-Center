@@ -39,7 +39,12 @@ interface InstancePublicTabProps {
 }
 
 type ServerFilterType = 'all' | 'public' | 'hidden';
-type PublicSortCol = 'name' | 'visibility' | 'address' | 'description';
+type PublicSortCol =
+  | 'name'
+  | 'status'
+  | 'visibility'
+  | 'address'
+  | 'description';
 
 /* ─── Main Tab Component ──────────────────────────────────────────────── */
 
@@ -129,6 +134,8 @@ export function InstancePublicTab({
             sensitivity: 'base',
           },
         );
+      } else if (sortCol === 'status') {
+        cmp = Number(a.status === 'running') - Number(b.status === 'running');
       } else if (sortCol === 'visibility') {
         cmp = (a.isPublic ? 1 : 0) - (b.isPublic ? 1 : 0);
       } else if (sortCol === 'address') {
@@ -456,7 +463,13 @@ export function InstancePublicTab({
                       className={`access-sort-th ${sortCol === 'name' ? 'access-sort-th--active' : ''} ${sortCol === 'name' && sortAsc ? 'access-sort-th--asc' : ''}`}
                       onClick={() => handleSort('name')}
                     >
-                      {t('server_name') || 'Имя сервера'}
+                      {t('instances_col_name') || 'Имя'}
+                    </th>
+                    <th
+                      className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                      onClick={() => handleSort('status')}
+                    >
+                      {t('web_user_status_label') || 'Статус'}
                     </th>
                     <th
                       className={`access-sort-th ${sortCol === 'visibility' ? 'access-sort-th--active' : ''} ${sortCol === 'visibility' && sortAsc ? 'access-sort-th--asc' : ''}`}
@@ -513,6 +526,23 @@ export function InstancePublicTab({
                         {/* 1. Server Name (Only text, no icons or badges) */}
                         <td>
                           <span className="pub-server-name">{item.name}</span>
+                        </td>
+
+                        {/* 2. Status */}
+                        <td>
+                          <span className="pub-visibility-badge">
+                            <span
+                              className={
+                                'instance-run-dot' +
+                                (item.status === 'running'
+                                  ? ' instance-run-dot--on'
+                                  : '')
+                              }
+                            />
+                            {item.status === 'running'
+                              ? t('status_running') || 'Запущен'
+                              : t('status_stopped') || 'Остановлен'}
+                          </span>
                         </td>
 
                         {/* 2. Visibility */}
