@@ -387,15 +387,6 @@ export function ModpacksTab({ modpacks, t }: ModpacksTabProps) {
               </div>
               <span className="mods-toolbar__grow" aria-hidden="true" />
               <div className="mods-toolbar__meta-group">
-                {modpacks.activeName ? (
-                  <span
-                    id="modpackActivePill"
-                    className="active-modpack-pill"
-                    title={t('modpack_active_label') || undefined}
-                  >
-                    {modpacks.activeName}
-                  </span>
-                ) : null}
                 <button
                   type="button"
                   className="mods-toolbar__portal-link modpacks-toolbar__mode-link"
@@ -491,17 +482,12 @@ export function ModpacksTab({ modpacks, t }: ModpacksTabProps) {
                           >
                             <td className="mods-col-name modpacks-col-name">
                               <span className="instance-name-cell">
-                                <span
-                                  className={
-                                    'instance-run-dot' +
-                                    (isActive ? ' instance-run-dot--on' : '')
-                                  }
-                                  title={
-                                    isActive
-                                      ? t('modpack_active_label')
-                                      : undefined
-                                  }
-                                />
+                                {isActive && (
+                                  <span
+                                    className="instance-run-dot instance-run-dot--on"
+                                    title={t('modpack_active_label')}
+                                  />
+                                )}
                                 <span className="modpack-name-text">
                                   {p.name}
                                 </span>

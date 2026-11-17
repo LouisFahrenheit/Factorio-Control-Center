@@ -2,19 +2,29 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { modConfirm } from '../lib/modErrorUtils';
-import { buildPickVersionList, collectReleaseVersions, fuLocalizeError } from '../lib/factorioUpdateUtils';
+import {
+  buildPickVersionList,
+  collectReleaseVersions,
+  fuLocalizeError,
+} from '../lib/factorioUpdateUtils';
 import { notifyApiError } from '../lib/networkErrors';
 import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
-import type { FactorioPickState, FactorioUpdateCheck, FactorioUpdateStatus } from '../types/factorioUpdate';
+import type {
+  FactorioPickState,
+  FactorioUpdateCheck,
+  FactorioUpdateStatus,
+} from '../types/factorioUpdate';
 
-type FuMode = 'closed' | 'pick' | 'progress';
+type FuMode = 'closed' | 'checking' | 'pick' | 'progress';
 
 const GAME_UPDATE_CHECK_ALL_LAST_TS_KEY = 'fcc_game_update_check_all_last_ts';
 const GAME_UPDATE_CHECK_ALL_PERIOD_MS = 24 * 60 * 60 * 1000;
 
 function gameUpdateDailyCheckDue(): boolean {
   try {
-    const raw = String(localStorage.getItem(GAME_UPDATE_CHECK_ALL_LAST_TS_KEY) || '').trim();
+    const raw = String(
+      localStorage.getItem(GAME_UPDATE_CHECK_ALL_LAST_TS_KEY) || '',
+    ).trim();
     const last = parseInt(raw, 10);
     if (!Number.isFinite(last) || last <= 0) return true;
     return Date.now() - last >= GAME_UPDATE_CHECK_ALL_PERIOD_MS;
@@ -49,6 +59,7 @@ export function useFactorioUpdate(
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const pollRef = useRef<number | null>(null);
   const dailyCheckRunningRef = useRef(false);
+  const checkCancelledRef = useRef(false);
 
   const clearPoll = useCallback(() => {
     if (pollRef.current) {
@@ -58,6 +69,7 @@ export function useFactorioUpdate(
   }, []);
 
   const close = useCallback(() => {
+    checkCancelledRef.current = true;
     setMode('closed');
     setStatus(null);
     setPickState(null);
@@ -91,12 +103,15 @@ export function useFactorioUpdate(
     dailyCheckRunningRef.current = true;
     void (async () => {
       try {
-        const j = await api<{ ok?: boolean; items?: { id?: string; ok?: boolean; has_updates?: boolean }[] }>(
-          '/api/factorio/update/check-all',
-        );
+        const j = await api<{
+          ok?: boolean;
+          items?: { id?: string; ok?: boolean; has_updates?: boolean }[];
+        }>('/api/factorio/update/check-all');
         if (j?.ok !== false) {
           const rows = Array.isArray(j?.items) ? j.items : [];
-          const row = rows.find((r) => String(r?.id || '').trim() === instanceId);
+          const row = rows.find(
+            (r) => String(r?.id || '').trim() === instanceId,
+          );
           if (row?.ok && row.has_updates) setUpdateAvailable(true);
           else if (row) setUpdateAvailable(false);
           gameUpdateDailyCheckMarkNow();
@@ -138,14 +153,19 @@ export function useFactorioUpdate(
       setMode('progress');
       setStatus({ running: true, phase: 'preparing' });
       try {
-        const body: Record<string, unknown> = targetVersion ? { target_version: targetVersion } : {};
+        const body: Record<string, unknown> = targetVersion
+          ? { target_version: targetVersion }
+          : {};
         if (showExperimental) {
           body.experimental = true;
         }
-        const j = await api<{ ok?: boolean; error?: string }>('/api/factorio/update', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        });
+        const j = await api<{ ok?: boolean; error?: string }>(
+          '/api/factorio/update',
+          {
+            method: 'POST',
+            body: JSON.stringify(body),
+          },
+        );
         if (!j?.ok) {
           setStatus({
             running: false,
@@ -167,7 +187,8 @@ export function useFactorioUpdate(
   );
 
   const stopUpdate = useCallback(async () => {
-    if (!(await modConfirm(t('about_factorio_update_stop_confirm_msg'), t))) return;
+    if (!(await modConfirm(t('about_factorio_update_stop_confirm_msg'), t)))
+      return;
     try {
       await api('/api/factorio/update/stop', { method: 'POST' });
     } catch {
@@ -185,9 +206,14 @@ export function useFactorioUpdate(
       notifyWarn(title, t('updates_blocked_by_instance_setting'));
       return;
     }
+    checkCancelledRef.current = false;
+    setMode('checking');
     setChecking(true);
     try {
-      const statusFirst = await api<FactorioUpdateStatus>('/api/factorio/update/status');
+      const statusFirst = await api<FactorioUpdateStatus>(
+        '/api/factorio/update/status',
+      );
+      if (checkCancelledRef.current) return;
       if (statusFirst?.running) {
         setMode('progress');
         setStatus(statusFirst);
@@ -195,25 +221,43 @@ export function useFactorioUpdate(
         return;
       }
       const chk = await api<FactorioUpdateCheck>('/api/factorio/update/check');
+      if (checkCancelledRef.current) return;
       if (!chk?.ok) {
-        notifyErr(title, fuLocalizeError('', undefined, String(chk?.error || ''), t));
+        setMode('closed');
+        notifyErr(
+          title,
+          fuLocalizeError('', undefined, String(chk?.error || ''), t),
+        );
         return;
       }
       const updates = Array.isArray(chk.updates) ? chk.updates : [];
       if (!updates.length) {
+        setMode('closed');
         setUpdateAvailable(false);
-        notifyOk(title, t('about_factorio_update_no_updates', chk.current || '?', chk.latest_stable || '?'));
+        notifyOk(
+          title,
+          t(
+            'about_factorio_update_no_updates',
+            chk.current || '?',
+            chk.latest_stable || '?',
+          ),
+        );
         return;
       }
       setUpdateAvailable(true);
-      const stableTargets = updates.map((u) => String(u.to || '')).filter(Boolean);
+      const stableTargets = updates
+        .map((u) => String(u.to || ''))
+        .filter(Boolean);
       let releases = { stable: [] as string[], experimental: [] as string[] };
       try {
-        const rel = await api<{ ok?: boolean; releases?: unknown }>('/api/factorio/releases');
+        const rel = await api<{ ok?: boolean; releases?: unknown }>(
+          '/api/factorio/releases',
+        );
         if (rel?.ok) releases = collectReleaseVersions(rel.releases);
       } catch {
         /* optional */
       }
+      if (checkCancelledRef.current) return;
       const pick: FactorioPickState = {
         current: String(chk.current || ''),
         stableTargets,
@@ -225,7 +269,10 @@ export function useFactorioUpdate(
       setSelectedVersion(versions[0] || stableTargets[0] || '');
       setMode('pick');
     } catch (e) {
-      notifyApiError(title, e, t);
+      if (!checkCancelledRef.current) {
+        setMode('closed');
+        notifyApiError(title, e, t);
+      }
     } finally {
       setChecking(false);
     }
@@ -234,7 +281,9 @@ export function useFactorioUpdate(
   useEffect(() => {
     if (mode !== 'pick' || !pickState) return;
     const { versions } = buildPickVersionList(pickState, showExperimental);
-    setSelectedVersion((prev) => (versions.includes(prev) ? prev : versions[0] || ''));
+    setSelectedVersion((prev) =>
+      versions.includes(prev) ? prev : versions[0] || '',
+    );
   }, [mode, pickState, showExperimental]);
 
   useEffect(() => {

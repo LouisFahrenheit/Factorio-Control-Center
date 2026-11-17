@@ -14293,7 +14293,7 @@ table.data.data--history tbody tr:hover td {
 @media (min-width: 960px) {
   .control-tab__top {
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
   }
 }
 
@@ -14477,12 +14477,16 @@ table.data.data--history tbody tr:hover td {
 .control-tab__card--actions {
   padding: 10px;
   gap: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .control-tab__action-grid {
   display: grid;
   gap: 6px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
 }
 
 .control-tab__action-btn {
@@ -14535,6 +14539,7 @@ table.data.data--history tbody tr:hover td {
   align-items: stretch;
   gap: 8px;
   flex-wrap: nowrap;
+  flex: 1 1 auto;
 }
 
 .control-tab__card--launch .control-tab__rcon {
@@ -14545,7 +14550,7 @@ table.data.data--history tbody tr:hover td {
   gap: 8px 10px;
   min-width: 0;
   margin-top: 0;
-  padding: 8px 10px;
+  padding: 3px 8px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg-widget) 82%, var(--bg-main) 18%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
@@ -14554,8 +14559,9 @@ table.data.data--history tbody tr:hover td {
 .control-tab__history-btn {
   flex: 0 0 auto;
   align-self: stretch;
-  min-height: 36px;
-  padding: 6px 12px;
+  min-height: 28px;
+  height: 100%;
+  padding: 2px 8px;
   gap: 6px;
   white-space: nowrap;
 }
@@ -14570,6 +14576,9 @@ table.data.data--history tbody tr:hover td {
   flex: 1 1 12rem;
   min-width: 0;
   max-width: none;
+  min-height: 28px;
+  height: 100%;
+  padding: 2px 8px;
   text-align: left;
 }
 
@@ -15052,7 +15061,8 @@ select.input option:checked:hover {
     0 0 0 1px color-mix(in srgb, var(--accent) 18%, var(--border-dark) 82%);
 }
 
-.fu-modal.server-update-dialog--pick {
+.fu-modal.server-update-dialog--pick,
+.fu-modal.server-update-dialog--checking {
   width: min(440px, 94vw);
   overflow: visible;
   border: none;
@@ -15182,15 +15192,18 @@ select.input option:checked:hover {
   min-height: 0;
 }
 
-.fu-modal.server-update-dialog--pick .server-update-dialog__body {
+.fu-modal.server-update-dialog--pick .server-update-dialog__body,
+.fu-modal.server-update-dialog--checking .server-update-dialog__body {
   overflow: visible;
 }
 
-.fu-modal.server-update-dialog--pick .server-update-dialog__header {
+.fu-modal.server-update-dialog--pick .server-update-dialog__header,
+.fu-modal.server-update-dialog--checking .server-update-dialog__header {
   border-radius: 14px 14px 0 0;
 }
 
-.fu-modal.server-update-dialog--pick .server-update-dialog__footer {
+.fu-modal.server-update-dialog--pick .server-update-dialog__footer,
+.fu-modal.server-update-dialog--checking .server-update-dialog__footer {
   border-radius: 0 0 14px 14px;
 }
 

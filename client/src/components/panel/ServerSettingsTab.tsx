@@ -116,7 +116,7 @@ export function ServerSettingsTab({
               {!settings.fileMissing && (
                 <button
                   type="button"
-                  className="btn btn--with-icon"
+                  className="btn btn--danger btn--with-icon"
                   id="btnServerSettingsReset"
                   data-i18n="reset_btn"
                   disabled={settings.locked || settings.loading}

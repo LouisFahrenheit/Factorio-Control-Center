@@ -4586,7 +4586,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-top
   .instance-dashboard-stat--disk-warn
   .instance-dashboard-stat__icon {
-  color: var(--starting, #ffb833) !important;
   background: color-mix(
     in srgb,
     var(--starting, #ffb833) 14%,
@@ -4600,18 +4599,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 }
 
 .instance-dashboard-top
-  .instance-dashboard-stat--cpu-warn
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-warn
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-warn
-  .instance-dashboard-stat__value {
-  color: var(--starting, #ffb833);
-}
-
-.instance-dashboard-top
   .instance-dashboard-stat--cpu-danger
   .instance-dashboard-stat__icon,
 .instance-dashboard-top
@@ -4620,7 +4607,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
 .instance-dashboard-top
   .instance-dashboard-stat--disk-danger
   .instance-dashboard-stat__icon {
-  color: var(--error, #ff4d4d) !important;
   background: color-mix(
     in srgb,
     var(--error, #ff4d4d) 16%,
@@ -4631,18 +4617,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
     var(--error, #ff4d4d) 32%,
     transparent
   ) !important;
-}
-
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-danger
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-danger
-  .instance-dashboard-stat__value,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-danger
-  .instance-dashboard-stat__value {
-  color: var(--error, #ff4d4d) !important;
 }
 
 .instance-dashboard-top {
@@ -7119,8 +7093,8 @@ table.data thead th.saves-sort-th--asc::after {
   color: var(--text) !important;
 }
 
-.server-settings-tab__actions .btn:hover:not(:disabled),
-.server-settings-tab__toolbar .btn:hover:not(:disabled) {
+.server-settings-tab__actions .btn:not(.btn--danger):hover:not(:disabled),
+.server-settings-tab__toolbar .btn:not(.btn--danger):hover:not(:disabled) {
   background: var(--fcc-btn-bg-hover) !important;
   border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
   color: var(--text) !important;
