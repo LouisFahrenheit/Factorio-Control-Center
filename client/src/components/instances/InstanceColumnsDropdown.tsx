@@ -10,45 +10,41 @@ import {
 } from '@tabler/icons-react';
 import { FccSwitch } from '../FccSwitch';
 import { webEffectsReduced } from '../../theme/webEffects';
-import type {
-  ServerListColumnKey,
-  ServerListColumnVisibility,
-} from '../../lib/userPrefs';
 
-interface ColumnConfigItem {
-  key: ServerListColumnKey;
+export interface ColumnConfigItem<K extends string = string> {
+  key: K;
   labelKey: string;
+  /** When set, the row shows a mode select instead of an on/off switch. */
+  modes?: readonly { value: string; labelKey: string }[];
 }
 
-const COLUMN_CONFIG: ColumnConfigItem[] = [
-  { key: 'save', labelKey: 'instances_col_save' },
-  { key: 'access', labelKey: 'instances_col_access' },
-  { key: 'port', labelKey: 'instances_col_server_port' },
-  { key: 'rconPort', labelKey: 'instances_col_rcon_port' },
-  { key: 'version', labelKey: 'instances_col_version' },
-  { key: 'mods', labelKey: 'mods_btn' },
-  { key: 'online', labelKey: 'instances_col_online' },
-  { key: 'uptime', labelKey: 'server_uptime' },
-  { key: 'status', labelKey: 'instances_col_status' },
-];
-
-interface InstanceColumnsDropdownProps {
-  columns: ServerListColumnVisibility;
-  order: readonly ServerListColumnKey[];
-  onToggleColumn: (key: ServerListColumnKey, visible: boolean) => void;
-  onMoveColumn: (key: ServerListColumnKey, direction: 'up' | 'down') => void;
+interface InstanceColumnsDropdownProps<K extends string> {
+  config: readonly ColumnConfigItem<K>[];
+  columns: Record<K, boolean>;
+  order: readonly K[];
+  /** Distinguishes DOM ids when several tabs render this dropdown. */
+  idPrefix?: string;
+  onToggleColumn: (key: K, visible: boolean) => void;
+  /** Current value per column that declares `modes`. */
+  modeValues?: Partial<Record<K, string>>;
+  onChangeMode?: (key: K, value: string) => void;
+  onMoveColumn: (key: K, direction: 'up' | 'down') => void;
   onReset: () => void;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function InstanceColumnsDropdown({
+export function InstanceColumnsDropdown<K extends string>({
+  config,
   columns,
+  idPrefix = 'Instance',
+  modeValues,
+  onChangeMode,
   order,
   onToggleColumn,
   onMoveColumn,
   onReset,
   t,
-}: InstanceColumnsDropdownProps) {
+}: InstanceColumnsDropdownProps<K>) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const reduced = webEffectsReduced();
@@ -81,14 +77,14 @@ export function InstanceColumnsDropdown({
   }, [isOpen]);
 
   const orderedColumns = order
-    .map((key) => COLUMN_CONFIG.find((col) => col.key === key))
-    .filter((col): col is ColumnConfigItem => col !== undefined);
+    .map((key) => config.find((col) => col.key === key))
+    .filter((col): col is ColumnConfigItem<K> => col !== undefined);
 
   return (
     <div className="instance-columns-dropdown-wrap" ref={containerRef}>
       <button
         type="button"
-        id="btnInstanceColumnsToggle"
+        id={`btn${idPrefix}ColumnsToggle`}
         className="btn btn--toolbar-icon instance-servers-bar__columns-btn"
         title={t('instances_customize_columns') || 'Настройка колонок'}
         aria-label={t('instances_customize_columns') || 'Настройка колонок'}
@@ -102,7 +98,7 @@ export function InstanceColumnsDropdown({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            id="instanceColumnsMenu"
+            id={`${idPrefix.toLowerCase()}ColumnsMenu`}
             className="instance-columns-dropdown"
             role="menu"
             aria-label={t('instances_customize_columns') || 'Настройка колонок'}
@@ -163,13 +159,33 @@ export function InstanceColumnsDropdown({
                         <IconChevronDown size={12} />
                       </button>
                     </div>
-                    <FccSwitch
-                      id={`col_toggle_${col.key}`}
-                      checked={isChecked}
-                      onChange={(checked) => onToggleColumn(col.key, checked)}
-                      label={labelText}
-                      labelClassName="instance-columns-dropdown__label"
-                    />
+                    {col.modes && onChangeMode ? (
+                      <div className="instance-columns-dropdown__mode-row">
+                        <span className="instance-columns-dropdown__label">
+                          {labelText}
+                        </span>
+                        <select
+                          className="input instance-columns-dropdown__mode-select"
+                          aria-label={labelText}
+                          value={modeValues?.[col.key] ?? col.modes[0].value}
+                          onChange={(e) => onChangeMode(col.key, e.target.value)}
+                        >
+                          {col.modes.map((m) => (
+                            <option key={m.value} value={m.value}>
+                              {t(m.labelKey)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <FccSwitch
+                        id={`col_toggle_${idPrefix === 'Instance' ? '' : `${idPrefix.toLowerCase()}_`}${col.key}`}
+                        checked={isChecked}
+                        onChange={(checked) => onToggleColumn(col.key, checked)}
+                        label={labelText}
+                        labelClassName="instance-columns-dropdown__label"
+                      />
+                    )}
                   </motion.div>
                 );
               })}

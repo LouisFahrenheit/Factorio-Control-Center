@@ -19,11 +19,19 @@ import {
 } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
 import type { WebAccessInstance, WebUser } from '../../types/webUser';
+import type {
+  UserAccessColumnKey,
+  UserAccessColumnVisibility,
+} from '../../lib/userAccessColumnPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
 
 interface AccessUsersTableProps {
   users: WebUser[];
   accessInstances: WebAccessInstance[];
   selectedUser?: string;
+  columns: UserAccessColumnVisibility;
+  columnOrder: readonly UserAccessColumnKey[];
+  statusMode: StatusMode;
   isLastEnabledAdmin: (username: string) => boolean;
   onOpenEdit: (user: WebUser) => void;
   onToggleEnabled: (user: WebUser) => void;
@@ -37,16 +45,41 @@ interface AccessUsersTableProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-type UserSortCol = 'username' | 'role' | 'servers' | 'createdAt' | 'status';
+type UserSortCol =
+  | 'username'
+  | 'role'
+  | 'servers'
+  | 'createdAt'
+  | 'status'
+  | 'twofa';
+
+/** Relative column widths; normalized over the visible columns so the table always fills its width. */
+const NAME_WEIGHT = 20;
+const COLUMN_WEIGHT: Record<UserAccessColumnKey, number> = {
+  role: 12,
+  status: 10,
+  twofa: 8,
+  servers: 20,
+  perms: 24,
+  created: 16,
+};
 
 export function AccessUsersTable({
   users,
   accessInstances,
   selectedUser,
+  columns,
+  columnOrder,
+  statusMode,
   onOpenEdit,
   onRowClick,
   t,
 }: AccessUsersTableProps) {
+  const visibleColumns = columnOrder.filter((key) => columns[key] !== false);
+  const totalWeight =
+    NAME_WEIGHT + visibleColumns.reduce((sum, key) => sum + COLUMN_WEIGHT[key], 0);
+  const showStatusDot = statusMode === 'dot';
+  const showTwofaColumn = visibleColumns.includes('twofa');
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(0);
   const [isEntering, setIsEntering] = useState(!reduced);
@@ -83,6 +116,8 @@ export function AccessUsersTable({
         const aVal = a.enabled !== false ? 1 : 0;
         const bVal = b.enabled !== false ? 1 : 0;
         cmp = aVal - bVal;
+      } else if (sortCol === 'twofa') {
+        cmp = Number(!!a.twoFactorEnabled) - Number(!!b.twoFactorEnabled);
       } else if (sortCol === 'servers') {
         const aCount = a.instance_ids ? a.instance_ids.length : 999;
         const bCount = b.instance_ids ? b.instance_ids.length : 999;
@@ -139,32 +174,76 @@ export function AccessUsersTable({
               <th
                 className={`access-sort-th ${sortCol === 'username' ? 'access-sort-th--active' : ''} ${sortCol === 'username' && sortAsc ? 'access-sort-th--asc' : ''}`}
                 onClick={() => handleSort('username')}
-                style={{ width: '19%' }}
+                style={{ width: `${(NAME_WEIGHT / totalWeight) * 100}%` }}
               >
                 {t('web_user_label')}
               </th>
-              <th
-                className={`access-sort-th ${sortCol === 'role' ? 'access-sort-th--active' : ''} ${sortCol === 'role' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                onClick={() => handleSort('role')}
-                style={{ width: '13%' }}
-              >
-                {t('web_role_label')}
-              </th>
-              <th
-                className={`access-sort-th ${sortCol === 'servers' ? 'access-sort-th--active' : ''} ${sortCol === 'servers' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                onClick={() => handleSort('servers')}
-                style={{ width: '24%' }}
-              >
-                {t('instances_tab_servers')}
-              </th>
-              <th style={{ width: '28%' }}>{t('web_access_perms_label')}</th>
-              <th
-                className={`access-sort-th ${sortCol === 'createdAt' ? 'access-sort-th--active' : ''} ${sortCol === 'createdAt' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                onClick={() => handleSort('createdAt')}
-                style={{ width: '16%' }}
-              >
-                {t('web_user_created_at_label')}
-              </th>
+              {visibleColumns.map((key) => {
+                const width = `${(COLUMN_WEIGHT[key] / totalWeight) * 100}%`;
+                switch (key) {
+                  case 'role':
+                    return (
+                      <th
+                        key={key}
+                        className={`access-sort-th ${sortCol === 'role' ? 'access-sort-th--active' : ''} ${sortCol === 'role' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                        onClick={() => handleSort('role')}
+                        style={{ width }}
+                      >
+                        {t('web_role_label')}
+                      </th>
+                    );
+                  case 'status':
+                    return (
+                      <th
+                        key={key}
+                        className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                        onClick={() => handleSort('status')}
+                        style={{ width }}
+                      >
+                        {t('web_user_status_label')}
+                      </th>
+                    );
+                  case 'twofa':
+                    return (
+                      <th
+                        key={key}
+                        className={`access-sort-th ${sortCol === 'twofa' ? 'access-sort-th--active' : ''} ${sortCol === 'twofa' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                        onClick={() => handleSort('twofa')}
+                        style={{ width }}
+                      >
+                        2FA
+                      </th>
+                    );
+                  case 'servers':
+                    return (
+                      <th
+                        key={key}
+                        className={`access-sort-th ${sortCol === 'servers' ? 'access-sort-th--active' : ''} ${sortCol === 'servers' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                        onClick={() => handleSort('servers')}
+                        style={{ width }}
+                      >
+                        {t('instances_tab_servers')}
+                      </th>
+                    );
+                  case 'perms':
+                    return (
+                      <th key={key} style={{ width }}>
+                        {t('web_access_perms_label')}
+                      </th>
+                    );
+                  case 'created':
+                    return (
+                      <th
+                        key={key}
+                        className={`access-sort-th ${sortCol === 'createdAt' ? 'access-sort-th--active' : ''} ${sortCol === 'createdAt' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                        onClick={() => handleSort('createdAt')}
+                        style={{ width }}
+                      >
+                        {t('web_user_created_at_label')}
+                      </th>
+                    );
+                }
+              })}
             </tr>
           </thead>
           <motion.tbody
@@ -207,19 +286,21 @@ export function AccessUsersTable({
                   {/* 1. User */}
                   <td className="access-users-table__col-user">
                     <div className="access-user-table-cell">
-                      <span
-                        className={`access-user-status-dot ${enabled ? 'access-user-status-dot--on' : ''}`}
-                        title={
-                          enabled
-                            ? t('web_enabled_label')
-                            : t('web_user_status_off')
-                        }
-                      />
+                      {showStatusDot && (
+                        <span
+                          className={`access-user-status-dot ${enabled ? 'access-user-status-dot--on' : ''}`}
+                          title={
+                            enabled
+                              ? t('web_enabled_label')
+                              : t('web_user_status_off')
+                          }
+                        />
+                      )}
                       <div className="access-user-identity">
                         <span className="access-users-row__name">
                           {u.username}
                         </span>
-                        {u.twoFactorEnabled && (
+                        {u.twoFactorEnabled && !showTwofaColumn && (
                           <span
                             className="access-user-2fa-badge"
                             title={t('web_2fa_enabled_badge')}
@@ -232,51 +313,86 @@ export function AccessUsersTable({
                     </div>
                   </td>
 
-                  {/* 2. Role */}
-                  <td className="access-users-table__col-role">
-                    <span
-                      className={`access-users-role-text ${!enabled ? 'access-users-role-text--disabled' : ''}`}
-                    >
-                      {roleLabel(u.role, t)}
-                    </span>
-                  </td>
-
-                  {/* 3. Servers */}
-                  <td className="access-users-table__col-servers">
-                    <AccessSummaryList
-                      items={instanceLabels}
-                      maxVisible={2}
-                      variant="table"
-                      title={t('instances_tab_servers')}
-                    />
-                  </td>
-
-                  {/* 4. Permissions */}
-                  <td className="access-users-table__col-perms">
-                    {isAdminUser ? (
-                      <AccessSummaryList
-                        items={[t('web_users_full_perms')]}
-                        maxVisible={1}
-                        variant="table"
-                        title={t('web_access_perms_label')}
-                        highlightSingle
-                      />
-                    ) : (
-                      <AccessSummaryList
-                        items={tabLabels}
-                        maxVisible={2}
-                        variant="table"
-                        title={t('web_access_perms_label')}
-                      />
-                    )}
-                  </td>
-
-                  {/* 5. Created At */}
-                  <td className="access-users-table__col-created">
-                    <span className="access-users-created-text">
-                      {formatPanelDateTime(u.createdAt)}
-                    </span>
-                  </td>
+                  {visibleColumns.map((key) => {
+                    switch (key) {
+                      case 'role':
+                        return (
+                          <td key={key} className="access-users-table__col-role">
+                            <span
+                              className={`access-users-role-text ${!enabled ? 'access-users-role-text--disabled' : ''}`}
+                            >
+                              {roleLabel(u.role, t)}
+                            </span>
+                          </td>
+                        );
+                      case 'status':
+                        return (
+                          <td key={key}>
+                            <span className="access-users-created-text">
+                              {enabled
+                                ? t('web_enabled_label')
+                                : t('web_user_status_off')}
+                            </span>
+                          </td>
+                        );
+                      case 'twofa':
+                        return (
+                          <td key={key}>
+                            <span
+                              className={
+                                u.twoFactorEnabled
+                                  ? 'access-users-created-text'
+                                  : 'access-users-role-text--disabled'
+                              }
+                            >
+                              {u.twoFactorEnabled
+                                ? t('web_2fa_enabled_badge')
+                                : t('web_2fa_disabled_badge')}
+                            </span>
+                          </td>
+                        );
+                      case 'servers':
+                        return (
+                          <td key={key} className="access-users-table__col-servers">
+                            <AccessSummaryList
+                              items={instanceLabels}
+                              maxVisible={2}
+                              variant="table"
+                              title={t('instances_tab_servers')}
+                            />
+                          </td>
+                        );
+                      case 'perms':
+                        return (
+                          <td key={key} className="access-users-table__col-perms">
+                            {isAdminUser ? (
+                              <AccessSummaryList
+                                items={[t('web_users_full_perms')]}
+                                maxVisible={1}
+                                variant="table"
+                                title={t('web_access_perms_label')}
+                                highlightSingle
+                              />
+                            ) : (
+                              <AccessSummaryList
+                                items={tabLabels}
+                                maxVisible={2}
+                                variant="table"
+                                title={t('web_access_perms_label')}
+                              />
+                            )}
+                          </td>
+                        );
+                      case 'created':
+                        return (
+                          <td key={key} className="access-users-table__col-created">
+                            <span className="access-users-created-text">
+                              {formatPanelDateTime(u.createdAt)}
+                            </span>
+                          </td>
+                        );
+                    }
+                  })}
                 </motion.tr>
               );
             })}

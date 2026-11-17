@@ -6,7 +6,33 @@ import {
   IconRefresh,
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import type {
+  UserAccessColumnKey,
+  UserAccessColumnVisibility,
+} from '../../lib/userAccessColumnPrefs';
 import type { UserAccessViewMode } from '../../lib/userPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
+import {
+  InstanceColumnsDropdown,
+  type ColumnConfigItem,
+} from './InstanceColumnsDropdown';
+
+const USER_COLUMN_CONFIG: readonly ColumnConfigItem<UserAccessColumnKey>[] = [
+  { key: 'role', labelKey: 'web_role_label' },
+  {
+    key: 'status',
+    labelKey: 'web_user_status_label',
+    modes: [
+      { value: 'column', labelKey: 'web_status_mode_on' },
+      { value: 'dot', labelKey: 'web_status_mode_dot' },
+      { value: 'off', labelKey: 'web_status_mode_off' },
+    ],
+  },
+  { key: 'twofa', labelKey: 'web_2fa_column_label' },
+  { key: 'servers', labelKey: 'instances_tab_servers' },
+  { key: 'perms', labelKey: 'web_access_perms_label' },
+  { key: 'created', labelKey: 'web_user_created_at_label' },
+];
 
 interface AccessUsersBarProps {
   search: string;
@@ -17,6 +43,13 @@ interface AccessUsersBarProps {
   onStatusFilterChange: (value: string) => void;
   viewMode: UserAccessViewMode;
   onViewModeChange: (mode: UserAccessViewMode) => void;
+  columns: UserAccessColumnVisibility;
+  columnOrder: readonly UserAccessColumnKey[];
+  statusMode: StatusMode;
+  onStatusModeChange: (mode: StatusMode) => void;
+  onToggleColumn: (key: UserAccessColumnKey, visible: boolean) => void;
+  onMoveColumn: (key: UserAccessColumnKey, direction: 'up' | 'down') => void;
+  onResetColumns: () => void;
   shownCount?: number;
   totalCount?: number;
   onRefresh?: () => void;
@@ -34,6 +67,13 @@ export function AccessUsersBar({
   onStatusFilterChange,
   viewMode,
   onViewModeChange,
+  columns,
+  columnOrder,
+  statusMode,
+  onStatusModeChange,
+  onToggleColumn,
+  onMoveColumn,
+  onResetColumns,
   onRefresh,
   onCreate,
   onOpenHelp,
@@ -110,6 +150,23 @@ export function AccessUsersBar({
             <IconUserPlus size={17} />
             <span>{t('web_user_create_btn') || 'Создать пользователя'}</span>
           </button>
+        )}
+
+        {viewMode === 'table' && (
+          <InstanceColumnsDropdown
+            idPrefix="Access"
+            config={USER_COLUMN_CONFIG}
+            columns={columns}
+            order={columnOrder}
+            modeValues={{ status: statusMode }}
+            onChangeMode={(_key, value) =>
+              onStatusModeChange(value as StatusMode)
+            }
+            onToggleColumn={onToggleColumn}
+            onMoveColumn={onMoveColumn}
+            onReset={onResetColumns}
+            t={t}
+          />
         )}
 
         <button

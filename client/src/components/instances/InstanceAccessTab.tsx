@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState, type MouseEvent } from 'react';
 import type { WebUsersApi } from '../../hooks/useWebUsers';
 import { useUserAccessViewMode } from '../../hooks/useUserAccessViewMode';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import {
+  userAccessColumnPrefs,
+  userAccessStatusPrefs,
+} from '../../lib/userAccessColumnPrefs';
 import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
 import type { WebUser } from '../../types/webUser';
 import { listUserInstanceLabels, roleLabel } from '../../lib/webUserUtils';
@@ -19,6 +24,10 @@ interface InstanceAccessTabProps {
 
 export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTabProps) {
   const [viewMode, setViewMode] = useUserAccessViewMode();
+  const accessColumns = useColumnPrefs(
+    userAccessColumnPrefs,
+    userAccessStatusPrefs,
+  );
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -98,6 +107,13 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
             onStatusFilterChange={setStatusFilter}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            columns={accessColumns.columns}
+            columnOrder={accessColumns.order}
+            statusMode={accessColumns.statusMode}
+            onStatusModeChange={accessColumns.setStatusMode}
+            onToggleColumn={accessColumns.setColumn}
+            onMoveColumn={accessColumns.moveColumn}
+            onResetColumns={accessColumns.resetColumns}
             shownCount={filteredUsers.length}
             totalCount={totalCount}
             onRefresh={() => void webUsers.refresh()}
@@ -143,6 +159,12 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
               <AccessUsersTable
                 users={filteredUsers}
                 accessInstances={webUsers.accessInstances}
+                columns={{
+                  ...accessColumns.columns,
+                  status: accessColumns.statusMode === 'column',
+                }}
+                columnOrder={accessColumns.order}
+                statusMode={accessColumns.statusMode}
                 selectedUser={webUsers.editorMode === 'edit' ? webUsers.selectedUser : undefined}
                 isLastEnabledAdmin={webUsers.isLastEnabledAdmin}
                 onOpenEdit={webUsers.openEdit}

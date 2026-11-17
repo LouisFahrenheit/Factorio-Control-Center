@@ -20,11 +20,19 @@ import { webEffectsReduced } from '../../theme/webEffects';
 import type { InstanceItem } from '../../types/instance';
 import type { MaintenanceTask } from '../../types/maintenance';
 import { AccessSummaryList } from './AccessSummaryList';
+import type { StatusMode } from '../../lib/statusModePrefs';
+import type {
+  MaintenanceColumnKey,
+  MaintenanceColumnVisibility,
+} from '../../lib/maintenanceColumnPrefs';
 
 interface MaintenanceTaskTableProps {
   tasks: MaintenanceTask[];
   instances: InstanceItem[];
   selectedTaskId?: string;
+  columns: MaintenanceColumnVisibility;
+  columnOrder: readonly MaintenanceColumnKey[];
+  statusMode: StatusMode;
   onOpenEdit: (task: MaintenanceTask) => void;
   onToggleActive: (task: MaintenanceTask) => void;
   onRunNow: (task: MaintenanceTask) => void;
@@ -39,14 +47,32 @@ interface MaintenanceTaskTableProps {
 
 type MaintSortCol = 'status' | 'schedule' | 'servers' | 'next_fire';
 
+/** Relative column widths; normalized over the visible columns so the table always fills its width. */
+const SCHEDULE_WEIGHT = 24;
+const COLUMN_WEIGHT: Record<MaintenanceColumnKey, number> = {
+  status: 10,
+  next_fire: 18,
+  servers: 20,
+  actions: 18,
+  timezone: 14,
+};
+
 export function MaintenanceTaskTable({
   tasks,
   instances,
   selectedTaskId,
+  columns,
+  columnOrder,
+  statusMode,
   onOpenEdit,
   onRowClick,
   t,
 }: MaintenanceTaskTableProps) {
+  const visibleColumns = columnOrder.filter((key) => columns[key] !== false);
+  const totalWeight =
+    SCHEDULE_WEIGHT +
+    visibleColumns.reduce((sum, key) => sum + COLUMN_WEIGHT[key], 0);
+  const showStatusDot = statusMode === 'dot';
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(0);
   const [isEntering, setIsEntering] = useState(!reduced);
@@ -150,8 +176,9 @@ export function MaintenanceTaskTable({
         <table className="data access-users-table" id="tblMaintenanceTasks">
           <thead>
             <tr>
-              {/* Schedule */}
+              {/* Schedule (always visible) */}
               <th
+                style={{ width: `${(SCHEDULE_WEIGHT / totalWeight) * 100}%` }}
                 className={`access-sort-th ${
                   sortCol === 'schedule' ? 'access-sort-th--active' : ''
                 } ${sortCol === 'schedule' && sortAsc ? 'access-sort-th--asc' : ''}`}
@@ -159,29 +186,56 @@ export function MaintenanceTaskTable({
               >
                 {t('maintenance_col_schedule')}
               </th>
-
-              {/* Servers */}
-              <th
-                className={`access-sort-th ${
-                  sortCol === 'servers' ? 'access-sort-th--active' : ''
-                } ${sortCol === 'servers' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                onClick={() => handleSort('servers')}
-              >
-                {t('maintenance_col_servers')}
-              </th>
-
-              {/* Next fire */}
-              <th
-                className={`access-sort-th ${
-                  sortCol === 'next_fire' ? 'access-sort-th--active' : ''
-                } ${sortCol === 'next_fire' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                onClick={() => handleSort('next_fire')}
-              >
-                {t('maintenance_col_next_fire')}
-              </th>
-
-              {/* Stop options */}
-              <th>{t('maintenance_col_actions_on_stop')}</th>
+              {visibleColumns.map((key) => {
+                const width = `${(COLUMN_WEIGHT[key] / totalWeight) * 100}%`;
+                switch (key) {
+                    case 'status':
+                      return (
+                        <th
+                          key={key}
+                          style={{ width }}
+                          className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('status')}
+                        >
+                          {t('maintenance_col_status')}
+                        </th>
+                      );
+                    case 'next_fire':
+                      return (
+                        <th
+                          key={key}
+                          style={{ width }}
+                          className={`access-sort-th ${sortCol === 'next_fire' ? 'access-sort-th--active' : ''} ${sortCol === 'next_fire' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('next_fire')}
+                        >
+                          {t('maintenance_col_next_fire')}
+                        </th>
+                      );
+                    case 'servers':
+                      return (
+                        <th
+                          key={key}
+                          style={{ width }}
+                          className={`access-sort-th ${sortCol === 'servers' ? 'access-sort-th--active' : ''} ${sortCol === 'servers' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('servers')}
+                        >
+                          {t('maintenance_col_servers')}
+                        </th>
+                      );
+                  case 'actions':
+                    return (
+                      <th key={key} style={{ width }}>
+                        {t('maintenance_col_actions_on_stop')}
+                      </th>
+                    );
+                  case 'timezone':
+                    return (
+                      <th key={key} style={{ width }}>
+                        {t('maintenance_col_timezone')}
+                      </th>
+                    );
+                }
+              })}
             </tr>
           </thead>
           <motion.tbody
@@ -239,17 +293,19 @@ export function MaintenanceTaskTable({
                     onRowClick(task, ev.currentTarget, ev);
                   }}
                 >
-                  {/* Schedule */}
+                  {/* Schedule (always visible) */}
                   <td className="maintenance-table__col-schedule">
                     <div className="access-user-table-cell">
-                      <span
-                        className={`access-user-status-dot ${active ? 'access-user-status-dot--on' : ''}`}
-                        title={
-                          active
-                            ? t('maintenance_card_active')
-                            : t('maintenance_card_inactive')
-                        }
-                      />
+                      {showStatusDot && (
+                        <span
+                          className={`access-user-status-dot ${active ? 'access-user-status-dot--on' : ''}`}
+                          title={
+                            active
+                              ? t('maintenance_card_active')
+                              : t('maintenance_card_inactive')
+                          }
+                        />
+                      )}
                       <div className="maintenance-table-schedule-cell">
                         <span className="maintenance-table-schedule-title">
                           {scheduleTitle}
@@ -264,54 +320,78 @@ export function MaintenanceTaskTable({
                     </div>
                   </td>
 
-                  {/* Servers */}
-                  <td className="maintenance-table__col-servers">
-                    <AccessSummaryList
-                      items={
-                        isAllServers
-                          ? [t('maintenance_instance_all')]
-                          : rawIds.map((id) => {
-                              const row = instances.find(
-                                (x) => String(x.id || '') === id,
-                              );
-                              return row
-                                ? String(row.name || id).trim() || id
-                                : id;
-                            })
-                      }
-                      maxVisible={2}
-                      variant="table"
-                      title={t('maintenance_col_servers')}
-                    />
-                  </td>
-
-                  {/* Next fire */}
-                  <td className="maintenance-table__col-next-fire">
-                    <span className="maintenance-table-next-fire-cell">
-                      {task.manual_only
-                        ? t('maintenance_card_next_manual')
-                        : nextShown}
-                    </span>
-                  </td>
-
-                  {/* Stop options */}
-                  <td className="maintenance-table__col-options">
-                    <AccessSummaryList
-                      items={[
-                        ...(isServer ? [t('maintenance_card_tag_server')] : []),
-                        ...(isMods ? [t('maintenance_card_tag_mods')] : []),
-                        ...(isMaint
-                          ? [t('maintenance_card_tag_maintenance')]
-                          : []),
-                        ...(isRestartOnly
-                          ? [t('maintenance_card_tag_none')]
-                          : []),
-                      ]}
-                      maxVisible={3}
-                      variant="table"
-                      title={t('maintenance_col_actions_on_stop')}
-                    />
-                  </td>
+                  {visibleColumns.map((key) => {
+                    switch (key) {
+                      case 'status':
+                        return (
+                          <td key={key}>
+                            <span className="access-users-created-text">
+                              {active
+                                ? t('maintenance_card_active')
+                                : t('maintenance_card_inactive')}
+                            </span>
+                          </td>
+                        );
+                      case 'next_fire':
+                        return (
+                          <td key={key} className="maintenance-table__col-next-fire">
+                            <span className="maintenance-table-next-fire-cell">
+                              {task.manual_only
+                                ? t('maintenance_card_next_manual')
+                                : nextShown}
+                            </span>
+                          </td>
+                        );
+                      case 'servers':
+                        return (
+                          <td key={key} className="maintenance-table__col-servers">
+                            <AccessSummaryList
+                              items={
+                                isAllServers
+                                  ? [t('maintenance_instance_all')]
+                                  : rawIds.map((id) => {
+                                      const row = instances.find(
+                                        (x) => String(x.id || '') === id,
+                                      );
+                                      return row
+                                        ? String(row.name || id).trim() || id
+                                        : id;
+                                    })
+                              }
+                              maxVisible={2}
+                              variant="table"
+                              title={t('maintenance_col_servers')}
+                            />
+                          </td>
+                        );
+                      case 'actions':
+                        return (
+                          <td key={key} className="maintenance-table__col-options">
+                            <AccessSummaryList
+                              items={[
+                                ...(isServer ? [t('maintenance_card_tag_server')] : []),
+                                ...(isMods ? [t('maintenance_card_tag_mods')] : []),
+                                ...(isMaint
+                                  ? [t('maintenance_card_tag_maintenance')]
+                                  : []),
+                                ...(isRestartOnly
+                                  ? [t('maintenance_card_tag_none')]
+                                  : []),
+                              ]}
+                              maxVisible={3}
+                              variant="table"
+                              title={t('maintenance_col_actions_on_stop')}
+                            />
+                          </td>
+                        );
+                      case 'timezone':
+                        return (
+                          <td key={key} className="instance-mono-cell">
+                            {task.timezone || '—'}
+                          </td>
+                        );
+                    }
+                  })}
                 </motion.tr>
               );
             })}

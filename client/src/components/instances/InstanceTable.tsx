@@ -6,7 +6,7 @@ import {
   DEFAULT_SERVER_LIST_COLUMN_ORDER,
   type ServerListColumnKey,
   type ServerListColumnVisibility,
-} from '../../lib/userPrefs';
+} from '../../lib/serverListColumnPrefs';
 import {
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,

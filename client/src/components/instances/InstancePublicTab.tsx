@@ -30,6 +30,27 @@ import {
 import { webEffectsReduced } from '../../theme/webEffects';
 import { notifyOk } from '../../lib/notify';
 import { api } from '../../api/client';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import {
+  publicColumnPrefs,
+  type PublicColumnKey,
+} from '../../lib/publicColumnPrefs';
+import { formatInstanceGameVersion, formatUptime } from '../../lib/instanceUtils';
+import {
+  InstanceColumnsDropdown,
+  type ColumnConfigItem,
+} from './InstanceColumnsDropdown';
+
+const PUBLIC_COLUMN_CONFIG: readonly ColumnConfigItem<PublicColumnKey>[] = [
+  { key: 'status', labelKey: 'web_user_status_label' },
+  { key: 'visibility', labelKey: 'visibility' },
+  { key: 'online', labelKey: 'instances_col_online' },
+  { key: 'version', labelKey: 'instances_col_version' },
+  { key: 'mods', labelKey: 'mods_btn' },
+  { key: 'uptime', labelKey: 'server_uptime' },
+  { key: 'address', labelKey: 'connection_address' },
+  { key: 'description', labelKey: 'description' },
+];
 
 interface InstancePublicTabProps {
   instances: InstanceItem[];
@@ -43,6 +64,10 @@ type PublicSortCol =
   | 'name'
   | 'status'
   | 'visibility'
+  | 'online'
+  | 'version'
+  | 'mods'
+  | 'uptime'
   | 'address'
   | 'description';
 
@@ -66,6 +91,12 @@ export function InstancePublicTab({
   const [menuItem, setMenuItem] = useState<InstanceItem | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [copied, setCopied] = useState(false);
+
+  const publicColumns = useColumnPrefs(publicColumnPrefs);
+  const visibleColumns = publicColumns.order.filter(
+    (key) => publicColumns.columns[key] !== false,
+  );
+  const placeholder = t('server_uptime_placeholder');
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -138,6 +169,18 @@ export function InstancePublicTab({
         cmp = Number(a.status === 'running') - Number(b.status === 'running');
       } else if (sortCol === 'visibility') {
         cmp = (a.isPublic ? 1 : 0) - (b.isPublic ? 1 : 0);
+      } else if (sortCol === 'online') {
+        cmp = Number(a.onlineCount || 0) - Number(b.onlineCount || 0);
+      } else if (sortCol === 'mods') {
+        cmp = Number(a.modsCount || 0) - Number(b.modsCount || 0);
+      } else if (sortCol === 'uptime') {
+        cmp = Number(a.uptimeSeconds ?? -1) - Number(b.uptimeSeconds ?? -1);
+      } else if (sortCol === 'version') {
+        cmp = String(a.gameVersion || '').localeCompare(
+          String(b.gameVersion || ''),
+          undefined,
+          { numeric: true },
+        );
       } else if (sortCol === 'address') {
         const addrA =
           a.publicConnectionAddress ||
@@ -416,6 +459,16 @@ export function InstancePublicTab({
               <IconEyeOff size={17} />
               <span>{t('public_disable_all_btn') || 'Скрыть все'}</span>
             </button>
+            <InstanceColumnsDropdown
+              idPrefix="Public"
+              config={PUBLIC_COLUMN_CONFIG}
+              columns={publicColumns.columns}
+              order={publicColumns.order}
+              onToggleColumn={publicColumns.setColumn}
+              onMoveColumn={publicColumns.moveColumn}
+              onReset={publicColumns.resetColumns}
+              t={t}
+            />
             <SectionHelpButton
               idPrefix="public"
               content={PUBLIC_HELP}
@@ -465,30 +518,90 @@ export function InstancePublicTab({
                     >
                       {t('instances_col_name') || 'Имя'}
                     </th>
-                    <th
-                      className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('status')}
-                    >
-                      {t('web_user_status_label') || 'Статус'}
-                    </th>
-                    <th
-                      className={`access-sort-th ${sortCol === 'visibility' ? 'access-sort-th--active' : ''} ${sortCol === 'visibility' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('visibility')}
-                    >
-                      {t('visibility') || 'Видимость'}
-                    </th>
-                    <th
-                      className={`access-sort-th ${sortCol === 'address' ? 'access-sort-th--active' : ''} ${sortCol === 'address' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('address')}
-                    >
-                      {t('connection_address') || 'IP-адрес для подключения'}
-                    </th>
-                    <th
-                      className={`access-sort-th ${sortCol === 'description' ? 'access-sort-th--active' : ''} ${sortCol === 'description' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('description')}
-                    >
-                      {t('description') || 'Описание'}
-                    </th>
+                    {visibleColumns.map((key) => {
+                      switch (key) {
+                    case 'status':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('status')}
+                        >
+                          {t('web_user_status_label') || 'Статус'}
+                        </th>
+                      );
+                    case 'visibility':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'visibility' ? 'access-sort-th--active' : ''} ${sortCol === 'visibility' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('visibility')}
+                        >
+                          {t('visibility') || 'Видимость'}
+                        </th>
+                      );
+                    case 'online':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'online' ? 'access-sort-th--active' : ''} ${sortCol === 'online' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('online')}
+                        >
+                          {t('instances_col_online') || 'Онлайн'}
+                        </th>
+                      );
+                    case 'version':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'version' ? 'access-sort-th--active' : ''} ${sortCol === 'version' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('version')}
+                        >
+                          {t('instances_col_version') || 'Версия'}
+                        </th>
+                      );
+                    case 'mods':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'mods' ? 'access-sort-th--active' : ''} ${sortCol === 'mods' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('mods')}
+                        >
+                          {t('mods_btn') || 'Моды'}
+                        </th>
+                      );
+                    case 'uptime':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'uptime' ? 'access-sort-th--active' : ''} ${sortCol === 'uptime' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('uptime')}
+                        >
+                          {t('server_uptime') || 'Аптайм'}
+                        </th>
+                      );
+                    case 'address':
+                      return (
+                        <th
+                          key={key}
+                          className={`access-sort-th ${sortCol === 'address' ? 'access-sort-th--active' : ''} ${sortCol === 'address' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('address')}
+                        >
+                          {t('connection_address') || 'IP-адрес для подключения'}
+                        </th>
+                      );
+                    case 'description':
+                      return (
+                        <th
+                          key={key}
+                          className={`pub-th-desc access-sort-th ${sortCol === 'description' ? 'access-sort-th--active' : ''} ${sortCol === 'description' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                          onClick={() => handleSort('description')}
+                        >
+                          {t('description') || 'Описание'}
+                        </th>
+                      );
+                      }
+                    })}
                   </tr>
                 </thead>
                 <motion.tbody
@@ -528,87 +641,128 @@ export function InstancePublicTab({
                           <span className="pub-server-name">{item.name}</span>
                         </td>
 
-                        {/* 2. Status */}
-                        <td>
-                          <span className="pub-visibility-badge">
-                            <span
-                              className={
-                                'instance-run-dot' +
-                                (item.status === 'running'
-                                  ? ' instance-run-dot--on'
-                                  : '')
-                              }
-                            />
-                            {item.status === 'running'
-                              ? t('status_running') || 'Запущен'
-                              : t('status_stopped') || 'Остановлен'}
-                          </span>
-                        </td>
-
-                        {/* 2. Visibility */}
-                        <td>
-                          <span
-                            className={`pub-visibility-badge ${isPublic ? 'pub-visibility-badge--on' : 'pub-visibility-badge--off'}`}
-                            title={
-                              isPublic
-                                ? t('public_server_visible_tooltip') ||
-                                  'Отображается на публичной странице'
-                                : t('public_server_hidden_tooltip') ||
-                                  'Скрыт с публичной страницы'
-                            }
-                          >
-                            {isPublic ? (
-                              <>
-                                <IconEye size={14} />
-                                <span>
-                                  {t('public_server_status_public') ||
-                                    t('server_settings_visibility_public') ||
-                                    'Публичный'}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <IconEyeOff size={14} />
-                                <span>
-                                  {t('public_server_status_hidden') ||
-                                    'Скрытый'}
-                                </span>
-                              </>
-                            )}
-                          </span>
-                        </td>
-
-                        {/* 3. Connection Address */}
-                        <td>
-                          <span
-                            className={`pub-address-badge ${isAutoAddr ? 'pub-address-badge--auto' : ''}`}
-                            title={
-                              isAutoAddr
-                                ? t('public_addr_auto_tooltip') ||
-                                  'Адрес определяется автоматически'
-                                : t('public_addr_custom_tooltip') ||
-                                  'Задан статический адрес'
-                            }
-                          >
-                            {effectiveAddr}
-                          </span>
-                        </td>
-
-                        {/* 4. Description */}
-                        <td className="pub-col-desc">
-                          {item.publicDescription ? (
-                            <span
-                              className="pub-desc-text"
-                              title={item.publicDescription}
-                            >
-                              {item.publicDescription}
-                            </span>
-                          ) : (
-                            <span className="pub-desc-text pub-desc-text--empty">
-                              {t('no_description') || 'Нет описания'}
-                            </span>
-                          )}
-                        </td>
+                        {visibleColumns.map((key) => {
+                          switch (key) {
+                            case 'status':
+                              return (
+                                <td key={key}>
+                                  <span className="pub-visibility-badge">
+                                    <span
+                                      className={
+                                        'instance-run-dot' +
+                                        (item.status === 'running'
+                                          ? ' instance-run-dot--on'
+                                          : '')
+                                      }
+                                    />
+                                    {item.status === 'running'
+                                      ? t('status_running') || 'Запущен'
+                                      : t('status_stopped') || 'Остановлен'}
+                                  </span>
+                                </td>
+                              );
+                            case 'visibility':
+                              return (
+                                <td key={key}>
+                                  <span
+                                    className={`pub-visibility-badge ${isPublic ? 'pub-visibility-badge--on' : 'pub-visibility-badge--off'}`}
+                                    title={
+                                      isPublic
+                                        ? t('public_server_visible_tooltip') ||
+                                          'Отображается на публичной странице'
+                                        : t('public_server_hidden_tooltip') ||
+                                          'Скрыт с публичной страницы'
+                                    }
+                                  >
+                                    {isPublic ? (
+                                      <>
+                                        <IconEye size={14} />
+                                        <span>
+                                          {t('public_server_status_public') ||
+                                            t('server_settings_visibility_public') ||
+                                            'Публичный'}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <IconEyeOff size={14} />
+                                        <span>
+                                          {t('public_server_status_hidden') ||
+                                            'Скрытый'}
+                                        </span>
+                                      </>
+                                    )}
+                                  </span>
+                                </td>
+                              );
+                            case 'online':
+                              return (
+                                <td key={key} className="instance-num-cell">
+                                  {String(item.onlineCount || 0)}
+                                </td>
+                              );
+                            case 'version':
+                              return (
+                                <td key={key} className="instance-mono-cell">
+                                  {formatInstanceGameVersion(
+                                    item.gameVersion,
+                                    placeholder,
+                                  )}
+                                </td>
+                              );
+                            case 'mods':
+                              return (
+                                <td key={key} className="instance-num-cell">
+                                  {Number(item.modsCount || 0) > 0
+                                    ? String(item.modsCount)
+                                    : t('instances_mods_none')}
+                                </td>
+                              );
+                            case 'uptime':
+                              return (
+                                <td key={key} className="instance-mono-cell">
+                                  {typeof item.uptimeSeconds === 'number' &&
+                                  item.uptimeSeconds >= 0
+                                    ? formatUptime(item.uptimeSeconds, placeholder)
+                                    : placeholder}
+                                </td>
+                              );
+                            case 'address':
+                              return (
+                                <td key={key}>
+                                  <span
+                                    className={`pub-address-badge ${isAutoAddr ? 'pub-address-badge--auto' : ''}`}
+                                    title={
+                                      isAutoAddr
+                                        ? t('public_addr_auto_tooltip') ||
+                                          'Адрес определяется автоматически'
+                                        : t('public_addr_custom_tooltip') ||
+                                          'Задан статический адрес'
+                                    }
+                                  >
+                                    {effectiveAddr}
+                                  </span>
+                                </td>
+                              );
+                            case 'description':
+                              return (
+                                <td key={key} className="pub-col-desc">
+                                  {item.publicDescription ? (
+                                    <span
+                                      className="pub-desc-text"
+                                      title={item.publicDescription}
+                                    >
+                                      {item.publicDescription}
+                                    </span>
+                                  ) : (
+                                    <span className="pub-desc-text pub-desc-text--empty">
+                                      {t('no_description') || 'Нет описания'}
+                                    </span>
+                                  )}
+                                </td>
+                              );
+                          }
+                        })}
                       </motion.tr>
                     );
                   })}

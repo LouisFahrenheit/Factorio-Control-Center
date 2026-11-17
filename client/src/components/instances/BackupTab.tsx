@@ -25,6 +25,9 @@ import {
   LIST_ROW_VARIANTS,
 } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
+import { formatRelativeAge } from '../../lib/datetimeUtils';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import { backupColumnPrefs } from '../../lib/backupColumnPrefs';
 import { openFccConfirmModal } from '../../lib/fccConfirmModal';
 import { BackupRestoreModal } from '../modals/BackupRestoreModal';
 import { BackupCreateModal } from '../modals/BackupCreateModal';
@@ -81,6 +84,11 @@ export function BackupTab({ backup, t }: BackupTabProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadDragOver, setIsUploadDragOver] = useState(false);
+
+  const backupColumns = useColumnPrefs(backupColumnPrefs);
+  const visibleColumns = backupColumns.order.filter(
+    (key) => backupColumns.columns[key] !== false,
+  );
 
   // Search & Filter
   const [search, setSearch] = useState('');
@@ -428,6 +436,11 @@ export function BackupTab({ backup, t }: BackupTabProps) {
           onOpenCreate={() => setCreateModalOpen(true)}
           onOpenAutoSettings={() => setAutoSettingsModalOpen(true)}
           onTriggerUpload={() => fileInputRef.current?.click()}
+          columns={backupColumns.columns}
+          columnOrder={backupColumns.order}
+          onToggleColumn={backupColumns.setColumn}
+          onMoveColumn={backupColumns.moveColumn}
+          onResetColumns={backupColumns.resetColumns}
           autoEnabled={effectiveEnabled}
           creating={backup.creating}
           uploading={backup.uploading}
@@ -504,30 +517,61 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                     <th style={{ textAlign: 'left' }}>
                       {t('backup_col_name') || 'Название'}
                     </th>
-                    <th
-                      style={{ textAlign: 'left' }}
-                      className={`backup-sort-th ${sortCol === 'date' ? 'backup-sort-th--active' : ''} ${sortCol === 'date' && sortAsc ? 'backup-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('date')}
-                    >
-                      {t('backup_col_date')}
-                    </th>
-                    <th
-                      style={{ textAlign: 'center' }}
-                      className={`backup-sort-th ${sortCol === 'type' ? 'backup-sort-th--active' : ''} ${sortCol === 'type' && sortAsc ? 'backup-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('type')}
-                    >
-                      {t('backup_col_type')}
-                    </th>
-                    <th
-                      style={{ textAlign: 'center' }}
-                      className={`backup-sort-th ${sortCol === 'size' ? 'backup-sort-th--active' : ''} ${sortCol === 'size' && sortAsc ? 'backup-sort-th--asc' : ''}`}
-                      onClick={() => handleSort('size')}
-                    >
-                      {t('backup_col_size')}
-                    </th>
-                    <th style={{ textAlign: 'left' }}>
-                      {t('backup_col_sections')}
-                    </th>
+                    {visibleColumns.map((key) => {
+                      switch (key) {
+                        case 'date':
+                          return (
+                            <th
+                              key={key}
+                              style={{ textAlign: 'center' }}
+                              className={`backup-sort-th ${sortCol === 'date' ? 'backup-sort-th--active' : ''} ${sortCol === 'date' && sortAsc ? 'backup-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('date')}
+                            >
+                              {t('backup_col_date')}
+                            </th>
+                          );
+                        case 'age':
+                          return (
+                            <th key={key} style={{ textAlign: 'center' }}>
+                              {t('backup_col_age')}
+                            </th>
+                          );
+                        case 'type':
+                          return (
+                            <th
+                              key={key}
+                              style={{ textAlign: 'center' }}
+                              className={`backup-sort-th ${sortCol === 'type' ? 'backup-sort-th--active' : ''} ${sortCol === 'type' && sortAsc ? 'backup-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('type')}
+                            >
+                              {t('backup_col_type')}
+                            </th>
+                          );
+                        case 'size':
+                          return (
+                            <th
+                              key={key}
+                              style={{ textAlign: 'center' }}
+                              className={`backup-sort-th ${sortCol === 'size' ? 'backup-sort-th--active' : ''} ${sortCol === 'size' && sortAsc ? 'backup-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('size')}
+                            >
+                              {t('backup_col_size')}
+                            </th>
+                          );
+                        case 'version':
+                          return (
+                            <th key={key} style={{ textAlign: 'center' }}>
+                              {t('backup_col_version')}
+                            </th>
+                          );
+                        case 'sections':
+                          return (
+                            <th key={key} style={{ textAlign: 'center' }}>
+                              {t('backup_col_sections')}
+                            </th>
+                          );
+                      }
+                    })}
                   </tr>
                 </thead>
                 <motion.tbody
@@ -573,59 +617,99 @@ export function BackupTab({ backup, t }: BackupTabProps) {
                           </div>
                         </td>
 
-                        {/* Дата */}
-                        <td className="backup-tab__cell">
-                          <span className="backup-tab__file-date">
-                            {formatDate(entry.createdAt)}
-                          </span>
-                        </td>
-
-                        {/* Тип (Auto / Manual / Uploaded) */}
-                        <td
-                          className="backup-tab__cell"
-                          style={{ textAlign: 'center' }}
-                        >
-                          {entry.type === 'auto' ? (
-                            <span className="backup-tab__type-badge backup-tab__type-badge--auto">
-                              {t('backup_type_auto')}
-                            </span>
-                          ) : entry.type === 'uploaded' ? (
-                            <span className="backup-tab__type-badge backup-tab__type-badge--uploaded">
-                              {t('backup_type_uploaded')}
-                            </span>
-                          ) : (
-                            <span className="backup-tab__type-badge backup-tab__type-badge--manual">
-                              {t('backup_type_manual')}
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Размер */}
-                        <td
-                          className="backup-tab__cell"
-                          style={{ textAlign: 'center' }}
-                        >
-                          <span className="backup-tab__size-badge">
-                            {entry.sizeBytes > 0
-                              ? formatBytes(entry.sizeBytes)
-                              : '—'}
-                          </span>
-                        </td>
-
-                        {/* Состав архива */}
-                        <td className="backup-tab__cell">
-                          <div className="backup-tab__tags">
-                            {entry.sections && entry.sections.length > 0 ? (
-                              entry.sections.map((sec: string) => (
-                                <span key={sec} className="backup-tab__tag">
-                                  {TAG_LABELS[sec] || sec}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="backup-tab__tag">DB</span>
-                            )}
-                          </div>
-                        </td>
+                        {visibleColumns.map((key) => {
+                          switch (key) {
+                            case 'date':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  <span className="backup-tab__file-date">
+                                    {formatDate(entry.createdAt)}
+                                  </span>
+                                </td>
+                              );
+                            case 'age':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  <span className="backup-tab__file-date">
+                                    {formatRelativeAge(entry.createdAt)}
+                                  </span>
+                                </td>
+                              );
+                            case 'type':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  {entry.type === 'auto' ? (
+                                    <span className="backup-tab__type-badge backup-tab__type-badge--auto">
+                                      {t('backup_type_auto')}
+                                    </span>
+                                  ) : entry.type === 'uploaded' ? (
+                                    <span className="backup-tab__type-badge backup-tab__type-badge--uploaded">
+                                      {t('backup_type_uploaded')}
+                                    </span>
+                                  ) : (
+                                    <span className="backup-tab__type-badge backup-tab__type-badge--manual">
+                                      {t('backup_type_manual')}
+                                    </span>
+                                  )}
+                                </td>
+                              );
+                            case 'size':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  <span className="backup-tab__size-badge">
+                                    {entry.sizeBytes > 0
+                                      ? formatBytes(entry.sizeBytes)
+                                      : '—'}
+                                  </span>
+                                </td>
+                              );
+                            case 'version':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  {entry.fccVersion || '—'}
+                                </td>
+                              );
+                            case 'sections':
+                              return (
+                                <td
+                                  key={key}
+                                  className="backup-tab__cell"
+                                  style={{ textAlign: 'center' }}
+                                >
+                                  <div className="backup-tab__tags">
+                                    {entry.sections && entry.sections.length > 0
+                                      ? entry.sections
+                                          .map(
+                                            (sec: string) =>
+                                              TAG_LABELS[sec] || sec,
+                                          )
+                                          .join(', ')
+                                      : 'DB'}
+                                  </div>
+                                </td>
+                              );
+                          }
+                        })}
                       </motion.tr>
                     );
                   })}

@@ -22,7 +22,7 @@
   padding: 6px 14px;
   font-size: 0.88rem;
   font-weight: 600;
-  border-radius: 7px;
+  border-radius: var(--r-md, 8px);
   background: var(--fcc-btn-bg);
   color: var(--text);
   border: 1px solid var(--fcc-btn-border);
@@ -121,9 +121,9 @@
 .control-tab__card--actions {
   padding: 10px;
   background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
-  border-radius: 9px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--fcc-surface-border);
+  border-radius: var(--r-lg, 12px);
+  box-shadow: var(--fcc-surface-shadow);
 }
 
 .control-tab__action-grid {
@@ -140,7 +140,7 @@
   padding: 7px 12px !important;
   font-size: 0.88rem !important;
   font-weight: 600 !important;
-  border-radius: 7px !important;
+  border-radius: var(--r-md, 8px) !important;
   text-align: center;
 }
 
@@ -296,7 +296,7 @@
   padding: 6px 14px;
   font-size: 0.88rem;
   font-weight: 600;
-  border-radius: 7px;
+  border-radius: var(--r-md, 8px);
   background: var(--fcc-btn-bg);
   color: var(--text);
   border: 1px solid var(--fcc-btn-border);

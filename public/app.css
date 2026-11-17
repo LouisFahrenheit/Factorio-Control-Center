@@ -1060,19 +1060,33 @@ body::after {
 .input {
   background: var(--bg-input);
   color: var(--text);
-  border: 1px solid var(--border-dark);
-  border-top-color: var(--border-inset-t);
-  border-left-color: var(--border-inset-t);
-  padding: 5px 8px;
-  border-radius: 0;
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%);
+  padding: 6px 10px;
+  border-radius: var(--r-md, 8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
   min-width: 200px;
   flex: 1;
   max-width: 420px;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.input:hover:not(:focus):not(:disabled):not(.is-locked) {
+  border-color: color-mix(in srgb, var(--border) 68%, var(--border-dark) 32%);
 }
 
 .input:focus {
   outline: none;
-  border: 1px solid var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border) 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    var(
+      --fcc-focus-ring,
+      0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)
+    );
 }
 
 .input:disabled,
@@ -2244,18 +2258,30 @@ table.data.data--save-mods tbody tr:hover td {
   align-items: center;
   min-height: 34px;
   padding: 0 10px 0 34px;
-  border-radius: 8px;
+  border-radius: var(--r-md, 8px);
   background: color-mix(in srgb, var(--bg-main) 72%, var(--bg-widget) 28%);
-  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition:
     border-color 0.18s var(--fcc-hover-ease),
+    box-shadow 0.18s var(--fcc-hover-ease),
     background-color 0.18s var(--fcc-hover-ease);
 }
 
+.input-with-icon:hover:not(:focus-within) {
+  border-color: color-mix(in srgb, var(--border) 62%, var(--border-dark) 38%);
+}
+
 .input-with-icon:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--border-dark) 68%);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border) 45%);
   background: color-mix(in srgb, var(--bg-main) 62%, var(--bg-widget) 38%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    var(
+      --fcc-focus-ring,
+      0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)
+    );
 }
 
 .input-with-icon__icon {
@@ -2798,7 +2824,7 @@ table.data.data--modpacks tbody tr:hover td {
   padding: 6px 14px;
   margin: 0;
   border: 1px solid var(--fcc-btn-border);
-  border-radius: 7px;
+  border-radius: var(--r-md, 8px);
   background: var(--fcc-btn-bg);
   color: var(--text);
   box-shadow: var(--fcc-btn-shadow);
@@ -4063,12 +4089,19 @@ table.data.data--modpacks tbody tr:hover td {
 }
 
 .tab-panels {
-  border: 1px solid color-mix(in srgb, var(--border-dark) 90%, transparent);
-  border-radius: 10px;
+  border: 1px solid
+    var(
+      --fcc-surface-border,
+      color-mix(in srgb, var(--border-dark) 90%, transparent)
+    );
+  border-radius: var(--r-lg, 12px);
   background: color-mix(in srgb, var(--bg-main) 58%, var(--bg-widget) 42%);
   padding: 14px;
   margin-bottom: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: var(
+    --fcc-surface-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.05)
+  );
 }
 
 .tab-panels .btn {
@@ -4143,33 +4176,35 @@ table.data.data--modpacks tbody tr:hover td {
 .panel {
   position: relative;
   isolation: isolate;
-  background: linear-gradient(to bottom, #595959 0%, #4a4a4a 45%, #3d3d3d 100%);
-  border: 1px solid var(--border-dark);
-  border-top-color: var(--btn-top);
-  border-left-color: #6b6b6b;
-  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-main) 52%, var(--bg-widget) 48%);
+  border: 1px solid
+    var(
+      --fcc-surface-border,
+      color-mix(in srgb, var(--border-dark) 85%, transparent)
+    );
+  border-radius: var(--r-lg, 12px);
   margin-bottom: 12px;
   padding: 0;
   overflow: hidden;
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: var(
+    --fcc-surface-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.065),
+    0 4px 16px rgba(0, 0, 0, 0.28)
+  );
 }
 
 .panel__title {
   margin: 0;
-  padding: 8px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
-  font-size: 10pt;
-  font-weight: bold;
-  color: var(--text);
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  padding: 9px 14px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 82%, transparent);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-widget) 72%, var(--bg-main) 28%);
+  text-shadow: none;
 }
 
 .instance-screen__header {
@@ -4319,10 +4354,14 @@ table.data.data--modpacks tbody tr:hover td {
   flex-direction: column;
   gap: 12px;
   padding: 16px 18px 14px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--bg-widget) 92%, var(--bg-main) 8%);
-  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+  border-radius: var(--r-lg, 12px);
+  background: color-mix(in srgb, var(--bg-widget) 88%, var(--bg-main) 12%);
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.09) 48%, var(--border-dark) 52%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.065),
+    0 4px 18px -2px rgba(0, 0, 0, 0.32),
+    0 1px 3px rgba(0, 0, 0, 0.22);
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,
@@ -4337,10 +4376,11 @@ table.data.data--modpacks tbody tr:hover td {
 
 .instance-card:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border) 45%);
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border) 52%);
   box-shadow:
-    0 8px 26px rgba(0, 0, 0, 0.42),
-    0 0 14px rgba(var(--accent-rgb), 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 10px 28px -4px rgba(0, 0, 0, 0.42),
+    0 0 14px rgba(var(--accent-rgb), 0.1);
 }
 
 .instance-card:focus-visible {

@@ -1,12 +1,24 @@
 import { IconLayoutGrid, IconList, IconRefresh } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
 import { AppIcon } from '../AppIcon';
+import type { ServerListViewMode } from '../../lib/userPrefs';
 import type {
-  ServerListViewMode,
   ServerListColumnKey,
   ServerListColumnVisibility,
-} from '../../lib/userPrefs';
-import { InstanceColumnsDropdown } from './InstanceColumnsDropdown';
+} from '../../lib/serverListColumnPrefs';
+import { InstanceColumnsDropdown, type ColumnConfigItem } from './InstanceColumnsDropdown';
+
+const SERVER_COLUMN_CONFIG: readonly ColumnConfigItem<ServerListColumnKey>[] = [
+  { key: 'save', labelKey: 'instances_col_save' },
+  { key: 'access', labelKey: 'instances_col_access' },
+  { key: 'port', labelKey: 'instances_col_server_port' },
+  { key: 'rconPort', labelKey: 'instances_col_rcon_port' },
+  { key: 'version', labelKey: 'instances_col_version' },
+  { key: 'mods', labelKey: 'mods_btn' },
+  { key: 'online', labelKey: 'instances_col_online' },
+  { key: 'uptime', labelKey: 'server_uptime' },
+  { key: 'status', labelKey: 'instances_col_status' },
+];
 
 interface InstanceServersBarProps {
   search: string;
@@ -187,6 +199,7 @@ export function InstanceServersBar({
           onMoveColumn &&
           onResetColumns && (
             <InstanceColumnsDropdown
+              config={SERVER_COLUMN_CONFIG}
               columns={columns}
               order={columnOrder}
               onToggleColumn={onToggleColumn}

@@ -61,7 +61,8 @@ import {
   InstanceServersNoResults,
 } from './InstanceServersEmpty';
 import { useUserServerListViewMode } from '../../hooks/useUserServerListViewMode';
-import { useUserServerListColumns } from '../../hooks/useUserServerListColumns';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import { serverListColumnPrefs } from '../../lib/serverListColumnPrefs';
 import { InstanceMonitoringTab } from './InstanceMonitoringTab';
 import { CircuitWireConnection } from './CircuitWireConnection';
 import { BackupTab } from './BackupTab';
@@ -140,7 +141,7 @@ export function InstanceScreen({
     setColumn: setListColumn,
     moveColumn: moveListColumn,
     resetColumns: resetListColumns,
-  } = useUserServerListColumns();
+  } = useColumnPrefs(serverListColumnPrefs);
   const tableWrapRef = useRef<HTMLDivElement>(null);
 
   const tabAllowed = useCallback(

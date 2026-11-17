@@ -8,6 +8,31 @@ import {
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
 import type { MaintenanceViewMode } from '../../lib/userPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
+import type {
+  MaintenanceColumnKey,
+  MaintenanceColumnVisibility,
+} from '../../lib/maintenanceColumnPrefs';
+import {
+  InstanceColumnsDropdown,
+  type ColumnConfigItem,
+} from './InstanceColumnsDropdown';
+
+const MAINTENANCE_COLUMN_CONFIG: readonly ColumnConfigItem<MaintenanceColumnKey>[] = [
+  {
+    key: 'status',
+    labelKey: 'maintenance_col_status',
+    modes: [
+      { value: 'column', labelKey: 'web_status_mode_on' },
+      { value: 'dot', labelKey: 'web_status_mode_dot' },
+      { value: 'off', labelKey: 'web_status_mode_off' },
+    ],
+  },
+  { key: 'next_fire', labelKey: 'maintenance_col_next_fire' },
+  { key: 'servers', labelKey: 'maintenance_col_servers' },
+  { key: 'actions', labelKey: 'maintenance_col_actions_on_stop' },
+  { key: 'timezone', labelKey: 'maintenance_col_timezone' },
+];
 
 export interface MaintenanceServerOption {
   id: string;
@@ -24,6 +49,13 @@ interface MaintenanceTasksBarProps {
   serverOptions: MaintenanceServerOption[];
   viewMode: MaintenanceViewMode;
   onViewModeChange: (mode: MaintenanceViewMode) => void;
+  columns: MaintenanceColumnVisibility;
+  columnOrder: readonly MaintenanceColumnKey[];
+  statusMode: StatusMode;
+  onStatusModeChange: (mode: StatusMode) => void;
+  onToggleColumn: (key: MaintenanceColumnKey, visible: boolean) => void;
+  onMoveColumn: (key: MaintenanceColumnKey, direction: 'up' | 'down') => void;
+  onResetColumns: () => void;
   shownCount?: number;
   totalCount?: number;
   activeCount: number;
@@ -44,6 +76,13 @@ export function MaintenanceTasksBar({
   serverOptions,
   viewMode,
   onViewModeChange,
+  columns,
+  columnOrder,
+  statusMode,
+  onStatusModeChange,
+  onToggleColumn,
+  onMoveColumn,
+  onResetColumns,
   activeCount,
   onRefresh,
   onOpenAdd,
@@ -144,6 +183,21 @@ export function MaintenanceTasksBar({
           <IconPlayerStop size={16} />
           <span>{t('maintenance_deactivate_all_btn')}</span>
         </button>
+
+        {viewMode === 'table' && (
+          <InstanceColumnsDropdown
+            idPrefix="Maint"
+            config={MAINTENANCE_COLUMN_CONFIG}
+            columns={columns}
+            order={columnOrder}
+            modeValues={{ status: statusMode }}
+            onChangeMode={(_key, value) => onStatusModeChange(value as StatusMode)}
+            onToggleColumn={onToggleColumn}
+            onMoveColumn={onMoveColumn}
+            onReset={onResetColumns}
+            t={t}
+          />
+        )}
 
         <button
           type="button"

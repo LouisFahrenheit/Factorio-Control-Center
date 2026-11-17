@@ -210,7 +210,6 @@ export function useWebUsers(enabled: boolean, t: (key: string, ...args: (string 
           setEditor((e) => ({ ...e, enabled }));
         }
         await refresh();
-        toast(t('web_users_saved'));
       } catch (e) {
         toast(localizeWebUserError(e instanceof Error ? e.message : String(e), t), true);
       }

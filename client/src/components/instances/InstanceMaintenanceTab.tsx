@@ -11,6 +11,11 @@ import { AppIcon } from '../AppIcon';
 import { MaintenanceReportDetail } from './MaintenanceReportDetail';
 import { useListViewportPageSize } from '../../hooks/useListViewportPageSize';
 import { useUserMaintenanceViewMode } from '../../hooks/useUserMaintenanceViewMode';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import {
+  maintenanceColumnPrefs,
+  maintenanceStatusPrefs,
+} from '../../lib/maintenanceColumnPrefs';
 import {
   filterPeriodReports,
   formatTaskScheduleTime,
@@ -74,6 +79,10 @@ export function InstanceMaintenanceTab({
 }: InstanceMaintenanceTabProps) {
   const [innerTab, setInnerTab] = useState<InnerTab>('tasks');
   const [viewMode, setViewMode] = useUserMaintenanceViewMode();
+  const maintColumns = useColumnPrefs(
+    maintenanceColumnPrefs,
+    maintenanceStatusPrefs,
+  );
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [serverFilter, setServerFilter] = useState('all');
@@ -366,6 +375,13 @@ export function InstanceMaintenanceTab({
             serverOptions={serverOptions}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            columns={maintColumns.columns}
+            columnOrder={maintColumns.order}
+            statusMode={maintColumns.statusMode}
+            onStatusModeChange={maintColumns.setStatusMode}
+            onToggleColumn={maintColumns.setColumn}
+            onMoveColumn={maintColumns.moveColumn}
+            onResetColumns={maintColumns.resetColumns}
             shownCount={filteredTasks.length}
             totalCount={maintenance.tasks.length}
             activeCount={activeTasksCount}
@@ -528,6 +544,12 @@ export function InstanceMaintenanceTab({
               <MaintenanceTaskTable
                 tasks={filteredTasks}
                 instances={instances}
+                columns={{
+                  ...maintColumns.columns,
+                  status: maintColumns.statusMode === 'column',
+                }}
+                columnOrder={maintColumns.order}
+                statusMode={maintColumns.statusMode}
                 selectedTaskId={
                   menuOpen && menuTask ? String(menuTask.id) : undefined
                 }

@@ -92,8 +92,8 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 
 .fu-modal {
   background: var(--bg-modal);
-  border: 1px solid var(--border-dark);
-  border-radius: 10px;
+  border: 1px solid var(--fcc-surface-border, var(--border-dark));
+  border-radius: var(--r-lg, 12px);
   width: min(680px, 92vw);
   max-height: min(
     90vh,
@@ -101,9 +101,11 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
   );
   display: flex;
   flex-direction: column;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(
+    --fcc-elevated-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 42px rgba(0, 0, 0, 0.5)
+  );
   overflow: hidden;
 }
 

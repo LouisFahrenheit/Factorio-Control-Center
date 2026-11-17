@@ -7,6 +7,17 @@ import {
 import { SearchField } from '../SearchField';
 import { SectionHelpButton } from '../SectionHelpModal';
 import { BACKUP_HELP } from '../../lib/instanceHelpContent';
+import type { BackupColumnKey, BackupColumnVisibility } from '../../lib/backupColumnPrefs';
+import { InstanceColumnsDropdown, type ColumnConfigItem } from './InstanceColumnsDropdown';
+
+const BACKUP_COLUMN_CONFIG: readonly ColumnConfigItem<BackupColumnKey>[] = [
+  { key: 'type', labelKey: 'backup_col_type' },
+  { key: 'sections', labelKey: 'backup_col_sections' },
+  { key: 'version', labelKey: 'backup_col_version' },
+  { key: 'size', labelKey: 'backup_col_size' },
+  { key: 'date', labelKey: 'backup_col_date' },
+  { key: 'age', labelKey: 'backup_col_age' },
+];
 
 interface BackupBarProps {
   search: string;
@@ -17,6 +28,11 @@ interface BackupBarProps {
   onOpenCreate: () => void;
   onOpenAutoSettings: () => void;
   onTriggerUpload: () => void;
+  columns: BackupColumnVisibility;
+  columnOrder: readonly BackupColumnKey[];
+  onToggleColumn: (key: BackupColumnKey, visible: boolean) => void;
+  onMoveColumn: (key: BackupColumnKey, direction: 'up' | 'down') => void;
+  onResetColumns: () => void;
   autoEnabled: boolean;
   creating: boolean;
   uploading: boolean;
@@ -34,6 +50,11 @@ export function BackupBar({
   onOpenCreate,
   onOpenAutoSettings,
   onTriggerUpload,
+  columns,
+  columnOrder,
+  onToggleColumn,
+  onMoveColumn,
+  onResetColumns,
   autoEnabled,
   creating,
   uploading,
@@ -141,6 +162,17 @@ export function BackupBar({
             </>
           )}
         </button>
+
+        <InstanceColumnsDropdown
+          idPrefix="Backup"
+          config={BACKUP_COLUMN_CONFIG}
+          columns={columns}
+          order={columnOrder}
+          onToggleColumn={onToggleColumn}
+          onMoveColumn={onMoveColumn}
+          onReset={onResetColumns}
+          t={t}
+        />
 
         <SectionHelpButton
           idPrefix="backup"
