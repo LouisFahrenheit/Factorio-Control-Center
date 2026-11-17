@@ -7246,7 +7246,8 @@ table.data thead th.saves-sort-th--asc::after {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: var(--accent) !important;
+  color: var(--accent-selected) !important;
+  opacity: 0.9 !important;
   flex-shrink: 0 !important;
 }
 
@@ -7338,21 +7339,27 @@ table.data thead th.saves-sort-th--asc::after {
   line-height: calc(var(--sst-input-height) - 2px) !important;
   padding: 0 clamp(9px, 0.8vw, 13px) !important;
   border-radius: var(--r-md, 8px) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 72%,
-    var(--bg-widget) 28%
-  ) !important;
-  border: 1px solid
-    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  background-color: var(--fcc-btn-bg) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
   color: var(--text) !important;
   box-sizing: border-box !important;
   width: 100% !important;
   transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.server-settings-tab
+  .settings-row__control
+  .input:not(select):hover:not(:disabled):not(:focus) {
+  background-color: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 45%,
+    var(--border) 55%
+  ) !important;
 }
 
 .server-settings-tab .settings-row__control .input:not(select):focus {
@@ -7361,52 +7368,70 @@ table.data thead th.saves-sort-th--asc::after {
     var(--accent) 58%,
     var(--border) 42%
   ) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  ) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    var(--fcc-focus-ring) !important;
+  background-color: var(--fcc-btn-bg-hover) !important;
+  box-shadow: var(--fcc-btn-shadow), var(--fcc-focus-ring) !important;
   outline: none !important;
 }
 
-/* ── Password Field with Dice Generator Left and Eye Toggle Right ────── */
+.server-settings-tab .settings-row__control .input:not(select):disabled {
+  background-color: var(
+    --fcc-btn-bg-disabled,
+    rgba(255, 255, 255, 0.04)
+  ) !important;
+  opacity: 0.6 !important;
+}
+
+/* ── Password Field with Actions (Dice / Eye) Inside on the Right ─── */
 
 .server-settings-tab .settings-input-eye-wrap {
   position: relative !important;
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
 .server-settings-tab .settings-input-eye-wrap .input {
   width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  min-width: 0 !important;
   padding-right: calc(var(--sst-input-height) + 2px) !important;
+  box-sizing: border-box !important;
+}
+
+.server-settings-tab
+  .settings-input-eye-wrap--has-dice.settings-input-eye-wrap--has-eye
+  .input {
+  padding-right: calc(var(--sst-input-height) * 2 - 4px) !important;
 }
 
 .server-settings-tab .settings-input-eye-wrap--has-dice .input {
-  padding-left: calc(var(--sst-input-height) + 2px) !important;
+  padding-left: clamp(9px, 0.8vw, 13px) !important;
 }
 
-.server-settings-tab .settings-input-dice-btn {
-  position: absolute !important;
-  left: 4px !important;
-  right: auto !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: 2 !important;
-}
-
-.server-settings-tab .settings-input-eye-btn {
+.server-settings-tab .settings-input-actions-end {
   position: absolute !important;
   right: 4px !important;
-  left: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  z-index: 5 !important;
+  pointer-events: auto !important;
+}
+
+.server-settings-tab .settings-input-dice-btn,
+.server-settings-tab .settings-input-eye-btn {
+  position: relative !important;
+  right: auto !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
 }
 
 .server-settings-tab .settings-input-action-btn {
@@ -7437,7 +7462,7 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 .server-settings-tab .settings-input-dice-btn:active {
-  transform: translateY(-50%) rotate(45deg) scale(0.92) !important;
+  transform: rotate(45deg) scale(0.92) !important;
 }
 
 .server-settings-tab .settings-input-action-btn svg {
@@ -7461,21 +7486,28 @@ table.data thead th.saves-sort-th--asc::after {
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent !important;
   padding: 0 6px !important;
   border-radius: var(--r-md, 8px) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 72%,
-    var(--bg-widget) 28%
-  ) !important;
-  border: 1px solid
-    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  background-color: var(--fcc-btn-bg) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
   box-sizing: border-box !important;
   width: 100% !important;
   cursor: text;
   transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.server-settings-tab
+  .settings-tags-wrap:hover:not(.settings-tags-wrap--disabled):not(
+    :focus-within
+  ) {
+  background-color: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 45%,
+    var(--border) 55%
+  ) !important;
 }
 
 .server-settings-tab .settings-tags-wrap::-webkit-scrollbar {
@@ -7502,17 +7534,15 @@ table.data thead th.saves-sort-th--asc::after {
     var(--accent) 58%,
     var(--border) 42%
   ) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 62%,
-    var(--bg-widget) 38%
-  ) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    var(--fcc-focus-ring) !important;
+  background-color: var(--fcc-btn-bg-hover) !important;
+  box-shadow: var(--fcc-btn-shadow), var(--fcc-focus-ring) !important;
 }
 
 .server-settings-tab .settings-tags-wrap--disabled {
+  background-color: var(
+    --fcc-btn-bg-disabled,
+    rgba(255, 255, 255, 0.04)
+  ) !important;
   opacity: 0.6 !important;
   cursor: not-allowed !important;
 }

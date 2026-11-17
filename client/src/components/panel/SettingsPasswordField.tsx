@@ -13,7 +13,9 @@ interface SettingsPasswordFieldProps {
 }
 
 const canWebkitDisc =
-  typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-text-security', 'disc');
+  typeof CSS !== 'undefined' &&
+  CSS.supports &&
+  CSS.supports('-webkit-text-security', 'disc');
 
 function generateRandomPassword(length = 10): string {
   const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -54,18 +56,6 @@ export function SettingsPasswordField({
     <div
       className={`settings-input-eye-wrap${canGenerate ? ' settings-input-eye-wrap--has-dice' : ''}${canReveal ? ' settings-input-eye-wrap--has-eye' : ''}`}
     >
-      {canGenerate && (
-        <button
-          type="button"
-          className="settings-input-action-btn settings-input-dice-btn"
-          title={t('server_settings_generate_password_title') || 'Generate random password'}
-          aria-label={t('server_settings_generate_password_title') || 'Generate random password'}
-          disabled={disabled}
-          onClick={handleGenerate}
-        >
-          <IconDice size={18} />
-        </button>
-      )}
       <input
         type={inputType}
         className="input"
@@ -84,24 +74,56 @@ export function SettingsPasswordField({
         data-form-type="other"
         value={value}
         disabled={disabled}
-        style={useTextSec && !showRevealed ? ({ WebkitTextSecurity: 'disc' } as CSSProperties) : undefined}
+        style={
+          useTextSec && !showRevealed
+            ? ({ WebkitTextSecurity: 'disc' } as CSSProperties)
+            : undefined
+        }
         onChange={(e) => onChange(e.target.value)}
       />
-      {canReveal && (
-        <button
-          type="button"
-          className="settings-input-action-btn settings-input-eye-btn"
-          data-i18n-title="web_login_pass_toggle"
-          title={showRevealed ? t('web_password_reveal_hide') : t('web_password_reveal_show')}
-          aria-label={showRevealed ? t('web_password_reveal_hide') : t('web_password_reveal_show')}
-          disabled={disabled}
-          onClick={toggle}
-        >
-          {showRevealed ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-        </button>
+      {(canGenerate || canReveal) && (
+        <div className="settings-input-actions-end">
+          {canGenerate && (
+            <button
+              type="button"
+              className="settings-input-action-btn settings-input-dice-btn"
+              title={
+                t('server_settings_generate_password_title') ||
+                'Generate random password'
+              }
+              aria-label={
+                t('server_settings_generate_password_title') ||
+                'Generate random password'
+              }
+              disabled={disabled}
+              onClick={handleGenerate}
+            >
+              <IconDice size={18} />
+            </button>
+          )}
+          {canReveal && (
+            <button
+              type="button"
+              className="settings-input-action-btn settings-input-eye-btn"
+              data-i18n-title="web_login_pass_toggle"
+              title={
+                showRevealed
+                  ? t('web_password_reveal_hide')
+                  : t('web_password_reveal_show')
+              }
+              aria-label={
+                showRevealed
+                  ? t('web_password_reveal_hide')
+                  : t('web_password_reveal_show')
+              }
+              disabled={disabled}
+              onClick={toggle}
+            >
+              {showRevealed ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
 }
-
-
