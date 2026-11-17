@@ -10,6 +10,7 @@ interface WebUserRowMenuProps {
   user: WebUser | null;
   position: { x: number; y: number };
   lastAdminLocked?: boolean;
+  selfLocked?: boolean;
   onClose: () => void;
   onEnable: () => void;
   onDisable: () => void;
@@ -24,6 +25,7 @@ export function WebUserRowMenu({
   user,
   position,
   lastAdminLocked = false,
+  selfLocked = false,
   onClose,
   onEnable,
   onDisable,
@@ -49,29 +51,49 @@ export function WebUserRowMenu({
       style={menuStyle}
     >
       {!enabled && (
-        <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onEnable}>
+        <button
+          type="button"
+          className="btn instance-row-menu__item btn--with-icon"
+          onClick={onEnable}
+        >
           <AppIcon name="mode_off_on" size={16} />
           {t('maintenance_menu_activate')}
         </button>
       )}
-      {enabled && !lastAdminLocked && (
-        <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onDisable}>
+      {enabled && !lastAdminLocked && !selfLocked && (
+        <button
+          type="button"
+          className="btn instance-row-menu__item btn--with-icon"
+          onClick={onDisable}
+        >
           <AppIcon name="mode_off_on" size={16} />
           {t('maintenance_menu_deactivate')}
         </button>
       )}
-      <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onEdit}>
+      <button
+        type="button"
+        className="btn instance-row-menu__item btn--with-icon"
+        onClick={onEdit}
+      >
         <AppIcon name="edit" size={16} />
         {t('maintenance_menu_edit')}
       </button>
       {user.twoFactorEnabled && onReset2fa && (
-        <button type="button" className="btn instance-row-menu__item btn--with-icon" onClick={onReset2fa}>
+        <button
+          type="button"
+          className="btn instance-row-menu__item btn--with-icon"
+          onClick={onReset2fa}
+        >
           <AppIcon name="person_shield" size={16} />
           {t('web_user_reset_2fa')}
         </button>
       )}
       {!lastAdminLocked && (
-        <button type="button" className="btn btn--danger instance-row-menu__item btn--with-icon" onClick={onDelete}>
+        <button
+          type="button"
+          className="btn btn--danger instance-row-menu__item btn--with-icon"
+          onClick={onDelete}
+        >
           <AppIcon name="delete" size={16} />
           {t('maintenance_menu_delete')}
         </button>

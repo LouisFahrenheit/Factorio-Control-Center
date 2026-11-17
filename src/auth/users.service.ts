@@ -309,6 +309,11 @@ export class UsersService implements OnModuleInit {
     if (this.wouldRemoveLastEnabledAdmin(users, u, nextRole, nextEnabled))
       return { ok: false, error: 'last_admin' };
 
+    const isSelf = actorUsername.toLowerCase() === username.toLowerCase();
+    if (isSelf && body.enabled === false) {
+      return { ok: false, error: 'cannot_disable_self' };
+    }
+
     if (body.password !== undefined) {
       const password = typeof body.password === 'string' ? body.password : '';
       if (!password || password.length < MIN_PASSWORD_LENGTH) {

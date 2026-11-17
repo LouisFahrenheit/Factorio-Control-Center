@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type MouseEvent } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import type { WebUsersApi } from '../../hooks/useWebUsers';
 import { useUserAccessViewMode } from '../../hooks/useUserAccessViewMode';
 import { useColumnPrefs } from '../../hooks/useColumnPrefs';
@@ -6,7 +7,10 @@ import {
   userAccessColumnPrefs,
   userAccessStatusPrefs,
 } from '../../lib/userAccessColumnPrefs';
-import { TabLoadingPlaceholder, tabInitialLoad } from '../TabLoadingPlaceholder';
+import {
+  TabLoadingPlaceholder,
+  tabInitialLoad,
+} from '../TabLoadingPlaceholder';
 import type { WebUser } from '../../types/webUser';
 import { listUserInstanceLabels, roleLabel } from '../../lib/webUserUtils';
 import { AccessUsersBar } from './AccessUsersBar';
@@ -22,7 +26,13 @@ interface InstanceAccessTabProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTabProps) {
+export function InstanceAccessTab({
+  webUsers,
+  onOpenHelp,
+  t,
+}: InstanceAccessTabProps) {
+  const { user: authUser } = useAuth();
+  const currentUsername = authUser?.username;
   const [viewMode, setViewMode] = useUserAccessViewMode();
   const accessColumns = useColumnPrefs(
     userAccessColumnPrefs,
@@ -36,13 +46,20 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
   const [menuUser, setMenuUser] = useState<WebUser | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
-  const initialLoading = tabInitialLoad(webUsers.loading, webUsers.users.length > 0);
+  const initialLoading = tabInitialLoad(
+    webUsers.loading,
+    webUsers.users.length > 0,
+  );
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
   }, []);
 
-  const onRowClick = (user: WebUser, _targetEl: HTMLElement, ev: MouseEvent) => {
+  const onRowClick = (
+    user: WebUser,
+    _targetEl: HTMLElement,
+    ev: MouseEvent,
+  ) => {
     ev.stopPropagation();
     setMenuUser(user);
     setMenuPos({
@@ -71,7 +88,8 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
       if (q) {
         const usernameMatch = (u.username || '').toLowerCase().includes(q);
         const roleText = roleLabel(u.role, t).toLowerCase();
-        const roleMatch = roleText.includes(q) || (u.role || '').toLowerCase().includes(q);
+        const roleMatch =
+          roleText.includes(q) || (u.role || '').toLowerCase().includes(q);
         const instanceText = listUserInstanceLabels(
           u.instance_ids,
           webUsers.accessInstances,
@@ -86,7 +104,14 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
 
       return true;
     });
-  }, [webUsers.users, webUsers.accessInstances, search, roleFilter, statusFilter, t]);
+  }, [
+    webUsers.users,
+    webUsers.accessInstances,
+    search,
+    roleFilter,
+    statusFilter,
+    t,
+  ]);
 
   return (
     <div
@@ -125,7 +150,10 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
           {/* Main Content Area */}
           <div className="access-layout__content">
             {initialLoading ? (
-              <TabLoadingPlaceholder variant="table" label={t('tab_data_loading')} />
+              <TabLoadingPlaceholder
+                variant="table"
+                label={t('tab_data_loading')}
+              />
             ) : webUsers.loadError ? (
               <p className="maintenance-tab__inline-error" role="alert">
                 {webUsers.loadError}
@@ -146,10 +174,17 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
               <AccessUsersCards
                 users={filteredUsers}
                 accessInstances={webUsers.accessInstances}
-                selectedUser={webUsers.editorMode === 'edit' ? webUsers.selectedUser : undefined}
+                selectedUser={
+                  webUsers.editorMode === 'edit'
+                    ? webUsers.selectedUser
+                    : undefined
+                }
                 isLastEnabledAdmin={webUsers.isLastEnabledAdmin}
+                currentUsername={currentUsername}
                 onOpenEdit={webUsers.openEdit}
-                onToggleEnabled={(u) => void webUsers.setEnabled(u.username, u.enabled === false)}
+                onToggleEnabled={(u) =>
+                  void webUsers.setEnabled(u.username, u.enabled === false)
+                }
                 onReset2fa={(username) => void webUsers.reset2fa(username)}
                 onDeleteUser={(username) => void webUsers.deleteUser(username)}
                 onRowClick={onRowClick}
@@ -165,10 +200,16 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
                 }}
                 columnOrder={accessColumns.order}
                 statusMode={accessColumns.statusMode}
-                selectedUser={webUsers.editorMode === 'edit' ? webUsers.selectedUser : undefined}
+                selectedUser={
+                  webUsers.editorMode === 'edit'
+                    ? webUsers.selectedUser
+                    : undefined
+                }
                 isLastEnabledAdmin={webUsers.isLastEnabledAdmin}
                 onOpenEdit={webUsers.openEdit}
-                onToggleEnabled={(u) => void webUsers.setEnabled(u.username, u.enabled === false)}
+                onToggleEnabled={(u) =>
+                  void webUsers.setEnabled(u.username, u.enabled === false)
+                }
                 onReset2fa={(username) => void webUsers.reset2fa(username)}
                 onDeleteUser={(username) => void webUsers.deleteUser(username)}
                 onRowClick={onRowClick}
@@ -186,7 +227,14 @@ export function InstanceAccessTab({ webUsers, onOpenHelp, t }: InstanceAccessTab
           open={menuOpen}
           user={menuUser}
           position={menuPos}
-          lastAdminLocked={menuUser ? webUsers.isLastEnabledAdmin(menuUser.username) : false}
+          lastAdminLocked={
+            menuUser ? webUsers.isLastEnabledAdmin(menuUser.username) : false
+          }
+          selfLocked={Boolean(
+            menuUser &&
+            currentUsername &&
+            menuUser.username.toLowerCase() === currentUsername.toLowerCase(),
+          )}
           onClose={closeMenu}
           onEnable={() => {
             if (!menuUser) return;

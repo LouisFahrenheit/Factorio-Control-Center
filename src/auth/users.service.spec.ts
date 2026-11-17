@@ -190,6 +190,20 @@ describe('UsersService', () => {
       expect(disableRes.error).toBe('last_admin');
     });
 
+    it('prevents disabling own account even when another admin exists', async () => {
+      const admin1 = createFakeUser({ id: 'admin-1', username: 'admin1' });
+      const admin2 = createFakeUser({ id: 'admin-2', username: 'admin2' });
+      mockUserRepo.find?.mockResolvedValue([admin1, admin2]);
+
+      const res = await service.updateUser(
+        'admin1',
+        { enabled: false },
+        'admin1',
+      );
+      expect(res.ok).toBe(false);
+      expect(res.error).toBe('cannot_disable_self');
+    });
+
     it('prevents deleting the only administrator', async () => {
       const admin = createFakeUser({ id: 'admin-1', username: 'admin' });
       mockUserRepo.find?.mockResolvedValue([admin]);

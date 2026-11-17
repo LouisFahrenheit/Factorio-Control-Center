@@ -19,6 +19,7 @@ interface AccessUsersCardsProps {
   accessInstances: WebAccessInstance[];
   selectedUser?: string;
   isLastEnabledAdmin: (username: string) => boolean;
+  currentUsername?: string;
   onOpenEdit: (user: WebUser) => void;
   onToggleEnabled: (user: WebUser) => void;
   onReset2fa: (username: string) => void;
@@ -32,6 +33,7 @@ export function AccessUsersCards({
   accessInstances,
   selectedUser,
   isLastEnabledAdmin,
+  currentUsername,
   onOpenEdit,
   onToggleEnabled,
   onReset2fa,
@@ -53,6 +55,10 @@ export function AccessUsersCards({
         const isAdminUser = u.role === 'administrator';
         const isSelected = selectedUser === u.username;
         const lastAdmin = isLastEnabledAdmin(u.username);
+        const isSelf = Boolean(
+          currentUsername &&
+          u.username.toLowerCase() === currentUsername.toLowerCase(),
+        );
         const tabLabels = listUserTabLabels(u.tabs, t);
         const instanceLabels = listUserInstanceLabels(
           u.instance_ids,
@@ -196,7 +202,7 @@ export function AccessUsersCards({
                     ? ' access-user-card__action-btn--toggle-off'
                     : ' access-user-card__action-btn--toggle-on')
                 }
-                disabled={enabled && lastAdmin}
+                disabled={enabled && (lastAdmin || isSelf)}
                 title={
                   enabled
                     ? t('maintenance_menu_deactivate')
