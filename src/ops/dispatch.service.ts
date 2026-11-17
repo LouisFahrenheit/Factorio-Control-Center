@@ -204,7 +204,10 @@ export class DispatchService {
               : undefined,
         });
       case 'rcon_exec':
-        return this.server.rconExec(s(kwargs.command, ''));
+        return this.server.rconExec(
+          s(kwargs.command, ''),
+          kwargs.source ? s(kwargs.source) : undefined,
+        );
       case 'chat_send_text':
         return this.server.chatSendText(s(kwargs.message, ''));
       case 'log_tail':

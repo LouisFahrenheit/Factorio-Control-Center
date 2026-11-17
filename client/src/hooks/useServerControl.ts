@@ -11,7 +11,6 @@ import {
   validateGameBindIp,
   validateGamePort,
 } from '../lib/networkValidation';
-import { feedbackMsg } from '../lib/apiFeedback';
 import { modConfirm } from '../lib/modErrorUtils';
 import {
   notifyApiError,
@@ -433,13 +432,15 @@ export function useServerControl(
 
   const sendRcon = useCallback(
     async (command: string) => {
-      const rconTitle = t('console_label');
-      if (!running) {
-        feedbackMsg(rconTitle, t('server_not_running_msg'), true);
-        return;
-      }
       const text = command.trim();
       if (!text) return;
+      if (!running) {
+        setLogLines((prev) => {
+          const next = [...prev, `[Error] ${t('server_not_running_msg')}`];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
+        return;
+      }
       try {
         const r = await api<{
           ok?: boolean;
@@ -451,17 +452,28 @@ export function useServerControl(
           body: JSON.stringify({ command: text, source: 'console' }),
         });
         void qc.invalidateQueries({ queryKey: ['players'] });
-        if (r?.ok === false) {
-          feedbackMsg(
-            rconTitle,
-            `${t('error_title')}: ${r.error || 'rcon_failed'}`,
-            true,
-          );
-        } else {
-          feedbackMsg(rconTitle, r.response || r.output || 'OK');
+        if (!isSocketConnected()) {
+          if (r?.ok === false) {
+            const errText = `${t('error_title')}: ${r.error || 'rcon_failed'}`;
+            setLogLines((prev) => {
+              const next = [...prev, `> ${text}`, `Error: ${errText}`];
+              return next.length > 500 ? next.slice(-500) : next;
+            });
+          } else {
+            const raw = (r.response || r.output || '').trim();
+            const outputLines = raw ? raw.split(/\r?\n/) : [];
+            setLogLines((prev) => {
+              const next = [...prev, `> ${text}`, ...outputLines];
+              return next.length > 500 ? next.slice(-500) : next;
+            });
+          }
         }
-      } catch (e) {
-        feedbackMsg(rconTitle, resolveApiErrorMessage(e, t), true, false, t);
+      } catch (e: unknown) {
+        const errText = resolveApiErrorMessage(e, t);
+        setLogLines((prev) => {
+          const next = [...prev, `> ${text}`, `Error: ${errText}`];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
       }
     },
     [running, t, qc],

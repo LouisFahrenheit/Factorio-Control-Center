@@ -58,8 +58,7 @@
   border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
   flex: 0 0 auto;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
 }
 
 #tabPanelMods .mods-toolbar__section {
@@ -359,6 +358,9 @@
   min-height: 140px;
   height: 100%;
   overflow: auto;
+  contain: paint;
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
   border-radius: 9px;
   background: color-mix(in srgb, var(--bg-main) 68%, var(--bg-widget) 32%);
   border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
@@ -384,9 +386,114 @@
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dark) 80%, transparent) !important;
 }
 
+/* ── Sort Headers (Matching Main Server Table Exactly) ───────────────── */
+
+#tabPanelMods table#tblMods thead th.mods-sort-th,
+#tabPanelMods table.data--mods thead th.mods-sort-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.18s var(--fcc-hover-ease);
+}
+
+#tabPanelMods table#tblMods thead th.mods-sort-th:hover,
+#tabPanelMods table.data--mods thead th.mods-sort-th:hover {
+  color: var(--text) !important;
+  background: var(--fcc-interactive-hover-bg) !important;
+}
+
+#tabPanelMods table#tblMods thead th.mods-sort-th--active,
+#tabPanelMods table.data--mods thead th.mods-sort-th--active {
+  color: var(--text-muted) !important;
+}
+
+#tabPanelMods table#tblMods thead th.mods-sort-th--active:hover,
+#tabPanelMods table.data--mods thead th.mods-sort-th--active:hover {
+  color: var(--text) !important;
+}
+
+#tabPanelMods table#tblMods thead th.mods-sort-th--active::after,
+#tabPanelMods table.data--mods thead th.mods-sort-th--active::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 0.42em !important;
+  height: 0.42em !important;
+  margin-left: 0.45em !important;
+  border-right: 2px solid var(--accent-soft) !important;
+  border-bottom: 2px solid var(--accent-soft) !important;
+  border-top: none !important;
+  border-left: none !important;
+  transform: rotate(45deg) translateY(-2px) !important;
+  opacity: 0.9 !important;
+  vertical-align: middle !important;
+}
+
+#tabPanelMods table#tblMods thead th.mods-sort-th--asc::after,
+#tabPanelMods table.data--mods thead th.mods-sort-th--asc::after {
+  transform: rotate(-135deg) translateY(1px) !important;
+}
+
 /* Row animations */
 #tabPanelMods .mods-tab__table-wrap.table-wrap--enter table.data tbody tr {
   animation: tableRowEnter 0.22s var(--fcc-spring-ease) both;
+}
+
+/* ── Mod Type Column ────────────────────────────────────────────────── */
+
+#tabPanelMods .mods-col-type {
+  white-space: nowrap;
+}
+
+/* ── Portal Newer Version (Clear visual badge, zero animation overhead) ── */
+
+#tabPanelMods #tblModsBody td.mods-portal-newer,
+#tabPanelMods table.data--mods tbody td.mods-portal-newer {
+  animation: none !important;
+  text-shadow: none !important;
+  font-weight: 700;
+  color: var(--accent-selected, var(--accent, #f59e0b)) !important;
+}
+
+#tabPanelMods .mods-portal-newer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+  color: var(--accent-selected, var(--accent, #f59e0b)) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent-selected, var(--accent, #f59e0b)) 16%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--accent-selected, var(--accent, #f59e0b)) 45%,
+      transparent
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#tabPanelMods .mods-portal-newer-badge .mods-portal-newer-icon {
+  color: currentColor;
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+
+#tabPanelMods table.data tbody tr:hover .mods-portal-newer-badge {
+  background: color-mix(
+    in srgb,
+    var(--accent-selected, var(--accent, #f59e0b)) 25%,
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--accent-selected, var(--accent, #f59e0b)) 70%,
+    transparent
+  );
 }
 
 /* Responsive */

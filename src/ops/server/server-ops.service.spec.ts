@@ -71,6 +71,7 @@ describe('ServerOpsService', () => {
       waitUntilStopped: jest.fn().mockResolvedValue(true),
       rconExec: jest.fn().mockResolvedValue({ ok: true, output: 'success' }),
       logTail: jest.fn().mockReturnValue(['line 1', 'line 2']),
+      appendConsoleLog: jest.fn(),
     };
 
     mockPaths = {
@@ -275,6 +276,17 @@ describe('ServerOpsService', () => {
       const res = await service.rconExec('/time');
       expect(res).toEqual({ ok: true, output: 'success' });
       expect(mockRuntime.rconExec).toHaveBeenCalledWith(inst.id, '/time');
+    });
+
+    it('rconExec appends to console log when source is console', async () => {
+      const res = await service.rconExec('/help', 'console');
+      expect(res).toEqual({ ok: true, output: 'success' });
+      expect(mockRuntime.rconExec).toHaveBeenCalledWith(inst.id, '/help');
+      expect(mockRuntime.appendConsoleLog).toHaveBeenCalledWith(
+        inst.id,
+        '/help',
+        { ok: true, output: 'success' },
+      );
     });
 
     it('chatSendText rejects empty message', async () => {

@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import type { ServerSettingsApi } from '../../hooks/useServerSettings';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
 import { RefreshButton } from '../RefreshButton';
+import { SearchField } from '../SearchField';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { ServerSettingsForm } from './ServerSettingsForm';
 import { ServerSettingsResetModal } from './ServerSettingsResetModal';
@@ -18,6 +20,8 @@ export function ServerSettingsTab({
   canRevealSecrets = false,
   t,
 }: ServerSettingsTabProps) {
+  const [search, setSearch] = useState('');
+
   return (
     <>
       <div
@@ -28,6 +32,16 @@ export function ServerSettingsTab({
       >
         <div className="server-settings-tab__layout">
           <header className="server-settings-tab__toolbar">
+            <SearchField
+              type="search"
+              id="serverSettingsSearch"
+              className="server-settings-tab__search"
+              placeholder={t('search_placeholder')}
+              autoComplete="off"
+              spellCheck={false}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
             <div className="server-settings-tab__actions">
               <RefreshButton
                 className="btn btn--toolbar-icon"
@@ -133,6 +147,7 @@ export function ServerSettingsTab({
                 t={t}
                 onChange={settings.setField}
                 onVisibilityPublicAttempt={settings.checkVisibilityPublic}
+                search={search}
               />
             )}
           </div>

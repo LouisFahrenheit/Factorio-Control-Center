@@ -228,8 +228,8 @@ export function useMods(
       setSelectedMod('');
       return;
     }
-    if (!rawRows.some((x) => x.name === selectedMod)) {
-      setSelectedMod(rawRows[0]?.name || '');
+    if (selectedMod && !rawRows.some((x) => x.name === selectedMod)) {
+      setSelectedMod('');
     }
   }, [rawRows, selectedMod]);
 

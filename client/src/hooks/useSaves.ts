@@ -33,16 +33,20 @@ export function useSaves(
   const { startUploadBatch } = useUploadProgress();
 
   const kind = resolveStatusKind(status);
-  const serverBusy = kind === 'running' || kind === 'starting' || kind === 'stopping';
+  const serverBusy =
+    kind === 'running' || kind === 'starting' || kind === 'stopping';
   const maintLocked = kind === 'maintenance';
 
   const listQuery = useQuery({
     queryKey: ['saves', 'list'],
     queryFn: async () => {
-      const j = await api<{ saves?: SaveRow[]; ok?: boolean; error?: string }>('/api/saves');
+      const j = await api<{ saves?: SaveRow[]; ok?: boolean; error?: string }>(
+        '/api/saves',
+      );
       if (j?.ok === false) {
         const err = String(j.error || '');
-        if (err.includes('not_found') || err.includes('no_saves')) return [] as SaveRow[];
+        if (err.includes('not_found') || err.includes('no_saves'))
+          return [] as SaveRow[];
         throw new Error(err || 'load_failed');
       }
       const rows = Array.isArray(j.saves) ? j.saves.slice() : [];
@@ -93,11 +97,19 @@ export function useSaves(
     queryFn: async () => {
       const name = selectedSave;
       const [insp, modList, modsAll] = await Promise.all([
-        api<{ header?: { factorio_version?: string; mods?: { name?: string; version?: string }[] } }>(
-          `/api/saves/${encodeURIComponent(name)}/inspect`,
+        api<{
+          header?: {
+            factorio_version?: string;
+            mods?: { name?: string; version?: string }[];
+          };
+        }>(`/api/saves/${encodeURIComponent(name)}/inspect`),
+        api<{ data?: { mods?: { name?: string; enabled?: boolean }[] } }>(
+          '/api/files/mod-list',
         ),
-        api<{ data?: { mods?: { name?: string; enabled?: boolean }[] } }>('/api/files/mod-list'),
-        api<{ mods?: { name?: string; local_version?: string }[]; game_version?: string }>('/api/mods'),
+        api<{
+          mods?: { name?: string; local_version?: string }[];
+          game_version?: string;
+        }>('/api/mods'),
       ]);
       return buildSaveModCompareRows(insp, modList, modsAll);
     },
@@ -123,7 +135,9 @@ export function useSaves(
       const token = getToken();
       const headers: Record<string, string> = {};
       if (token) headers.Authorization = `Bearer ${token}`;
-      const r = await fetch(`/api/saves/${encodeURIComponent(name)}/download`, { headers });
+      const r = await fetch(`/api/saves/${encodeURIComponent(name)}/download`, {
+        headers,
+      });
       if (!r.ok) throw new Error(await r.text());
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);
@@ -186,13 +200,18 @@ export function useSaves(
           body: JSON.stringify({ new_name: renameNewName.trim() }),
         },
       );
-      if (!j || j.ok === false) throw new Error(String(j?.error || 'rename_failed'));
+      if (!j || j.ok === false)
+        throw new Error(String(j?.error || 'rename_failed'));
       const finalName = String(j.name || nextZip);
       if (selectedSave === oldName) setSelectedSave(finalName);
       closeRenameDialog();
       await reload();
       setSavesMsg(
-        t('saves_manager_rename_done', saveDisplayLabel(oldName), saveDisplayLabel(finalName)),
+        t(
+          'saves_manager_rename_done',
+          saveDisplayLabel(oldName),
+          saveDisplayLabel(finalName),
+        ),
         false,
       );
     } catch (e) {
@@ -275,7 +294,9 @@ export function useSaves(
       if (!res || res.ok === false) {
         throw new Error(String(res?.error || 'transfer_failed'));
       }
-      const targetServerLabel = String(res.target_server_name || transferTargetServerId);
+      const targetServerLabel = String(
+        res.target_server_name || transferTargetServerId,
+      );
       const finalTargetName = String(res.target_name || nextZip);
       closeTransferDialog();
       await reload();
@@ -283,7 +304,10 @@ export function useSaves(
         transferMode === 'move'
           ? 'saves_manager_transfer_success_move'
           : 'saves_manager_transfer_success_copy';
-      setSavesMsg(t(msgKey, srcName, targetServerLabel, finalTargetName), false);
+      setSavesMsg(
+        t(msgKey, srcName, targetServerLabel, finalTargetName),
+        false,
+      );
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       let text = raw;
@@ -291,7 +315,10 @@ export function useSaves(
         text = t('saves_manager_transfer_mode_move_running_warn');
       } else if (raw === 'target_running_active_save') {
         text = t('saves_manager_transfer_target_running_active');
-      } else if (raw === 'invalid_target_server' || raw === 'target_server_not_found') {
+      } else if (
+        raw === 'invalid_target_server' ||
+        raw === 'target_server_not_found'
+      ) {
         text = t('saves_manager_transfer_invalid_target');
       } else {
         text = localizeSaveRenameError(raw, t, nextZip);
@@ -323,9 +350,14 @@ export function useSaves(
         cancelLabel: t('cancel'),
         variant: 'danger',
         onConfirm: async () => {
-          await api(`/api/saves/${encodeURIComponent(name)}`, { method: 'DELETE' });
+          await api(`/api/saves/${encodeURIComponent(name)}`, {
+            method: 'DELETE',
+          });
           await reload();
-          setSavesMsg(t('saves_manager_delete_done', saveDisplayLabel(name)), false);
+          setSavesMsg(
+            t('saves_manager_delete_done', saveDisplayLabel(name)),
+            false,
+          );
         },
       });
     },
@@ -334,27 +366,41 @@ export function useSaves(
 
   const duplicate = useCallback(
     async (name: string) => {
-      await api(`/api/saves/${encodeURIComponent(name)}/duplicate`, { method: 'POST' });
+      await api(`/api/saves/${encodeURIComponent(name)}/duplicate`, {
+        method: 'POST',
+      });
       await reload();
-      setSavesMsg(t('saves_manager_duplicate_done', saveDisplayLabel(name)), false);
+      setSavesMsg(
+        t('saves_manager_duplicate_done', saveDisplayLabel(name)),
+        false,
+      );
     },
     [reload, setSavesMsg, t],
   );
 
   const setLaunch = useCallback(
     async (name: string) => {
-      await api('/api/saves/set-launch', { method: 'POST', body: JSON.stringify({ name }) });
+      await api('/api/saves/set-launch', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      });
       await Promise.all([
-        qc.invalidateQueries({ queryKey: ['players'] }),
+        reload(),
         qc.invalidateQueries({ queryKey: ['instances'] }),
         qc.invalidateQueries({ queryKey: ['config', 'server'] }),
       ]);
       setSavesMsg(t('saves_manager_launch_set', name), false);
     },
-    [qc, setSavesMsg, t],
+    [qc, reload, setSavesMsg, t],
   );
 
-  const createSaveDialog = useCreateSave(instanceId, serverBusy, reload, setSavesMsg, t);
+  const createSaveDialog = useCreateSave(
+    instanceId,
+    serverBusy,
+    reload,
+    setSavesMsg,
+    t,
+  );
 
   const openQuickSaveDialog = useCallback(() => {
     if (serverBusy) {
@@ -392,7 +438,9 @@ export function useSaves(
         return;
       }
       if (existingSaveNames.has(zip.toLowerCase())) {
-        setQuickSaveNameError(t('saves_manager_rename_exists', saveDisplayLabel(zip)));
+        setQuickSaveNameError(
+          t('saves_manager_rename_exists', saveDisplayLabel(zip)),
+        );
         return;
       }
       name = saveDisplayLabel(zip);
@@ -400,11 +448,15 @@ export function useSaves(
     setQuickCreating(true);
     setQuickSaveNameError('');
     try {
-      const r = await api<{ ok?: boolean; error?: string; name?: string }>('/api/server/create-save', {
-        method: 'POST',
-        body: JSON.stringify({ name, mode: 'default', seed }),
-      });
-      if (r?.ok === false) throw new Error(String(r.error || 'create_save_failed'));
+      const r = await api<{ ok?: boolean; error?: string; name?: string }>(
+        '/api/server/create-save',
+        {
+          method: 'POST',
+          body: JSON.stringify({ name, mode: 'default', seed }),
+        },
+      );
+      if (r?.ok === false)
+        throw new Error(String(r.error || 'create_save_failed'));
       const finalName = String(r.name || `${name}.zip`);
       setQuickSaveDialogOpen(false);
       setQuickSaveFileName('');
@@ -412,14 +464,25 @@ export function useSaves(
       setQuickSaveSeed(null);
       setSelectedSave(finalName);
       await reload();
-      setSavesMsg(t('create_save_quick_done', saveDisplayLabel(finalName)), false);
+      setSavesMsg(
+        t('create_save_quick_done', saveDisplayLabel(finalName)),
+        false,
+      );
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       setQuickSaveNameError(localizeCreateSaveError(raw, t));
     } finally {
       setQuickCreating(false);
     }
-  }, [existingSaveNames, quickCreating, quickSaveFileName, quickSaveSeed, reload, setSavesMsg, t]);
+  }, [
+    existingSaveNames,
+    quickCreating,
+    quickSaveFileName,
+    quickSaveSeed,
+    reload,
+    setSavesMsg,
+    t,
+  ]);
 
   const uploadFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -447,7 +510,10 @@ export function useSaves(
           const fd = new FormData();
           fd.append('file', file, file.name);
           fd.append('filename', file.name);
-          const res = await uploadWithProgress<{ ok?: boolean; error?: string }>('/api/saves/upload', fd, { signal, onProgress });
+          const res = await uploadWithProgress<{
+            ok?: boolean;
+            error?: string;
+          }>('/api/saves/upload', fd, { signal, onProgress });
           if (res && res.ok === false) {
             throw new Error(String(res.error || 'invalid_save_archive'));
           }
@@ -456,7 +522,10 @@ export function useSaves(
       );
 
       if (batchResult.cancelled) {
-        setSavesMsg(t('upload_progress_cancelled') || 'Загрузка отменена', false);
+        setSavesMsg(
+          t('upload_progress_cancelled') || 'Загрузка отменена',
+          false,
+        );
         await reload();
         return;
       }
@@ -464,11 +533,17 @@ export function useSaves(
       if (batchResult.errors.length === 0) {
         if (validFiles.length === 1 && validFiles[0]) {
           setSavesMsg(
-            t('saves_manager_upload_done_single', saveDisplayLabel(validFiles[0].name)),
+            t(
+              'saves_manager_upload_done_single',
+              saveDisplayLabel(validFiles[0].name),
+            ),
             false,
           );
         } else {
-          setSavesMsg(t('saves_manager_upload_done_plural', validFiles.length), false);
+          setSavesMsg(
+            t('saves_manager_upload_done_plural', validFiles.length),
+            false,
+          );
         }
       }
       await reload();
@@ -478,7 +553,10 @@ export function useSaves(
 
   const handleError = useCallback(
     (e: unknown) => {
-      const text = localizeSaveUploadError(e instanceof Error ? e.message : String(e), t);
+      const text = localizeSaveUploadError(
+        e instanceof Error ? e.message : String(e),
+        t,
+      );
       feedbackMsg(savesTitle, text, true, false, t);
     },
     [savesTitle, t],
@@ -494,7 +572,8 @@ export function useSaves(
     compareLoading:
       !!selectedSave &&
       enabled &&
-      (compareQuery.isPending || (compareQuery.isFetching && compareQuery.data === undefined)),
+      (compareQuery.isPending ||
+        (compareQuery.isFetching && compareQuery.data === undefined)),
     loading: listQuery.isLoading,
     serverBusy,
     maintLocked,

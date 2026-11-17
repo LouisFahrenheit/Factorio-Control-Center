@@ -172,6 +172,7 @@ export interface SaveRow {
   name: string;
   mtime?: number;
   is_running_active?: boolean;
+  is_launch?: boolean;
 }
 
 export type SaveSortColumn = 'name' | 'type' | 'mtime';

@@ -336,10 +336,14 @@ export class ServerOpsService {
     }
   }
 
-  async rconExec(command: string): Promise<OpResult> {
+  async rconExec(command: string, source?: string): Promise<OpResult> {
     const id = this.instances.getSelectedId();
     if (!id) return { ok: false, error: 'instance_not_found' };
-    return this.runtime.rconExec(id, String(command || ''));
+    const res = await this.runtime.rconExec(id, String(command || ''));
+    if (source === 'console') {
+      this.runtime.appendConsoleLog(id, String(command || ''), res);
+    }
+    return res;
   }
 
   async chatSendText(message: string): Promise<OpResult> {

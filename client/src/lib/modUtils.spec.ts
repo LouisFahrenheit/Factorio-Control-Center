@@ -87,13 +87,19 @@ describe('modUtils lib', () => {
   describe('modAuthor helpers', () => {
     it('extracts plain author text from various fields', () => {
       expect(modAuthorPlain({ name: 'm', author: 'Author1' })).toBe('Author1');
-      expect(modAuthorPlain({ name: 'm', authors: ['Dev A', 'Dev B'] })).toBe('Dev A, Dev B');
+      expect(modAuthorPlain({ name: 'm', authors: ['Dev A', 'Dev B'] })).toBe(
+        'Dev A, Dev B',
+      );
       expect(modAuthorPlain({ name: 'm', owner: 'OwnerDev' })).toBe('OwnerDev');
       expect(modAuthorPlain({ name: 'm' })).toBe('');
     });
 
     it('splits comma-separated author parts', () => {
-      expect(modAuthorParts('Dev1, Dev2, Dev3')).toEqual(['Dev1', 'Dev2', 'Dev3']);
+      expect(modAuthorParts('Dev1, Dev2, Dev3')).toEqual([
+        'Dev1',
+        'Dev2',
+        'Dev3',
+      ]);
       expect(modAuthorParts('—')).toEqual([]);
       expect(modAuthorParts('')).toEqual([]);
     });
@@ -120,12 +126,15 @@ describe('modUtils lib', () => {
   });
 
   describe('modsDefaultAscForColumn', () => {
-    it('returns true for text columns and false for metrics', () => {
+    it('returns true for text, category, and version columns and false for metrics', () => {
       expect(modsDefaultAscForColumn('name')).toBe(true);
+      expect(modsDefaultAscForColumn('type')).toBe(true);
       expect(modsDefaultAscForColumn('author')).toBe(true);
       expect(modsDefaultAscForColumn('installed_by')).toBe(true);
+      expect(modsDefaultAscForColumn('version')).toBe(true);
+      expect(modsDefaultAscForColumn('portal')).toBe(true);
+      expect(modsDefaultAscForColumn('enabled')).toBe(true);
       expect(modsDefaultAscForColumn('size')).toBe(false);
-      expect(modsDefaultAscForColumn('version')).toBe(false);
       expect(modsDefaultAscForColumn('installed')).toBe(false);
     });
   });
@@ -159,7 +168,9 @@ describe('modUtils lib', () => {
 
     it('returns space age URL for builtin mods', () => {
       expect(getModOpenUrl('space-age', true)).toBe(BUILTIN_MOD_CONTENT_URL);
-      expect(getModOpenUrl('flib', false)).toBe('https://mods.factorio.com/mod/flib');
+      expect(getModOpenUrl('flib', false)).toBe(
+        'https://mods.factorio.com/mod/flib',
+      );
     });
   });
 
@@ -210,9 +221,21 @@ describe('modUtils lib', () => {
 
   describe('filterModRows', () => {
     const rows: ModRow[] = [
-      { name: 'alpha-mod', display_name: 'Alpha Craft', local_version: '1.0.0' },
-      { name: 'beta-mod', display_name: 'Beta Transport', local_version: '2.1.0' },
-      { name: 'gamma-core', display_name: 'Gamma Core', portal_version: '3.0.0' },
+      {
+        name: 'alpha-mod',
+        display_name: 'Alpha Craft',
+        local_version: '1.0.0',
+      },
+      {
+        name: 'beta-mod',
+        display_name: 'Beta Transport',
+        local_version: '2.1.0',
+      },
+      {
+        name: 'gamma-core',
+        display_name: 'Gamma Core',
+        portal_version: '3.0.0',
+      },
     ];
 
     it('returns all rows when query is empty', () => {
@@ -229,23 +252,53 @@ describe('modUtils lib', () => {
 
   describe('sortModRows', () => {
     const rows: ModRow[] = [
-      { name: 'beta-mod', display_name: 'Beta', enabled: false, zip_size_bytes: 500, local_version: '1.0.0' },
-      { name: 'alpha-mod', display_name: 'Alpha', enabled: true, zip_size_bytes: 100, local_version: '2.0.0' },
-      { name: 'gamma-mod', display_name: 'Gamma', enabled: true, zip_size_bytes: 300, local_version: '1.5.0' },
+      {
+        name: 'beta-mod',
+        display_name: 'Beta',
+        enabled: false,
+        zip_size_bytes: 500,
+        local_version: '1.0.0',
+      },
+      {
+        name: 'alpha-mod',
+        display_name: 'Alpha',
+        enabled: true,
+        zip_size_bytes: 100,
+        local_version: '2.0.0',
+      },
+      {
+        name: 'gamma-mod',
+        display_name: 'Gamma',
+        enabled: true,
+        zip_size_bytes: 300,
+        local_version: '1.5.0',
+      },
     ];
     const order = ['alpha-mod', 'beta-mod', 'gamma-mod'];
 
     it('sorts by initial list order if sortColumn is empty', () => {
       const sorted = sortModRows(rows, order, '', true);
-      expect(sorted.map((r) => r.name)).toEqual(['alpha-mod', 'beta-mod', 'gamma-mod']);
+      expect(sorted.map((r) => r.name)).toEqual([
+        'alpha-mod',
+        'beta-mod',
+        'gamma-mod',
+      ]);
     });
 
     it('sorts by name ascending and descending', () => {
       const asc = sortModRows(rows, order, 'name', true);
-      expect(asc.map((r) => r.name)).toEqual(['alpha-mod', 'beta-mod', 'gamma-mod']);
+      expect(asc.map((r) => r.name)).toEqual([
+        'alpha-mod',
+        'beta-mod',
+        'gamma-mod',
+      ]);
 
       const desc = sortModRows(rows, order, 'name', false);
-      expect(desc.map((r) => r.name)).toEqual(['gamma-mod', 'beta-mod', 'alpha-mod']);
+      expect(desc.map((r) => r.name)).toEqual([
+        'gamma-mod',
+        'beta-mod',
+        'alpha-mod',
+      ]);
     });
 
     it('sorts by enabled state', () => {
@@ -257,12 +310,35 @@ describe('modUtils lib', () => {
 
     it('sorts by size', () => {
       const asc = sortModRows(rows, order, 'size', true);
-      expect(asc.map((r) => r.name)).toEqual(['alpha-mod', 'gamma-mod', 'beta-mod']);
+      expect(asc.map((r) => r.name)).toEqual([
+        'alpha-mod',
+        'gamma-mod',
+        'beta-mod',
+      ]);
     });
 
     it('sorts by version', () => {
       const asc = sortModRows(rows, order, 'version', true);
-      expect(asc.map((r) => r.local_version)).toEqual(['1.0.0', '1.5.0', '2.0.0']);
+      expect(asc.map((r) => r.local_version)).toEqual([
+        '1.0.0',
+        '1.5.0',
+        '2.0.0',
+      ]);
+    });
+
+    it('sorts by type', () => {
+      const mixedRows = [
+        { name: 'local', portal_version: '~', is_builtin: false },
+        { name: 'builtin', is_builtin: true },
+        { name: 'portal', portal_version: '1.0.0', is_builtin: false },
+      ];
+      const asc = sortModRows(
+        mixedRows,
+        ['local', 'builtin', 'portal'],
+        'type',
+        true,
+      );
+      expect(asc.map((r) => r.name)).toEqual(['builtin', 'portal', 'local']);
     });
   });
 });

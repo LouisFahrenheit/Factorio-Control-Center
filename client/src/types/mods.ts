@@ -21,6 +21,7 @@ export interface ModRow {
 export type ModSortColumn =
   | 'enabled'
   | 'name'
+  | 'type'
   | 'author'
   | 'size'
   | 'version'

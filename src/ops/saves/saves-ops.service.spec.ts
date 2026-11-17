@@ -133,12 +133,29 @@ describe('SavesOpsService', () => {
       expect(res.running_now).toBe(true);
       expect(res.running_active_save).toBe('world1.zip');
 
-      const saves = res.saves as { name: string; is_running_active: boolean }[];
+      const saves = res.saves as {
+        name: string;
+        is_running_active: boolean;
+        is_launch?: boolean;
+      }[];
       expect(saves).toHaveLength(2);
       const w1 = saves.find((s) => s.name === 'world1.zip');
       const w2 = saves.find((s) => s.name === 'world2.zip');
       expect(w1?.is_running_active).toBe(true);
       expect(w2?.is_running_active).toBe(false);
+    });
+
+    it('marks launch save when specified or resolved', () => {
+      fs.writeFileSync(path.join(instance1SavesDir, 'world1.zip'), 'dummy1');
+      fs.writeFileSync(path.join(instance1SavesDir, 'world2.zip'), 'dummy2');
+      inst1.launchSave = 'world2.zip';
+      const res = service.list();
+      expect(res.ok).toBe(true);
+      const saves = res.saves as { name: string; is_launch: boolean }[];
+      const w1 = saves.find((s) => s.name === 'world1.zip');
+      const w2 = saves.find((s) => s.name === 'world2.zip');
+      expect(w1?.is_launch).toBe(false);
+      expect(w2?.is_launch).toBe(true);
     });
 
     it('resolves active save from latest file when not explicitly in runtime', () => {

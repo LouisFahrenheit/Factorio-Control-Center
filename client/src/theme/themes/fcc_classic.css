@@ -184,14 +184,16 @@
   background-repeat: no-repeat !important;
 }
 
-:root:not([data-theme]) .tab-panels,
-:root[data-theme='fcc_classic'] .tab-panels {
+:root:not([data-theme]) .tab-panels:not(.panel-shell > .tab-panels),
+:root[data-theme='fcc_classic'] .tab-panels:not(.panel-shell > .tab-panels) {
   background-image: none !important;
-  background-color: color-mix(
-    in srgb,
-    var(--bg-main) 58%,
-    var(--bg-widget) 42%
-  ) !important;
+  background-color: transparent !important;
+}
+
+:root:not([data-theme]) .panel-shell > .tab-panels,
+:root[data-theme='fcc_classic'] .panel-shell > .tab-panels {
+  background: color-mix(in srgb, #1e1e1e 78%, #4a4a4a 22%) !important;
+  background-image: none !important;
 }
 
 :root[data-theme='fcc_classic'] .login-screen__brand-primary,

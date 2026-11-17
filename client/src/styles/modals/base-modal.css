@@ -201,7 +201,7 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 .fcc-modal .btn svg,
 .fcc-modal .btn .app-icon,
 .fcc-modal .mantine-Button-root svg {
-  color: var(--text-muted);
+  color: currentColor;
   transition: color 0.16s ease;
 }
 

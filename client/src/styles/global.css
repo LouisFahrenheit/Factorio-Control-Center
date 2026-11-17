@@ -341,11 +341,20 @@ body {
   border: 1px solid var(--fcc-btn-border);
   border-radius: var(--r-md);
   box-shadow: var(--fcc-btn-shadow);
+  color: var(--text);
   transition:
     background-color 0.22s var(--fcc-hover-ease),
     border-color 0.22s var(--fcc-hover-ease),
     box-shadow 0.22s var(--fcc-hover-ease),
     color 0.22s var(--fcc-hover-ease);
+}
+
+.btn svg,
+.btn .app-icon,
+.btn--toolbar-icon svg,
+.btn--toolbar-icon .app-icon {
+  color: currentColor;
+  transition: color 0.16s ease;
 }
 
 .btn--toolbar-icon:hover:not(:disabled):not(.is-locked) {
@@ -355,6 +364,7 @@ body {
     var(--accent) 28%,
     var(--fcc-btn-border) 72%
   );
+  color: var(--accent);
 }
 
 .fcc-switch {
@@ -739,7 +749,11 @@ table#tblBackups thead th.backup-sort-th:hover {
 }
 
 table#tblBackups thead th.backup-sort-th--active {
-  color: var(--accent-soft) !important;
+  color: var(--text-muted) !important;
+}
+
+table#tblBackups thead th.backup-sort-th--active:hover {
+  color: var(--text) !important;
 }
 
 table#tblBackups thead th.backup-sort-th--active::after {
@@ -748,8 +762,8 @@ table#tblBackups thead th.backup-sort-th--active::after {
   width: 0.42em;
   height: 0.42em;
   margin-left: 0.45em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  border-right: 2px solid var(--accent-soft) !important;
+  border-bottom: 2px solid var(--accent-soft) !important;
   transform: rotate(45deg) translateY(-2px);
   opacity: 0.9;
   vertical-align: middle;
@@ -5420,6 +5434,139 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   }
 }
 
+/* ── Universal Select Controls (Matched to Button Surface) ── */
+
+select:not(.control-tab__compact-input),
+select.input:not(.control-tab__compact-input),
+.access-users-bar__select,
+.instance-monitoring-bar__select,
+.history-tab__filter-select,
+.instance-columns-dropdown__mode-select {
+  background-color: var(--fcc-btn-bg) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  color: var(--text) !important;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+select:not(.control-tab__compact-input):hover:not(:disabled),
+select.input:not(.control-tab__compact-input):hover:not(:disabled),
+.access-users-bar__select:hover:not(:disabled),
+.instance-monitoring-bar__select:hover:not(:disabled),
+.history-tab__filter-select:hover:not(:disabled),
+.instance-columns-dropdown__mode-select:hover:not(:disabled) {
+  background-color: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 45%,
+    var(--border) 55%
+  ) !important;
+}
+
+select:not(.control-tab__compact-input):focus,
+select.input:not(.control-tab__compact-input):focus,
+.access-users-bar__select:focus,
+.instance-monitoring-bar__select:focus,
+.history-tab__filter-select:focus,
+.instance-columns-dropdown__mode-select:focus {
+  outline: none !important;
+  background-color: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 58%,
+    var(--border) 42%
+  ) !important;
+  box-shadow: var(--fcc-btn-shadow), var(--fcc-focus-ring) !important;
+}
+
+select:not(.control-tab__compact-input):disabled,
+select.input:not(.control-tab__compact-input):disabled,
+.access-users-bar__select:disabled,
+.instance-monitoring-bar__select:disabled,
+.history-tab__filter-select:disabled,
+.instance-columns-dropdown__mode-select:disabled {
+  background-color: var(
+    --fcc-btn-bg-disabled,
+    rgba(255, 255, 255, 0.04)
+  ) !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+select option,
+select.input option {
+  background: var(--bg-widget, #1e2430) !important;
+  color: var(--text) !important;
+}
+
+/* ── Universal Search Controls (Matched to Button Surface) ── */
+
+.input-with-icon,
+.instance-peek-modal__search-bar,
+.mod-portal-versions__search-box,
+.server-save-select__search,
+input[type='search']:not(.input-with-icon__input):not(.settings-tags-input) {
+  background-color: var(--fcc-btn-bg) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  color: var(--text) !important;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.input-with-icon:hover,
+.instance-peek-modal__search-bar:hover,
+.mod-portal-versions__search-box:hover,
+.server-save-select__search:hover,
+input[type='search']:not(.input-with-icon__input):not(
+    .settings-tags-input
+  ):hover {
+  background-color: var(--fcc-btn-bg) !important;
+}
+
+.input-with-icon:hover:not(:focus-within),
+.instance-peek-modal__search-bar:hover:not(:focus-within),
+.mod-portal-versions__search-box:hover:not(:focus-within),
+.server-save-select__search:hover:not(:focus-within),
+input[type='search']:not(.input-with-icon__input):not(
+    .settings-tags-input
+  ):hover:not(:disabled):not(:focus) {
+  border-color: var(--fcc-btn-border) !important;
+}
+
+.input-with-icon:focus-within,
+.instance-peek-modal__search-bar:focus-within,
+.mod-portal-versions__search-box:focus-within,
+.server-save-select__search:focus-within,
+input[type='search']:not(.input-with-icon__input):not(
+    .settings-tags-input
+  ):focus {
+  outline: none !important;
+  background-color: var(--fcc-btn-bg) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 58%,
+    var(--border) 42%
+  ) !important;
+  box-shadow: var(--fcc-btn-shadow), var(--fcc-focus-ring) !important;
+}
+
+.input-with-icon .input-with-icon__input,
+.input-with-icon input.input,
+.instance-peek-modal__search-bar .instance-peek-modal__search-input,
+.mod-portal-versions__search-box .mod-portal-versions__search-input,
+.server-save-select__search .server-save-select__search-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .instance-status-pill {
   display: inline-flex !important;
   align-items: center !important;
@@ -5555,6 +5702,7 @@ table#tblInstances thead th.instances-sort-th:hover,
 table#tblSaves thead th.saves-sort-th:hover,
 table.data thead th.saves-sort-th:hover,
 table.data thead th.instances-sort-th:hover,
+table#tblMods thead th.mods-sort-th:hover,
 table.data thead th.mods-sort-th:hover,
 table#tblPublicServers thead th.access-sort-th:hover {
   color: var(--text) !important;
@@ -5565,23 +5713,35 @@ table#tblInstances thead th.instances-sort-th--active,
 table.data thead th.instances-sort-th--active,
 table#tblSaves thead th.saves-sort-th--active,
 table.data thead th.saves-sort-th--active,
+table#tblMods thead th.mods-sort-th--active,
 table.data thead th.mods-sort-th--active,
 table#tblPublicServers thead th.access-sort-th--active {
-  color: var(--accent-soft) !important;
+  color: var(--text-muted) !important;
+}
+
+table#tblInstances thead th.instances-sort-th--active:hover,
+table.data thead th.instances-sort-th--active:hover,
+table#tblSaves thead th.saves-sort-th--active:hover,
+table.data thead th.saves-sort-th--active:hover,
+table#tblMods thead th.mods-sort-th--active:hover,
+table.data thead th.mods-sort-th--active:hover,
+table#tblPublicServers thead th.access-sort-th--active:hover {
+  color: var(--text) !important;
 }
 
 table#tblInstances thead th.instances-sort-th--active::after,
 table.data thead th.instances-sort-th--active::after,
 table#tblSaves thead th.saves-sort-th--active::after,
 table.data thead th.saves-sort-th--active::after,
+table#tblMods thead th.mods-sort-th--active::after,
 table.data thead th.mods-sort-th--active::after {
   content: '' !important;
   display: inline-block !important;
   width: 0.42em !important;
   height: 0.42em !important;
   margin-left: 0.45em !important;
-  border-right: 2px solid currentColor !important;
-  border-bottom: 2px solid currentColor !important;
+  border-right: 2px solid var(--accent-soft) !important;
+  border-bottom: 2px solid var(--accent-soft) !important;
   border-top: none !important;
   border-left: none !important;
   transform: rotate(45deg) translateY(-2px) !important;
@@ -5593,6 +5753,7 @@ table#tblInstances thead th.instances-sort-th--asc::after,
 table.data thead th.instances-sort-th--asc::after,
 table#tblSaves thead th.saves-sort-th--asc::after,
 table.data thead th.saves-sort-th--asc::after,
+table#tblMods thead th.mods-sort-th--asc::after,
 table.data thead th.mods-sort-th--asc::after {
   transform: rotate(-135deg) translateY(1px) !important;
 }
@@ -6111,6 +6272,39 @@ td.instance-save-cell {
   white-space: nowrap;
 }
 
+.saves-col-name .instance-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  vertical-align: middle;
+}
+
+.save-launch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.save-launch-icon .app-icon {
+  display: block;
+}
+
+#tabPanelSaves .saves-col-type,
+#tabPanelSaves .save-type-badge,
+#tabPanelSaves .save-type-text {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .saves-col-mtime {
   width: 170px;
   min-width: 150px;
@@ -6169,7 +6363,11 @@ table.data thead th.saves-sort-th:hover {
 }
 
 table.data thead th.saves-sort-th--active {
-  color: var(--accent-soft) !important;
+  color: var(--text-muted) !important;
+}
+
+table.data thead th.saves-sort-th--active:hover {
+  color: var(--text) !important;
 }
 
 table.data thead th.saves-sort-th--active::after {
@@ -6178,8 +6376,8 @@ table.data thead th.saves-sort-th--active::after {
   width: 0.42em;
   height: 0.42em;
   margin-left: 0.45em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  border-right: 2px solid var(--accent-soft) !important;
+  border-bottom: 2px solid var(--accent-soft) !important;
   transform: rotate(45deg) translateY(-2px);
   opacity: 0.9;
   vertical-align: middle;
@@ -6488,7 +6686,11 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 .saves-tab__card-body table.data thead th.saves-sort-th--active {
-  color: var(--accent-soft) !important;
+  color: var(--text-muted) !important;
+}
+
+.saves-tab__card-body table.data thead th.saves-sort-th--active:hover {
+  color: var(--text) !important;
 }
 
 .saves-tab__card-body table.data thead th.saves-sort-th--active::after {
@@ -6657,7 +6859,8 @@ table.data thead th.saves-sort-th--asc::after {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  width: 230px;
+  width: 280px;
+  box-sizing: border-box;
   background: var(--bg-dropdown, var(--bg-widget));
   border: 1px solid var(--border-dark);
   border-radius: 8px;
@@ -6670,6 +6873,13 @@ table.data thead th.saves-sort-th--asc::after {
   box-shadow:
     0 10px 28px rgba(0, 0, 0, 0.65),
     0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.instance-columns-dropdown,
+.instance-columns-dropdown *,
+.instance-columns-dropdown *::before,
+.instance-columns-dropdown *::after {
+  box-sizing: border-box;
 }
 
 .instance-columns-dropdown__header {
@@ -6788,21 +6998,34 @@ table.data thead th.saves-sort-th--asc::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 6px 4px 2px;
+  gap: 8px;
+  padding: 8px 4px 2px;
   border-top: 1px solid color-mix(in srgb, var(--border-dark) 60%, transparent);
-  margin-top: 2px;
+  margin-top: 4px;
+  box-sizing: border-box;
 }
 
 .instance-columns-dropdown__action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.73rem;
-  padding: 4px 8px;
-  border-radius: 5px;
-  flex: 1 1 50%;
+  gap: 5px;
+  font-size: 0.78rem !important;
+  padding: 4px 10px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-radius: 6px !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
   justify-content: center;
+  box-sizing: border-box;
+  white-space: nowrap !important;
+}
+
+.instance-columns-dropdown__action-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ==========================================================================
@@ -6855,10 +7078,14 @@ table.data thead th.saves-sort-th--asc::after {
   align-items: center !important;
   gap: 8px !important;
   padding: 0 var(--sst-card-pad-h) !important;
-  border-radius: 9px !important;
-  border: 1px solid var(--border-dark) !important;
-  background: var(--bg-widget) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  border-radius: var(--r-md, 8px) !important;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-main) 35%,
+    var(--bg-widget) 65%
+  ) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
   min-height: var(--sst-toolbar-height) !important;
   height: var(--sst-toolbar-height) !important;
   box-sizing: border-box !important;
@@ -6884,8 +7111,27 @@ table.data thead th.saves-sort-th--asc::after {
   justify-content: center !important;
   gap: 6px !important;
   font-size: var(--sst-btn-font) !important;
-  font-weight: 550 !important;
-  border-radius: 6px !important;
+  font-weight: 600 !important;
+  border-radius: var(--r-md, 8px) !important;
+  background: var(--fcc-btn-bg) !important;
+  border: 1px solid var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
+  color: var(--text) !important;
+}
+
+.server-settings-tab__actions .btn:hover:not(:disabled),
+.server-settings-tab__toolbar .btn:hover:not(:disabled) {
+  background: var(--fcc-btn-bg-hover) !important;
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
+  color: var(--text) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28) !important;
+}
+
+.server-settings-tab__actions .btn svg,
+.server-settings-tab__toolbar .btn svg,
+.server-settings-tab__actions .btn .app-icon,
+.server-settings-tab__toolbar .btn .app-icon {
+  color: currentColor !important;
 }
 
 .server-settings-tab__actions .btn--toolbar-icon,
@@ -6941,12 +7187,20 @@ table.data thead th.saves-sort-th--asc::after {
 .server-settings-tab .settings-section {
   display: flex !important;
   flex-direction: column !important;
-  border: 1px solid var(--border-dark) !important;
-  border-radius: 9px !important;
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.09) 48%, var(--border-dark) 52%) !important;
+  border-radius: var(--r-lg, 12px) !important;
   padding: 0 !important;
   overflow: hidden !important;
-  background: var(--bg-data) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 88%,
+    var(--bg-main) 12%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.065),
+    0 4px 18px -2px rgba(0, 0, 0, 0.32),
+    0 1px 3px rgba(0, 0, 0, 0.22) !important;
   height: 100% !important;
   box-sizing: border-box !important;
   transition:
@@ -6998,8 +7252,13 @@ table.data thead th.saves-sort-th--asc::after {
   padding: 0 var(--sst-card-pad-h) !important;
   min-height: var(--sst-header-height) !important;
   height: var(--sst-header-height) !important;
-  background: var(--bg-widget) !important;
-  border-bottom: 1px solid var(--border-dark) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-widget) 72%,
+    var(--bg-main) 28%
+  ) !important;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 82%, transparent) !important;
   font-size: var(--sst-header-font) !important;
   font-weight: 650 !important;
   letter-spacing: 0.02em !important;
@@ -7085,7 +7344,6 @@ table.data thead th.saves-sort-th--asc::after {
 
 /* ── Form Inputs ─────────────────────────────────────────────────────── */
 
-.server-settings-tab .settings-row__control .input,
 .server-settings-tab .settings-row__control select.input {
   height: var(--sst-input-height) !important;
   min-height: var(--sst-input-height) !important;
@@ -7093,14 +7351,27 @@ table.data thead th.saves-sort-th--asc::after {
   font-size: var(--sst-label-font) !important;
   line-height: calc(var(--sst-input-height) - 2px) !important;
   padding: 0 clamp(9px, 0.8vw, 13px) !important;
-  border-radius: 6px !important;
+  border-radius: var(--r-md, 8px) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.server-settings-tab .settings-row__control .input:not(select) {
+  height: var(--sst-input-height) !important;
+  min-height: var(--sst-input-height) !important;
+  max-height: var(--sst-input-height) !important;
+  font-size: var(--sst-label-font) !important;
+  line-height: calc(var(--sst-input-height) - 2px) !important;
+  padding: 0 clamp(9px, 0.8vw, 13px) !important;
+  border-radius: var(--r-md, 8px) !important;
   background: color-mix(
     in srgb,
-    var(--bg-main) 70%,
-    var(--bg-widget) 30%
+    var(--bg-main) 72%,
+    var(--bg-widget) 28%
   ) !important;
-  border: 1px solid var(--border-dark) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
   color: var(--text) !important;
   box-sizing: border-box !important;
   width: 100% !important;
@@ -7110,17 +7381,20 @@ table.data thead th.saves-sort-th--asc::after {
     box-shadow 0.15s ease;
 }
 
-.server-settings-tab .settings-row__control .input:focus,
-.server-settings-tab .settings-row__control select.input:focus {
-  border-color: var(--accent) !important;
+.server-settings-tab .settings-row__control .input:not(select):focus {
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 58%,
+    var(--border) 42%
+  ) !important;
   background: color-mix(
     in srgb,
-    var(--bg-main) 55%,
-    var(--bg-widget) 45%
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
   ) !important;
   box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.2),
-    0 0 0 1px var(--accent) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    var(--fcc-focus-ring) !important;
   outline: none !important;
 }
 
@@ -7212,14 +7486,15 @@ table.data thead th.saves-sort-th--asc::after {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent !important;
   padding: 0 6px !important;
-  border-radius: 6px !important;
+  border-radius: var(--r-md, 8px) !important;
   background: color-mix(
     in srgb,
-    var(--bg-main) 70%,
-    var(--bg-widget) 30%
+    var(--bg-main) 72%,
+    var(--bg-widget) 28%
   ) !important;
-  border: 1px solid var(--border-dark) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid
+    color-mix(in srgb, rgba(255, 255, 255, 0.08) 40%, var(--border-dark) 60%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
   box-sizing: border-box !important;
   width: 100% !important;
   cursor: text;
@@ -7248,15 +7523,19 @@ table.data thead th.saves-sort-th--asc::after {
 }
 
 .server-settings-tab .settings-tags-wrap:focus-within {
-  border-color: var(--accent) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 58%,
+    var(--border) 42%
+  ) !important;
   background: color-mix(
     in srgb,
-    var(--bg-main) 55%,
-    var(--bg-widget) 45%
+    var(--bg-main) 62%,
+    var(--bg-widget) 38%
   ) !important;
   box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.2),
-    0 0 0 1px var(--accent) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    var(--fcc-focus-ring) !important;
 }
 
 .server-settings-tab .settings-tags-wrap--disabled {

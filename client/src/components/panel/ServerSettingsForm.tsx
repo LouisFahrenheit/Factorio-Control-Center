@@ -32,14 +32,26 @@ interface ServerSettingsFormProps {
   t: (key: string, ...args: (string | number)[]) => string;
   onChange: (key: string, value: unknown) => void;
   onVisibilityPublicAttempt: () => boolean;
+  search?: string;
 }
 
-function isGameplayBoolField(cat: SettingCategory, field: SettingField): boolean {
-  return cat === 'gameplay' && typeof field.value === 'boolean' && field.key !== 'visibility';
+function isGameplayBoolField(
+  cat: SettingCategory,
+  field: SettingField,
+): boolean {
+  return (
+    cat === 'gameplay' &&
+    typeof field.value === 'boolean' &&
+    field.key !== 'visibility'
+  );
 }
 
 function scalarDisplayValue(key: string, value: unknown): string {
-  if ((key === 'name' || key === 'description') && isDefaultServerTextValue(key, value)) return '';
+  if (
+    (key === 'name' || key === 'description') &&
+    isDefaultServerTextValue(key, value)
+  )
+    return '';
   return value == null ? '' : String(value);
 }
 
@@ -53,7 +65,9 @@ function renderFieldControl(
   onVisibilityPublicAttempt: ServerSettingsFormProps['onVisibilityPublicAttempt'],
 ) {
   const key = field.key;
-  const v = Object.prototype.hasOwnProperty.call(values, key) ? values[key] : field.value;
+  const v = Object.prototype.hasOwnProperty.call(values, key)
+    ? values[key]
+    : field.value;
 
   if (key === 'allow_commands') {
     return (
@@ -85,7 +99,8 @@ function renderFieldControl(
             onChange(key, { ...vis, public: checked });
           }}
           label={
-            t('server_settings_visibility_public') !== 'server_settings_visibility_public'
+            t('server_settings_visibility_public') !==
+            'server_settings_visibility_public'
               ? t('server_settings_visibility_public')
               : 'Public'
           }
@@ -98,7 +113,8 @@ function renderFieldControl(
           disabled={disabled}
           onChange={(checked) => onChange(key, { ...vis, lan: checked })}
           label={
-            t('server_settings_visibility_lan') !== 'server_settings_visibility_lan'
+            t('server_settings_visibility_lan') !==
+            'server_settings_visibility_lan'
               ? t('server_settings_visibility_lan')
               : 'LAN'
           }
@@ -111,14 +127,18 @@ function renderFieldControl(
     const tagList = Array.isArray(v)
       ? v.map((x) => String(x).trim()).filter(Boolean)
       : typeof v === 'string'
-        ? v.split(',').map((x) => x.trim()).filter(Boolean)
+        ? v
+            .split(',')
+            .map((x) => x.trim())
+            .filter(Boolean)
         : [];
     return (
       <SettingsTagsField
         tags={tagList}
         disabled={disabled}
         placeholder={
-          t('server_settings_tags_placeholder') !== 'server_settings_tags_placeholder'
+          t('server_settings_tags_placeholder') !==
+          'server_settings_tags_placeholder'
             ? t('server_settings_tags_placeholder')
             : 'Add tag...'
         }
@@ -138,7 +158,11 @@ function renderFieldControl(
     );
   }
 
-  if (field.value && typeof field.value === 'object' && !Array.isArray(field.value)) {
+  if (
+    field.value &&
+    typeof field.value === 'object' &&
+    !Array.isArray(field.value)
+  ) {
     const jsonVal = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
     return (
       <textarea
@@ -179,7 +203,8 @@ function renderFieldControl(
     'data-fcc-non-credential': '1',
     value: scalarDisplayValue(key, v),
     disabled,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(key, e.target.value),
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+      onChange(key, e.target.value),
   };
 
   if (key === 'username') {
@@ -193,10 +218,20 @@ function renderFieldControl(
   }
 
   if (key === 'name') {
-    return <input {...inputProps} placeholder={t('server_settings_placeholder_name')} />;
+    return (
+      <input
+        {...inputProps}
+        placeholder={t('server_settings_placeholder_name')}
+      />
+    );
   }
   if (key === 'description') {
-    return <input {...inputProps} placeholder={t('server_settings_placeholder_description')} />;
+    return (
+      <input
+        {...inputProps}
+        placeholder={t('server_settings_placeholder_description')}
+      />
+    );
   }
 
   return <input {...inputProps} />;
@@ -225,7 +260,15 @@ function renderSection(
   props: ServerSettingsFormProps,
 ) {
   if (!items.length) return null;
-  const { values, disabled, canRevealSecrets, strings, t, onChange, onVisibilityPublicAttempt } = props;
+  const {
+    values,
+    disabled,
+    canRevealSecrets,
+    strings,
+    t,
+    onChange,
+    onVisibilityPublicAttempt,
+  } = props;
 
   const boolFields = items.filter((f) => isGameplayBoolField(cat, f));
   const rowFields = items.filter((f) => !isGameplayBoolField(cat, f));
@@ -241,7 +284,12 @@ function renderSection(
       {rowFields.length > 0 && (
         <div className="settings-rows">
           {rowFields.map((field) => {
-            const hint = settingHintForLabel(field.key, field.comments, t, strings);
+            const hint = settingHintForLabel(
+              field.key,
+              field.comments,
+              t,
+              strings,
+            );
             const control = renderFieldControl(
               field,
               values,
@@ -253,7 +301,10 @@ function renderSection(
             );
             return (
               <div key={field.key} className="settings-row">
-                <label className="settings-row__label" title={hint || undefined}>
+                <label
+                  className="settings-row__label"
+                  title={hint || undefined}
+                >
                   {settingLabel(field.key, t, strings)}
                 </label>
                 <div className="settings-row__control">{control}</div>
@@ -265,7 +316,12 @@ function renderSection(
       {boolFields.length > 0 && (
         <div className="settings-bool-grid">
           {boolFields.map((field) => {
-            const hint = settingHintForLabel(field.key, field.comments, t, strings);
+            const hint = settingHintForLabel(
+              field.key,
+              field.comments,
+              t,
+              strings,
+            );
             const v = Object.prototype.hasOwnProperty.call(values, field.key)
               ? values[field.key]
               : field.value;
@@ -299,20 +355,63 @@ const ORDERED_PAIRS: SettingCategory[] = [
 ];
 
 export function ServerSettingsForm(props: ServerSettingsFormProps) {
+  const query = props.search?.trim().toLowerCase() || '';
   const fields = parseSettingFields(props.data);
-  const grouped = groupFieldsByCategory(fields);
+  const filteredFields = query
+    ? fields.filter((f) => {
+        const keyMatch = f.key.toLowerCase().includes(query);
+        const label = settingLabel(f.key, props.t, props.strings).toLowerCase();
+        const labelMatch = label.includes(query);
+        const hint = settingHintForLabel(
+          f.key,
+          f.comments,
+          props.t,
+          props.strings,
+        ).toLowerCase();
+        const hintMatch = hint.includes(query);
+        return keyMatch || labelMatch || hintMatch;
+      })
+    : fields;
+
+  if (query && filteredFields.length === 0) {
+    return (
+      <div
+        className="settings-empty-search"
+        style={{
+          padding: '48px 16px',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontSize: '0.95rem',
+        }}
+      >
+        {props.t('search_no_results') || 'Ничего не найдено'}
+      </div>
+    );
+  }
+
+  const grouped = groupFieldsByCategory(filteredFields);
   const sections = new Map<SettingCategory, ReactNode>();
 
   CATEGORY_ORDER.forEach((cat) => {
     sections.set(cat, renderSection(cat, grouped.get(cat) || [], props));
   });
 
-  const orderedSections = ORDERED_PAIRS.map((cat) => sections.get(cat)).filter(Boolean);
-  const leftovers = CATEGORY_ORDER.filter((cat) => !ORDERED_PAIRS.includes(cat));
-  const leftoverSections = leftovers.map((cat) => sections.get(cat)).filter(Boolean);
+  const orderedSections = ORDERED_PAIRS.map((cat) => sections.get(cat)).filter(
+    Boolean,
+  );
+  const leftovers = CATEGORY_ORDER.filter(
+    (cat) => !ORDERED_PAIRS.includes(cat),
+  );
+  const leftoverSections = leftovers
+    .map((cat) => sections.get(cat))
+    .filter(Boolean);
 
   return (
-    <div className="settings-form-isolate" role="group" aria-label="Server settings">
+    <div
+      className="settings-form-isolate"
+      role="group"
+      aria-label="Server settings"
+    >
       <div className="settings-columns">
         {orderedSections}
         {leftoverSections}

@@ -1,4 +1,11 @@
-import { useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { motion } from 'motion/react';
 import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
@@ -14,11 +21,7 @@ import {
 import { formatPanelDateOnly } from '../../lib/datetimeUtils';
 import { formatPanelActorDisplay } from '../../lib/actorUtils';
 import { hardNavigate } from '../../lib/hardNavigate';
-import {
-  LIST_CONTAINER_VARIANTS,
-  LIST_ROW_VARIANTS,
-  LIST_WRAP_VARIANTS,
-} from '../../lib/motionPresets';
+import { LIST_WRAP_VARIANTS } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
 import {
   compareModVersionDesc,
@@ -32,49 +35,242 @@ import type { ModRow, ModSortColumn } from '../../types/mods';
 import { ModPortalVersionsModal } from './ModPortalVersionsModal';
 import { ModsFromSaveModal } from './ModsFromSaveModal';
 import { ModsRowMenu } from './ModsRowMenu';
+import { useColumnPrefs } from '../../hooks/useColumnPrefs';
+import {
+  MOD_COLUMN_CONFIG,
+  modsColumnPrefs,
+  type ModColumnKey,
+} from '../../lib/modsColumnPrefs';
+import { InstanceColumnsDropdown } from '../instances/InstanceColumnsDropdown';
 
 interface ModsTabProps {
   mods: ModsApi;
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-const SORT_COLUMNS: {
-  key: ModSortColumn;
-  i18n: string;
-  thId?: string;
-  className?: string;
-}[] = [
+const CONFIGURABLE_COLUMNS: Record<
+  ModColumnKey,
   {
-    key: 'enabled',
-    i18n: 'mod_list_col_enabled',
-    thId: 'thModsEnabledSort',
-    className: 'mods-col-enabled',
-  },
-  { key: 'name', i18n: 'mod_list_col_name' },
-  { key: 'author', i18n: 'mod_list_col_author', className: 'mods-col-author' },
-  { key: 'size', i18n: 'mod_list_col_size', className: 'mods-col-size' },
-  {
-    key: 'version',
-    i18n: 'mod_list_col_version',
-    className: 'mods-col-version',
-  },
-  { key: 'portal', i18n: 'mod_list_col_portal', className: 'mods-col-portal' },
-  {
-    key: 'installed',
+    i18n: string;
+    thId?: string;
+    className?: string;
+  }
+> = {
+  type: { i18n: 'mod_list_col_type', className: 'mods-col-type' },
+  author: { i18n: 'mod_list_col_author', className: 'mods-col-author' },
+  size: { i18n: 'mod_list_col_size', className: 'mods-col-size' },
+  version: { i18n: 'mod_list_col_version', className: 'mods-col-version' },
+  portal: { i18n: 'mod_list_col_portal', className: 'mods-col-portal' },
+  installed: {
     i18n: 'mod_list_col_installed_date',
     className: 'mods-col-installed',
   },
-  {
-    key: 'installed_by',
+  installed_by: {
     i18n: 'mod_list_col_installed_by',
     className: 'mods-col-installed-by',
   },
-];
+};
+
+interface ModTableRowProps {
+  m: ModRow;
+  isSelected: boolean;
+  visibleColumns: ModColumnKey[];
+  serverProcessBusy: boolean;
+  blockUpdates: boolean;
+  onRowClick: (row: ModRow, tr: HTMLTableRowElement, ev: MouseEvent) => void;
+  onToggleEnabled: (name: string, enabled: boolean) => void;
+  onSetVersion: (name: string, version: string) => void;
+  t: (key: string, ...args: (string | number)[]) => string;
+}
+
+const ModTableRow = memo(function ModTableRow({
+  m,
+  isSelected,
+  visibleColumns,
+  serverProcessBusy,
+  blockUpdates,
+  onRowClick,
+  onToggleEnabled,
+  onSetVersion,
+  t,
+}: ModTableRowProps) {
+  const portalNewer = useMemo(
+    () =>
+      !m.is_builtin &&
+      portalVersionNewer(m.portal_version || '', maxInstalledModVersion(m)),
+    [m],
+  );
+
+  const av = useMemo(
+    () =>
+      Array.isArray(m.available_versions)
+        ? m.available_versions.slice().sort(compareModVersionDesc)
+        : [],
+    [m.available_versions],
+  );
+
+  const author = useMemo(() => {
+    const authorFull = m.is_builtin
+      ? 'Wube Software'
+      : modAuthorPlain(m) || '—';
+    return formatModAuthorDisplay(authorFull);
+  }, [m]);
+
+  const rowClassName =
+    [
+      isSelected ? 'mods-row--selected' : '',
+      !m.enabled ? 'mods-row--disabled' : '',
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
+
+  return (
+    <tr
+      className={rowClassName}
+      onClick={(ev) => onRowClick(m, ev.currentTarget, ev)}
+    >
+      <td className="mods-col-enabled">
+        <button
+          type="button"
+          className="mods-enabled-btn"
+          data-name={m.name}
+          aria-pressed={m.enabled ? 'true' : 'false'}
+          aria-label={t('mod_list_col_enabled')}
+          title={
+            serverProcessBusy ? t('server_running_mutate_blocked') : undefined
+          }
+          disabled={serverProcessBusy}
+          onClick={(ev) => {
+            ev.stopPropagation();
+            onToggleEnabled(m.name, !m.enabled);
+          }}
+        >
+          <span className="mods-enabled-mark" aria-hidden="true" />
+        </button>
+      </td>
+      <td className="mods-col-name">{m.display_name || m.name}</td>
+      {visibleColumns.map((key) => {
+        switch (key) {
+          case 'type': {
+            const isBuiltin = !!m.is_builtin;
+            const isCustom = !isBuiltin && m.portal_version === '~';
+            const label = isBuiltin
+              ? t('mod_type_builtin')
+              : isCustom
+                ? t('mod_type_custom')
+                : t('mod_type_portal');
+            return (
+              <td key={key} className="mods-col-type">
+                {label}
+              </td>
+            );
+          }
+          case 'author':
+            return (
+              <td
+                key={key}
+                className="mods-col-author"
+                title={author.truncated ? author.full : undefined}
+              >
+                {author.display}
+              </td>
+            );
+          case 'size':
+            return (
+              <td key={key} className="mods-col-size">
+                {formatModpackSizeBytes(m.zip_size_bytes)}
+              </td>
+            );
+          case 'version':
+            return (
+              <td key={key} className="mods-col-version">
+                {av.length > 1 && !m.is_builtin ? (
+                  <div className="mods-version-select-wrap">
+                    <select
+                      className="mods-version-select"
+                      data-name={m.name}
+                      value={String(m.local_version || av[0] || '')}
+                      disabled={serverProcessBusy || blockUpdates}
+                      onClick={(ev) => ev.stopPropagation()}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onSetVersion(m.name, e.target.value);
+                      }}
+                      title={t('mod_list_col_version')}
+                    >
+                      {av.map((v) => (
+                        <option key={v} value={v}>
+                          {v}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <span className="mods-version-text">
+                    {m.local_version || '-'}
+                  </span>
+                )}
+              </td>
+            );
+          case 'portal':
+            return (
+              <td
+                key={key}
+                className={
+                  'mods-col-portal' + (portalNewer ? ' mods-portal-newer' : '')
+                }
+              >
+                {portalNewer ? (
+                  <span
+                    className="mods-portal-newer-badge"
+                    title={t(
+                      'mod_list_update_available',
+                      m.portal_version || '',
+                    )}
+                  >
+                    <AppIcon
+                      name="arrow_upward"
+                      size={12}
+                      className="mods-portal-newer-icon"
+                    />
+                    <span>{m.portal_version}</span>
+                  </span>
+                ) : (
+                  m.portal_version || '-'
+                )}
+              </td>
+            );
+          case 'installed':
+            return (
+              <td key={key} className="mods-col-installed">
+                {formatPanelDateOnly(m.install_date)}
+              </td>
+            );
+          case 'installed_by':
+            return (
+              <td key={key} className="mods-col-installed-by">
+                {m.is_builtin
+                  ? t('mod_list_builtin_installed_by')
+                  : formatPanelActorDisplay(m.installed_by, t)}
+              </td>
+            );
+          default:
+            return null;
+        }
+      })}
+    </tr>
+  );
+});
 
 export function ModsTab({ mods, t }: ModsTabProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState<ModRow | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const modsColumns = useColumnPrefs(modsColumnPrefs);
+  const visibleColumns = useMemo(
+    () => modsColumns.order.filter((key) => modsColumns.columns[key] !== false),
+    [modsColumns.order, modsColumns.columns],
+  );
   const uploadRef = useRef<HTMLInputElement>(null);
   const saveUploadRef = useRef<HTMLInputElement>(null);
   const totalCount = mods.rawRows.length;
@@ -94,26 +290,38 @@ export function ModsTab({ mods, t }: ModsTabProps) {
     setMenuOpen(false);
   }
 
-  function onRowClick(row: ModRow, _tr: HTMLTableRowElement, ev: MouseEvent) {
-    ev.stopPropagation();
-    if ((ev.target as HTMLElement).closest('select')) return;
-    if ((ev.target as HTMLElement).closest('button.mods-enabled-btn')) return;
+  const handleRowClick = useCallback(
+    (row: ModRow, tr: HTMLTableRowElement, ev: MouseEvent) => {
+      ev.stopPropagation();
+      if ((ev.target as HTMLElement).closest('select')) return;
+      if ((ev.target as HTMLElement).closest('button.mods-enabled-btn')) return;
 
-    mods.setSelectedMod(row.name);
-    const clickedName = !!(ev.target as HTMLElement).closest(
-      'td.mods-col-name',
-    );
-    if (clickedName) {
+      const x = Number.isFinite(ev.clientX)
+        ? Math.round(ev.clientX + 2)
+        : Math.round(tr.getBoundingClientRect().left + 12);
+      const y = Number.isFinite(ev.clientY)
+        ? Math.round(ev.clientY + 2)
+        : Math.round(tr.getBoundingClientRect().bottom + 6);
       setMenuItem(row);
-      setMenuPos({
-        x: ev.clientX + 2,
-        y: ev.clientY + 2,
-      });
+      setMenuPos({ x, y });
       setMenuOpen(true);
-    } else {
-      closeMenu();
-    }
-  }
+    },
+    [],
+  );
+
+  const handleToggleEnabled = useCallback(
+    (name: string, enabled: boolean) => {
+      void mods.toggleEnabled(name, enabled).catch(mods.handleError);
+    },
+    [mods],
+  );
+
+  const handleSetVersion = useCallback(
+    (name: string, version: string) => {
+      void mods.setVersion(name, version).catch(mods.handleError);
+    },
+    [mods],
+  );
 
   function sortClass(column: ModSortColumn): string {
     const active = mods.sortColumn === column;
@@ -417,6 +625,16 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                   }
                   label={t('mod_list_remove_old_zips_cb')}
                 />
+                <InstanceColumnsDropdown
+                  idPrefix="Mods"
+                  config={MOD_COLUMN_CONFIG}
+                  columns={modsColumns.columns}
+                  order={modsColumns.order}
+                  onToggleColumn={modsColumns.setColumn}
+                  onMoveColumn={modsColumns.moveColumn}
+                  onReset={modsColumns.resetColumns}
+                  t={t}
+                />
               </div>
             </div>
           </div>
@@ -436,159 +654,86 @@ export function ModsTab({ mods, t }: ModsTabProps) {
               <table className="data data--mods" id="tblMods">
                 <thead>
                   <tr>
-                    {SORT_COLUMNS.map((col) => (
-                      <th
-                        key={col.key}
-                        id={col.thId}
-                        scope="col"
-                        className={[col.className, sortClass(col.key)]
-                          .filter(Boolean)
-                          .join(' ')}
-                        data-mods-sort={col.key}
-                        aria-sort={
-                          mods.sortColumn === col.key
-                            ? mods.sortAsc
-                              ? 'ascending'
-                              : 'descending'
-                            : 'none'
-                        }
-                        onClick={() => mods.toggleSort(col.key)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {col.key === 'enabled' ? '✓' : t(col.i18n)}
-                      </th>
-                    ))}
+                    <th
+                      id="thModsEnabledSort"
+                      scope="col"
+                      className={['mods-col-enabled', sortClass('enabled')]
+                        .filter(Boolean)
+                        .join(' ')}
+                      data-mods-sort="enabled"
+                      aria-sort={
+                        mods.sortColumn === 'enabled'
+                          ? mods.sortAsc
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
+                      }
+                      onClick={() => mods.toggleSort('enabled')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      ✓
+                    </th>
+                    <th
+                      id="thModsNameSort"
+                      scope="col"
+                      className={sortClass('name')}
+                      data-mods-sort="name"
+                      aria-sort={
+                        mods.sortColumn === 'name'
+                          ? mods.sortAsc
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
+                      }
+                      onClick={() => mods.toggleSort('name')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {t('mod_list_col_name')}
+                    </th>
+                    {visibleColumns.map((key) => {
+                      const col = CONFIGURABLE_COLUMNS[key];
+                      if (!col) return null;
+                      return (
+                        <th
+                          key={key}
+                          id={col.thId}
+                          scope="col"
+                          className={[col.className, sortClass(key)]
+                            .filter(Boolean)
+                            .join(' ')}
+                          data-mods-sort={key}
+                          aria-sort={
+                            mods.sortColumn === key
+                              ? mods.sortAsc
+                                ? 'ascending'
+                                : 'descending'
+                              : 'none'
+                          }
+                          onClick={() => mods.toggleSort(key)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {t(col.i18n)}
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
-                <motion.tbody
-                  id="tblModsBody"
-                  variants={reduced ? undefined : LIST_CONTAINER_VARIANTS}
-                  initial={reduced ? false : 'hidden'}
-                  animate={reduced ? undefined : 'show'}
-                >
-                  {mods.rows.map((m) => {
-                    const portalNewer =
-                      !m.is_builtin &&
-                      portalVersionNewer(
-                        m.portal_version || '',
-                        maxInstalledModVersion(m),
-                      );
-                    const av = Array.isArray(m.available_versions)
-                      ? m.available_versions
-                      : [];
-                    const authorFull = m.is_builtin
-                      ? 'Wube Software'
-                      : modAuthorPlain(m) || '—';
-                    const author = formatModAuthorDisplay(authorFull);
-                    return (
-                      <motion.tr
-                        key={m.name}
-                        className={
-                          [
-                            mods.selectedMod === m.name
-                              ? 'mods-row--selected'
-                              : '',
-                            !m.enabled ? 'mods-row--disabled' : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ') || undefined
-                        }
-                        variants={reduced ? undefined : LIST_ROW_VARIANTS}
-                        onClick={(ev) => onRowClick(m, ev.currentTarget, ev)}
-                      >
-                        <td className="mods-col-enabled">
-                          <button
-                            type="button"
-                            className="mods-enabled-btn"
-                            data-name={m.name}
-                            aria-pressed={m.enabled ? 'true' : 'false'}
-                            aria-label={t('mod_list_col_enabled')}
-                            title={
-                              mods.serverProcessBusy
-                                ? t('server_running_mutate_blocked')
-                                : undefined
-                            }
-                            disabled={mods.serverProcessBusy}
-                            onClick={(ev) => {
-                              ev.stopPropagation();
-                              void mods
-                                .toggleEnabled(m.name, !m.enabled)
-                                .catch(mods.handleError);
-                            }}
-                          >
-                            <span
-                              className="mods-enabled-mark"
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </td>
-                        <td className="mods-col-name">
-                          {m.display_name || m.name}
-                        </td>
-                        <td
-                          className="mods-col-author"
-                          title={author.truncated ? author.full : undefined}
-                        >
-                          {author.display}
-                        </td>
-                        <td className="mods-col-size">
-                          {formatModpackSizeBytes(m.zip_size_bytes)}
-                        </td>
-                        <td className="mods-col-version">
-                          {av.length > 1 && !m.is_builtin ? (
-                            <div className="mods-version-select-wrap">
-                              <select
-                                className="mods-version-select"
-                                data-name={m.name}
-                                value={String(m.local_version || av[0] || '')}
-                                disabled={
-                                  mods.serverProcessBusy || mods.blockUpdates
-                                }
-                                onClick={(ev) => ev.stopPropagation()}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  void mods
-                                    .setVersion(m.name, e.target.value)
-                                    .catch(mods.handleError);
-                                }}
-                                title={t('mod_list_col_version')}
-                              >
-                                {av
-                                  .slice()
-                                  .sort(compareModVersionDesc)
-                                  .map((v) => (
-                                    <option key={v} value={v}>
-                                      {v}
-                                    </option>
-                                  ))}
-                              </select>
-                            </div>
-                          ) : (
-                            <span className="mods-version-text">
-                              {m.local_version || '-'}
-                            </span>
-                          )}
-                        </td>
-                        <td
-                          className={
-                            'mods-col-portal' +
-                            (portalNewer ? ' mods-portal-newer' : '')
-                          }
-                        >
-                          {m.portal_version || '-'}
-                        </td>
-                        <td className="mods-col-installed">
-                          {formatPanelDateOnly(m.install_date)}
-                        </td>
-                        <td className="mods-col-installed-by">
-                          {m.is_builtin
-                            ? t('mod_list_builtin_installed_by')
-                            : formatPanelActorDisplay(m.installed_by, t)}
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </motion.tbody>
+                <tbody id="tblModsBody">
+                  {mods.rows.map((m) => (
+                    <ModTableRow
+                      key={m.name}
+                      m={m}
+                      isSelected={menuOpen && menuItem?.name === m.name}
+                      visibleColumns={visibleColumns}
+                      serverProcessBusy={mods.serverProcessBusy}
+                      blockUpdates={mods.blockUpdates}
+                      onRowClick={handleRowClick}
+                      onToggleEnabled={handleToggleEnabled}
+                      onSetVersion={handleSetVersion}
+                      t={t}
+                    />
+                  ))}
+                </tbody>
               </table>
             </motion.div>
           )}

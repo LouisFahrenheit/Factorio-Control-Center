@@ -520,6 +520,27 @@ export class RuntimeService implements OnModuleDestroy {
     return liveLogTail(rt.logRing, rt.logSession.anchorLine, tail);
   }
 
+  appendConsoleLog(
+    instanceId: string,
+    command: string,
+    result: { ok: boolean; output?: string; error?: string },
+  ): void {
+    const rt = this.runtimes.get(instanceId);
+    if (!rt) return;
+    this.appendGameLogLine(rt, `${panelLogLineTimestamp()}  > ${command}`);
+    if (result.ok) {
+      const out = String(result.output || '').trim();
+      if (out) {
+        for (const line of out.split(/\r?\n/)) {
+          this.appendGameLogLine(rt, line);
+        }
+      }
+    } else {
+      const err = String(result.error || 'rcon_failed').trim();
+      this.appendGameLogLine(rt, `${panelLogLineTimestamp()}  Error: ${err}`);
+    }
+  }
+
   private startStopWatchdog(rt: InstanceRuntime): void {
     if (rt.stopWatchdogActive) return;
     if (process.platform !== 'win32') return;

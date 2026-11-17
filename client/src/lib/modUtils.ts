@@ -58,15 +58,20 @@ export function maxInstalledModVersion(m: ModRow): string {
 }
 
 export function modAuthorPlain(m: ModRow): string {
-  const authorRaw = m.author || m.owner || m.publisher || m.username || m.user || m.authors;
-  if (Array.isArray(authorRaw)) return authorRaw.filter(Boolean).join(', ') || '';
+  const authorRaw =
+    m.author || m.owner || m.publisher || m.username || m.user || m.authors;
+  if (Array.isArray(authorRaw))
+    return authorRaw.filter(Boolean).join(', ') || '';
   return authorRaw ? String(authorRaw) : '';
 }
 
 export function modAuthorParts(author: string): string[] {
   const s = String(author || '').trim();
   if (!s || s === '—') return [];
-  return s.split(/\s*,\s*/).map((p) => p.trim()).filter(Boolean);
+  return s
+    .split(/\s*,\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 /** Shortens long comma-separated author lists for table cells. */
@@ -78,7 +83,8 @@ export function formatModAuthorDisplay(
   if (full === '—') return { display: full, full, truncated: false };
 
   const parts = modAuthorParts(full);
-  if (parts.length <= maxAuthors) return { display: full, full, truncated: false };
+  if (parts.length <= maxAuthors)
+    return { display: full, full, truncated: false };
 
   const display = `${parts.slice(0, maxAuthors).join(', ')} +${parts.length - maxAuthors}`;
   return { display, full, truncated: true };
@@ -92,7 +98,8 @@ function installDateTs(m: ModRow): number {
 }
 
 export function modsDefaultAscForColumn(key: ModSortColumn): boolean {
-  return key === 'name' || key === 'author' || key === 'installed_by';
+  if (key === 'size' || key === 'installed') return false;
+  return true;
 }
 
 export function formatModpackSizeBytes(sizeBytes: unknown): string {
@@ -105,7 +112,10 @@ export function formatModpackSizeBytes(sizeBytes: unknown): string {
   return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export function formatModpackFactorioDisplay(ver: unknown, requiresSpaceAge?: boolean): string {
+export function formatModpackFactorioDisplay(
+  ver: unknown,
+  requiresSpaceAge?: boolean,
+): string {
   const v = String(ver || '').trim();
   const sa = !!requiresSpaceAge;
   if (v && sa) return `${v} SA`;
@@ -133,7 +143,8 @@ export function sortModRows(
   sortAsc: boolean,
 ): ModRow[] {
   const idx = new Map(listOrder.map((n, i) => [n, i]));
-  const ordList = (a: ModRow, b: ModRow) => (idx.get(a.name) ?? 1e9) - (idx.get(b.name) ?? 1e9);
+  const ordList = (a: ModRow, b: ModRow) =>
+    (idx.get(a.name) ?? 1e9) - (idx.get(b.name) ?? 1e9);
   const out = rows.slice();
 
   if (!sortColumn) {
@@ -150,7 +161,15 @@ export function sortModRows(
     } else if (sortColumn === 'name') {
       r = String(a.display_name || a.name || '')
         .toLowerCase()
-        .localeCompare(String(b.display_name || b.name || '').toLowerCase(), undefined, { sensitivity: 'base' });
+        .localeCompare(
+          String(b.display_name || b.name || '').toLowerCase(),
+          undefined,
+          { sensitivity: 'base' },
+        );
+    } else if (sortColumn === 'type') {
+      const typeRank = (m: ModRow) =>
+        m.is_builtin ? 0 : m.portal_version === '~' ? 2 : 1;
+      r = typeRank(a) - typeRank(b);
     } else if (sortColumn === 'author') {
       const sa = modAuthorPlain(a).toLowerCase();
       const sb = modAuthorPlain(b).toLowerCase();
@@ -166,7 +185,10 @@ export function sortModRows(
       else if (ma && !mb) r = -1;
       else if (ma && mb) r = za === zb ? 0 : za < zb ? -1 : 1;
     } else if (sortColumn === 'version') {
-      r = compareModVersionAsc(String(a.local_version || '').trim(), String(b.local_version || '').trim());
+      r = compareModVersionAsc(
+        String(a.local_version || '').trim(),
+        String(b.local_version || '').trim(),
+      );
     } else if (sortColumn === 'portal') {
       let va = String(a.portal_version || '').trim();
       let vb = String(b.portal_version || '').trim();
@@ -203,17 +225,27 @@ export function sortModRows(
 }
 
 export function filterModRows(rows: ModRow[], query: string): ModRow[] {
-  const q = String(query || '').trim().toLowerCase();
+  const q = String(query || '')
+    .trim()
+    .toLowerCase();
   if (!q) return rows;
   return rows.filter((m) => {
-    const hay = [m.display_name || '', m.name || '', m.local_version || '', m.portal_version || '']
+    const hay = [
+      m.display_name || '',
+      m.name || '',
+      m.local_version || '',
+      m.portal_version || '',
+    ]
       .join(' ')
       .toLowerCase();
     return hay.includes(q);
   });
 }
 
-export function parseModInput(raw: string): { modName: string; version?: string } {
+export function parseModInput(raw: string): {
+  modName: string;
+  version?: string;
+} {
   let s = String(raw || '').trim();
   if (!s) return { modName: '' };
 
@@ -249,8 +281,7 @@ export function parseModInput(raw: string): { modName: string; version?: string 
     return { modName: sepMatch[1].trim(), version: sepMatch[2].trim() };
   }
 
-  const zipMatch =
-    /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
+  const zipMatch = /^([A-Za-z0-9_\- ]+?)_(\d+(?:\.\d+)+)(?:\.zip)?$/i.exec(s);
   if (zipMatch) {
     return { modName: zipMatch[1].trim(), version: zipMatch[2].trim() };
   }

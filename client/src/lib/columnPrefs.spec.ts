@@ -29,6 +29,11 @@ import {
   publicColumnPrefs,
   publicStatusPrefs,
 } from './publicColumnPrefs';
+import {
+  DEFAULT_MOD_COLUMNS,
+  DEFAULT_MOD_COLUMN_ORDER,
+  modsColumnPrefs,
+} from './modsColumnPrefs';
 
 describe('createColumnPrefs', () => {
   const store = new Map<string, string>();
@@ -198,6 +203,21 @@ describe('createColumnPrefs', () => {
       [...DEFAULT_SERVER_LIST_COLUMN_ORDER].reverse(),
     );
     expect(fired).toBe(2);
+  });
+
+  it('reads and updates mods column prefs and ordering', () => {
+    expect(modsColumnPrefs.readColumns()).toEqual(DEFAULT_MOD_COLUMNS);
+    expect(modsColumnPrefs.readOrder()).toEqual([...DEFAULT_MOD_COLUMN_ORDER]);
+
+    modsColumnPrefs.setColumns({
+      ...DEFAULT_MOD_COLUMNS,
+      installed: false,
+    });
+    expect(modsColumnPrefs.readColumns().installed).toBe(false);
+
+    const reversedOrder = [...DEFAULT_MOD_COLUMN_ORDER].reverse();
+    modsColumnPrefs.setOrder(reversedOrder);
+    expect(modsColumnPrefs.readOrder()).toEqual(reversedOrder);
   });
 
   it('shows the status as a dot by default in maintenance and keeps timezone hidden', () => {

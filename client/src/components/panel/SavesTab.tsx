@@ -10,7 +10,6 @@ import {
 } from '../TabLoadingPlaceholder';
 import {
   filterSaveRows,
-  getSaveKind,
   getSaveTypeBadgeLabel,
   saveDisplayLabel,
   sortSaveRows,
@@ -379,23 +378,31 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                       >
                         <td className="saves-col-name">
                           <span className="instance-name-cell">
-                            <span
-                              className={
-                                'instance-run-dot' +
-                                (s.is_running_active
-                                  ? ' instance-run-dot--on'
-                                  : '')
-                              }
-                            />
+                            {s.is_running_active && (
+                              <span
+                                className="instance-run-dot instance-run-dot--on"
+                                title={
+                                  t('saves_manager_active_save_running') ||
+                                  'Активное сохранение (сервер запущен)'
+                                }
+                              />
+                            )}
+                            {s.is_launch && (
+                              <span
+                                className="save-launch-icon"
+                                title={
+                                  t('saves_manager_launch_save') ||
+                                  'Выбрано для запуска сервера'
+                                }
+                              >
+                                <AppIcon name="start_save" size={14} />
+                              </span>
+                            )}
                             <span>{saveDisplayLabel(s.name)}</span>
                           </span>
                         </td>
                         <td className="saves-col-type">
-                          <span
-                            className={`save-type-badge save-type-badge--${getSaveKind(s.name)}`}
-                          >
-                            {getSaveTypeBadgeLabel(s.name, t)}
-                          </span>
+                          {getSaveTypeBadgeLabel(s.name, t)}
                         </td>
                         <td className="saves-col-mtime">
                           {saves.formatLocalTime(s.mtime)}
@@ -489,9 +496,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                       </>
                     )}
                   </span>
-                  <span
-                    className={`save-type-badge save-type-badge--${getSaveKind(saves.selectedSave)}`}
-                  >
+                  <span className="save-type-text">
                     {getSaveTypeBadgeLabel(saves.selectedSave, t)}
                   </span>
                   <span

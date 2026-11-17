@@ -50,20 +50,30 @@ export class SavesOpsService {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
     mkdirSync(sel.pm.savesDir, { recursive: true });
-    const active =
-      this.runtime.get(sel.item.id)?.saveName ||
-      this.resolveLaunch(sel.item.launchSave, sel.pm.savesDir);
+    const configuredLaunch =
+      String(sel.item.launchSave || 'latest').trim() || 'latest';
+    const resolvedLaunch = this.resolveLaunch(
+      sel.item.launchSave,
+      sel.pm.savesDir,
+    );
+    const active = this.runtime.get(sel.item.id)?.saveName || resolvedLaunch;
     const runningNow = this.runtime.isRunning(sel.item.id);
     const saves = sel.pm.listSaves().map((s) => ({
       name: s.name,
       mtime: Math.floor(s.mtime / 1000),
       is_running_active: runningNow && active === s.name,
+      is_launch:
+        configuredLaunch !== 'latest'
+          ? configuredLaunch === s.name
+          : resolvedLaunch === s.name,
     }));
     return {
       ok: true,
       saves,
       running_now: runningNow,
       running_active_save: runningNow ? active : '',
+      launch_save: configuredLaunch,
+      resolved_launch_save: resolvedLaunch,
     };
   }
 
