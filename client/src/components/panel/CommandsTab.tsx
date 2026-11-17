@@ -1,9 +1,10 @@
 import type { CommandRow } from '../../lib/commandUtils';
 import type { CommandEditorApi } from '../../hooks/useCommandEditor';
-import { IconRefresh, IconTerminal2, IconPlayerPlay } from '@tabler/icons-react';
+import { IconTerminal2, IconPlayerPlay } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
 import { FccSwitch } from '../FccSwitch';
+import { RefreshButton } from '../RefreshButton';
 import type { CommandsApi } from '../../hooks/useCommands';
 import {
   TabLoadingPlaceholder,
@@ -34,7 +35,10 @@ function CommandParams({
 
   if (!hasAnyParam) {
     return (
-      <div id="cmdParams" className="commands-params commands-tab__params commands-tab__params--empty">
+      <div
+        id="cmdParams"
+        className="commands-params commands-tab__params commands-tab__params--empty"
+      >
         <span className="commands-tab__params-empty-text">
           {t('cmd_no_params')}
         </span>
@@ -178,8 +182,7 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
               onChange={(e) => commands.setSearch(e.target.value)}
             />
             <div className="commands-tab__toolbar-actions">
-              <button
-                type="button"
+              <RefreshButton
                 className="btn btn--toolbar-icon"
                 id="btnCmdRefresh"
                 title={t('update_list_btn') || t('saves_manager_refresh')}
@@ -188,9 +191,7 @@ export function CommandsTab({ commands, commandEditor, t }: CommandsTabProps) {
                   commands.setSearch('');
                   void commands.reload();
                 }}
-              >
-                <IconRefresh size={18} />
-              </button>
+              />
               <button
                 type="button"
                 className="btn btn--with-icon"

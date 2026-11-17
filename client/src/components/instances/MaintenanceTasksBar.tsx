@@ -4,9 +4,9 @@ import {
   IconPlus,
   IconPlayerStop,
   IconHelp,
-  IconRefresh,
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import type { MaintenanceViewMode } from '../../lib/userPrefs';
 import type { StatusMode } from '../../lib/statusModePrefs';
 import type {
@@ -18,21 +18,22 @@ import {
   type ColumnConfigItem,
 } from './InstanceColumnsDropdown';
 
-const MAINTENANCE_COLUMN_CONFIG: readonly ColumnConfigItem<MaintenanceColumnKey>[] = [
-  {
-    key: 'status',
-    labelKey: 'maintenance_col_status',
-    modes: [
-      { value: 'column', labelKey: 'web_status_mode_on' },
-      { value: 'dot', labelKey: 'web_status_mode_dot' },
-      { value: 'off', labelKey: 'web_status_mode_off' },
-    ],
-  },
-  { key: 'next_fire', labelKey: 'maintenance_col_next_fire' },
-  { key: 'servers', labelKey: 'maintenance_col_servers' },
-  { key: 'actions', labelKey: 'maintenance_col_actions_on_stop' },
-  { key: 'timezone', labelKey: 'maintenance_col_timezone' },
-];
+const MAINTENANCE_COLUMN_CONFIG: readonly ColumnConfigItem<MaintenanceColumnKey>[] =
+  [
+    {
+      key: 'status',
+      labelKey: 'maintenance_col_status',
+      modes: [
+        { value: 'column', labelKey: 'web_status_mode_on' },
+        { value: 'dot', labelKey: 'web_status_mode_dot' },
+        { value: 'off', labelKey: 'web_status_mode_off' },
+      ],
+    },
+    { key: 'next_fire', labelKey: 'maintenance_col_next_fire' },
+    { key: 'servers', labelKey: 'maintenance_col_servers' },
+    { key: 'actions', labelKey: 'maintenance_col_actions_on_stop' },
+    { key: 'timezone', labelKey: 'maintenance_col_timezone' },
+  ];
 
 export interface MaintenanceServerOption {
   id: string;
@@ -143,16 +144,12 @@ export function MaintenanceTasksBar({
 
       {/* 3. Кнопка обновления */}
       {onRefresh && (
-        <button
-          type="button"
-          className="btn access-users-bar__refresh-btn"
+        <RefreshButton
           id="btnMaintRefresh"
           title={t('update_list_btn') || 'Обновить'}
           aria-label={t('update_list_btn') || 'Обновить'}
           onClick={onRefresh}
-        >
-          <IconRefresh size={18} />
-        </button>
+        />
       )}
 
       {/* 4. Кнопки действий */}
@@ -191,7 +188,9 @@ export function MaintenanceTasksBar({
             columns={columns}
             order={columnOrder}
             modeValues={{ status: statusMode }}
-            onChangeMode={(_key, value) => onStatusModeChange(value as StatusMode)}
+            onChangeMode={(_key, value) =>
+              onStatusModeChange(value as StatusMode)
+            }
             onToggleColumn={onToggleColumn}
             onMoveColumn={onMoveColumn}
             onReset={onResetColumns}

@@ -1,14 +1,16 @@
-import {
-  IconPlus,
-  IconClock,
-  IconUpload,
-  IconRefresh,
-} from '@tabler/icons-react';
+import { IconPlus, IconClock, IconUpload } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import { SectionHelpButton } from '../SectionHelpModal';
 import { BACKUP_HELP } from '../../lib/instanceHelpContent';
-import type { BackupColumnKey, BackupColumnVisibility } from '../../lib/backupColumnPrefs';
-import { InstanceColumnsDropdown, type ColumnConfigItem } from './InstanceColumnsDropdown';
+import type {
+  BackupColumnKey,
+  BackupColumnVisibility,
+} from '../../lib/backupColumnPrefs';
+import {
+  InstanceColumnsDropdown,
+  type ColumnConfigItem,
+} from './InstanceColumnsDropdown';
 
 const BACKUP_COLUMN_CONFIG: readonly ColumnConfigItem<BackupColumnKey>[] = [
   { key: 'type', labelKey: 'backup_col_type' },
@@ -61,7 +63,11 @@ export function BackupBar({
   t,
 }: BackupBarProps) {
   return (
-    <div className="access-users-bar backup-bar" role="toolbar" aria-label={t('backup_list_title')}>
+    <div
+      className="access-users-bar backup-bar"
+      role="toolbar"
+      aria-label={t('backup_list_title')}
+    >
       {/* 1. Поиск */}
       <SearchField
         type="search"
@@ -91,16 +97,12 @@ export function BackupBar({
       </div>
 
       {/* 3. Кнопка обновления */}
-      <button
-        type="button"
-        className="btn access-users-bar__refresh-btn"
+      <RefreshButton
         id="btnBackupRefresh"
         title={t('web_refresh')}
         aria-label={t('web_refresh')}
         onClick={onRefresh}
-      >
-        <IconRefresh size={18} />
-      </button>
+      />
 
       {/* 4. Кнопки действий */}
       <div className="access-users-bar__actions">

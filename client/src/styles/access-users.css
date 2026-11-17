@@ -219,6 +219,71 @@ select.access-users-bar__select,
   transform: none;
 }
 
+/* ── Refresh Button Spin Feedback ── */
+
+.access-users-bar__refresh-btn svg,
+.btn--toolbar-icon svg,
+.refresh-icon {
+  transform-origin: center center;
+}
+
+.refresh-icon--mirrored {
+  transform: scaleX(-1);
+}
+
+.refresh-icon--mirrored.refresh-icon--spinning,
+.access-users-bar__refresh-btn.is-spinning .refresh-icon--mirrored,
+.btn--toolbar-icon.is-spinning .refresh-icon--mirrored {
+  animation: fcc-refresh-spin-mirrored 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.is-loading .refresh-icon--mirrored,
+.access-users-bar__refresh-btn.is-loading .refresh-icon--mirrored,
+.btn--toolbar-icon.is-loading .refresh-icon--mirrored {
+  animation: fcc-refresh-spin-mirrored 0.8s linear infinite;
+}
+
+.access-users-bar__refresh-btn.is-spinning svg:not(.refresh-icon--mirrored),
+.btn--toolbar-icon.is-spinning svg:not(.refresh-icon--mirrored),
+.refresh-icon--spinning:not(.refresh-icon--mirrored) {
+  animation: fcc-refresh-spin 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.access-users-bar__refresh-btn.is-loading svg:not(.refresh-icon--mirrored),
+.btn--toolbar-icon.is-loading svg:not(.refresh-icon--mirrored) {
+  animation: fcc-refresh-spin 0.8s linear infinite;
+}
+
+@keyframes fcc-refresh-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fcc-refresh-spin-mirrored {
+  0% {
+    transform: rotate(0deg) scaleX(-1);
+  }
+  100% {
+    transform: rotate(360deg) scaleX(-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-users-bar__refresh-btn.is-spinning svg,
+  .access-users-bar__refresh-btn .refresh-icon--spinning,
+  .btn--toolbar-icon.is-spinning svg,
+  .btn--toolbar-icon .refresh-icon--spinning,
+  .access-users-bar__refresh-btn.is-loading svg,
+  .btn--toolbar-icon.is-loading svg,
+  .refresh-icon--spinning {
+    animation: none;
+  }
+}
+
 /* ── Status Dot ──────────────────────────────────────────────────────── */
 
 .access-user-table-cell .instance-run-dot,
@@ -461,7 +526,11 @@ table.access-users-table tbody tr.access-users-row:hover td {
   text-align: center;
 }
 
-#tblWebUsers tbody tr.access-users-row td:not(:first-child) .access-users-chip-list {
+#tblWebUsers
+  tbody
+  tr.access-users-row
+  td:not(:first-child)
+  .access-users-chip-list {
   justify-content: center;
 }
 
@@ -482,7 +551,11 @@ table.access-users-table tbody tr.access-users-row:hover td {
   text-align: center;
 }
 
-#tblMaintenanceTasks tbody tr.access-users-row td:not(:first-child) .access-users-chip-list {
+#tblMaintenanceTasks
+  tbody
+  tr.access-users-row
+  td:not(:first-child)
+  .access-users-chip-list {
   justify-content: center;
 }
 

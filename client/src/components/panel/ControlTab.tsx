@@ -22,10 +22,10 @@ import {
   listWrapVariants,
 } from '../../lib/motionPresets';
 import { webEffectsReduced } from '../../theme/webEffects';
-import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { ServerIpCombobox } from '../ServerIpCombobox';
 import { ServerSaveSelect } from '../ServerSaveSelect';
+import { RefreshButton } from '../RefreshButton';
 import { FactorioUpdateModal } from './FactorioUpdateModal';
 import { ServerLogHistoryModal } from './ServerLogHistoryModal';
 
@@ -361,18 +361,14 @@ export function ControlTab({
                   t={t}
                 />
               </div>
-              <button
-                type="button"
+              <RefreshButton
                 className="btn btn--toolbar-icon control-tab__launch-refresh"
                 id="btnReloadSaves"
-                data-i18n="saves_manager_refresh"
                 title={t('saves_manager_refresh')}
                 aria-label={t('saves_manager_refresh')}
                 disabled={control.busy}
                 onClick={() => void control.reloadSaves()}
-              >
-                <IconRefresh size={18} />
-              </button>
+              />
             </div>
             {(showIpError || showPortError) && (
               <div className="control-tab__launch-errors" role="alert">

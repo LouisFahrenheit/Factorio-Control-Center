@@ -1,8 +1,8 @@
 import type { ServerSettingsApi } from '../../hooks/useServerSettings';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
-import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
+import { RefreshButton } from '../RefreshButton';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { ServerSettingsForm } from './ServerSettingsForm';
 import { ServerSettingsResetModal } from './ServerSettingsResetModal';
@@ -29,18 +29,15 @@ export function ServerSettingsTab({
         <div className="server-settings-tab__layout">
           <header className="server-settings-tab__toolbar">
             <div className="server-settings-tab__actions">
-              <button
-                type="button"
+              <RefreshButton
                 className="btn btn--toolbar-icon"
                 id="btnServerSettingsReload"
-                data-i18n="saves_manager_refresh"
                 title={t('saves_manager_refresh')}
                 aria-label={t('saves_manager_refresh')}
                 disabled={settings.locked || settings.loading}
+                loading={settings.loading}
                 onClick={() => void settings.reload()}
-              >
-                <IconRefresh size={18} />
-              </button>
+              />
               <button
                 type="button"
                 className="btn btn--with-icon"

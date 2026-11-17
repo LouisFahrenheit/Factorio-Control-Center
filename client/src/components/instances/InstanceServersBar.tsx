@@ -1,12 +1,16 @@
-import { IconLayoutGrid, IconList, IconRefresh } from '@tabler/icons-react';
+import { IconLayoutGrid, IconList } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import { AppIcon } from '../AppIcon';
 import type { ServerListViewMode } from '../../lib/userPrefs';
 import type {
   ServerListColumnKey,
   ServerListColumnVisibility,
 } from '../../lib/serverListColumnPrefs';
-import { InstanceColumnsDropdown, type ColumnConfigItem } from './InstanceColumnsDropdown';
+import {
+  InstanceColumnsDropdown,
+  type ColumnConfigItem,
+} from './InstanceColumnsDropdown';
 
 const SERVER_COLUMN_CONFIG: readonly ColumnConfigItem<ServerListColumnKey>[] = [
   { key: 'save', labelKey: 'instances_col_save' },
@@ -101,14 +105,14 @@ export function InstanceServersBar({
           <option value="ready">{t('instances_status_ready')}</option>
           <option value="starting">{t('instances_status_starting')}</option>
           <option value="stopping">{t('instances_status_stopping')}</option>
-          <option value="maintenance">{t('instances_status_maintenance')}</option>
+          <option value="maintenance">
+            {t('instances_status_maintenance')}
+          </option>
         </select>
       </div>
 
       {/* 3. Обновление */}
-      <button
-        type="button"
-        className="btn access-users-bar__refresh-btn"
+      <RefreshButton
         id="btnInstancesRefresh"
         title={t('update_list_btn')}
         aria-label={t('update_list_btn')}
@@ -116,9 +120,7 @@ export function InstanceServersBar({
           onSearchChange('');
           onRefresh();
         }}
-      >
-        <IconRefresh size={18} />
-      </button>
+      />
 
       {/* 4. Кнопки действий (Добавить сервер, Массовые действия, Переключение вида, Справка) */}
       <div className="access-users-bar__actions">
@@ -213,11 +215,25 @@ export function InstanceServersBar({
           type="button"
           className="btn btn--toolbar-icon access-users-bar__view-toggle-btn instance-servers-bar__view-toggle-btn"
           id="btnInstanceViewToggle"
-          title={viewMode === 'list' ? t('instances_view_cards') : t('instances_view_list')}
-          aria-label={viewMode === 'list' ? t('instances_view_cards') : t('instances_view_list')}
-          onClick={() => onViewModeChange(viewMode === 'list' ? 'cards' : 'list')}
+          title={
+            viewMode === 'list'
+              ? t('instances_view_cards')
+              : t('instances_view_list')
+          }
+          aria-label={
+            viewMode === 'list'
+              ? t('instances_view_cards')
+              : t('instances_view_list')
+          }
+          onClick={() =>
+            onViewModeChange(viewMode === 'list' ? 'cards' : 'list')
+          }
         >
-          {viewMode === 'list' ? <IconLayoutGrid size={18} /> : <IconList size={18} />}
+          {viewMode === 'list' ? (
+            <IconLayoutGrid size={18} />
+          ) : (
+            <IconList size={18} />
+          )}
         </button>
 
         <button

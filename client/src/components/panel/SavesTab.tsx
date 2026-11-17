@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { IconRefresh, IconUpload } from '@tabler/icons-react';
+import { IconUpload } from '@tabler/icons-react';
 import type { SavesApi } from '../../hooks/useSaves';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import {
   TabLoadingPlaceholder,
   tabInitialLoad,
@@ -226,8 +227,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
         <div className="fcc-drop-overlay">
           <IconUpload size={36} className="fcc-drop-overlay__icon" />
           <span className="fcc-drop-overlay__text">
-            {t('upload_drop_zone_hint') ||
-              'Перетащите файлы сюда для загрузки'}
+            {t('upload_drop_zone_hint') || 'Перетащите файлы сюда для загрузки'}
           </span>
         </div>
       )}
@@ -251,8 +251,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                 onChange={(e) => setFilter(e.target.value)}
               />
               <div className="saves-tab__toolbar-actions">
-                <button
-                  type="button"
+                <RefreshButton
                   className="btn btn--toolbar-icon"
                   id="btnSavesRefresh"
                   title={t('update_list_btn')}
@@ -261,9 +260,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                     setFilter('');
                     void saves.reload();
                   }}
-                >
-                  <IconRefresh size={18} />
-                </button>
+                />
                 <button
                   type="button"
                   className={
@@ -537,10 +534,7 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                 aria-busy={modsLoading}
                 aria-live="polite"
               >
-                <table
-                  className="data data--save-mods"
-                  id="tblSaveModsCompare"
-                >
+                <table className="data data--save-mods" id="tblSaveModsCompare">
                   <thead>
                     <tr>
                       <th>{t('saves_manager_col_mod')}</th>
@@ -561,25 +555,18 @@ export function SavesTab({ saves, t }: SavesTabProps) {
                               key={r.name}
                               className={
                                 r.nameClass
-                                  ? 'save-mod-row save-mod-row--' +
-                                    kind
+                                  ? 'save-mod-row save-mod-row--' + kind
                                   : undefined
                               }
                             >
                               <td
-                                className={
-                                  'save-mod-col-name ' + r.nameClass
-                                }
+                                className={'save-mod-col-name ' + r.nameClass}
                                 title={r.name}
                               >
                                 {r.display_name}
                               </td>
-                              <td className="save-mod-col-ver">
-                                {r.saveVer}
-                              </td>
-                              <td className="save-mod-col-ver">
-                                {r.diskVer}
-                              </td>
+                              <td className="save-mod-col-ver">{r.saveVer}</td>
+                              <td className="save-mod-col-ver">{r.diskVer}</td>
                               <td className="save-mod-col-status">
                                 {renderModStatus(r)}
                               </td>

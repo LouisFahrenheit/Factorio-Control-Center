@@ -3,9 +3,9 @@ import {
   IconList,
   IconUserPlus,
   IconHelp,
-  IconRefresh,
 } from '@tabler/icons-react';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import type {
   UserAccessColumnKey,
   UserAccessColumnVisibility,
@@ -80,7 +80,11 @@ export function AccessUsersBar({
   t,
 }: AccessUsersBarProps) {
   return (
-    <div className="access-users-bar" role="toolbar" aria-label={t('instances_tab_access')}>
+    <div
+      className="access-users-bar"
+      role="toolbar"
+      aria-label={t('instances_tab_access')}
+    >
       {/* 1. Поиск */}
       <SearchField
         id="accessUsersSearchInput"
@@ -94,9 +98,7 @@ export function AccessUsersBar({
 
       {/* 2. Обновление */}
       {onRefresh && (
-        <button
-          type="button"
-          className="btn access-users-bar__refresh-btn"
+        <RefreshButton
           id="btnAccessUsersRefresh"
           title={t('update_list_btn')}
           aria-label={t('update_list_btn')}
@@ -104,9 +106,7 @@ export function AccessUsersBar({
             onSearchChange('');
             onRefresh();
           }}
-        >
-          <IconRefresh size={18} />
-        </button>
+        />
       )}
 
       {/* 2. Фильтры */}
@@ -120,7 +120,9 @@ export function AccessUsersBar({
         >
           <option value="all">{t('web_users_filter_all_roles')}</option>
           <option value="administrator">{t('web_role_administrator')}</option>
-          <option value="server_engineer">{t('web_role_server_engineer')}</option>
+          <option value="server_engineer">
+            {t('web_role_server_engineer')}
+          </option>
           <option value="moderator">{t('web_role_moderator')}</option>
         </select>
 
@@ -133,7 +135,9 @@ export function AccessUsersBar({
         >
           <option value="all">{t('web_users_filter_all_status')}</option>
           <option value="enabled">{t('web_users_filter_active_only')}</option>
-          <option value="disabled">{t('web_users_filter_disabled_only')}</option>
+          <option value="disabled">
+            {t('web_users_filter_disabled_only')}
+          </option>
           <option value="2fa">{t('web_users_filter_2fa_only')}</option>
         </select>
       </div>
@@ -173,11 +177,25 @@ export function AccessUsersBar({
           type="button"
           className="btn btn--toolbar-icon access-users-bar__view-toggle-btn"
           id="btnAccessViewToggle"
-          title={viewMode === 'table' ? t('instances_view_cards') : t('instances_view_list')}
-          aria-label={viewMode === 'table' ? t('instances_view_cards') : t('instances_view_list')}
-          onClick={() => onViewModeChange(viewMode === 'table' ? 'cards' : 'table')}
+          title={
+            viewMode === 'table'
+              ? t('instances_view_cards')
+              : t('instances_view_list')
+          }
+          aria-label={
+            viewMode === 'table'
+              ? t('instances_view_cards')
+              : t('instances_view_list')
+          }
+          onClick={() =>
+            onViewModeChange(viewMode === 'table' ? 'cards' : 'table')
+          }
         >
-          {viewMode === 'table' ? <IconLayoutGrid size={18} /> : <IconList size={18} />}
+          {viewMode === 'table' ? (
+            <IconLayoutGrid size={18} />
+          ) : (
+            <IconList size={18} />
+          )}
         </button>
 
         {onOpenHelp && (

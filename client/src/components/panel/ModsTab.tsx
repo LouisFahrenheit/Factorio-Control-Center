@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { motion } from 'motion/react';
-import { IconRefresh, IconUpload } from '@tabler/icons-react';
+import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { FactorioPortalUsername } from '../FactorioPortalUsername';
 import { FccSwitch } from '../FccSwitch';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import type { ModsApi } from '../../hooks/useMods';
 import {
   TabLoadingPlaceholder,
@@ -305,8 +306,7 @@ export function ModsTab({ mods, t }: ModsTabProps) {
               />
               <span className="mods-toolbar__sep" aria-hidden="true" />
               <div className="mods-toolbar__btn-group">
-                <button
-                  type="button"
+                <RefreshButton
                   className="btn btn--toolbar-icon"
                   id="btnModRefresh"
                   title={t('update_list_btn')}
@@ -315,9 +315,7 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                     mods.setSearch('');
                     void mods.reload();
                   }}
-                >
-                  <IconRefresh size={18} />
-                </button>
+                />
                 <button
                   type="button"
                   className="btn btn--with-icon"
@@ -414,7 +412,9 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                   className="mods-toolbar__switch row__inline-switch"
                   labelClassName="row__inline-switch-label"
                   checked={mods.removeOldZips}
-                  onChange={(checked) => void mods.setRemoveOldZipsPref(checked)}
+                  onChange={(checked) =>
+                    void mods.setRemoveOldZipsPref(checked)
+                  }
                   label={t('mod_list_remove_old_zips_cb')}
                 />
               </div>

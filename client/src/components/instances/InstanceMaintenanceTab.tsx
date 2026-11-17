@@ -6,7 +6,8 @@ import {
   useState,
   type MouseEvent,
 } from 'react';
-import { IconRefresh, IconHelp } from '@tabler/icons-react';
+import { IconHelp } from '@tabler/icons-react';
+import { RefreshButton } from '../RefreshButton';
 import { AppIcon } from '../AppIcon';
 import { MaintenanceReportDetail } from './MaintenanceReportDetail';
 import { useListViewportPageSize } from '../../hooks/useListViewportPageSize';
@@ -470,16 +471,13 @@ export function InstanceMaintenanceTab({
               </select>
             </div>
 
-            <button
-              type="button"
-              className="btn access-users-bar__refresh-btn"
+            <RefreshButton
               title={t('update_list_btn') || 'Обновить'}
               aria-label={t('update_list_btn') || 'Обновить'}
               onClick={() => void maintenance.refreshReports()}
               disabled={maintenance.reportsLoading}
-            >
-              <IconRefresh size={18} />
-            </button>
+              loading={maintenance.reportsLoading}
+            />
 
             {onOpenHelp && (
               <div className="access-users-bar__actions">

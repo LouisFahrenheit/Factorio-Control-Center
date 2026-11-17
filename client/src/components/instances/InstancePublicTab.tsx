@@ -9,13 +9,13 @@ import {
   IconCheck,
   IconEye,
   IconEyeOff,
-  IconRefresh,
 } from '@tabler/icons-react';
 import type { InstanceItem } from '../../types/instance';
 import type { useInstances } from '../../hooks/useInstances';
 import type { useProgramSettings } from '../../hooks/useProgramSettings';
 import { FccSwitch } from '../FccSwitch';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import { SectionHelpButton } from '../SectionHelpModal';
 import { PUBLIC_HELP } from '../../lib/instanceHelpContent';
 import { PublicServerEditModal } from './PublicServerEditModal';
@@ -35,7 +35,10 @@ import {
   publicColumnPrefs,
   type PublicColumnKey,
 } from '../../lib/publicColumnPrefs';
-import { formatInstanceGameVersion, formatUptime } from '../../lib/instanceUtils';
+import {
+  formatInstanceGameVersion,
+  formatUptime,
+} from '../../lib/instanceUtils';
 import {
   InstanceColumnsDropdown,
   type ColumnConfigItem,
@@ -334,9 +337,7 @@ export function InstancePublicTab({
           </div>
 
           {/* 3. Refresh button */}
-          <button
-            type="button"
-            className="btn access-users-bar__refresh-btn"
+          <RefreshButton
             id="btnPublicRefresh"
             title={t('update_list_btn') || 'Обновить'}
             aria-label={t('update_list_btn') || 'Обновить'}
@@ -344,9 +345,7 @@ export function InstancePublicTab({
               setSearch('');
               void instancesApi.reload();
             }}
-          >
-            <IconRefresh size={18} />
-          </button>
+          />
 
           {/* 4. Master page toggle */}
           <div className="pub-bar__master-toggle">
@@ -520,86 +519,87 @@ export function InstancePublicTab({
                     </th>
                     {visibleColumns.map((key) => {
                       switch (key) {
-                    case 'status':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('status')}
-                        >
-                          {t('web_user_status_label') || 'Статус'}
-                        </th>
-                      );
-                    case 'visibility':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'visibility' ? 'access-sort-th--active' : ''} ${sortCol === 'visibility' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('visibility')}
-                        >
-                          {t('visibility') || 'Видимость'}
-                        </th>
-                      );
-                    case 'online':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'online' ? 'access-sort-th--active' : ''} ${sortCol === 'online' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('online')}
-                        >
-                          {t('instances_col_online') || 'Онлайн'}
-                        </th>
-                      );
-                    case 'version':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'version' ? 'access-sort-th--active' : ''} ${sortCol === 'version' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('version')}
-                        >
-                          {t('instances_col_version') || 'Версия'}
-                        </th>
-                      );
-                    case 'mods':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'mods' ? 'access-sort-th--active' : ''} ${sortCol === 'mods' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('mods')}
-                        >
-                          {t('mods_btn') || 'Моды'}
-                        </th>
-                      );
-                    case 'uptime':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'uptime' ? 'access-sort-th--active' : ''} ${sortCol === 'uptime' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('uptime')}
-                        >
-                          {t('server_uptime') || 'Аптайм'}
-                        </th>
-                      );
-                    case 'address':
-                      return (
-                        <th
-                          key={key}
-                          className={`access-sort-th ${sortCol === 'address' ? 'access-sort-th--active' : ''} ${sortCol === 'address' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('address')}
-                        >
-                          {t('connection_address') || 'IP-адрес для подключения'}
-                        </th>
-                      );
-                    case 'description':
-                      return (
-                        <th
-                          key={key}
-                          className={`pub-th-desc access-sort-th ${sortCol === 'description' ? 'access-sort-th--active' : ''} ${sortCol === 'description' && sortAsc ? 'access-sort-th--asc' : ''}`}
-                          onClick={() => handleSort('description')}
-                        >
-                          {t('description') || 'Описание'}
-                        </th>
-                      );
+                        case 'status':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'status' ? 'access-sort-th--active' : ''} ${sortCol === 'status' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('status')}
+                            >
+                              {t('web_user_status_label') || 'Статус'}
+                            </th>
+                          );
+                        case 'visibility':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'visibility' ? 'access-sort-th--active' : ''} ${sortCol === 'visibility' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('visibility')}
+                            >
+                              {t('visibility') || 'Видимость'}
+                            </th>
+                          );
+                        case 'online':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'online' ? 'access-sort-th--active' : ''} ${sortCol === 'online' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('online')}
+                            >
+                              {t('instances_col_online') || 'Онлайн'}
+                            </th>
+                          );
+                        case 'version':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'version' ? 'access-sort-th--active' : ''} ${sortCol === 'version' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('version')}
+                            >
+                              {t('instances_col_version') || 'Версия'}
+                            </th>
+                          );
+                        case 'mods':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'mods' ? 'access-sort-th--active' : ''} ${sortCol === 'mods' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('mods')}
+                            >
+                              {t('mods_btn') || 'Моды'}
+                            </th>
+                          );
+                        case 'uptime':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'uptime' ? 'access-sort-th--active' : ''} ${sortCol === 'uptime' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('uptime')}
+                            >
+                              {t('server_uptime') || 'Аптайм'}
+                            </th>
+                          );
+                        case 'address':
+                          return (
+                            <th
+                              key={key}
+                              className={`access-sort-th ${sortCol === 'address' ? 'access-sort-th--active' : ''} ${sortCol === 'address' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('address')}
+                            >
+                              {t('connection_address') ||
+                                'IP-адрес для подключения'}
+                            </th>
+                          );
+                        case 'description':
+                          return (
+                            <th
+                              key={key}
+                              className={`pub-th-desc access-sort-th ${sortCol === 'description' ? 'access-sort-th--active' : ''} ${sortCol === 'description' && sortAsc ? 'access-sort-th--asc' : ''}`}
+                              onClick={() => handleSort('description')}
+                            >
+                              {t('description') || 'Описание'}
+                            </th>
+                          );
                       }
                     })}
                   </tr>
@@ -679,7 +679,9 @@ export function InstancePublicTab({
                                         <IconEye size={14} />
                                         <span>
                                           {t('public_server_status_public') ||
-                                            t('server_settings_visibility_public') ||
+                                            t(
+                                              'server_settings_visibility_public',
+                                            ) ||
                                             'Публичный'}
                                         </span>
                                       </>
@@ -723,7 +725,10 @@ export function InstancePublicTab({
                                 <td key={key} className="instance-mono-cell">
                                   {typeof item.uptimeSeconds === 'number' &&
                                   item.uptimeSeconds >= 0
-                                    ? formatUptime(item.uptimeSeconds, placeholder)
+                                    ? formatUptime(
+                                        item.uptimeSeconds,
+                                        placeholder,
+                                      )
                                     : placeholder}
                                 </td>
                               );

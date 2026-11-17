@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { motion } from 'motion/react';
-import { IconRefresh, IconUpload } from '@tabler/icons-react';
+import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { SearchField } from '../SearchField';
+import { RefreshButton } from '../RefreshButton';
 import {
   TabLoadingPlaceholder,
   tabInitialLoad,
@@ -120,10 +121,14 @@ function compareModpacks(
   let diff = 0;
   switch (col) {
     case 'name':
-      diff = String(a.name || '').localeCompare(String(b.name || ''), undefined, {
-        numeric: true,
-        sensitivity: 'base',
-      });
+      diff = String(a.name || '').localeCompare(
+        String(b.name || ''),
+        undefined,
+        {
+          numeric: true,
+          sensitivity: 'base',
+        },
+      );
       break;
     case 'mods':
       diff = (a.mods_count ?? 0) - (b.mods_count ?? 0);
@@ -311,8 +316,7 @@ export function ModpacksTab({ modpacks, t }: ModpacksTabProps) {
               />
               <span className="mods-toolbar__sep" aria-hidden="true" />
               <div className="mods-toolbar__btn-group">
-                <button
-                  type="button"
+                <RefreshButton
                   className="btn btn--toolbar-icon"
                   id="btnModpackRefresh"
                   title={t('update_list_btn')}
@@ -321,9 +325,7 @@ export function ModpacksTab({ modpacks, t }: ModpacksTabProps) {
                     setSearch('');
                     void modpacks.reload();
                   }}
-                >
-                  <IconRefresh size={18} />
-                </button>
+                />
                 <button
                   type="button"
                   className="btn btn--with-icon"
@@ -484,12 +486,8 @@ export function ModpacksTab({ modpacks, t }: ModpacksTabProps) {
                                 .join(' ') || undefined
                             }
                             variants={reduced ? undefined : LIST_ROW_VARIANTS}
-                            onClick={(ev) =>
-                              onRowClick(p, ev)
-                            }
-                            onContextMenu={(ev) =>
-                              onRowContextMenu(p, ev)
-                            }
+                            onClick={(ev) => onRowClick(p, ev)}
+                            onContextMenu={(ev) => onRowContextMenu(p, ev)}
                           >
                             <td className="mods-col-name modpacks-col-name">
                               <span className="instance-name-cell">
