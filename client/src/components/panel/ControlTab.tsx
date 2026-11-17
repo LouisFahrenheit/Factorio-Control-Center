@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -124,6 +125,46 @@ export function ControlTab({
   const rconInputRef = useRef<HTMLInputElement>(null);
   const [ipTouched, setIpTouched] = useState(false);
   const [portTouched, setPortTouched] = useState(false);
+  const [savingState, setSavingState] = useState<'idle' | 'saving' | 'saved'>(
+    'idle',
+  );
+  const [backupState, setBackupState] = useState<
+    'idle' | 'backingUp' | 'backedUp'
+  >('idle');
+  const [restarting, setRestarting] = useState(false);
+
+  const handleRestart = useCallback(async () => {
+    try {
+      setRestarting(true);
+      await control.restart();
+    } catch {
+      // ignored
+    } finally {
+      setRestarting(false);
+    }
+  }, [control]);
+
+  const handleSave = useCallback(async () => {
+    try {
+      setSavingState('saving');
+      await control.saveGame();
+      setSavingState('saved');
+      setTimeout(() => setSavingState('idle'), 1200);
+    } catch {
+      setSavingState('idle');
+    }
+  }, [control]);
+
+  const handleBackup = useCallback(async () => {
+    try {
+      setBackupState('backingUp');
+      await control.backup();
+      setBackupState('backedUp');
+      setTimeout(() => setBackupState('idle'), 1200);
+    } catch {
+      setBackupState('idle');
+    }
+  }, [control]);
   const logRef = useRef<HTMLPreElement>(null);
   const logFormatOptions = useMemo(
     () => ({
@@ -436,7 +477,21 @@ export function ControlTab({
                 disabled={control.startStopDisabled}
                 onClick={() => void control.toggleStartStop()}
               >
-                <AppIcon name={showStopIcon ? 'stop' : 'start'} size={16} />
+                <AppIcon
+                  name={
+                    control.kind === 'starting' || control.kind === 'stopping'
+                      ? 'refresh'
+                      : showStopIcon
+                        ? 'stop'
+                        : 'start'
+                  }
+                  size={16}
+                  className={
+                    control.kind === 'starting' || control.kind === 'stopping'
+                      ? 'refresh-icon--spinning-infinite'
+                      : undefined
+                  }
+                />
                 {control.startStopLabel}
               </button>
               <button
@@ -444,10 +499,20 @@ export function ControlTab({
                 className="btn btn--with-icon control-tab__action-btn"
                 id="btnRestartServer"
                 data-i18n="restart_server_btn"
-                disabled={control.kind !== 'running' || control.maintLocked}
-                onClick={() => void control.restart().catch(() => {})}
+                disabled={
+                  control.kind !== 'running' ||
+                  control.maintLocked ||
+                  restarting
+                }
+                onClick={() => void handleRestart()}
               >
-                <AppIcon name="restart" size={16} />
+                <AppIcon
+                  name={restarting ? 'refresh' : 'restart'}
+                  size={16}
+                  className={
+                    restarting ? 'refresh-icon--spinning-infinite' : undefined
+                  }
+                />
                 {t('restart_server_btn')}
               </button>
               <button
@@ -472,10 +537,24 @@ export function ControlTab({
                 className="btn btn--with-icon control-tab__action-btn"
                 id="btnSaveGame"
                 data-i18n="save_game_btn"
-                disabled={!control.running}
-                onClick={() => void control.saveGame().catch(() => {})}
+                disabled={!control.running || savingState === 'saving'}
+                onClick={() => void handleSave()}
               >
-                <AppIcon name="save" size={16} />
+                <AppIcon
+                  name={
+                    savingState === 'saving'
+                      ? 'refresh'
+                      : savingState === 'saved'
+                        ? 'check'
+                        : 'save'
+                  }
+                  size={16}
+                  className={
+                    savingState === 'saving'
+                      ? 'refresh-icon--spinning-infinite'
+                      : undefined
+                  }
+                />
                 {t('save_game_btn')}
               </button>
               <button
@@ -483,10 +562,24 @@ export function ControlTab({
                 className="btn btn--with-icon control-tab__action-btn"
                 id="btnBackup"
                 data-i18n="backup_btn"
-                disabled={!control.running}
-                onClick={() => void control.backup().catch(() => {})}
+                disabled={!control.running || backupState === 'backingUp'}
+                onClick={() => void handleBackup()}
               >
-                <AppIcon name="file_copy" size={16} />
+                <AppIcon
+                  name={
+                    backupState === 'backingUp'
+                      ? 'refresh'
+                      : backupState === 'backedUp'
+                        ? 'check'
+                        : 'file_copy'
+                  }
+                  size={16}
+                  className={
+                    backupState === 'backingUp'
+                      ? 'refresh-icon--spinning-infinite'
+                      : undefined
+                  }
+                />
                 {t('backup_btn')}
               </button>
               <button

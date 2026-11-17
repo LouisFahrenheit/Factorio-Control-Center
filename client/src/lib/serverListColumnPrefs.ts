@@ -1,4 +1,5 @@
 import { createColumnPrefs } from './columnPrefs';
+import { createStatusModePrefs } from './statusModePrefs';
 
 export type ServerListColumnKey =
   | 'save'
@@ -45,3 +46,8 @@ export const serverListColumnPrefs = createColumnPrefs<ServerListColumnKey>({
   defaults: DEFAULT_SERVER_LIST_COLUMNS,
   defaultOrder: DEFAULT_SERVER_LIST_COLUMN_ORDER,
 });
+
+export const serverListStatusPrefs = createStatusModePrefs(
+  'fcc_user_server_list_status_mode',
+  'dot',
+);

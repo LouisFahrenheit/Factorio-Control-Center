@@ -51,11 +51,8 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 
 @keyframes fu-modal-panel-in {
   from {
-    transform: translate3d(0, 20px, 0) scale(0.96);
-    filter: brightness(0.92);
-  }
-  55% {
-    filter: brightness(1.02);
+    transform: translate3d(0, 8px, 0) scale(0.985);
+    filter: brightness(0.96);
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
@@ -64,12 +61,12 @@ body > .fu-modal-backdrop.fu-modal-backdrop--portal {
 }
 
 .fu-modal-backdrop:not(.hidden) {
-  animation: fu-modal-backdrop-in 0.3s cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  animation: fu-modal-backdrop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .fu-modal-backdrop:not(.hidden) .fu-modal {
   transform-origin: 50% 45%;
-  animation: fu-modal-panel-in 0.4s cubic-bezier(0.22, 1, 0.34, 1) both;
+  animation: fu-modal-panel-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

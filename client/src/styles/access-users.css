@@ -249,6 +249,16 @@ select.access-users-bar__select,
   animation: fcc-refresh-spin 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
+.refresh-icon--spinning-infinite {
+  animation: fcc-refresh-spin 0.8s linear infinite;
+  transform-origin: center center;
+}
+
+.app-icon.refresh-icon--spinning-infinite,
+.app-icon.refresh-icon--spinning {
+  transform-origin: center center;
+}
+
 .access-users-bar__refresh-btn.is-loading svg:not(.refresh-icon--mirrored),
 .btn--toolbar-icon.is-loading svg:not(.refresh-icon--mirrored) {
   animation: fcc-refresh-spin 0.8s linear infinite;
@@ -282,25 +292,6 @@ select.access-users-bar__select,
   .refresh-icon--spinning {
     animation: none;
   }
-}
-
-/* ── Status Dot ──────────────────────────────────────────────────────── */
-
-.access-user-table-cell .instance-run-dot,
-.access-user-card__header-left .instance-run-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--border-dark);
-  box-shadow: none;
-  flex: 0 0 9px;
-}
-
-.access-user-table-cell .instance-run-dot--on,
-.access-user-card__header-left .instance-run-dot--on {
-  background: var(--running);
-  box-shadow: 0 0 5px color-mix(in srgb, var(--running) 60%, transparent);
-  animation: none;
 }
 
 /* ── Role Text (clean, neutral, no color, no icon) ──────────────────── */
@@ -588,17 +579,6 @@ table.access-users-table tbody tr.access-users-row--selected td {
 .access-user-status-dot {
   align-self: flex-start;
   margin-top: 2px;
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  transition: all 0.2s ease;
-}
-
-.access-user-status-dot--on {
-  background: #20c997;
-  box-shadow: 0 0 6px #20c997;
 }
 
 .access-user-identity {

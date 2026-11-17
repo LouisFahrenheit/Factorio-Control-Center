@@ -59,19 +59,6 @@
   color: var(--text-muted);
 }
 
-.public-server-edit-modal__server-name .instance-run-dot {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border-radius: 50%;
-  background: var(--text-muted);
-}
-
-.public-server-edit-modal__server-name .instance-run-dot--on {
-  background: var(--running);
-  box-shadow: 0 0 6px var(--running);
-}
-
 .public-server-edit-modal__body {
   display: flex;
   flex-direction: column;

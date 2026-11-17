@@ -33,8 +33,10 @@ import { api } from '../../api/client';
 import { useColumnPrefs } from '../../hooks/useColumnPrefs';
 import {
   publicColumnPrefs,
+  publicStatusPrefs,
   type PublicColumnKey,
 } from '../../lib/publicColumnPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
 import {
   formatInstanceGameVersion,
   formatUptime,
@@ -45,7 +47,15 @@ import {
 } from './InstanceColumnsDropdown';
 
 const PUBLIC_COLUMN_CONFIG: readonly ColumnConfigItem<PublicColumnKey>[] = [
-  { key: 'status', labelKey: 'web_user_status_label' },
+  {
+    key: 'status',
+    labelKey: 'web_user_status_label',
+    modes: [
+      { value: 'column', labelKey: 'web_status_mode_on' },
+      { value: 'dot', labelKey: 'web_status_mode_dot' },
+      { value: 'off', labelKey: 'web_status_mode_off' },
+    ],
+  },
   { key: 'visibility', labelKey: 'visibility' },
   { key: 'online', labelKey: 'instances_col_online' },
   { key: 'version', labelKey: 'instances_col_version' },
@@ -95,9 +105,12 @@ export function InstancePublicTab({
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [copied, setCopied] = useState(false);
 
-  const publicColumns = useColumnPrefs(publicColumnPrefs);
+  const publicColumns = useColumnPrefs(publicColumnPrefs, publicStatusPrefs);
+  const showStatusDot = publicColumns.statusMode === 'dot';
   const visibleColumns = publicColumns.order.filter(
-    (key) => publicColumns.columns[key] !== false,
+    (key) =>
+      publicColumns.columns[key] !== false &&
+      (key !== 'status' || publicColumns.statusMode === 'column'),
   );
   const placeholder = t('server_uptime_placeholder');
 
@@ -463,6 +476,10 @@ export function InstancePublicTab({
               config={PUBLIC_COLUMN_CONFIG}
               columns={publicColumns.columns}
               order={publicColumns.order}
+              modeValues={{ status: publicColumns.statusMode }}
+              onChangeMode={(_key, value) =>
+                publicColumns.setStatusMode(value as StatusMode)
+              }
               onToggleColumn={publicColumns.setColumn}
               onMoveColumn={publicColumns.moveColumn}
               onReset={publicColumns.resetColumns}
@@ -636,9 +653,21 @@ export function InstancePublicTab({
                           setEditingServer(item);
                         }}
                       >
-                        {/* 1. Server Name (Only text, no icons or badges) */}
+                        {/* 1. Server Name */}
                         <td>
-                          <span className="pub-server-name">{item.name}</span>
+                          <div className="pub-server-cell">
+                            {showStatusDot && (
+                              <span
+                                className={
+                                  'instance-run-dot' +
+                                  (item.status === 'running'
+                                    ? ' instance-run-dot--on'
+                                    : '')
+                                }
+                              />
+                            )}
+                            <span className="pub-server-name">{item.name}</span>
+                          </div>
                         </td>
 
                         {visibleColumns.map((key) => {
@@ -647,14 +676,6 @@ export function InstancePublicTab({
                               return (
                                 <td key={key}>
                                   <span className="pub-visibility-badge">
-                                    <span
-                                      className={
-                                        'instance-run-dot' +
-                                        (item.status === 'running'
-                                          ? ' instance-run-dot--on'
-                                          : '')
-                                      }
-                                    />
                                     {item.status === 'running'
                                       ? t('status_running') || 'Запущен'
                                       : t('status_stopped') || 'Остановлен'}

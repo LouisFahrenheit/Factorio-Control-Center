@@ -5349,11 +5349,75 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   text-transform: uppercase !important;
 }
 
-/* Running dot in server name */
+/* ── Universal Status Dot (LED indicator) ── */
 
-.instance-run-dot--on {
+.instance-run-dot,
+.access-user-status-dot,
+.pub-server-cell .instance-run-dot,
+.public-server-edit-modal__server-name .instance-run-dot {
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px !important;
+  min-height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--border-dark, #3b4252);
+  box-shadow: none;
+  flex: 0 0 8px !important;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+.instance-run-dot--on,
+.access-user-status-dot--on,
+.pub-server-cell .instance-run-dot--on,
+.public-server-edit-modal__server-name .instance-run-dot--on {
   background: var(--running, #78c840) !important;
-  box-shadow: 0 0 8px rgba(120, 200, 64, 0.75) !important;
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--running, #78c840) 65%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
+  animation: none !important;
+}
+
+.instance-run-dot--starting,
+.access-user-status-dot--starting {
+  background: var(--starting, #ffb833) !important;
+  box-shadow: 0 0 6px rgba(255, 184, 51, 0.75) !important;
+  animation: instance-dot-pulse 1.3s ease-in-out infinite !important;
+}
+
+.instance-run-dot--stopping,
+.access-user-status-dot--stopping {
+  background: var(--stopping, #ef4444) !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.75) !important;
+  animation: instance-dot-pulse 1.1s ease-in-out infinite !important;
+}
+
+.instance-run-dot--maintenance,
+.instance-run-dot--maintenance-manual {
+  background: var(--fcc-maintenance-accent, #9b59b6) !important;
+  box-shadow: 0 0 6px rgba(155, 89, 182, 0.6) !important;
+}
+
+@keyframes instance-dot-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 rgba(255, 184, 51, 0.55);
+  }
+  65% {
+    transform: scale(1.08);
+    opacity: 1;
+    box-shadow: 0 0 0 5px rgba(255, 184, 51, 0);
+  }
+  100% {
+    transform: scale(0.92);
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 rgba(255, 184, 51, 0);
+  }
 }
 
 .instance-status-pill {

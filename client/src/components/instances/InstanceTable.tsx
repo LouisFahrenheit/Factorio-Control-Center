@@ -1,12 +1,16 @@
 import { motion } from 'motion/react';
 import { useRef, type MouseEvent, type RefObject } from 'react';
-import { formatUptime, instanceMaintenanceManualMode } from '../../lib/instanceUtils';
+import {
+  formatUptime,
+  instanceMaintenanceManualMode,
+} from '../../lib/instanceUtils';
 import type { InstanceSortColumn } from '../../lib/instanceListUtils';
 import {
   DEFAULT_SERVER_LIST_COLUMN_ORDER,
   type ServerListColumnKey,
   type ServerListColumnVisibility,
 } from '../../lib/serverListColumnPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
 import {
   LIST_CONTAINER_VARIANTS,
   LIST_ROW_VARIANTS,
@@ -78,10 +82,15 @@ interface InstanceTableProps {
   sortColumn: InstanceSortColumn;
   sortAsc: boolean;
   onSortColumn: (col: InstanceSortColumn) => void;
-  onRowClick: (item: InstanceItem, rowEl: HTMLTableRowElement, ev: MouseEvent) => void;
+  onRowClick: (
+    item: InstanceItem,
+    rowEl: HTMLTableRowElement,
+    ev: MouseEvent,
+  ) => void;
   onRowDoubleClick: (item: InstanceItem, ev: MouseEvent) => void;
   columns?: ServerListColumnVisibility;
   columnOrder?: readonly ServerListColumnKey[];
+  statusMode?: StatusMode;
   tableWrapRef?: RefObject<HTMLDivElement | null>;
   t: (key: string, ...args: (string | number)[]) => string;
 }
@@ -99,21 +108,28 @@ export function InstanceTable({
   onRowDoubleClick,
   columns,
   columnOrder,
+  statusMode,
   tableWrapRef,
   t,
 }: InstanceTableProps) {
   const placeholder = t('server_uptime_placeholder');
-  const visibleOrder = (columnOrder ?? DEFAULT_SERVER_LIST_COLUMN_ORDER).filter((key) =>
-    columns ? columns[key] !== false : true,
+  const visibleOrder = (columnOrder ?? DEFAULT_SERVER_LIST_COLUMN_ORDER).filter(
+    (key) => (columns ? columns[key] !== false : true),
   );
-  const { ready: listIconsReady, isAvailable: isListIconAvailable } = useServerListIconsProbe();
+  const showStatusDot = statusMode === 'dot';
+  const { ready: listIconsReady, isAvailable: isListIconAvailable } =
+    useServerListIconsProbe();
   const showModBadges = useUserShowServerListModBadges();
   const showSABadge = useUserShowServerListSpaceAgeBadge();
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(listEnterDelay);
   const clickTimerRef = useRef<number | null>(null);
 
-  const handleRowClick = (item: InstanceItem, rowEl: HTMLTableRowElement, ev: MouseEvent) => {
+  const handleRowClick = (
+    item: InstanceItem,
+    rowEl: HTMLTableRowElement,
+    ev: MouseEvent,
+  ) => {
     if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
     clickTimerRef.current = window.setTimeout(() => {
       clickTimerRef.current = null;
@@ -142,7 +158,13 @@ export function InstanceTable({
       <table className="data data--instances" id="tblInstances">
         <thead>
           <tr>
-            <SortableTh col={SORTABLE_COLUMNS[0]} sortColumn={sortColumn} sortAsc={sortAsc} onSortColumn={onSortColumn} t={t} />
+            <SortableTh
+              col={SORTABLE_COLUMNS[0]}
+              sortColumn={sortColumn}
+              sortAsc={sortAsc}
+              onSortColumn={onSortColumn}
+              t={t}
+            />
             {visibleOrder.map((key) => {
               const sortable = SORTABLE_COLUMNS.find((col) => col.key === key);
               return sortable ? (
@@ -171,17 +193,26 @@ export function InstanceTable({
           {rows.map((it) => {
             const statusRaw = getEffectiveStatus(it);
             const isRunning = statusRaw === 'running';
-            const rowStatus = t('instances_status_' + String(statusRaw || 'ready'));
+            const rowStatus = t(
+              'instances_status_' + String(statusRaw || 'ready'),
+            );
             const modsCount = Number(it.modsCount || 0);
-            const modsText = modsCount > 0 ? String(modsCount) : t('instances_mods_none');
-            const isMaintLocked = statusRaw === 'maintenance' || !!it.maintenanceLock;
-            const isMaintManual = instanceMaintenanceManualMode(it, getEffectiveStatus);
+            const modsText =
+              modsCount > 0 ? String(modsCount) : t('instances_mods_none');
+            const isMaintLocked =
+              statusRaw === 'maintenance' || !!it.maintenanceLock;
+            const isMaintManual = instanceMaintenanceManualMode(
+              it,
+              getEffectiveStatus,
+            );
             const isMaintRow = isMaintLocked || isMaintManual;
             const nameText = String(it.name || '');
             const saveNameRaw = it.activeSave || it.launchSave || '';
             const isConfiguredLatest = it.launchSave === 'latest';
             const isSaveLatest = saveNameRaw === 'latest';
-            const saveDisplayName = isSaveLatest ? t('latest') : saveDisplayLabel(saveNameRaw);
+            const saveDisplayName = isSaveLatest
+              ? t('latest')
+              : saveDisplayLabel(saveNameRaw);
             const saveFullTitle = isSaveLatest
               ? t('latest')
               : isConfiguredLatest && it.activeSave
@@ -191,15 +222,26 @@ export function InstanceTable({
               typeof it.uptimeSeconds === 'number' && it.uptimeSeconds >= 0
                 ? formatUptime(it.uptimeSeconds, placeholder)
                 : placeholder;
+            const isStarting = statusRaw === 'starting';
+            const isStopping = statusRaw === 'stopping';
             const maintDotClass = isMaintManual
               ? ' instance-run-dot--maintenance-manual'
               : isMaintLocked
                 ? ' instance-run-dot--maintenance'
                 : '';
+            const statusDotClass = isRunning
+              ? ' instance-run-dot--on'
+              : isStarting
+                ? ' instance-run-dot--starting'
+                : isStopping
+                  ? ' instance-run-dot--stopping'
+                  : maintDotClass;
 
             const rowClass = [
               isRunning ? 'instance-row--running' : 'instance-row--stopped',
-              selectedRowId && String(it.id) === selectedRowId ? 'instance-row-selected' : '',
+              selectedRowId && String(it.id) === selectedRowId
+                ? 'instance-row-selected'
+                : '',
               isMaintLocked ? 'instance-row--maintenance' : '',
               isMaintManual ? 'instance-row--maintenance-manual' : '',
             ]
@@ -216,19 +258,17 @@ export function InstanceTable({
               >
                 <td>
                   <span className="instance-name-cell">
-                    <span
-                      className={
-                        'instance-run-dot' +
-                        (isRunning ? ' instance-run-dot--on' : '') +
-                        maintDotClass
-                      }
-                    />
+                    {showStatusDot && (
+                      <span className={'instance-run-dot' + statusDotClass} />
+                    )}
                     <span className="instance-name-title">
                       {isMaintRow ? (
                         <span
                           className={
                             'instance-maint-badge' +
-                            (isMaintManual ? ' instance-maint-badge--manual' : ' instance-maint-badge--locked')
+                            (isMaintManual
+                              ? ' instance-maint-badge--manual'
+                              : ' instance-maint-badge--locked')
                           }
                           title={
                             isMaintManual
@@ -290,8 +330,13 @@ export function InstanceTable({
                       return (
                         <td key={key} className="instance-save-cell">
                           {saveDisplayName ? (
-                            <span className="instance-save-text" title={saveFullTitle}>
-                              <span className="instance-save-name">{saveDisplayName}</span>
+                            <span
+                              className="instance-save-text"
+                              title={saveFullTitle}
+                            >
+                              <span className="instance-save-name">
+                                {saveDisplayName}
+                              </span>
                             </span>
                           ) : (
                             <span className="muted">—</span>
@@ -302,36 +347,83 @@ export function InstanceTable({
                       return (
                         <td key={key} className="instance-access-cell">
                           <span className="status-flags status-flags--side">
-                            <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>LAN</span>
-                            <span className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}>PUB</span>
-                            <span className={'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')}>
+                            <span
+                              className={
+                                'status-flag' +
+                                (it.visibilityLan ? ' status-flag--on' : '')
+                              }
+                            >
+                              LAN
+                            </span>
+                            <span
+                              className={
+                                'status-flag' +
+                                (it.visibilityPublic ? ' status-flag--on' : '')
+                              }
+                            >
+                              PUB
+                            </span>
+                            <span
+                              className={
+                                'status-flag' +
+                                (it.requireUserVerification
+                                  ? ' status-flag--on'
+                                  : '')
+                              }
+                            >
                               RUV
                             </span>
                           </span>
                         </td>
                       );
                     case 'port':
-                      return <td key={key} className="instance-mono-cell">{String(it.port || '')}</td>;
+                      return (
+                        <td key={key} className="instance-mono-cell">
+                          {String(it.port || '')}
+                        </td>
+                      );
                     case 'rconPort':
-                      return <td key={key} className="instance-mono-cell">{String(it.rconPort || '')}</td>;
+                      return (
+                        <td key={key} className="instance-mono-cell">
+                          {String(it.rconPort || '')}
+                        </td>
+                      );
                     case 'version':
                       return (
                         <td key={key} className="instance-mono-cell">
-                          <InstanceGameVersionCell version={it.gameVersion} placeholder={placeholder} />
+                          <InstanceGameVersionCell
+                            version={it.gameVersion}
+                            placeholder={placeholder}
+                          />
                         </td>
                       );
                     case 'mods':
-                      return <td key={key} className="instance-num-cell">{modsText}</td>;
+                      return (
+                        <td key={key} className="instance-num-cell">
+                          {modsText}
+                        </td>
+                      );
                     case 'online':
-                      return <td key={key} className="instance-num-cell">{String(it.onlineCount || 0)}</td>;
+                      return (
+                        <td key={key} className="instance-num-cell">
+                          {String(it.onlineCount || 0)}
+                        </td>
+                      );
                     case 'uptime':
-                      return <td key={key} className="instance-mono-cell">{uptimeText}</td>;
+                      return (
+                        <td key={key} className="instance-mono-cell">
+                          {uptimeText}
+                        </td>
+                      );
                     case 'status':
                       return (
                         <td key={key}>
                           <span
                             className={
-                              'instance-status-line' + (isMaintRow ? ' instance-status-line--maintenance' : '')
+                              'instance-status-line' +
+                              (isMaintRow
+                                ? ' instance-status-line--maintenance'
+                                : '')
                             }
                           >
                             <span

@@ -1,9 +1,19 @@
-import { useCallback, useEffect, useMemo, useState, createElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  createElement,
+} from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { modals } from '@mantine/modals';
 import { api } from '../api/client';
 import { feedbackErr } from '../lib/apiFeedback';
-import { isNetworkFetchError, notifyApiError, notifyNetworkFetchError } from '../lib/networkErrors';
+import {
+  isNetworkFetchError,
+  notifyApiError,
+  notifyNetworkFetchError,
+} from '../lib/networkErrors';
 import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
 import type { InstanceItem } from '../types/instance';
 import type {
@@ -21,7 +31,8 @@ function throwIfMaintenancePutFailure(
 ): void {
   if (!j || typeof j !== 'object') return;
   const er = String(j.error || '').trim();
-  if (er === 'invalid_scheduler_tz') throw new Error(t('maintenance_error_invalid_scheduler_tz'));
+  if (er === 'invalid_scheduler_tz')
+    throw new Error(t('maintenance_error_invalid_scheduler_tz'));
   if (er === 'maintenance_instance_updates_forbidden') {
     const iid = String(j.instance_id || '').trim();
     const row = instances.find((x) => String(x.id || '') === iid);
@@ -29,7 +40,9 @@ function throwIfMaintenancePutFailure(
     const head = t('maintenance_instance_updates_forbidden');
     const body = t('maintenance_instance_updates_forbidden_detail', nm || iid);
     const err = new Error([head, body].filter(Boolean).join('\n'));
-    (err as Error & { fccMaintenanceUpdatesForbiddenToast?: boolean }).fccMaintenanceUpdatesForbiddenToast = true;
+    (
+      err as Error & { fccMaintenanceUpdatesForbiddenToast?: boolean }
+    ).fccMaintenanceUpdatesForbiddenToast = true;
     throw err;
   }
 }
@@ -42,7 +55,8 @@ export function useMaintenance(
 ) {
   const qc = useQueryClient();
   const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
-  const [selectedReport, setSelectedReport] = useState<MaintenanceReport | null>(null);
+  const [selectedReport, setSelectedReport] =
+    useState<MaintenanceReport | null>(null);
   const maintenanceTitle = t('instances_tab_maintenance');
 
   const tasksQuery = useQuery({
@@ -66,21 +80,42 @@ export function useMaintenance(
     if (tasksQuery.isError) {
       const e = tasksQuery.error;
       if (!notifyNetworkFetchError(maintenanceTitle, e, t)) {
-        feedbackErr(maintenanceTitle, e instanceof Error ? e.message : String(e), t);
+        feedbackErr(
+          maintenanceTitle,
+          e instanceof Error ? e.message : String(e),
+          t,
+        );
       }
       return;
     }
     if (tasksQuery.data) {
-      setTasks(Array.isArray(tasksQuery.data.tasks) ? tasksQuery.data.tasks : []);
+      setTasks(
+        Array.isArray(tasksQuery.data.tasks) ? tasksQuery.data.tasks : [],
+      );
     }
-  }, [tasksQuery.data, tasksQuery.isError, tasksQuery.error, maintenanceTitle, t]);
+  }, [
+    tasksQuery.data,
+    tasksQuery.isError,
+    tasksQuery.error,
+    maintenanceTitle,
+    t,
+  ]);
 
   useEffect(() => {
     if (!reportsEnabled || !reportsQuery.isError) return;
     notifyNetworkFetchError(maintenanceTitle, reportsQuery.error, t);
-  }, [reportsEnabled, reportsQuery.isError, reportsQuery.error, maintenanceTitle, t]);
+  }, [
+    reportsEnabled,
+    reportsQuery.isError,
+    reportsQuery.error,
+    maintenanceTitle,
+    t,
+  ]);
 
-  const reports: MaintenanceReport[] = useMemo(() => reportsQuery.data?.reports || [], [reportsQuery.data?.reports]);
+  const reports: MaintenanceReport[] = useMemo(
+    () => reportsQuery.data?.reports || [],
+    [reportsQuery.data?.reports],
+  );
 
   useEffect(() => {
     if (!reportsEnabled || !reports.length) {
@@ -104,12 +139,17 @@ export function useMaintenance(
           body: JSON.stringify({ tasks: nextTasks }),
         });
       } catch (e) {
-        const payload = (e as Error & { fccApiJson?: Record<string, unknown> })?.fccApiJson;
+        const payload = (e as Error & { fccApiJson?: Record<string, unknown> })
+          ?.fccApiJson;
         throwIfMaintenancePutFailure(payload, instances, t);
         throw e;
       }
       if (r?.ok === false) {
-        throwIfMaintenancePutFailure(r as Record<string, unknown>, instances, t);
+        throwIfMaintenancePutFailure(
+          r as Record<string, unknown>,
+          instances,
+          t,
+        );
         throw new Error(String(r.error || 'save_failed'));
       }
       await qc.invalidateQueries({ queryKey: ['maintenance', 'tasks'] });
@@ -119,7 +159,9 @@ export function useMaintenance(
 
   const handleMaintError = useCallback(
     (e: unknown, titleKey = 'instances_tab_maintenance') => {
-      const err = e as Error & { fccMaintenanceUpdatesForbiddenToast?: boolean };
+      const err = e as Error & {
+        fccMaintenanceUpdatesForbiddenToast?: boolean;
+      };
       const raw = err instanceof Error ? err.message : String(e);
       if (err?.fccMaintenanceUpdatesForbiddenToast) {
         notifyErr(t(titleKey), raw);
@@ -140,18 +182,20 @@ export function useMaintenance(
       next[idx] = { ...next[idx], active: makeActive };
       try {
         await putTasks(next);
-        notifyOk(t('instances_tab_maintenance'), t('maintenance_tasks_saved'));
       } catch (e) {
         handleMaintError(e);
       }
     },
-    [handleMaintError, putTasks, t, tasks],
+    [handleMaintError, putTasks, tasks],
   );
 
   const deactivateAllTasks = useCallback(() => {
     const activeTasks = tasks.filter((task) => !!task.active);
     if (!activeTasks.length) {
-      notifyWarn(t('instances_tab_maintenance'), t('maintenance_deactivate_all_none'));
+      notifyWarn(
+        t('instances_tab_maintenance'),
+        t('maintenance_deactivate_all_none'),
+      );
       return;
     }
     modals.openConfirmModal({
@@ -161,13 +205,19 @@ export function useMaintenance(
         { style: { whiteSpace: 'pre-wrap', margin: 0 } },
         t('maintenance_deactivate_all_confirm_msg', activeTasks.length),
       ),
-      labels: { confirm: t('maintenance_deactivate_all_btn'), cancel: t('cancel') },
+      labels: {
+        confirm: t('maintenance_deactivate_all_btn'),
+        cancel: t('cancel'),
+      },
       confirmProps: { className: 'btn btn--danger' },
       onConfirm: async () => {
         const next = tasks.map((task) => ({ ...task, active: false }));
         try {
           await putTasks(next);
-          notifyOk(t('instances_tab_maintenance'), t('maintenance_deactivate_all_done', activeTasks.length));
+          notifyOk(
+            t('instances_tab_maintenance'),
+            t('maintenance_deactivate_all_done', activeTasks.length),
+          );
         } catch (e) {
           handleMaintError(e);
         }
@@ -186,7 +236,10 @@ export function useMaintenance(
           const next = tasks.filter((x) => String(x.id) !== String(taskId));
           try {
             await putTasks(next);
-            notifyOk(t('instances_tab_maintenance'), t('maintenance_tasks_saved'));
+            notifyOk(
+              t('instances_tab_maintenance'),
+              t('maintenance_tasks_saved'),
+            );
           } catch (e) {
             handleMaintError(e);
           }
@@ -199,12 +252,18 @@ export function useMaintenance(
   const runNow = useCallback(
     async (taskId: string) => {
       try {
-        const r = await api<{ ok?: boolean; error?: string }>('/api/maintenance/run', {
-          method: 'POST',
-          body: JSON.stringify({ task_id: taskId }),
-        });
+        const r = await api<{ ok?: boolean; error?: string }>(
+          '/api/maintenance/run',
+          {
+            method: 'POST',
+            body: JSON.stringify({ task_id: taskId }),
+          },
+        );
         if (r?.ok === false) throw new Error(String(r.error || 'run_failed'));
-        notifyOk(t('instances_tab_maintenance'), t('maintenance_run_now_started'));
+        notifyOk(
+          t('instances_tab_maintenance'),
+          t('maintenance_run_now_started'),
+        );
       } catch (e) {
         handleMaintError(e);
       }
@@ -243,8 +302,10 @@ export function useMaintenance(
     upsertTask,
     putTasks,
     handleMaintError,
-    refreshTasks: () => qc.invalidateQueries({ queryKey: ['maintenance', 'tasks'] }),
-    refreshReports: () => qc.invalidateQueries({ queryKey: ['maintenance', 'reports'] }),
+    refreshTasks: () =>
+      qc.invalidateQueries({ queryKey: ['maintenance', 'tasks'] }),
+    refreshReports: () =>
+      qc.invalidateQueries({ queryKey: ['maintenance', 'reports'] }),
   };
 }
 

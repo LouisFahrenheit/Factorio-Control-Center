@@ -32,5 +32,5 @@ export const userAccessColumnPrefs = createColumnPrefs<UserAccessColumnKey>({
 
 export const userAccessStatusPrefs = createStatusModePrefs(
   'fcc_user_access_status_mode',
-  'column',
+  'dot',
 );

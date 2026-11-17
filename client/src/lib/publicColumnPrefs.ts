@@ -1,4 +1,5 @@
 import { createColumnPrefs } from './columnPrefs';
+import { createStatusModePrefs } from './statusModePrefs';
 
 export type PublicColumnKey =
   | 'status'
@@ -42,3 +43,7 @@ export const publicColumnPrefs = createColumnPrefs<PublicColumnKey>({
   defaultOrder: DEFAULT_PUBLIC_COLUMN_ORDER,
 });
 
+export const publicStatusPrefs = createStatusModePrefs(
+  'fcc_user_public_status_mode',
+  'dot',
+);

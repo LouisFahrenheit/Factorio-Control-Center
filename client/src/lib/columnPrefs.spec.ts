@@ -21,11 +21,13 @@ import {
   DEFAULT_SERVER_LIST_COLUMNS,
   DEFAULT_SERVER_LIST_COLUMN_ORDER,
   serverListColumnPrefs,
+  serverListStatusPrefs,
 } from './serverListColumnPrefs';
 import {
   DEFAULT_PUBLIC_COLUMNS,
   DEFAULT_PUBLIC_COLUMN_ORDER,
   publicColumnPrefs,
+  publicStatusPrefs,
 } from './publicColumnPrefs';
 
 describe('createColumnPrefs', () => {
@@ -208,18 +210,33 @@ describe('createColumnPrefs', () => {
     expect(maintenanceStatusPrefs.read()).toBe('dot');
   });
 
-  it('defaults the users table status to a column', () => {
-    expect(userAccessStatusPrefs.read()).toBe('column');
+  it('defaults the users, server list, and public table status to a dot', () => {
+    expect(userAccessStatusPrefs.read()).toBe('dot');
+    expect(serverListStatusPrefs.read()).toBe('dot');
+    expect(publicStatusPrefs.read()).toBe('dot');
   });
 
   it('saves the status mode per table and rejects unknown stored values', () => {
     maintenanceStatusPrefs.set('off');
     expect(maintenanceStatusPrefs.read()).toBe('off');
+    expect(userAccessStatusPrefs.read()).toBe('dot');
+    expect(serverListStatusPrefs.read()).toBe('dot');
+    expect(publicStatusPrefs.read()).toBe('dot');
+
+    userAccessStatusPrefs.set('column');
     expect(userAccessStatusPrefs.read()).toBe('column');
+    serverListStatusPrefs.set('column');
+    expect(serverListStatusPrefs.read()).toBe('column');
+    publicStatusPrefs.set('column');
+    expect(publicStatusPrefs.read()).toBe('column');
 
     store.set('fcc_user_access_status_mode', 'bogus');
-    expect(userAccessStatusPrefs.read()).toBe('column');
+    expect(userAccessStatusPrefs.read()).toBe('dot');
     store.set('fcc_user_maintenance_status_mode', 'bogus');
     expect(maintenanceStatusPrefs.read()).toBe('dot');
+    store.set('fcc_user_server_list_status_mode', 'bogus');
+    expect(serverListStatusPrefs.read()).toBe('dot');
+    store.set('fcc_user_public_status_mode', 'bogus');
+    expect(publicStatusPrefs.read()).toBe('dot');
   });
 });

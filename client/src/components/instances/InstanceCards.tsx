@@ -1,6 +1,17 @@
 import { motion } from 'motion/react';
-import { useRef, useState, type KeyboardEvent, type MouseEvent, type RefObject } from 'react';
-import { IconClock, IconPackage, IconServer, IconUsers } from '@tabler/icons-react';
+import {
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type RefObject,
+} from 'react';
+import {
+  IconClock,
+  IconPackage,
+  IconServer,
+  IconUsers,
+} from '@tabler/icons-react';
 import {
   formatUptime,
   instanceMaintenanceManualMode,
@@ -17,7 +28,10 @@ import { useUserShowServerListSpaceAgeBadge } from '../../hooks/useUserShowServe
 import { webEffectsReduced } from '../../theme/webEffects';
 import { AppIcon } from '../AppIcon';
 import { InstanceListBadges } from './InstanceListBadges';
-import { InstancePeekModal, type InstancePeekModalState } from './InstancePeekModal';
+import {
+  InstancePeekModal,
+  type InstancePeekModalState,
+} from './InstancePeekModal';
 import type { InstanceItem } from '../../types/instance';
 
 interface InstanceCardsProps {
@@ -52,15 +66,22 @@ export function InstanceCards({
   t,
 }: InstanceCardsProps) {
   const placeholder = t('server_uptime_placeholder');
-  const { ready: listIconsReady, isAvailable: isListIconAvailable } = useServerListIconsProbe();
+  const { ready: listIconsReady, isAvailable: isListIconAvailable } =
+    useServerListIconsProbe();
   const showModBadges = useUserShowServerListModBadges();
   const showSABadge = useUserShowServerListSpaceAgeBadge();
   const reduced = webEffectsReduced();
   const wrapVariants = reduced ? undefined : listWrapVariants(listEnterDelay);
   const clickTimerRef = useRef<number | null>(null);
-  const [peekModal, setPeekModal] = useState<InstancePeekModalState | null>(null);
+  const [peekModal, setPeekModal] = useState<InstancePeekModalState | null>(
+    null,
+  );
 
-  const handleCardClick = (item: InstanceItem, el: HTMLElement, ev: MouseEvent) => {
+  const handleCardClick = (
+    item: InstanceItem,
+    el: HTMLElement,
+    ev: MouseEvent,
+  ) => {
     if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
     clickTimerRef.current = window.setTimeout(() => {
       clickTimerRef.current = null;
@@ -77,7 +98,10 @@ export function InstanceCards({
     onOpenPanel(item);
   };
 
-  const handleKeyDown = (item: InstanceItem, ev: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (
+    item: InstanceItem,
+    ev: KeyboardEvent<HTMLDivElement>,
+  ) => {
     if (ev.key === 'Enter') {
       ev.preventDefault();
       onOpenPanel(item);
@@ -104,11 +128,19 @@ export function InstanceCards({
           const statusRaw = getEffectiveStatus(it);
           const isRunning = statusRaw === 'running';
           const isActive =
-            statusRaw === 'running' || statusRaw === 'starting' || statusRaw === 'stopping';
-          const rowStatus = t('instances_status_' + String(statusRaw || 'ready'));
+            statusRaw === 'running' ||
+            statusRaw === 'starting' ||
+            statusRaw === 'stopping';
+          const rowStatus = t(
+            'instances_status_' + String(statusRaw || 'ready'),
+          );
           const modsCount = Number(it.modsCount || 0);
-          const isMaintLocked = statusRaw === 'maintenance' || !!it.maintenanceLock;
-          const isMaintManual = instanceMaintenanceManualMode(it, getEffectiveStatus);
+          const isMaintLocked =
+            statusRaw === 'maintenance' || !!it.maintenanceLock;
+          const isMaintManual = instanceMaintenanceManualMode(
+            it,
+            getEffectiveStatus,
+          );
           const isMaint = isMaintLocked || isMaintManual;
           const blocked = runningInstanceBlocked(it, getEffectiveStatus);
           const nameText = String(it.name || '');
@@ -117,11 +149,20 @@ export function InstanceCards({
               ? formatUptime(it.uptimeSeconds, placeholder)
               : placeholder;
 
+          const isStarting = statusRaw === 'starting';
+          const isStopping = statusRaw === 'stopping';
           const maintDotClass = isMaintManual
             ? ' instance-run-dot--maintenance-manual'
             : isMaintLocked
               ? ' instance-run-dot--maintenance'
               : '';
+          const statusDotClass = isRunning
+            ? ' instance-run-dot--on'
+            : isStarting
+              ? ' instance-run-dot--starting'
+              : isStopping
+                ? ' instance-run-dot--stopping'
+                : maintDotClass;
 
           const isSelected = selectedRowId && String(it.id) === selectedRowId;
 
@@ -167,13 +208,7 @@ export function InstanceCards({
               {/* 1. Card Header: Status Dot, Name, Inline Badges | Status Pill */}
               <div className="instance-card__header">
                 <div className="instance-card__header-left">
-                  <span
-                    className={
-                      'instance-run-dot' +
-                      (isRunning ? ' instance-run-dot--on' : '') +
-                      maintDotClass
-                    }
-                  />
+                  <span className={'instance-run-dot' + statusDotClass} />
                   {isMaint ? (
                     <span
                       className={
@@ -247,8 +282,14 @@ export function InstanceCards({
               {/* 2. Connection & Version Meta Line */}
               <div className="instance-card__meta-bar">
                 <div className="instance-card__meta-left">
-                  <span className="instance-card__meta-chip" title={t('instances_col_server_port')}>
-                    <IconServer size={16} className="instance-card__meta-icon" />
+                  <span
+                    className="instance-card__meta-chip"
+                    title={t('instances_col_server_port')}
+                  >
+                    <IconServer
+                      size={16}
+                      className="instance-card__meta-icon"
+                    />
                     <span>{String(it.port || '—')}</span>
                   </span>
                   <span
@@ -272,19 +313,31 @@ export function InstanceCards({
                   </span>
                 </div>
 
-                <div className="instance-card__meta-right" title={t('instances_col_access')}>
+                <div
+                  className="instance-card__meta-right"
+                  title={t('instances_col_access')}
+                >
                   <span className="status-flags status-flags--side">
-                    <span className={'status-flag' + (it.visibilityLan ? ' status-flag--on' : '')}>
+                    <span
+                      className={
+                        'status-flag' +
+                        (it.visibilityLan ? ' status-flag--on' : '')
+                      }
+                    >
                       LAN
                     </span>
                     <span
-                      className={'status-flag' + (it.visibilityPublic ? ' status-flag--on' : '')}
+                      className={
+                        'status-flag' +
+                        (it.visibilityPublic ? ' status-flag--on' : '')
+                      }
                     >
                       PUB
                     </span>
                     <span
                       className={
-                        'status-flag' + (it.requireUserVerification ? ' status-flag--on' : '')
+                        'status-flag' +
+                        (it.requireUserVerification ? ' status-flag--on' : '')
                       }
                     >
                       RUV
@@ -300,7 +353,9 @@ export function InstanceCards({
                   return (
                     <div
                       className={`instance-card__stat-tile ${
-                        hasPlayers ? 'instance-card__stat-tile--active-players' : ''
+                        hasPlayers
+                          ? 'instance-card__stat-tile--active-players'
+                          : ''
                       }`}
                       title={
                         hasPlayers
@@ -316,7 +371,10 @@ export function InstanceCards({
                         }
                       }}
                       onKeyDown={(e) => {
-                        if (hasPlayers && (e.key === 'Enter' || e.key === ' ')) {
+                        if (
+                          hasPlayers &&
+                          (e.key === 'Enter' || e.key === ' ')
+                        ) {
                           e.preventDefault();
                           e.stopPropagation();
                           setPeekModal({ type: 'players', item: it });
@@ -324,17 +382,27 @@ export function InstanceCards({
                       }}
                     >
                       <div className="instance-card__stat-value-row">
-                        <IconUsers size={15} className="instance-card__stat-icon" />
-                        <span className="instance-card__stat-value">{String(it.onlineCount || 0)}</span>
+                        <IconUsers
+                          size={15}
+                          className="instance-card__stat-icon"
+                        />
+                        <span className="instance-card__stat-value">
+                          {String(it.onlineCount || 0)}
+                        </span>
                       </div>
                     </div>
                   );
                 })()}
 
-                <div className="instance-card__stat-tile" title={t('server_uptime')}>
+                <div
+                  className="instance-card__stat-tile"
+                  title={t('server_uptime')}
+                >
                   <div className="instance-card__stat-value-row">
                     <IconClock size={15} className="instance-card__stat-icon" />
-                    <span className="instance-card__stat-value">{uptimeText}</span>
+                    <span className="instance-card__stat-value">
+                      {uptimeText}
+                    </span>
                   </div>
                 </div>
 
@@ -342,7 +410,11 @@ export function InstanceCards({
                   className={`instance-card__stat-tile ${
                     modsCount > 0 ? 'instance-card__stat-tile--clickable' : ''
                   }`}
-                  title={modsCount > 0 ? `${t('mods_btn')} (${modsCount})` : t('mods_btn')}
+                  title={
+                    modsCount > 0
+                      ? `${t('mods_btn')} (${modsCount})`
+                      : t('mods_btn')
+                  }
                   role={modsCount > 0 ? 'button' : undefined}
                   tabIndex={modsCount > 0 ? 0 : undefined}
                   onClick={(e) => {
@@ -360,7 +432,10 @@ export function InstanceCards({
                   }}
                 >
                   <div className="instance-card__stat-value-row">
-                    <IconPackage size={15} className="instance-card__stat-icon" />
+                    <IconPackage
+                      size={15}
+                      className="instance-card__stat-icon"
+                    />
                     <span className="instance-card__stat-value">
                       {modsCount > 0 ? String(modsCount) : '—'}
                     </span>
@@ -369,7 +444,10 @@ export function InstanceCards({
               </div>
 
               {/* 4. Action Buttons (Icon-Only, Uniform, with Restart) */}
-              <div className="instance-card__actions" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="instance-card__actions"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
                   type="button"
                   className="btn instance-card__action-btn instance-card__action-btn--open"

@@ -1563,7 +1563,7 @@
   "web_user_status_off": "Отключён",
   "web_user_status_label": "Статус",
   "web_2fa_column_label": "2FA",
-  "web_status_mode_on": "Вкл",
+  "web_status_mode_on": "Колонка",
   "web_status_mode_off": "Выкл",
   "web_status_mode_dot": "Точка",
   "web_username_placeholder": "Логин",

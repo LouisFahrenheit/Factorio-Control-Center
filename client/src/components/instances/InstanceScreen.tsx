@@ -62,7 +62,10 @@ import {
 } from './InstanceServersEmpty';
 import { useUserServerListViewMode } from '../../hooks/useUserServerListViewMode';
 import { useColumnPrefs } from '../../hooks/useColumnPrefs';
-import { serverListColumnPrefs } from '../../lib/serverListColumnPrefs';
+import {
+  serverListColumnPrefs,
+  serverListStatusPrefs,
+} from '../../lib/serverListColumnPrefs';
 import { InstanceMonitoringTab } from './InstanceMonitoringTab';
 import { CircuitWireConnection } from './CircuitWireConnection';
 import { BackupTab } from './BackupTab';
@@ -138,10 +141,12 @@ export function InstanceScreen({
   const {
     columns: listColumns,
     order: listColumnOrder,
+    statusMode: listStatusMode,
+    setStatusMode: setListStatusMode,
     setColumn: setListColumn,
     moveColumn: moveListColumn,
     resetColumns: resetListColumns,
-  } = useColumnPrefs(serverListColumnPrefs);
+  } = useColumnPrefs(serverListColumnPrefs, serverListStatusPrefs);
   const tableWrapRef = useRef<HTMLDivElement>(null);
 
   const tabAllowed = useCallback(
@@ -556,6 +561,8 @@ export function InstanceScreen({
                     onViewModeChange={setViewMode}
                     columns={listColumns}
                     columnOrder={listColumnOrder}
+                    statusMode={listStatusMode}
+                    onStatusModeChange={setListStatusMode}
                     onToggleColumn={setListColumn}
                     onMoveColumn={moveListColumn}
                     onResetColumns={resetListColumns}
@@ -622,8 +629,12 @@ export function InstanceScreen({
                       onSortColumn={onSortColumn}
                       onRowClick={onRowClick}
                       onRowDoubleClick={onRowDoubleClick}
-                      columns={listColumns}
+                      columns={{
+                        ...listColumns,
+                        status: listStatusMode === 'column',
+                      }}
                       columnOrder={listColumnOrder}
+                      statusMode={listStatusMode}
                       tableWrapRef={tableWrapRef}
                       t={t}
                     />

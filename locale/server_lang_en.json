@@ -1562,7 +1562,7 @@
   "web_user_status_off": "Disabled",
   "web_user_status_label": "Status",
   "web_2fa_column_label": "2FA",
-  "web_status_mode_on": "On",
+  "web_status_mode_on": "Column",
   "web_status_mode_off": "Off",
   "web_status_mode_dot": "Dot",
   "web_username_placeholder": "username",

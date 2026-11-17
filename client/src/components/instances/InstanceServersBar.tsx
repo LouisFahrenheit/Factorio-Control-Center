@@ -3,6 +3,7 @@ import { SearchField } from '../SearchField';
 import { RefreshButton } from '../RefreshButton';
 import { AppIcon } from '../AppIcon';
 import type { ServerListViewMode } from '../../lib/userPrefs';
+import type { StatusMode } from '../../lib/statusModePrefs';
 import type {
   ServerListColumnKey,
   ServerListColumnVisibility,
@@ -21,7 +22,15 @@ const SERVER_COLUMN_CONFIG: readonly ColumnConfigItem<ServerListColumnKey>[] = [
   { key: 'mods', labelKey: 'mods_btn' },
   { key: 'online', labelKey: 'instances_col_online' },
   { key: 'uptime', labelKey: 'server_uptime' },
-  { key: 'status', labelKey: 'instances_col_status' },
+  {
+    key: 'status',
+    labelKey: 'instances_col_status',
+    modes: [
+      { value: 'column', labelKey: 'web_status_mode_on' },
+      { value: 'dot', labelKey: 'web_status_mode_dot' },
+      { value: 'off', labelKey: 'web_status_mode_off' },
+    ],
+  },
 ];
 
 interface InstanceServersBarProps {
@@ -36,6 +45,8 @@ interface InstanceServersBarProps {
   onViewModeChange: (mode: ServerListViewMode) => void;
   columns?: ServerListColumnVisibility;
   columnOrder?: readonly ServerListColumnKey[];
+  statusMode?: StatusMode;
+  onStatusModeChange?: (mode: StatusMode) => void;
   onToggleColumn?: (key: ServerListColumnKey, visible: boolean) => void;
   onMoveColumn?: (key: ServerListColumnKey, direction: 'up' | 'down') => void;
   onResetColumns?: () => void;
@@ -60,6 +71,8 @@ export function InstanceServersBar({
   onViewModeChange,
   columns,
   columnOrder,
+  statusMode,
+  onStatusModeChange,
   onToggleColumn,
   onMoveColumn,
   onResetColumns,
@@ -204,6 +217,12 @@ export function InstanceServersBar({
               config={SERVER_COLUMN_CONFIG}
               columns={columns}
               order={columnOrder}
+              modeValues={statusMode ? { status: statusMode } : undefined}
+              onChangeMode={
+                onStatusModeChange
+                  ? (_key, value) => onStatusModeChange(value as StatusMode)
+                  : undefined
+              }
               onToggleColumn={onToggleColumn}
               onMoveColumn={onMoveColumn}
               onReset={onResetColumns}
