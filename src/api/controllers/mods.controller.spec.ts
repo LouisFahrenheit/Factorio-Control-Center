@@ -292,7 +292,12 @@ describe('ModsController', () => {
         name: 'my-mods.zip',
       });
       const { res, download } = mockResponse();
-      await controller.modsDownloadAll(res, 'inst-1');
+      await controller.modsDownloadAll(res, 'inst-1', '0', '1');
+      expect(bridge.submit).toHaveBeenCalledWith(
+        'build_mods_archive',
+        { include_disabled: false, include_settings: true },
+        'inst-1',
+      );
       expect(download).toHaveBeenCalledWith(testFile, 'my-mods.zip');
     });
 
@@ -328,6 +333,67 @@ describe('ModsController', () => {
       expect(bridge.submit).toHaveBeenCalledWith(
         'get_mod_portal_releases',
         { name: 'mod-a' },
+        'inst-1',
+      );
+    });
+
+    it('modsPortalSearch dispatches mods_portal_search', async () => {
+      await controller.modsPortalSearch(
+        'flib',
+        '20',
+        '0',
+        'inst-1',
+        '2.0',
+        '1',
+        'include',
+        'utilities',
+        'internal',
+        '1',
+        '2',
+        'downloads',
+      );
+      expect(bridge.submit).toHaveBeenCalledWith(
+        'mods_portal_search',
+        {
+          q: 'flib',
+          page: 2,
+          limit: 20,
+          sort: 'downloads',
+          only_compatible: false,
+          version: '2.0',
+          include_deprecated: true,
+          space_age: 'include',
+          include_categories: 'utilities',
+          exclude_categories: 'internal',
+          only_bookmarked: true,
+          search_in_description: true,
+          owner: '',
+          hide_installed: false,
+          only_installed: false,
+          only_updates: false,
+          refresh: false,
+        },
+        'inst-1',
+      );
+    });
+
+    it('modsPortalBookmark dispatches mods_portal_bookmark', async () => {
+      await controller.modsPortalBookmark(
+        { mod: 'flib', bookmarked: true },
+        'inst-1',
+      );
+      expect(bridge.submit).toHaveBeenCalledWith(
+        'mods_portal_bookmark',
+        { mod: 'flib', bookmarked: true },
+        'inst-1',
+      );
+    });
+
+    it('modsPortalThumbnails dispatches mods_portal_thumbnails', async () => {
+      await controller.modsPortalThumbnails({ names: ['flib'] }, 'inst-1');
+      expect(bridge.submit).toHaveBeenCalledWith(
+        'mods_portal_thumbnails',
+        { names: ['flib'] },
         'inst-1',
       );
     });

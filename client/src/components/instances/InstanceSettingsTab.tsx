@@ -183,15 +183,16 @@ export function InstanceSettingsTab({
       if (el) {
         clearInterval(interval);
         sessionStorage.removeItem('fcc_open_instance_setting');
-        const row =
-          el.classList.contains('settings-toggle-row')
-            ? el
-            : el.closest('.settings-toggle-row') || el;
+        const row = el.classList.contains('settings-toggle-row')
+          ? el
+          : el.closest('.settings-toggle-row') ||
+            el.closest('.settings-card') ||
+            el;
         row.scrollIntoView({ behavior: 'smooth', block: 'center' });
         row.classList.add('settings-toggle-row--blink');
         setTimeout(() => {
           row.classList.remove('settings-toggle-row--blink');
-        }, 2400);
+        }, 1900);
         const inputEl = document.getElementById(targetId);
         if (
           inputEl &&

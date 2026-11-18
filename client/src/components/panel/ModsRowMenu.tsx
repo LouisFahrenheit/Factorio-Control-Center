@@ -17,6 +17,7 @@ interface ModsRowMenuProps {
   onChangeVersion?: () => void;
   onDownload: () => void;
   onChangelog: () => void;
+  onOpenCard: () => void;
   onRemove: () => void;
   t: (key: string) => string;
 }
@@ -32,6 +33,7 @@ export function ModsRowMenu({
   onChangeVersion,
   onDownload,
   onChangelog,
+  onOpenCard,
   onRemove,
   t,
 }: ModsRowMenuProps) {
@@ -103,20 +105,35 @@ export function ModsRowMenu({
         <AppIcon name="changelog" size={16} />
         {t('mod_list_changelog_btn')}
       </button>
-      <button
-        type="button"
-        className="btn instance-row-menu__item btn--with-icon"
-        id="btnModsMenuOpenPortal"
-        onClick={(ev) => {
-          ev.stopPropagation();
-          const url = getModOpenUrl(item.name, isBuiltin);
-          onClose();
-          if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        }}
-      >
-        <AppIcon name="open_portal" size={16} />
-        {t('mod_list_open_portal_btn')}
-      </button>
+      {isBuiltin ? (
+        <button
+          type="button"
+          className="btn instance-row-menu__item btn--with-icon"
+          id="btnModsMenuOpenPortal"
+          onClick={(ev) => {
+            ev.stopPropagation();
+            const url = getModOpenUrl(item.name, true);
+            onClose();
+            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+          }}
+        >
+          <AppIcon name="open_portal" size={16} />
+          {t('mod_list_open_portal_btn')}
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="btn instance-row-menu__item btn--with-icon"
+          id="btnModsMenuOpenCard"
+          onClick={(ev) => {
+            ev.stopPropagation();
+            onOpenCard();
+          }}
+        >
+          <AppIcon name="package" size={16} />
+          {t('mod_list_open_card_btn')}
+        </button>
+      )}
       <button
         type="button"
         className="btn btn--danger instance-row-menu__item btn--with-icon"

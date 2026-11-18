@@ -156,12 +156,17 @@ export class ProgramOpsService {
     if ('global_username' in kwargs || 'global_token' in kwargs) {
       const username = safeTrim(kwargs.global_username ?? wp.global_username);
       const token = safeTrim(kwargs.global_token ?? wp.global_token);
-      if (!username || !token) {
-        return { ok: false, error: 'factorio_credentials_incomplete' };
-      }
-      const verified = await this.portal.verifyCredentials(username, token);
-      if (!verified.ok) {
-        return { ok: false, error: 'factorio_credentials_invalid' };
+      if (username || token) {
+        if (!username || !token) {
+          return { ok: false, error: 'factorio_credentials_incomplete' };
+        }
+        const verified = await this.portal.verifyCredentials(username, token);
+        if (!verified.ok) {
+          return { ok: false, error: 'factorio_credentials_invalid' };
+        }
+      } else {
+        if (shared.global_username) changes['shared.global_username'] = '';
+        if (shared.global_token) changes['shared.global_token'] = '';
       }
       this.portal.clearVerifyCache();
     }

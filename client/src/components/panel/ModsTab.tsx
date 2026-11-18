@@ -1,15 +1,7 @@
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from 'react';
+import { memo, useCallback, useMemo, useState, type MouseEvent } from 'react';
 import { motion } from 'motion/react';
 import { IconUpload } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
-import { FactorioPortalUsername } from '../FactorioPortalUsername';
 import { FccSwitch } from '../FccSwitch';
 import { SearchField } from '../SearchField';
 import { RefreshButton } from '../RefreshButton';
@@ -33,7 +25,9 @@ import {
 } from '../../lib/modUtils';
 import type { ModRow, ModSortColumn } from '../../types/mods';
 import { ModPortalVersionsModal } from './ModPortalVersionsModal';
+import { ModsDownloadAllModal } from './ModsDownloadAllModal';
 import { ModsFromSaveModal } from './ModsFromSaveModal';
+import { ModsInstallModal } from './ModsInstallModal';
 import { ModsRowMenu } from './ModsRowMenu';
 import { useColumnPrefs } from '../../hooks/useColumnPrefs';
 import {
@@ -271,8 +265,6 @@ export function ModsTab({ mods, t }: ModsTabProps) {
     () => modsColumns.order.filter((key) => modsColumns.columns[key] !== false),
     [modsColumns.order, modsColumns.columns],
   );
-  const uploadRef = useRef<HTMLInputElement>(null);
-  const saveUploadRef = useRef<HTMLInputElement>(null);
   const totalCount = mods.rawRows.length;
   const initialLoading = tabInitialLoad(mods.loading, totalCount > 0);
   const reduced = webEffectsReduced();
@@ -384,124 +376,6 @@ export function ModsTab({ mods, t }: ModsTabProps) {
         )}
         <div className="panel__body mods-tab__body">
           <div className="mods-toolbar">
-            <div className="mods-toolbar__section mods-toolbar__section--install">
-              <div
-                className={
-                  'mods-toolbar__field' +
-                  (mods.installBlink
-                    ? ' mods-toolbar__field--accent-blink'
-                    : '')
-                }
-              >
-                <AppIcon
-                  name="add_link"
-                  size={18}
-                  className="mods-toolbar__field-icon"
-                  aria-hidden
-                />
-                <input
-                  type="text"
-                  id="modInstallInput"
-                  className="input mods-toolbar__field-input"
-                  autoComplete="off"
-                  placeholder={t('mod_list_install_from_url_prompt')}
-                  disabled={mods.serverBusy}
-                  value={mods.installInput}
-                  onChange={(e) => mods.setInstallInput(e.target.value)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter') void mods.installFromUrl();
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn btn--with-icon mods-toolbar__field-action"
-                  id="btnModInstall"
-                  disabled={mods.serverBusy}
-                  onClick={() => void mods.installFromUrl()}
-                >
-                  <AppIcon name="download" size={16} />
-                  {t('mod_list_install_from_url_btn')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--toolbar-icon mods-toolbar__field-version-btn"
-                  id="btnModPickVersion"
-                  title={t('mod_list_pick_version_tooltip')}
-                  aria-label={t('mod_list_pick_version_tooltip')}
-                  disabled={mods.serverBusy}
-                  onClick={() => mods.openVersionPicker()}
-                >
-                  <AppIcon name="history" size={16} />
-                </button>
-              </div>
-              <span className="mods-toolbar__sep" aria-hidden="true" />
-              <div className="mods-toolbar__btn-group">
-                <input
-                  ref={uploadRef}
-                  type="file"
-                  id="inpModUpload"
-                  className="input input--file"
-                  accept=".zip,.dat,application/zip,application/octet-stream"
-                  multiple
-                  style={{ display: 'none' }}
-                  disabled={mods.serverBusy}
-                  onChange={(ev) => {
-                    void mods.uploadArchives(ev.target.files);
-                    ev.target.value = '';
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn btn--with-icon"
-                  id="btnModUpload"
-                  disabled={mods.serverBusy}
-                  onClick={() => uploadRef.current?.click()}
-                >
-                  <AppIcon name="upload" size={16} />
-                  {t('mod_list_upload_btn')}
-                </button>
-                <input
-                  ref={saveUploadRef}
-                  type="file"
-                  id="inpModsFromSave"
-                  className="input input--file"
-                  accept=".zip,application/zip"
-                  style={{ display: 'none' }}
-                  disabled={mods.serverBusy}
-                  onChange={(ev) => {
-                    const f = ev.target.files?.[0];
-                    ev.target.value = '';
-                    if (f) void mods.previewFromSave(f);
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn btn--with-icon"
-                  id="btnModsFromSave"
-                  disabled={mods.serverBusy}
-                  onClick={() => saveUploadRef.current?.click()}
-                >
-                  <AppIcon name="upload" size={16} />
-                  {t('mods_from_save_btn')}
-                </button>
-              </div>
-              <div className="mods-toolbar__portal-meta">
-                <FactorioPortalUsername
-                  username={mods.portalUsername}
-                  t={t}
-                  className="mods-toolbar__portal-username"
-                />
-                <a
-                  href="https://mods.factorio.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mods-toolbar__portal-link"
-                >
-                  <AppIcon name="open_portal" size={16} />
-                  {t('mod_list_portal_website_link')}
-                </a>
-              </div>
-            </div>
             <div className="mods-toolbar__section mods-toolbar__section--actions">
               <SearchField
                 type="text"
@@ -526,6 +400,20 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                 />
                 <button
                   type="button"
+                  className={
+                    'btn btn--with-icon mods-toolbar__install-open-btn' +
+                    (!mods.loading && !mods.hasPortalMods
+                      ? ' btn--update-available'
+                      : '')
+                  }
+                  id="btnModOpenInstall"
+                  onClick={mods.openInstallModal}
+                >
+                  <AppIcon name="add" size={16} />
+                  {t('mod_list_install_modal_open_btn')}
+                </button>
+                <button
+                  type="button"
                   className="btn btn--with-icon"
                   id="btnModSettings"
                   disabled={mods.serverBusy}
@@ -540,8 +428,8 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                   type="button"
                   className="btn btn--with-icon"
                   id="btnModCheckUpdates"
-                  disabled={!mods.hasPortalMods || mods.modsCheckRunning}
-                  onClick={() => void mods.checkUpdates(true)}
+                  disabled={!mods.hasPortalMods}
+                  onClick={mods.openUpdatesModal}
                 >
                   <AppIcon name="update" size={16} />
                   {t('mod_list_check_portal_btn')}
@@ -578,9 +466,7 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                   className="btn btn--with-icon"
                   id="btnModDownloadAll"
                   disabled={!mods.hasPortalMods}
-                  onClick={() =>
-                    void mods.downloadAll().catch(mods.handleError)
-                  }
+                  onClick={mods.openDownloadAllDialog}
                 >
                   <AppIcon name="download" size={16} />
                   {t('mod_list_download_all_btn')}
@@ -765,7 +651,12 @@ export function ModsTab({ mods, t }: ModsTabProps) {
         onChangelog={() => {
           if (!menuItem) return;
           closeMenu();
-          void mods.showChangelog(menuItem);
+          mods.openModCard(menuItem, 'changelog');
+        }}
+        onOpenCard={() => {
+          if (!menuItem) return;
+          closeMenu();
+          mods.openModCard(menuItem);
         }}
         onRemove={() => {
           if (!menuItem) return;
@@ -774,6 +665,8 @@ export function ModsTab({ mods, t }: ModsTabProps) {
         }}
         t={t}
       />
+
+      <ModsInstallModal mods={mods} t={t} />
 
       <ModPortalVersionsModal
         open={mods.portalVersionsModalOpen}
@@ -792,6 +685,19 @@ export function ModsTab({ mods, t }: ModsTabProps) {
       />
 
       <ModsFromSaveModal mods={mods} t={t} />
+
+      <ModsDownloadAllModal
+        open={mods.downloadAllConfirmOpen}
+        archiveName={mods.downloadAllArchiveName}
+        localModsCount={mods.downloadAllModsCount}
+        includeDisabled={mods.downloadAllIncludeDisabled}
+        includeSettings={mods.downloadAllIncludeSettings}
+        onIncludeDisabledChange={mods.setDownloadAllIncludeDisabled}
+        onIncludeSettingsChange={mods.setDownloadAllIncludeSettings}
+        onClose={mods.closeDownloadAllDialog}
+        onConfirm={() => void mods.downloadAll().catch(mods.handleError)}
+        t={t}
+      />
     </div>
   );
 }

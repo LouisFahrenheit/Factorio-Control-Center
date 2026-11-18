@@ -17,6 +17,7 @@ export const APP_ICON_URLS = {
   download: '/assets/icons/download.svg',
   edit: '/assets/icons/edit.svg',
   edit_document: '/assets/icons/edit_document.svg',
+  external_link: '/assets/icons/external_link.svg',
   favorite: '/assets/icons/favorite.svg',
   file_copy: '/assets/icons/file_copy.svg',
   folder: '/assets/icons/folder.svg',

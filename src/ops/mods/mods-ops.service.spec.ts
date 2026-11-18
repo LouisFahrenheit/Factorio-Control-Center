@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import { join } from 'path';
 import { ModsOpsService } from './mods-ops.service';
@@ -676,6 +677,39 @@ describe('ModsOpsService', () => {
       expect(res.ok).toBe(true);
       expect(res.name).toBe('Main Server-mods.zip');
       expect(res.path).toContain('fcc_mods_');
+    });
+
+    it('buildArchive excludes disabled mods and includes mod-settings.dat when configured', () => {
+      mockReaddirSync.mockReturnValue([
+        'flib_1.0.0.zip',
+        'disabled-mod_1.0.0.zip',
+      ]);
+      mockReadModList.mockReturnValue({
+        mods: [
+          { name: 'flib', enabled: true },
+          { name: 'disabled-mod', enabled: false },
+        ],
+      });
+      mockExistsSync.mockReturnValue(true);
+
+      const res = service.buildArchive({
+        includeDisabled: false,
+        includeSettings: true,
+      });
+      expect(res.ok).toBe(true);
+
+      const mockCtor = AdmZip as unknown as jest.Mock;
+      const lastResult = mockCtor.mock.results[mockCtor.mock.results.length - 1]
+        ?.value as { addLocalFile: jest.Mock };
+      expect(lastResult.addLocalFile).toHaveBeenCalledWith(
+        join(fakePm.modsDir, 'flib_1.0.0.zip'),
+      );
+      expect(lastResult.addLocalFile).not.toHaveBeenCalledWith(
+        join(fakePm.modsDir, 'disabled-mod_1.0.0.zip'),
+      );
+      expect(lastResult.addLocalFile).toHaveBeenCalledWith(
+        fakePm.modSettingsDat,
+      );
     });
   });
 

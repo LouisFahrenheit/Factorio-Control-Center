@@ -295,14 +295,27 @@
 /* ── Factorio Update Available Accent Highlight ──────────────────────── */
 
 .workspace__main--panel #btnFactorioUpdate.btn--update-available:not(:disabled),
-.panel-shell #btnFactorioUpdate.btn--update-available:not(:disabled) {
+.panel-shell #btnFactorioUpdate.btn--update-available:not(:disabled),
+.workspace__main--panel
+  #btnServerSettingsSave.btn--update-available:not(:disabled),
+.panel-shell #btnServerSettingsSave.btn--update-available:not(:disabled),
+.workspace__main--panel #btnModOpenInstall.btn--update-available:not(:disabled),
+.panel-shell #btnModOpenInstall.btn--update-available:not(:disabled),
+.mod-install-card__install-btn.btn--update-available:not(:disabled) {
   color: color-mix(in srgb, var(--accent) 85%, white 15%) !important;
   animation: factorio-update-btn-accent-pulse 1.4s ease-in-out infinite !important;
 }
 
 .workspace__main--panel
   #btnFactorioUpdate.btn--update-available:hover:not(:disabled),
-.panel-shell #btnFactorioUpdate.btn--update-available:hover:not(:disabled) {
+.panel-shell #btnFactorioUpdate.btn--update-available:hover:not(:disabled),
+.workspace__main--panel
+  #btnServerSettingsSave.btn--update-available:hover:not(:disabled),
+.panel-shell #btnServerSettingsSave.btn--update-available:hover:not(:disabled),
+.workspace__main--panel
+  #btnModOpenInstall.btn--update-available:hover:not(:disabled),
+.panel-shell #btnModOpenInstall.btn--update-available:hover:not(:disabled),
+.mod-install-card__install-btn.btn--update-available:hover:not(:disabled) {
   animation: none !important;
   border-color: var(--accent) !important;
   background: color-mix(
@@ -893,8 +906,8 @@
   font-weight: 600 !important;
   border-radius: var(--r-md, 8px) !important;
   background: var(--fcc-btn-bg) !important;
-  border: 1px solid var(--fcc-btn-border) !important;
-  box-shadow: var(--fcc-btn-shadow) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
   color: var(--text) !important;
   cursor: pointer;
   transition:
@@ -903,6 +916,28 @@
     color 0.16s ease,
     box-shadow 0.16s ease,
     transform 0.1s ease !important;
+}
+
+#tabPanelModpacks
+  .modpacks-toolbar
+  .btn:not(.instance-columns-dropdown *):not(.btn--toolbar-icon):not(
+    .btn--update-available
+  ),
+#tabPanelMods
+  .mods-toolbar
+  .btn:not(.instance-columns-dropdown *):not(.btn--toolbar-icon):not(
+    .btn--update-available
+  ),
+.server-settings-tab__toolbar
+  .btn:not(.instance-columns-dropdown *):not(.btn--toolbar-icon):not(
+    .btn--update-available
+  ),
+.server-settings-tab__actions
+  .btn:not(.instance-columns-dropdown *):not(.btn--toolbar-icon):not(
+    .btn--update-available
+  ) {
+  border-color: var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
 }
 
 #tabPanelModpacks

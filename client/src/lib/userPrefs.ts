@@ -200,3 +200,27 @@ export function setUserMaintenanceViewMode(mode: MaintenanceViewMode): void {
     /* ignore */
   }
 }
+
+const INTERFACE_HINTS_KEY = 'fcc_user_interface_hints_enabled';
+
+export function readUserInterfaceHintsEnabled(): boolean {
+  try {
+    if (typeof localStorage === 'undefined') return true;
+    const raw = localStorage.getItem(INTERFACE_HINTS_KEY);
+    if (raw === '0') return false;
+    if (raw === '1') return true;
+  } catch {
+    /* ignore */
+  }
+  return true;
+}
+
+export function setUserInterfaceHintsEnabled(enabled: boolean): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(INTERFACE_HINTS_KEY, enabled ? '1' : '0');
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}

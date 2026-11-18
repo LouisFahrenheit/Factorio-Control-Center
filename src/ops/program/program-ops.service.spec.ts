@@ -298,6 +298,22 @@ describe('ProgramOpsService', () => {
       );
     });
 
+    it('allows clearing both global_username and global_token to empty strings', async () => {
+      const res = await service.set({
+        global_username: '',
+        global_token: '',
+      });
+      expect(res.ok).toBe(true);
+      expect(mockPortal.verifyCredentials).not.toHaveBeenCalled();
+      expect(mockPortal.clearVerifyCache).toHaveBeenCalled();
+      expect(mockConfig.updatePreferences).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'web_panel.global_username': '',
+          'web_panel.global_token': '',
+        }),
+      );
+    });
+
     it('updates shared settings and records modpack_activate_use_symlinks changes', async () => {
       const res = await service.set({
         translate_mod_names: false,

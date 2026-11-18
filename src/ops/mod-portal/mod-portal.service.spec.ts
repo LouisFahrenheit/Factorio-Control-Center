@@ -620,4 +620,333 @@ describe('ModPortalService', () => {
       expect(verifiedName).toBe('');
     });
   });
+
+  describe('searchMods()', () => {
+    it('fetches catalog, caches it, ranks matches, and returns popular mods on empty query', async () => {
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                name: 'base',
+                title: 'Base Mod',
+                downloads_count: 9999999,
+              },
+              {
+                name: 'flib',
+                title: 'Factorio Library',
+                summary: 'Common Lua utilities',
+                owner: 'raiguard',
+                downloads_count: 500000,
+                thumbnail: '/assets/flib.png',
+                category: 'utilities',
+                latest_release: {
+                  version: '0.15.0',
+                  released_at: '2026-01-01T00:00:00Z',
+                  info_json: { factorio_version: '2.0' },
+                },
+              },
+              {
+                name: 'RateCalculator',
+                title: 'Rate Calculator',
+                summary: 'Calculate production rates using flib',
+                owner: 'raiguard',
+                downloads_count: 800000,
+                thumbnail: '/assets/rate.png',
+                latest_release: {
+                  version: '3.3.2',
+                  released_at: '2026-02-01T00:00:00Z',
+                  info_json: { factorio_version: '2.0' },
+                },
+              },
+            ],
+          }),
+      });
+      globalThis.fetch = fetchMock;
+
+      const popular = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        limit: 10,
+      });
+      expect(popular.factorioVersion).toBe('2.0');
+      expect(popular.results.map((r) => r.name)).toEqual([
+        'RateCalculator',
+        'flib',
+      ]);
+
+      const filtered = await service.searchMods('flib', {
+        gameVersion: '2.0.28',
+        limit: 10,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(filtered.results[0]?.name).toBe('flib');
+      expect(filtered.total).toBe(2);
+    });
+
+    it('supports sorting by downloads, updated, trending and page slicing', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                name: 'mod-alpha',
+                title: 'Alpha Mod',
+                downloads_count: 1000,
+                score: 95.5,
+                latest_release: {
+                  version: '1.0.0',
+                  released_at: '2026-01-10T00:00:00Z',
+                  info_json: { factorio_version: '2.0' },
+                },
+              },
+              {
+                name: 'mod-beta',
+                title: 'Beta Mod',
+                downloads_count: 5000,
+                score: 12.0,
+                latest_release: {
+                  version: '1.0.0',
+                  released_at: '2026-02-01T00:00:00Z',
+                  info_json: { factorio_version: '2.0' },
+                },
+              },
+              {
+                name: 'mod-gamma',
+                title: 'Gamma Mod',
+                downloads_count: 2500,
+                score: 50.0,
+                latest_release: {
+                  version: '1.0.0',
+                  released_at: '2026-03-15T00:00:00Z',
+                  info_json: { factorio_version: '2.0' },
+                },
+              },
+            ],
+          }),
+      });
+
+      const byDownloads = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        sort: 'downloads',
+        limit: 10,
+      });
+      expect(byDownloads.results.map((r) => r.name)).toEqual([
+        'mod-beta',
+        'mod-gamma',
+        'mod-alpha',
+      ]);
+
+      const byUpdated = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        sort: 'updated',
+        limit: 10,
+      });
+      expect(byUpdated.results.map((r) => r.name)).toEqual([
+        'mod-gamma',
+        'mod-beta',
+        'mod-alpha',
+      ]);
+
+      const byTrending = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        sort: 'trending',
+        limit: 2,
+        page: 2,
+      });
+      expect(byTrending.total).toBe(3);
+      expect(byTrending.page).toBe(2);
+      expect(byTrending.pageSize).toBe(2);
+      expect(byTrending.totalPages).toBe(2);
+      expect(byTrending.results.map((r) => r.name)).toEqual(['mod-beta']);
+    });
+
+    it('fetchThumbnails resolves and caches mod thumbnails while ignoring placeholder', async () => {
+      const fetchMock = jest.fn().mockImplementation((url: string) => {
+        if (url.endsWith('/flib')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () =>
+              Promise.resolve({ thumbnail: '/assets/flib.thumb.png' }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ thumbnail: '/assets/.thumb.png' }),
+        });
+      });
+      globalThis.fetch = fetchMock;
+
+      const first = await service.fetchThumbnails(['flib', 'other-mod']);
+      expect(first).toEqual({
+        flib: '/assets/flib.thumb.png',
+        'other-mod': '',
+      });
+
+      const second = await service.fetchThumbnails(['flib', 'other-mod']);
+      expect(second).toEqual(first);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('fetches and toggles portal bookmarks using account credentials', async () => {
+      const fetchMock = jest
+        .fn()
+        .mockImplementation((url: string, init?: RequestInit) => {
+          if (url.includes('/api/bookmarks/toggle')) {
+            expect(init?.method).toBe('POST');
+            return Promise.resolve({
+              ok: true,
+              status: 200,
+              json: () => Promise.resolve({ ok: true }),
+            });
+          }
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve(['flib', { name: 'RateCalculator' }]),
+          });
+        });
+      globalThis.fetch = fetchMock;
+
+      const list = await service.fetchBookmarks('player1', 'tok1');
+      expect(list).toEqual(['flib', 'RateCalculator']);
+
+      const toggled = await service.toggleBookmark(
+        'player1',
+        'tok1',
+        'krastorio2',
+        true,
+      );
+      expect(toggled.bookmarked).toBe(true);
+      expect(toggled.bookmarks).toContain('krastorio2');
+    });
+
+    it('filters by owner and hideInstalled, supports forceRefresh, and normalizes fetchModDetails', async () => {
+      const fetchMock = jest.fn().mockImplementation((url: string) => {
+        if (url.endsWith('/flib/full')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () =>
+              Promise.resolve({
+                name: 'flib',
+                title: 'Factorio Library',
+                owner: 'raiguard',
+                summary: 'Utilities',
+                description: '# Heading\nSome **markdown**',
+                changelog:
+                  'Version: 0.15.0\nDate: 2026-01-01\n  Changes:\n    - Init',
+                faq: 'Q: Why?\nA: Useful.',
+                category: 'utilities',
+                tags: ['utilities'],
+                downloads_count: 500000,
+                thumbnail: '/assets/flib.png',
+                images: [
+                  {
+                    id: 'img1',
+                    url: 'https://assets-mod.factorio.com/assets/img1.png',
+                    thumbnail:
+                      'https://assets-mod.factorio.com/assets/img1.thumb.png',
+                  },
+                ],
+                license: {
+                  title: 'MIT',
+                  url: 'https://opensource.org/licenses/MIT',
+                },
+                releases: [
+                  {
+                    version: '0.15.0',
+                    released_at: '2026-01-01T00:00:00Z',
+                  },
+                ],
+              }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              results: [
+                {
+                  name: 'flib',
+                  title: 'Factorio Library',
+                  owner: 'raiguard',
+                  downloads_count: 500000,
+                  thumbnail: '/assets/flib.png',
+                  latest_release: {
+                    version: '0.15.0',
+                    released_at: '2026-01-01T00:00:00Z',
+                    info_json: { factorio_version: '2.0' },
+                  },
+                },
+                {
+                  name: 'space-exploration',
+                  title: 'Space Exploration',
+                  owner: 'Earendel',
+                  downloads_count: 900000,
+                  thumbnail: '/assets/se.png',
+                  latest_release: {
+                    version: '0.7.0',
+                    released_at: '2026-02-01T00:00:00Z',
+                    info_json: { factorio_version: '2.0' },
+                  },
+                },
+              ],
+            }),
+        });
+      });
+      globalThis.fetch = fetchMock;
+
+      const byOwner = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        owner: 'raiguard',
+      });
+      expect(byOwner.results.map((r) => r.name)).toEqual(['flib']);
+
+      const hiddenInstalled = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        hideInstalled: true,
+        installedNamesLower: new Set(['flib']),
+      });
+      expect(hiddenInstalled.results.map((r) => r.name)).toEqual([
+        'space-exploration',
+      ]);
+
+      const onlyInstalled = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        onlyInstalled: true,
+        installedNamesLower: new Set(['flib']),
+      });
+      expect(onlyInstalled.results.map((r) => r.name)).toEqual(['flib']);
+
+      const withExtraFilter = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        extraFilter: (item) => item.name === 'space-exploration',
+        collectAllNames: true,
+      });
+      expect(withExtraFilter.results.map((r) => r.name)).toEqual([
+        'space-exploration',
+      ]);
+      expect(withExtraFilter.allNames).toEqual(['space-exploration']);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      await service.searchMods('', {
+        gameVersion: '2.0.28',
+        forceRefresh: true,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      const details = await service.fetchModDetails('flib');
+      expect(details.title).toBe('Factorio Library');
+      expect(details.images).toHaveLength(1);
+      expect(details.license?.title).toBe('MIT');
+      expect(details.latest_version).toBe('0.15.0');
+    });
+  });
 });

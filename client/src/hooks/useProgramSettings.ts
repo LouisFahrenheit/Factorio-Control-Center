@@ -8,7 +8,11 @@ import { uploadWithProgress } from '../api/uploadWithProgress';
 import { notifyApiError } from '../lib/networkErrors';
 import { notifyOk } from '../lib/notify';
 import type { ProgramSettings } from '../types/programSettings';
-import { applyEffectiveTheme, getLocalThemeOverride, setProgramDefaultTheme } from '../theme/themes';
+import {
+  applyEffectiveTheme,
+  getLocalThemeOverride,
+  setProgramDefaultTheme,
+} from '../theme/themes';
 
 function localizeTlsError(err: string, t: (key: string) => string): string {
   const k = String(err || '').trim();
@@ -54,7 +58,12 @@ export function useProgramSettings(
   }, [draft.global_token, draft.global_username, savedToken, savedUsername]);
 
   const verifyQuery = useQuery({
-    queryKey: ['program', 'global-factorio-credentials-verify', savedUsername, savedToken],
+    queryKey: [
+      'program',
+      'global-factorio-credentials-verify',
+      savedUsername,
+      savedToken,
+    ],
     queryFn: () =>
       api<{ ok?: boolean; verified?: boolean; portal_username?: string }>(
         '/api/config/program/factorio-credentials-verify',
@@ -100,7 +109,10 @@ export function useProgramSettings(
 
   const setTlsEnabled = useCallback((enabled: boolean) => {
     setDraft((d) => {
-      const currentPort = Math.max(1, Math.min(65535, parseInt(String(d.listen_port ?? 8080), 10) || 8080));
+      const currentPort = Math.max(
+        1,
+        Math.min(65535, parseInt(String(d.listen_port ?? 8080), 10) || 8080),
+      );
       let nextPort = currentPort;
       if (enabled) {
         if (currentPort === 80) nextPort = 443;
@@ -133,7 +145,10 @@ export function useProgramSettings(
         await saveField({ auto_download_missing_startup_deps: checked });
         await qc.invalidateQueries({ queryKey: ['program', 'settings'] });
       } catch {
-        setDraft((d) => ({ ...d, auto_download_missing_startup_deps: !checked }));
+        setDraft((d) => ({
+          ...d,
+          auto_download_missing_startup_deps: !checked,
+        }));
       }
     },
     [qc, saveField],
@@ -181,7 +196,10 @@ export function useProgramSettings(
       try {
         await saveField({ require_unique_instance_game_ports: checked });
       } catch {
-        setDraft((d) => ({ ...d, require_unique_instance_game_ports: !checked }));
+        setDraft((d) => ({
+          ...d,
+          require_unique_instance_game_ports: !checked,
+        }));
       }
     },
     [saveField],
@@ -193,7 +211,10 @@ export function useProgramSettings(
       try {
         await saveField({ server_settings_default_public_off: checked });
       } catch {
-        setDraft((d) => ({ ...d, server_settings_default_public_off: !checked }));
+        setDraft((d) => ({
+          ...d,
+          server_settings_default_public_off: !checked,
+        }));
       }
     },
     [saveField],
@@ -201,11 +222,17 @@ export function useProgramSettings(
 
   const setServerSettingsApplyGlobalCredentials = useCallback(
     async (checked: boolean) => {
-      setDraft((d) => ({ ...d, server_settings_apply_global_credentials: checked }));
+      setDraft((d) => ({
+        ...d,
+        server_settings_apply_global_credentials: checked,
+      }));
       try {
         await saveField({ server_settings_apply_global_credentials: checked });
       } catch {
-        setDraft((d) => ({ ...d, server_settings_apply_global_credentials: !checked }));
+        setDraft((d) => ({
+          ...d,
+          server_settings_apply_global_credentials: !checked,
+        }));
       }
     },
     [saveField],
@@ -443,13 +470,19 @@ export function useProgramSettings(
   const saveFactorioCredentials = useCallback(async () => {
     const username = String(draft.global_username || '').trim();
     const token = String(draft.global_token || '').trim();
-    if (!username || !token) {
-      feedbackErr(t('instances_tab_settings'), t('program_factorio_credentials_incomplete'), t);
+    if ((username || token) && (!username || !token)) {
+      feedbackErr(
+        t('instances_tab_settings'),
+        t('program_factorio_credentials_incomplete'),
+        t,
+      );
       return;
     }
     try {
       await saveField({ global_username: username, global_token: token });
-      await qc.invalidateQueries({ queryKey: ['program', 'global-factorio-credentials-verify'] });
+      await qc.invalidateQueries({
+        queryKey: ['program', 'global-factorio-credentials-verify'],
+      });
       await qc.invalidateQueries({ queryKey: ['mods', 'list'] });
       notifyOk(
         t('instances_tab_settings'),
@@ -466,7 +499,8 @@ export function useProgramSettings(
     let public_port = '';
     if (publicPortRaw) {
       const n = parseInt(publicPortRaw, 10);
-      if (Number.isFinite(n)) public_port = String(Math.max(1, Math.min(65535, n)));
+      if (Number.isFinite(n))
+        public_port = String(Math.max(1, Math.min(65535, n)));
     }
     const patch = {
       tls_enabled: !!draft.tls_enabled,
@@ -474,14 +508,23 @@ export function useProgramSettings(
       tls_keyfile: String(draft.tls_keyfile || '').trim(),
       tls_key_password: String(draft.tls_key_password || ''),
       listen_host: String(draft.listen_host || '0.0.0.0').trim() || '0.0.0.0',
-      listen_port: Math.max(1, Math.min(65535, parseInt(String(draft.listen_port ?? 8080), 10) || 8080)),
+      listen_port: Math.max(
+        1,
+        Math.min(
+          65535,
+          parseInt(String(draft.listen_port ?? 8080), 10) || 8080,
+        ),
+      ),
       public_host: String(draft.public_host || '').trim(),
       public_port,
     };
     try {
       await saveField(patch);
       const line = t('web_panel_tls_web_saved_msg');
-      notifyOk(settingsTitle, line !== 'web_panel_tls_web_saved_msg' ? line : undefined);
+      notifyOk(
+        settingsTitle,
+        line !== 'web_panel_tls_web_saved_msg' ? line : undefined,
+      );
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       feedbackErr(settingsTitle, localizeTlsError(raw, t));
@@ -514,18 +557,22 @@ export function useProgramSettings(
   const uploadTlsFile = useCallback(
     async (kind: 'cert' | 'key', file: File) => {
       const settingsTitle = t('instances_tab_settings');
-      const uploadTitle = t('upload_progress_title_tls') || 'Загрузка TLS сертификата/ключа';
+      const uploadTitle =
+        t('upload_progress_title_tls') || 'Загрузка TLS сертификата/ключа';
       try {
-        const batchRes = await startUploadBatch<{ ok?: boolean; path?: string; error?: string }>(
-          uploadTitle,
-          [file],
-          async (f, signal, onProgress) => {
-            const fd = new FormData();
-            fd.append('file', f);
-            fd.append('kind', kind);
-            return await uploadWithProgress('/api/config/web-tls/upload', fd, { signal, onProgress });
-          },
-        );
+        const batchRes = await startUploadBatch<{
+          ok?: boolean;
+          path?: string;
+          error?: string;
+        }>(uploadTitle, [file], async (f, signal, onProgress) => {
+          const fd = new FormData();
+          fd.append('file', f);
+          fd.append('kind', kind);
+          return await uploadWithProgress('/api/config/web-tls/upload', fd, {
+            signal,
+            onProgress,
+          });
+        });
 
         if (batchRes.cancelled || !batchRes.results.length) return;
         if (batchRes.errors.length) throw batchRes.errors[0].error;
@@ -536,7 +583,10 @@ export function useProgramSettings(
           else patchDraft({ tls_keyfile: r.path });
           const p = r.path;
           const line = t('web_panel_tls_upload_done_msg', p);
-          notifyOk(settingsTitle, line !== 'web_panel_tls_upload_done_msg' ? line : p);
+          notifyOk(
+            settingsTitle,
+            line !== 'web_panel_tls_upload_done_msg' ? line : p,
+          );
         }
       } catch (e) {
         const raw = e instanceof Error ? e.message : String(e);
@@ -580,7 +630,13 @@ export function useProgramSettings(
 
   const languages = (() => {
     const langs = Array.isArray(draft.available_languages)
-      ? draft.available_languages.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)
+      ? draft.available_languages
+          .map((x) =>
+            String(x || '')
+              .trim()
+              .toLowerCase(),
+          )
+          .filter(Boolean)
       : [];
     return langs;
   })();
@@ -588,7 +644,8 @@ export function useProgramSettings(
   return {
     settings: draft,
     loading: query.isLoading,
-    verifyingFactorioCredentials: verifyQuery.isLoading || verifyQuery.isFetching,
+    verifyingFactorioCredentials:
+      verifyQuery.isLoading || verifyQuery.isFetching,
     verifiedGlobalPortalUsername,
     factorioCredentialsDirty,
     languages,

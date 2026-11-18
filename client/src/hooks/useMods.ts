@@ -1,27 +1,38 @@
-import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { modals } from '@mantine/modals';
 import { api, getToken } from '../api/client';
 import type { ModJobApi } from './useModJob';
 import {
   filterModRows,
-  maxInstalledModVersion,
   modsDefaultAscForColumn,
   parseModInput,
-  portalVersionNewer,
   sortModRows,
 } from '../lib/modUtils';
-import { localizeModError, modConfirm, modsNeedingGameLinesFromPlan, normalizeFactorioDisplayVersion } from '../lib/modErrorUtils';
+import {
+  localizeModError,
+  modConfirm,
+  modsNeedingGameLinesFromPlan,
+  normalizeFactorioDisplayVersion,
+} from '../lib/modErrorUtils';
 import { openModGameVersionConfirm } from '../lib/modGameVersionConfirm';
 import { modDepsConfirm, modDepsUploadChoice } from '../lib/modDepsConfirm';
 import { openModUpdateAllFlow } from '../lib/modUpdateAllFlow';
-import { installConflictsFromPlan, mergeInstallConflicts } from '../lib/modConflictUtils';
+import {
+  installConflictsFromPlan,
+  mergeInstallConflicts,
+} from '../lib/modConflictUtils';
 import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import { feedbackMsg } from '../lib/apiFeedback';
-import { notifyErr, notifyOk, notifyWarn } from '../lib/notify';
-import { modsArchiveDownloadName, parseContentDispositionFilename } from '../lib/downloadFilename';
+import {
+  modsArchiveDownloadName,
+  parseContentDispositionFilename,
+} from '../lib/downloadFilename';
 import { useUploadProgress } from '../context/UploadProgressContext';
-import { uploadWithProgress, type UploadProgressInfo } from '../api/uploadWithProgress';
+import {
+  uploadWithProgress,
+  type UploadProgressInfo,
+} from '../api/uploadWithProgress';
+import { downloadWithProgress } from '../api/downloadWithProgress';
 import {
   invalidateSpaceAgeDependentQueries,
   modAffectsSpaceAgeMode,
@@ -29,9 +40,18 @@ import {
 import { resolveStatusKind, type PanelStatus } from '../types/panel';
 import type { ModRow, ModSortColumn } from '../types/mods';
 import type { ModInstallConflictInfo } from '../types/modConflict';
+
+export type ModCardTab = 'description' | 'dependencies' | 'changelog' | 'faq';
+
+/** Request to open the install modal directly on a specific mod card tab. */
+export interface ModCardRequest {
+  name: string;
+  title: string;
+  tab: ModCardTab;
+  nonce: number;
+}
 import type {
   ModCheckResultEntry,
-  ModCheckStatus,
   ModInstallPlan,
   ModSavePreview,
   ModSavePreviewMod,
@@ -45,6 +65,7 @@ interface ModsResponse {
   remove_old_zips?: boolean;
   active_modpack?: string;
   portal_username?: string;
+  portal_username_source?: string;
 }
 
 interface FromSaveState {
@@ -56,7 +77,10 @@ interface FromSaveState {
   preparing: boolean;
 }
 
-async function downloadBlob(url: string, fallbackName: string): Promise<string> {
+async function downloadBlob(
+  url: string,
+  fallbackName: string,
+): Promise<string> {
   const headers: Record<string, string> = {};
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -77,62 +101,8 @@ async function downloadBlob(url: string, fallbackName: string): Promise<string> 
   return outName;
 }
 
-function countAvailableModUpdates(rows: ModRow[], results: Record<string, ModCheckResultEntry>): number {
-  let count = 0;
-  for (const m of rows) {
-    if (!m || m.is_builtin) continue;
-    const name = String(m.name || '');
-    if (!name) continue;
-    const r = results[name];
-    if (!r?.ok || !r.version) continue;
-    if (portalVersionNewer(String(r.version || ''), maxInstalledModVersion(m))) count += 1;
-  }
-  return count;
-}
-
 function modListHasPortalMods(rows: ModRow[]): boolean {
   return rows.some((m) => m && !m.is_builtin);
-}
-
-function isIgnoredCheckError(error?: string): boolean {
-  const err = String(error || '').toLowerCase();
-  return (
-    err === 'http_404' ||
-    err === 'not_found' ||
-    err === 'no_release' ||
-    err === 'builtin'
-  );
-}
-
-/** Automatic portal check at most once per 24h per instance (localStorage). */
-const MODS_PORTAL_CHECK_PERIOD_MS = 24 * 60 * 60 * 1000;
-const MODS_PORTAL_CHECK_TS_PREFIX = 'fcc_mods_portal_check_ts:';
-
-function modsPortalCheckStorageKey(instanceId: string): string {
-  return `${MODS_PORTAL_CHECK_TS_PREFIX}${String(instanceId || '').trim()}`;
-}
-
-function modsPortalDailyCheckDue(instanceId: string): boolean {
-  const iid = String(instanceId || '').trim();
-  if (!iid) return false;
-  try {
-    const raw = String(localStorage.getItem(modsPortalCheckStorageKey(iid)) || '').trim();
-    const last = parseInt(raw, 10);
-    if (!Number.isFinite(last) || last <= 0) return true;
-    return Date.now() - last >= MODS_PORTAL_CHECK_PERIOD_MS;
-  } catch {
-    return true;
-  }
-}
-
-function modsPortalDailyCheckMarkNow(instanceId: string): void {
-  const iid = String(instanceId || '').trim();
-  if (!iid) return;
-  try {
-    localStorage.setItem(modsPortalCheckStorageKey(iid), String(Date.now()));
-  } catch {
-    /* ignore */
-  }
 }
 
 export function useMods(
@@ -152,14 +122,22 @@ export function useMods(
   const [removeOldZips, setRemoveOldZips] = useState(true);
   const [installInput, setInstallInput] = useState('');
   const [installBlink, setInstallBlink] = useState(false);
+  const [installModalOpen, setInstallModalOpen] = useState(false);
+  const [modCardRequest, setModCardRequest] = useState<ModCardRequest | null>(
+    null,
+  );
+  /** Timestamp of a pending request to open the install modal in updates mode. */
+  const [updatesModeRequest, setUpdatesModeRequest] = useState<number | null>(
+    null,
+  );
   const [portalVersionsModalOpen, setPortalVersionsModalOpen] = useState(false);
   const [portalVersionsModalMod, setPortalVersionsModalMod] = useState('');
-  const [checkResults, setCheckResults] = useState<Record<string, ModCheckResultEntry>>({});
-  const [modsCheckRunning, setModsCheckRunning] = useState(false);
-  const [fromSaveState, setFromSaveState] = useState<FromSaveState | null>(null);
-  const checkPollRef = useRef<number | null>(null);
-  const autoCheckRunningRef = useRef(false);
-  const checkIsManualRef = useRef(false);
+  const [checkResults, setCheckResults] = useState<
+    Record<string, ModCheckResultEntry>
+  >({});
+  const [fromSaveState, setFromSaveState] = useState<FromSaveState | null>(
+    null,
+  );
 
   const openVersionPicker = useCallback(
     (modName?: string) => {
@@ -182,10 +160,26 @@ export function useMods(
     setPortalVersionsModalMod('');
   }, []);
 
+  const openInstallModal = useCallback(() => {
+    setInstallModalOpen(true);
+  }, []);
+
+  const closeInstallModal = useCallback(() => {
+    setInstallModalOpen(false);
+    setModCardRequest(null);
+    setUpdatesModeRequest(null);
+  }, []);
+
   const kind = resolveStatusKind(status);
-  const serverProcessBusy = kind === 'running' || kind === 'starting' || kind === 'stopping';
+  const serverProcessBusy =
+    kind === 'running' || kind === 'starting' || kind === 'stopping';
   const serverBusy = serverProcessBusy || kind === 'maintenance';
-  const { startUploadBatch } = useUploadProgress();
+  const { startUploadBatch, startDownload } = useUploadProgress();
+  const [downloadAllConfirmOpen, setDownloadAllConfirmOpen] = useState(false);
+  const [downloadAllIncludeDisabled, setDownloadAllIncludeDisabled] =
+    useState(true);
+  const [downloadAllIncludeSettings, setDownloadAllIncludeSettings] =
+    useState(true);
 
   const query = useQuery({
     queryKey: ['mods', 'list', instanceId],
@@ -193,7 +187,10 @@ export function useMods(
     enabled: enabled && !!instanceId,
   });
 
-  const rawRows = useMemo(() => (Array.isArray(query.data?.mods) ? query.data.mods : []), [query.data]);
+  const rawRows = useMemo(
+    () => (Array.isArray(query.data?.mods) ? query.data.mods : []),
+    [query.data],
+  );
   const hasPortalMods = useMemo(() => modListHasPortalMods(rawRows), [rawRows]);
   const allNonBuiltinDisabled = useMemo(() => {
     const nonBuiltin = rawRows.filter((m) => m && !m.is_builtin);
@@ -216,6 +213,9 @@ export function useMods(
   const listOrder = useMemo(() => rawRows.map((x) => x.name), [rawRows]);
   const activeModpack = String(query.data?.active_modpack || '').trim();
   const portalUsername = String(query.data?.portal_username || '').trim();
+  const portalUsernameSource = String(
+    query.data?.portal_username_source || '',
+  ).trim();
 
   useEffect(() => {
     if (typeof query.data?.remove_old_zips === 'boolean') {
@@ -232,12 +232,6 @@ export function useMods(
       setSelectedMod('');
     }
   }, [rawRows, selectedMod]);
-
-  useEffect(() => {
-    return () => {
-      if (checkPollRef.current) window.clearInterval(checkPollRef.current);
-    };
-  }, []);
 
   const rows = useMemo(() => {
     const sorted = sortModRows(displayRows, listOrder, sortColumn, sortAsc);
@@ -273,23 +267,35 @@ export function useMods(
   );
 
   const confirmPortalGameVersion = useCallback(
-    async (modNames: string[]): Promise<{ ok: boolean; allow_requires_game_update: boolean }> => {
-      const mods = Array.from(new Set(modNames.map((x) => String(x || '').trim()).filter(Boolean)));
+    async (
+      modNames: string[],
+    ): Promise<{ ok: boolean; allow_requires_game_update: boolean }> => {
+      const mods = Array.from(
+        new Set(modNames.map((x) => String(x || '').trim()).filter(Boolean)),
+      );
       if (!mods.length) return { ok: true, allow_requires_game_update: false };
       try {
-        const batch = await api<ModInstallPlan>('/api/mods/install-plan-batch', {
-          method: 'POST',
-          body: JSON.stringify({ mods }),
-        });
-        if (!batch || batch.ok === false) return { ok: true, allow_requires_game_update: false };
-        if (!batch.requires_game_update_confirmation) return { ok: true, allow_requires_game_update: false };
+        const batch = await api<ModInstallPlan>(
+          '/api/mods/install-plan-batch',
+          {
+            method: 'POST',
+            body: JSON.stringify({ mods }),
+          },
+        );
+        if (!batch || batch.ok === false)
+          return { ok: true, allow_requires_game_update: false };
+        if (!batch.requires_game_update_confirmation)
+          return { ok: true, allow_requires_game_update: false };
         const flow = await openModGameVersionConfirm(t, {
           title: t('mod_install_requires_newer_game_title'),
           gameVersion: String(batch.game_version || '').trim() || '—',
           modLines: modsNeedingGameLinesFromPlan(batch),
         });
         if (!flow.ok) return { ok: false, allow_requires_game_update: false };
-        return { ok: true, allow_requires_game_update: flow.allow_requires_game_update };
+        return {
+          ok: true,
+          allow_requires_game_update: flow.allow_requires_game_update,
+        };
       } catch {
         return { ok: true, allow_requires_game_update: false };
       }
@@ -297,132 +303,24 @@ export function useMods(
     [t],
   );
 
-  const pollModsCheck = useCallback(async () => {
-    try {
-      const st = await api<ModCheckStatus>('/api/mods/check-updates');
-      const running = !!st?.running;
-      setModsCheckRunning(running);
-      if (st?.results) setCheckResults(st.results);
-      const total = Number(st?.total || 0);
-      if (running) {
-        return;
-      }
-      if (checkPollRef.current) {
-        window.clearInterval(checkPollRef.current);
-        checkPollRef.current = null;
-      }
-      const checkTitle = t('mod_list_check_result_title');
-      const err = st?.error ? String(st.error) : '';
-      const isManual = checkIsManualRef.current;
-      if (err) {
-        notifyErr(checkTitle, err);
-      } else if (total > 0) {
-        let failed = Number(st?.failed || 0);
-        if (st?.results) {
-          failed = Object.values(st.results).filter((r) => !r.ok && !isIgnoredCheckError(r.error)).length;
-        }
-        const updates = countAvailableModUpdates(rawRows, st?.results || {});
-        if (failed > 0) {
-          notifyWarn(
-            checkTitle,
-            t('mod_list_check_result_summary', String(total), String(updates), String(failed)),
-          );
-        } else if (updates > 0) {
-          notifyOk(
-            checkTitle,
-            t('mod_list_check_result_updates_only', String(updates), String(total)),
-          );
-        } else if (isManual) {
-          notifyOk(checkTitle, t('mod_list_check_all_up_to_date', String(total)));
-        }
-      }
-    } catch (e) {
-      setModsCheckRunning(false);
-      if (checkPollRef.current) {
-        window.clearInterval(checkPollRef.current);
-        checkPollRef.current = null;
-      }
-      const checkTitle = t('mod_list_check_result_title');
-      notifyErr(checkTitle, e instanceof Error ? e.message : String(e));
-    }
-  }, [rawRows, t]);
-
-  const startModsCheckPolling = useCallback(() => {
-    if (checkPollRef.current) window.clearInterval(checkPollRef.current);
-    checkPollRef.current = window.setInterval(() => {
-      void pollModsCheck();
-    }, 500);
-    void pollModsCheck();
-  }, [pollModsCheck]);
-
-  const checkUpdates = useCallback(
-    async (manual = true) => {
-      if (!manual && blockUpdates) return;
-      if (!modListHasPortalMods(rawRows)) {
-        if (!manual) modsPortalDailyCheckMarkNow(instanceId);
-        return;
-      }
-      checkIsManualRef.current = manual;
-      if (modsCheckRunning) {
-        startModsCheckPolling();
-        return;
-      }
-      if (rawRows.length) {
-        setCheckResults((prev) => {
-          const out = { ...prev };
-          for (const m of rawRows) {
-            if (!m.is_builtin) out[m.name] = { ok: true, version: '…' };
+  const applyPortalVersions = useCallback(
+    (versions: Record<string, string>) => {
+      const entries = Object.entries(versions);
+      if (!entries.length) return;
+      setCheckResults((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const [name, version] of entries) {
+          if (name && version && prev[name]?.version !== version) {
+            next[name] = { ok: true, version };
+            changed = true;
           }
-          return out;
-        });
-      }
-      try {
-        const j = await api<{ ok?: boolean; error?: string; started?: boolean; reason?: string }>(
-          '/api/mods/check-updates',
-          { method: 'POST', body: JSON.stringify({ ignoreBlockUpdates: manual }) },
-        );
-        if (!j?.ok) throw new Error(String(j?.error || j?.reason || 'check failed'));
-        const running = j.started === false && j.reason === 'already_running' ? true : !!j.started;
-        setModsCheckRunning(running);
-        if (running) {
-          startModsCheckPolling();
         }
-        if (
-          !manual &&
-          j?.ok &&
-          (running || j.reason === 'no_portal_mods' || j.reason === 'updates_blocked_by_instance_setting')
-        ) {
-          modsPortalDailyCheckMarkNow(instanceId);
-        }
-      } catch (e) {
-        setModsCheckRunning(false);
-        const checkTitle = t('mod_list_check_result_title');
-        notifyErr(checkTitle, localizeModError(e instanceof Error ? e.message : String(e), undefined, t));
-      }
+        return changed ? next : prev;
+      });
     },
-    [blockUpdates, instanceId, modsCheckRunning, rawRows, startModsCheckPolling, t],
+    [],
   );
-
-  useEffect(() => {
-    const iid = String(instanceId || '').trim();
-    if (!enabled || !iid || blockUpdates) return;
-    if (query.isLoading || query.isFetching) return;
-    if (!modListHasPortalMods(rawRows)) return;
-    if (!modsPortalDailyCheckDue(iid)) return;
-    if (autoCheckRunningRef.current) return;
-    autoCheckRunningRef.current = true;
-    void checkUpdates(false).finally(() => {
-      autoCheckRunningRef.current = false;
-    });
-  }, [
-    enabled,
-    instanceId,
-    blockUpdates,
-    query.isLoading,
-    query.isFetching,
-    rawRows,
-    checkUpdates,
-  ]);
 
   const installFromUrl = useCallback(
     async (rawModUrl?: string, overrideVersion?: string) => {
@@ -450,19 +348,28 @@ export function useMods(
           modJob.close();
           const code = String(plan.error || 'install_plan_failed');
           if (code === 'requires_space_age') {
-            setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
+            setModsMsg(
+              t('mod_requires_space_age', String(plan.mod || '').trim() || '?'),
+              true,
+            );
             return;
           }
           throw new Error(code);
         }
         const deps = Array.isArray(plan?.dependencies) ? plan.dependencies : [];
         const conflicts = installConflictsFromPlan(plan);
-        const recommended = Array.isArray(plan?.recommended) ? plan.recommended : [];
+        const recommended = Array.isArray(plan?.recommended)
+          ? plan.recommended
+          : [];
         const titles = plan?.titles;
         let checkedRecommended: string[] = [];
         if (deps.length || conflicts.length || recommended.length) {
           modJob.close();
-          const res = await modDepsConfirm(deps, 'install', t, { conflicts, recommended, titles });
+          const res = await modDepsConfirm(deps, 'install', t, {
+            conflicts,
+            recommended,
+            titles,
+          });
           if (!res.confirmed) return;
           checkedRecommended = res.recommendedToInstall || [];
         }
@@ -480,7 +387,10 @@ export function useMods(
         setInstallInput('');
         if (checkedRecommended.length > 0) {
           await modJob.start('/api/mods/job/start-install-save', {
-            mods: [targetVersion ? `${mod}@${targetVersion}` : mod, ...checkedRecommended],
+            mods: [
+              targetVersion ? `${mod}@${targetVersion}` : mod,
+              ...checkedRecommended,
+            ],
             remove_old_zips: removeOldZips,
             allow_requires_game_update: allowRg,
           });
@@ -494,7 +404,14 @@ export function useMods(
         }
       } catch (e) {
         modJob.close();
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
       }
     },
     [installInput, modJob, removeOldZips, serverBusy, setModsMsg, t],
@@ -511,7 +428,8 @@ export function useMods(
       const skipped: string[] = [];
       for (const f of files) {
         const lowerName = String(f.name || '').toLowerCase();
-        const isSettings = lowerName === 'mod-settings.dat' || lowerName.endsWith('.dat');
+        const isSettings =
+          lowerName === 'mod-settings.dat' || lowerName.endsWith('.dat');
         const isZip = lowerName.endsWith('.zip');
         if (!isSettings && !isZip) {
           skipped.push(f.name || '—');
@@ -531,11 +449,21 @@ export function useMods(
         onProgress: (p: UploadProgressInfo) => void,
       ) {
         const fd = new FormData();
-        fd.append('file', entry.f, entry.f.name || (entry.isSettings ? 'mod-settings.dat' : 'mod.zip'));
+        fd.append(
+          'file',
+          entry.f,
+          entry.f.name || (entry.isSettings ? 'mod-settings.dat' : 'mod.zip'),
+        );
         if (confirmReplace) fd.append('confirm_replace', '1');
-        const res = await uploadWithProgress<ModUploadResponse>('/api/mods/upload', fd, { signal, onProgress });
+        const res = await uploadWithProgress<ModUploadResponse>(
+          '/api/mods/upload',
+          fd,
+          { signal, onProgress },
+        );
         if (res && res.ok === false) {
-          const err = new Error(String(res.error || 'mod_upload_failed')) as Error & {
+          const err = new Error(
+            String(res.error || 'mod_upload_failed'),
+          ) as Error & {
             code?: string;
             requiresSpaceAgeMod?: string;
           };
@@ -568,11 +496,28 @@ export function useMods(
             const entry = prepared[index];
             let j: ModUploadResponse;
             try {
-              j = await sendOne(entry, !!(entry.isSettings && settingsBatchReplace), signal, onProgress);
+              j = await sendOne(
+                entry,
+                !!(entry.isSettings && settingsBatchReplace),
+                signal,
+                onProgress,
+              );
             } catch (e) {
-              const err = e as Error & { code?: string; requiresSpaceAgeMod?: string };
-              if (err.code === 'mod_settings_exists' && entry.isSettings && !settingsBatchReplace) {
-                if (!(await modConfirm(t('mod_list_upload_settings_replace_confirm'), t))) {
+              const err = e as Error & {
+                code?: string;
+                requiresSpaceAgeMod?: string;
+              };
+              if (
+                err.code === 'mod_settings_exists' &&
+                entry.isSettings &&
+                !settingsBatchReplace
+              ) {
+                if (
+                  !(await modConfirm(
+                    t('mod_list_upload_settings_replace_confirm'),
+                    t,
+                  ))
+                ) {
                   throw err;
                 }
                 settingsBatchReplace = true;
@@ -597,24 +542,38 @@ export function useMods(
         );
 
         if (batchRes.cancelled) {
-          setModsMsg(t('upload_progress_cancelled') || 'Загрузка отменена', false);
+          setModsMsg(
+            t('upload_progress_cancelled') || 'Загрузка отменена',
+            false,
+          );
           await reload();
           return;
         }
 
         if (anyZipOk) {
           await reload();
-          const existingNames = new Set(rawRows.map((m) => String(m.name || '').trim()).filter(Boolean));
+          const existingNames = new Set(
+            rawRows.map((m) => String(m.name || '').trim()).filter(Boolean),
+          );
           const missingDeps = Array.from(uploadedDeps)
             .map((d) => String(d || '').trim())
-            .filter((d) => d && !uploadedModNames.has(d) && !existingNames.has(d));
+            .filter(
+              (d) => d && !uploadedModNames.has(d) && !existingNames.has(d),
+            );
           const conflictList = Array.from(uploadedConflicts.values());
           if (missingDeps.length || conflictList.length) {
-            const choice = await modDepsUploadChoice(missingDeps, t, conflictList);
+            const choice = await modDepsUploadChoice(
+              missingDeps,
+              t,
+              conflictList,
+            );
             if (choice !== 'download' && choice !== 'as_is') {
               for (const name of uploadedModNames) {
                 try {
-                  await api('/api/mods/remove', { method: 'POST', body: JSON.stringify({ name }) });
+                  await api('/api/mods/remove', {
+                    method: 'POST',
+                    body: JSON.stringify({ name }),
+                  });
                 } catch {
                   /* ignore per-mod remove errors */
                 }
@@ -623,7 +582,9 @@ export function useMods(
               setModsMsg(t('mod_list_upload_missing_deps_cancelled'), false);
               return;
             }
-            const conflictsToDisable = conflictList.map((c) => c.name).filter(Boolean);
+            const conflictsToDisable = conflictList
+              .map((c) => c.name)
+              .filter(Boolean);
             if (conflictsToDisable.length) {
               await api('/api/mods/disable-conflicts', {
                 method: 'POST',
@@ -643,17 +604,25 @@ export function useMods(
           }
         }
 
-        const tail = skipped.length ? ' ' + t('mod_list_upload_skipped_warn', skipped.join(', ')) : '';
+        const tail = skipped.length
+          ? ' ' + t('mod_list_upload_skipped_warn', skipped.join(', '))
+          : '';
         if (batchRes.errors.length) {
           // Errors are displayed directly in the upload progress modal window (UploadProgressModal),
           // which remains open upon error. Avoid spamming redundant toasts.
           if (skipped.length) {
-            setModsMsg(t('mod_list_upload_skipped_warn', skipped.join(', ')), true);
+            setModsMsg(
+              t('mod_list_upload_skipped_warn', skipped.join(', ')),
+              true,
+            );
           }
           return;
         }
         if (multi) {
-          setModsMsg(t('mod_list_upload_batch_all_ok', String(prepared.length)) + tail, false);
+          setModsMsg(
+            t('mod_list_upload_batch_all_ok', String(prepared.length)) + tail,
+            false,
+          );
         } else {
           const only = prepared[0];
           const uploadRes = lastUploadResult as ModUploadResponse | null;
@@ -665,15 +634,33 @@ export function useMods(
           }
         }
       } catch (e) {
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
       }
     },
-    [confirmPortalGameVersion, modJob, rawRows, reload, removeOldZips, setModsMsg, startUploadBatch, t],
+    [
+      confirmPortalGameVersion,
+      modJob,
+      rawRows,
+      reload,
+      removeOldZips,
+      setModsMsg,
+      startUploadBatch,
+      t,
+    ],
   );
 
   const previewFromSave = useCallback(
     async (file: File) => {
-      const title = t('upload_progress_title_save_preview') || 'Загрузка сохранения для проверки модов';
+      const title =
+        t('upload_progress_title_save_preview') ||
+        'Загрузка сохранения для проверки модов';
       try {
         const batchRes = await startUploadBatch(
           title,
@@ -681,10 +668,14 @@ export function useMods(
           async (f, signal, onProgress) => {
             const fd = new FormData();
             fd.append('file', f, f.name || 'save.zip');
-            return await uploadWithProgress<ModSavePreview>('/api/mods/import-save/preview', fd, {
-              signal,
-              onProgress,
-            });
+            return await uploadWithProgress<ModSavePreview>(
+              '/api/mods/import-save/preview',
+              fd,
+              {
+                signal,
+                onProgress,
+              },
+            );
           },
         );
 
@@ -702,7 +693,14 @@ export function useMods(
           preparing: false,
         });
       } catch (e) {
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
       }
     },
     [setModsMsg, startUploadBatch, t],
@@ -720,7 +718,10 @@ export function useMods(
       .map((m) => String(m.name || '').trim())
       .filter(Boolean);
     if (!names.length) {
-      setFromSaveState({ ...st, error: t('mods_from_save_nothing_to_download') });
+      setFromSaveState({
+        ...st,
+        error: t('mods_from_save_nothing_to_download'),
+      });
       return;
     }
     setFromSaveState({ ...st, preparing: true, error: '' });
@@ -737,7 +738,14 @@ export function useMods(
       remove_old_zips: removeOldZips,
       allow_requires_game_update: gvOk.allow_requires_game_update,
     });
-  }, [closeFromSaveDialog, confirmPortalGameVersion, fromSaveState, modJob, removeOldZips, t]);
+  }, [
+    closeFromSaveDialog,
+    confirmPortalGameVersion,
+    fromSaveState,
+    modJob,
+    removeOldZips,
+    t,
+  ]);
 
   const updateSelected = useCallback(
     async (name: string, overrideVersion?: string) => {
@@ -760,13 +768,18 @@ export function useMods(
           modJob.close();
           const code = String(plan.error || 'install_plan_failed');
           if (code === 'requires_space_age') {
-            setModsMsg(t('mod_requires_space_age', String(plan.mod || '').trim() || '?'), true);
+            setModsMsg(
+              t('mod_requires_space_age', String(plan.mod || '').trim() || '?'),
+              true,
+            );
             return;
           }
           throw new Error(code);
         }
         const rootMod = String(plan?.mod || name).trim();
-        const toInstall = Array.isArray(plan?.to_install) ? plan.to_install : [];
+        const toInstall = Array.isArray(plan?.to_install)
+          ? plan.to_install
+          : [];
         const depsToInstall = toInstall.filter((x) => {
           const n = String(x?.name || '').trim();
           return n && n !== rootMod;
@@ -778,12 +791,21 @@ export function useMods(
             .filter(Boolean);
           const conflicts = installConflictsFromPlan(plan);
           modJob.close();
-          if (!(await modDepsConfirm(depNames, 'update', t, { conflicts, titles })).confirmed) return;
+          if (
+            !(
+              await modDepsConfirm(depNames, 'update', t, { conflicts, titles })
+            ).confirmed
+          )
+            return;
         } else {
           const conflicts = installConflictsFromPlan(plan);
           if (conflicts.length) {
             modJob.close();
-            if (!(await modDepsConfirm([], 'update', t, { conflicts, titles })).confirmed) return;
+            if (
+              !(await modDepsConfirm([], 'update', t, { conflicts, titles }))
+                .confirmed
+            )
+              return;
           }
         }
         let allowRg = false;
@@ -805,10 +827,84 @@ export function useMods(
         });
       } catch (e) {
         modJob.close();
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
       }
     },
     [blockUpdates, modJob, removeOldZips, serverBusy, setModsMsg, t],
+  );
+
+  /** Updates several mods in one job; a single name goes through the regular update flow. */
+  const updateMany = useCallback(
+    async (names: string[]) => {
+      const list = Array.from(
+        new Set(names.map((n) => n.trim()).filter(Boolean)),
+      );
+      if (list.length === 0) return;
+      if (list.length === 1) {
+        await updateSelected(list[0] as string);
+        return;
+      }
+      if (serverBusy) {
+        setModsMsg(t('server_running_mutate_blocked'), true);
+        return;
+      }
+      if (blockUpdates) {
+        setModsMsg(t('updates_blocked_by_instance_setting'), true);
+        return;
+      }
+      modJob.openPreparing(t('mod_job_phase_collecting_deps'));
+      try {
+        const plan = await api<ModInstallPlan>('/api/mods/install-plan-batch', {
+          method: 'POST',
+          body: JSON.stringify({ mods: list }),
+        });
+        if (plan?.ok === false) {
+          throw new Error(String(plan.error || 'install_plan_failed'));
+        }
+        let allowRg = false;
+        if (plan?.requires_game_update_confirmation) {
+          modJob.close();
+          const flow = await openModGameVersionConfirm(t, {
+            title: t('mod_update_requires_newer_game_title'),
+            gameVersion: String(plan.game_version || '').trim() || '—',
+            modLines: modsNeedingGameLinesFromPlan(plan),
+          });
+          if (!flow.ok) return;
+          allowRg = flow.allow_requires_game_update;
+        }
+        await modJob.start('/api/mods/job/start-install-save', {
+          mods: list,
+          remove_old_zips: removeOldZips,
+          allow_requires_game_update: allowRg,
+        });
+      } catch (e) {
+        modJob.close();
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
+      }
+    },
+    [
+      blockUpdates,
+      modJob,
+      removeOldZips,
+      serverBusy,
+      setModsMsg,
+      t,
+      updateSelected,
+    ],
   );
 
   const updateAll = useCallback(async () => {
@@ -821,14 +917,23 @@ export function useMods(
       return;
     }
     try {
-      const flow = await openModUpdateAllFlow(t, () => api<ModInstallPlan>('/api/mods/update-all-plan'));
+      const flow = await openModUpdateAllFlow(t, () =>
+        api<ModInstallPlan>('/api/mods/update-all-plan'),
+      );
       if (!flow.ok) return;
       await modJob.start('/api/mods/job/start-update-all', {
         remove_old_zips: removeOldZips,
         allow_requires_game_update: flow.allow_requires_game_update,
       });
     } catch (e) {
-      setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+      setModsMsg(
+        localizeModError(
+          e instanceof Error ? e.message : String(e),
+          undefined,
+          t,
+        ),
+        true,
+      );
     }
   }, [blockUpdates, modJob, removeOldZips, serverBusy, setModsMsg, t]);
 
@@ -858,10 +963,13 @@ export function useMods(
         };
       });
       try {
-        const j = await api<{ ok?: boolean; error?: string }>('/api/mods/toggle', {
-          method: 'POST',
-          body: JSON.stringify({ name, enabled: enabledNext }),
-        });
+        const j = await api<{ ok?: boolean; error?: string }>(
+          '/api/mods/toggle',
+          {
+            method: 'POST',
+            body: JSON.stringify({ name, enabled: enabledNext }),
+          },
+        );
         if (!j?.ok) throw new Error(String(j?.error || 'toggle_failed'));
         await reload();
         void qc.invalidateQueries({ queryKey: ['players'] });
@@ -871,7 +979,14 @@ export function useMods(
       } catch (e) {
         if (prev) qc.setQueryData(queryKey, prev);
         else await reload();
-        setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+        setModsMsg(
+          localizeModError(
+            e instanceof Error ? e.message : String(e),
+            undefined,
+            t,
+          ),
+          true,
+        );
       }
     },
     [instanceId, qc, reload, serverProcessBusy, setModsMsg, t],
@@ -890,14 +1005,19 @@ export function useMods(
       if (!old?.mods) return old;
       return {
         ...old,
-        mods: old.mods.map((m) => (m.is_builtin ? m : { ...m, enabled: enabledNext })),
+        mods: old.mods.map((m) =>
+          m.is_builtin ? m : { ...m, enabled: enabledNext },
+        ),
       };
     });
     try {
-      const j = await api<{ ok?: boolean; error?: string; changed?: number }>('/api/mods/toggle-all', {
-        method: 'POST',
-        body: JSON.stringify({ enabled: enabledNext }),
-      });
+      const j = await api<{ ok?: boolean; error?: string; changed?: number }>(
+        '/api/mods/toggle-all',
+        {
+          method: 'POST',
+          body: JSON.stringify({ enabled: enabledNext }),
+        },
+      );
       if (!j?.ok) throw new Error(String(j?.error || 'toggle_all_failed'));
       await reload();
       void qc.invalidateQueries({ queryKey: ['players'] });
@@ -913,9 +1033,25 @@ export function useMods(
     } catch (e) {
       if (prev) qc.setQueryData(queryKey, prev);
       else await reload();
-      setModsMsg(localizeModError(e instanceof Error ? e.message : String(e), undefined, t), true);
+      setModsMsg(
+        localizeModError(
+          e instanceof Error ? e.message : String(e),
+          undefined,
+          t,
+        ),
+        true,
+      );
     }
-  }, [allNonBuiltinDisabled, hasPortalMods, instanceId, qc, reload, serverProcessBusy, setModsMsg, t]);
+  }, [
+    allNonBuiltinDisabled,
+    hasPortalMods,
+    instanceId,
+    qc,
+    reload,
+    serverProcessBusy,
+    setModsMsg,
+    t,
+  ]);
 
   const setVersion = useCallback(
     async (name: string, version: string) => {
@@ -929,7 +1065,10 @@ export function useMods(
         await reload();
         return;
       }
-      await api('/api/mods/version', { method: 'POST', body: JSON.stringify({ name, version }) });
+      await api('/api/mods/version', {
+        method: 'POST',
+        body: JSON.stringify({ name, version }),
+      });
       setModsMsg(t('updated_successfully'), false);
       await reload();
     },
@@ -938,7 +1077,10 @@ export function useMods(
 
   const setRemoveOldZipsPref = useCallback(async (checked: boolean) => {
     setRemoveOldZips(checked);
-    await api('/api/mods/prefs', { method: 'PUT', body: JSON.stringify({ remove_old_zips: checked }) });
+    await api('/api/mods/prefs', {
+      method: 'PUT',
+      body: JSON.stringify({ remove_old_zips: checked }),
+    });
   }, []);
 
   const downloadMod = useCallback(
@@ -948,17 +1090,72 @@ export function useMods(
         setModsMsg(t('mod_list_cannot_download_builtin'), true);
         return;
       }
-      await downloadBlob(`/api/mods/${encodeURIComponent(name)}/download`, `${name}.zip`);
+      await downloadBlob(
+        `/api/mods/${encodeURIComponent(name)}/download`,
+        `${name}.zip`,
+      );
       setModsMsg(t('mod_list_download_ok', name), false);
     },
     [rawRows, setModsMsg, t],
   );
 
+  const downloadAllArchiveName = useMemo(
+    () => modsArchiveDownloadName(instanceName),
+    [instanceName],
+  );
+
+  const downloadAllModsCount = useMemo(
+    () =>
+      rawRows.filter(
+        (r) =>
+          !r.is_builtin && (downloadAllIncludeDisabled || r.enabled !== false),
+      ).length,
+    [downloadAllIncludeDisabled, rawRows],
+  );
+
+  const openDownloadAllDialog = useCallback(() => {
+    setDownloadAllConfirmOpen(true);
+  }, []);
+
+  const closeDownloadAllDialog = useCallback(() => {
+    setDownloadAllConfirmOpen(false);
+  }, []);
+
   const downloadAll = useCallback(async () => {
+    setDownloadAllConfirmOpen(false);
+    const defaultFilename = downloadAllArchiveName;
+    const title = t('mod_list_download_all_progress_title');
+    const url =
+      `/api/mods/download-all?include_disabled=${downloadAllIncludeDisabled ? '1' : '0'}` +
+      `&include_settings=${downloadAllIncludeSettings ? '1' : '0'}`;
     setModsMsg(t('mod_list_download_preparing'), false);
-    await downloadBlob('/api/mods/download-all', modsArchiveDownloadName(instanceName));
-    setModsMsg(t('mod_list_download_all_ok'), false);
-  }, [instanceName, setModsMsg, t]);
+    const res = await startDownload(
+      title,
+      defaultFilename,
+      async (signal, onProgress) => {
+        const headers: Record<string, string> = {};
+        const token = getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+        const dlRes = await downloadWithProgress(url, {
+          headers,
+          signal,
+          onProgress,
+          defaultFilename,
+        });
+        return dlRes.filename;
+      },
+    );
+    if (!res.cancelled) {
+      setModsMsg(t('mod_list_download_all_ok'), false);
+    }
+  }, [
+    downloadAllArchiveName,
+    downloadAllIncludeDisabled,
+    downloadAllIncludeSettings,
+    setModsMsg,
+    startDownload,
+    t,
+  ]);
 
   const removeMod = useCallback(
     async (name: string) => {
@@ -979,12 +1176,18 @@ export function useMods(
       }
       openFccConfirmModal({
         title: t('mod_list_remove_mod_btn'),
-        message: t('mod_list_remove_confirm', row.display_name || row.name || name),
+        message: t(
+          'mod_list_remove_confirm',
+          row.display_name || row.name || name,
+        ),
         confirmLabel: t('mod_list_remove_mod_btn'),
         cancelLabel: t('cancel'),
         variant: 'danger',
         onConfirm: async () => {
-          await api('/api/mods/remove', { method: 'POST', body: JSON.stringify({ name }) });
+          await api('/api/mods/remove', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+          });
           setModsMsg(t('updated_successfully'), false);
           await reload();
         },
@@ -993,32 +1196,32 @@ export function useMods(
     [rawRows, reload, serverProcessBusy, setModsMsg, t, openVersionPicker],
   );
 
-  const showChangelog = useCallback(
-    async (row: ModRow) => {
+  const openModCard = useCallback(
+    (row: ModRow, tab: ModCardTab = 'description') => {
       if (!row.name || row.is_builtin) return;
-      try {
-        const j = await api<{ ok?: boolean; error?: string; text?: string }>(
-          `/api/mods/changelog?name=${encodeURIComponent(row.name)}`,
-        );
-        if (!j || j.ok === false) throw new Error(String(j?.error || 'changelog_not_found'));
-        const txt = String(j.text || '').trim();
-        if (!txt) throw new Error('changelog_not_found');
-        modals.open({
-          title: t('mod_list_changelog_title', row.display_name || row.name),
-          size: 'auto',
-          classNames: {
-            content: 'fu-modal fu-modal--changelog',
-            body: 'changelog-modal__body',
-          },
-          children: createElement('pre', { className: 'changelog-pre' }, txt),
-        });
-      } catch (e) {
-        const raw = e instanceof Error ? e.message : String(e);
-        setModsMsg(raw === 'changelog_not_found' ? t('mod_list_changelog_not_found') : raw, true);
-      }
+      setModCardRequest({
+        name: row.name,
+        title: row.display_name || row.name,
+        tab,
+        nonce: Date.now(),
+      });
+      setInstallModalOpen(true);
     },
-    [setModsMsg, t],
+    [],
   );
+
+  const clearModCardRequest = useCallback(() => {
+    setModCardRequest(null);
+  }, []);
+
+  const openUpdatesModal = useCallback(() => {
+    setUpdatesModeRequest(Date.now());
+    setInstallModalOpen(true);
+  }, []);
+
+  const clearUpdatesModeRequest = useCallback(() => {
+    setUpdatesModeRequest(null);
+  }, []);
 
   const handleError = useCallback(
     (e: unknown) => {
@@ -1044,6 +1247,7 @@ export function useMods(
     blockUpdates,
     hasPortalMods,
     portalUsername,
+    portalUsernameSource,
     allNonBuiltinDisabled,
     removeOldZips,
     setRemoveOldZipsPref,
@@ -1054,10 +1258,28 @@ export function useMods(
     setVersion,
     downloadMod,
     downloadAll,
+    downloadAllConfirmOpen,
+    downloadAllArchiveName,
+    downloadAllModsCount,
+    downloadAllIncludeDisabled,
+    setDownloadAllIncludeDisabled,
+    downloadAllIncludeSettings,
+    setDownloadAllIncludeSettings,
+    openDownloadAllDialog,
+    closeDownloadAllDialog,
     removeMod,
-    showChangelog,
+    openModCard,
+    modCardRequest,
+    clearModCardRequest,
+    openUpdatesModal,
+    updatesModeRequest,
+    clearUpdatesModeRequest,
     handleError,
     modJob,
+    instanceId,
+    installModalOpen,
+    openInstallModal,
+    closeInstallModal,
     installInput,
     setInstallInput,
     installBlink,
@@ -1068,9 +1290,9 @@ export function useMods(
     closeFromSaveDialog,
     confirmFromSaveDialog,
     updateSelected,
+    updateMany,
     updateAll,
-    checkUpdates,
-    modsCheckRunning,
+    applyPortalVersions,
     portalVersionsModalOpen,
     portalVersionsModalMod,
     openVersionPicker,

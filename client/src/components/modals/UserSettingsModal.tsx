@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../../api/client';
 import { useLocale } from '../../i18n/LocaleProvider';
-import { applyUiScale, getStoredUiScale, type FccUiScale } from '../../theme/uiScale';
+import {
+  applyUiScale,
+  getStoredUiScale,
+  type FccUiScale,
+} from '../../theme/uiScale';
 import {
   applyEffectiveTheme,
   FCC_THEMES,
@@ -10,7 +14,10 @@ import {
   getProgramDefaultTheme,
   setLocalThemeOverride,
 } from '../../theme/themes';
-import { getLocalLanguageOverride, setLocalLanguageOverride } from '../../i18n/locale';
+import {
+  getLocalLanguageOverride,
+  setLocalLanguageOverride,
+} from '../../i18n/locale';
 import {
   readUserToastDurationSec,
   readUserShowServerListModBadges,
@@ -22,6 +29,8 @@ import {
   setUserServerLogColorize,
   readUserCircuitWireEnabled,
   setUserCircuitWireEnabled,
+  readUserInterfaceHintsEnabled,
+  setUserInterfaceHintsEnabled,
 } from '../../lib/userPrefs';
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
@@ -37,7 +46,11 @@ interface UserSettingsModalProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) {
+export function UserSettingsModal({
+  open,
+  onClose,
+  t,
+}: UserSettingsModalProps) {
   const qc = useQueryClient();
   const { user, refetch: refetchUser } = useAuth();
   const { availableLanguages } = useLocale();
@@ -51,6 +64,7 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
   const [showSABadge, setShowSABadge] = useState(true);
   const [serverLogColorize, setServerLogColorize] = useState(true);
   const [circuitWireEnabled, setCircuitWireEnabled] = useState(true);
+  const [interfaceHintsEnabled, setInterfaceHintsEnabled] = useState(true);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
 
@@ -60,11 +74,14 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     setScale(getStoredUiScale());
     setLang(getLocalLanguageOverride());
     setToastSec(readUserToastDurationSec());
-    setDisableEffects(localStorage.getItem('fcc_user_web_disable_effects') === '1');
+    setDisableEffects(
+      localStorage.getItem('fcc_user_web_disable_effects') === '1',
+    );
     setShowModBadges(readUserShowServerListModBadges());
     setShowSABadge(readUserShowServerListSpaceAgeBadge());
     setServerLogColorize(readUserServerLogColorize());
     setCircuitWireEnabled(readUserCircuitWireEnabled());
+    setInterfaceHintsEnabled(readUserInterfaceHintsEnabled());
     void api<ProgramSettings>('/api/config/program')
       .then((r) => {
         setTranslateModNames(r.translate_mod_names !== false);
@@ -99,15 +116,25 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
     applyUiScale(uiScale as FccUiScale);
     setLocalLanguageOverride(lang);
     setUserToastDurationSec(toastSec);
-    if (disableEffects) document.documentElement.setAttribute('data-web-disable-effects', '1');
+    if (disableEffects)
+      document.documentElement.setAttribute('data-web-disable-effects', '1');
     else document.documentElement.removeAttribute('data-web-disable-effects');
-    localStorage.setItem('fcc_user_web_disable_effects', disableEffects ? '1' : '0');
+    localStorage.setItem(
+      'fcc_user_web_disable_effects',
+      disableEffects ? '1' : '0',
+    );
     setUserShowServerListModBadges(showModBadges);
     setUserShowServerListSpaceAgeBadge(showSABadge);
     setUserServerLogColorize(serverLogColorize);
     setUserCircuitWireEnabled(circuitWireEnabled);
+    setUserInterfaceHintsEnabled(interfaceHintsEnabled);
     onClose();
-    if (prevLang !== String(lang || '').trim().toLowerCase()) {
+    if (
+      prevLang !==
+      String(lang || '')
+        .trim()
+        .toLowerCase()
+    ) {
       window.location.reload();
     }
   }
@@ -120,8 +147,16 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
 
   return (
     <ModalBackdrop open={open} onClose={onClose} id="userSettingsBackdrop">
-      <div className="fu-modal user-settings-modal" role="dialog" aria-modal="true" aria-labelledby="userSettingsHeading">
-        <div className="fu-modal__header fu-modal__header--with-icon" id="userSettingsHeading">
+      <div
+        className="fu-modal user-settings-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="userSettingsHeading"
+      >
+        <div
+          className="fu-modal__header fu-modal__header--with-icon"
+          id="userSettingsHeading"
+        >
           <AppIcon name="settings_account" size={20} />
           {t('web_user_settings_title')}
         </div>
@@ -130,11 +165,15 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
             <div className="user-settings-modal__brand" aria-hidden="true">
               <AppIcon name="settings_account" size={22} />
             </div>
-            <p className="user-settings-modal__intro">{t('web_user_settings_intro')}</p>
+            <p className="user-settings-modal__intro">
+              {t('web_user_settings_intro')}
+            </p>
           </section>
 
           <section className="user-settings-modal__section user-settings-modal__section--security">
-            <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_security')}</h3>
+            <h3 className="user-settings-modal__section-title">
+              {t('web_user_settings_section_security')}
+            </h3>
             <div
               style={{
                 display: 'flex',
@@ -142,7 +181,8 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                 justifyContent: 'space-between',
                 padding: '12px 14px',
                 background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))',
+                border:
+                  '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))',
                 borderRadius: 6,
                 gap: 12,
               }}
@@ -159,18 +199,32 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                     background: user?.twoFactorEnabled
                       ? 'rgba(76, 175, 80, 0.15)'
                       : 'rgba(255, 255, 255, 0.05)',
-                    color: user?.twoFactorEnabled ? 'var(--color-success, #4caf50)' : 'var(--text-dim, #777)',
+                    color: user?.twoFactorEnabled
+                      ? 'var(--color-success, #4caf50)'
+                      : 'var(--text-dim, #777)',
                   }}
                 >
                   <AppIcon name="person_shield" size={20} />
                 </span>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-main)' }}>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 13,
+                      color: 'var(--text-main)',
+                    }}
+                  >
                     {user?.twoFactorEnabled
                       ? t('web_2fa_status_enabled')
                       : t('web_2fa_status_disabled')}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-dim, #777)', marginTop: 2 }}>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--text-dim, #777)',
+                      marginTop: 2,
+                    }}
+                  >
                     {t('web_user_settings_security_desc')}
                   </div>
                 </div>
@@ -201,13 +255,27 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
           </section>
 
           <section className="user-settings-modal__section">
-            <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_appearance')}</h3>
+            <h3 className="user-settings-modal__section-title">
+              {t('web_user_settings_section_appearance')}
+            </h3>
             <div className="user-settings-grid user-settings-grid--appearance">
               {availableLanguages.length > 0 ? (
-                <label className="user-settings-field user-settings-field--select" htmlFor="selLanguage">
-                  <span className="user-settings-field__label">{t('program_language_label')}</span>
-                  <select id="selLanguage" className="input input--narrow" value={lang} onChange={(e) => setLang(e.target.value)}>
-                    <option value="">{t('program_language_default_user')}</option>
+                <label
+                  className="user-settings-field user-settings-field--select"
+                  htmlFor="selLanguage"
+                >
+                  <span className="user-settings-field__label">
+                    {t('program_language_label')}
+                  </span>
+                  <select
+                    id="selLanguage"
+                    className="input input--narrow"
+                    value={lang}
+                    onChange={(e) => setLang(e.target.value)}
+                  >
+                    <option value="">
+                      {t('program_language_default_user')}
+                    </option>
                     {availableLanguages.map((code) => (
                       <option key={code} value={code}>
                         {languageLabel(code)}
@@ -216,15 +284,22 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   </select>
                 </label>
               ) : null}
-              <label className="user-settings-field user-settings-field--select" htmlFor="selTheme">
-                <span className="user-settings-field__label">{t('program_theme_label')}</span>
+              <label
+                className="user-settings-field user-settings-field--select"
+                htmlFor="selTheme"
+              >
+                <span className="user-settings-field__label">
+                  {t('program_theme_label')}
+                </span>
                 <select
                   id="selTheme"
                   className="input input--narrow"
                   value={theme}
                   onChange={(e) => setTheme(e.target.value)}
                 >
-                  <option value="">{t('program_language_panel_default_tip') || 'Default'}</option>
+                  <option value="">
+                    {t('program_language_panel_default_tip') || 'Default'}
+                  </option>
                   {FCC_THEMES.map((th) => (
                     <option key={th.id} value={th.id}>
                       {t('ui_theme_' + th.id) || th.label}
@@ -232,9 +307,19 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   ))}
                 </select>
               </label>
-              <label className="user-settings-field user-settings-field--select" htmlFor="selUiScale">
-                <span className="user-settings-field__label">{t('program_ui_scale_label')}</span>
-                <select id="selUiScale" className="input input--narrow" value={uiScale} onChange={(e) => setScale(e.target.value)}>
+              <label
+                className="user-settings-field user-settings-field--select"
+                htmlFor="selUiScale"
+              >
+                <span className="user-settings-field__label">
+                  {t('program_ui_scale_label')}
+                </span>
+                <select
+                  id="selUiScale"
+                  className="input input--narrow"
+                  value={uiScale}
+                  onChange={(e) => setScale(e.target.value)}
+                >
                   <option value="auto">{t('ui_scale_auto')}</option>
                   <option value="1">100%</option>
                   <option value="1.25">125%</option>
@@ -247,10 +332,17 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
           </section>
 
           <section className="user-settings-modal__section user-settings-modal__section--interface">
-            <h3 className="user-settings-modal__section-title">{t('web_user_settings_section_interface')}</h3>
+            <h3 className="user-settings-modal__section-title">
+              {t('web_user_settings_section_interface')}
+            </h3>
             <div className="user-settings-grid user-settings-grid--interface">
-              <label className="user-settings-field user-settings-field--select user-settings-field--full" htmlFor="inpToastDurationSec">
-                <span className="user-settings-field__label">{t('program_toast_duration_sec_label')}</span>
+              <label
+                className="user-settings-field user-settings-field--select user-settings-field--full"
+                htmlFor="inpToastDurationSec"
+              >
+                <span className="user-settings-field__label">
+                  {t('program_toast_duration_sec_label')}
+                </span>
                 <input
                   type="number"
                   id="inpToastDurationSec"
@@ -261,7 +353,9 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   value={toastSec}
                   onChange={(e) => setToastSec(e.target.value)}
                 />
-                <span className="user-settings-field__hint">{t('program_toast_duration_sec_tip')}</span>
+                <span className="user-settings-field__hint">
+                  {t('program_toast_duration_sec_tip')}
+                </span>
               </label>
               <div
                 className="user-settings-field user-settings-field--switch"
@@ -338,11 +432,29 @@ export function UserSettingsModal({ open, onClose, t }: UserSettingsModalProps) 
                   label={t('user_circuit_wire_cb')}
                 />
               </div>
+              <div
+                className="user-settings-field user-settings-field--switch"
+                title={t('user_interface_hints_tip')}
+              >
+                <FccSwitch
+                  id="cbInterfaceHints"
+                  className="user-settings-field__switch"
+                  labelClassName="user-settings-field__switch-label"
+                  checked={interfaceHintsEnabled}
+                  onChange={setInterfaceHintsEnabled}
+                  label={t('user_interface_hints_cb')}
+                />
+              </div>
             </div>
           </section>
         </div>
         <div className="fu-modal__footer">
-          <button type="button" className="btn btn--primary btn--with-icon" id="btnUserSettingsClose" onClick={applyAndClose}>
+          <button
+            type="button"
+            className="btn btn--primary btn--with-icon"
+            id="btnUserSettingsClose"
+            onClick={applyAndClose}
+          >
             <AppIcon name="save" size={16} />
             {t('save_btn')}
           </button>

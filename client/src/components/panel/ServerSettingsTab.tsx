@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { ServerSettingsApi } from '../../hooks/useServerSettings';
+import { useUserInterfaceHintsEnabled } from '../../hooks/useUserInterfaceHintsEnabled';
+import { setUserInterfaceHintsEnabled } from '../../lib/userPrefs';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
@@ -21,6 +23,7 @@ export function ServerSettingsTab({
   t,
 }: ServerSettingsTabProps) {
   const [search, setSearch] = useState('');
+  const hintsEnabled = useUserInterfaceHintsEnabled();
 
   return (
     <>
@@ -42,6 +45,30 @@ export function ServerSettingsTab({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            <div
+              className={`server-settings-tab__hint-banner${hintsEnabled ? '' : ' server-settings-tab__hint-banner--hidden'}`}
+              role="note"
+              title={
+                hintsEnabled
+                  ? t('server_settings_hover_hint_banner')
+                  : undefined
+              }
+              aria-hidden={!hintsEnabled}
+            >
+              <AppIcon name="info" size={15} />
+              <span className="server-settings-tab__hint-banner-text">
+                {t('server_settings_hover_hint_banner')}
+              </span>
+              <button
+                type="button"
+                className="server-settings-tab__hint-banner-close"
+                title={t('close')}
+                aria-label={t('close')}
+                onClick={() => setUserInterfaceHintsEnabled(false)}
+              >
+                <AppIcon name="close" size={14} />
+              </button>
+            </div>
             <div className="server-settings-tab__actions">
               <RefreshButton
                 className="btn btn--toolbar-icon"

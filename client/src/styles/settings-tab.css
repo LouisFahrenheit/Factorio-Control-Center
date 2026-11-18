@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Factorio Control Center — Settings Tab (Panel Style, Spacious Layout)
+   Factorio Control Center — Settings Tab
    ========================================================================== */
 
 #instanceTabSettings.sub-tab-panel--active,
@@ -17,7 +17,7 @@
   text-align: left;
 }
 
-/* ── Global Reset for Settings: eradicate legacy .panel__body center inheritance ── */
+/* ── Global Reset for Settings── */
 
 #instanceTabSettings,
 #instanceTabSettings *,
@@ -72,7 +72,7 @@
   text-align: left;
 }
 
-/* ── Spacious Full-Width Dashboard Grid ───────────────────────────────── */
+/* ── Dashboard Grid ───────────────────────────────── */
 
 .settings-grid {
   display: grid;
@@ -103,7 +103,7 @@
   }
 }
 
-/* ── Modern Settings Card (FCC Widget Style) ─────────────────────────── */
+/* ── Settings Card (FCC Widget Style) ─────────────────────────── */
 
 .settings-card {
   display: flex;
@@ -209,7 +209,7 @@
   text-align: left !important;
 }
 
-/* ── Spacious Toggle Row (Title + Description on Left, Switch on Right) ── */
+/* ── Toggle Row (Title + Description on Left, Switch on Right) ── */
 
 .settings-toggle-row {
   display: flex;
@@ -233,23 +233,22 @@
 }
 
 .settings-toggle-row--blink {
-  animation: settings-toggle-row-blink 0.7s ease-in-out 3 !important;
-  will-change: background-color, border-color, box-shadow;
+  animation: settings-toggle-row-blink 0.9s ease-in-out 2 !important;
+  will-change: border-color, box-shadow;
 }
 
 @keyframes settings-toggle-row-blink {
+
   0%,
   100% {
-    background: color-mix(in srgb, var(--bg-main) 30%, transparent);
-    border-color: color-mix(in srgb, var(--border) 35%, transparent);
-    box-shadow: none;
+    box-shadow: 0 0 0 0 transparent;
   }
+
   50% {
-    background: color-mix(in srgb, var(--accent) 24%, var(--bg-main) 76%);
-    border-color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
     box-shadow:
-      0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent),
-      0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+      0 0 0 1px color-mix(in srgb, var(--accent) 36%, transparent),
+      0 0 12px color-mix(in srgb, var(--accent) 22%, transparent);
   }
 }
 
@@ -567,12 +566,14 @@
 }
 
 @keyframes pulse-dot {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.9;
     box-shadow: 0 0 4px #22c55e;
   }
+
   50% {
     transform: scale(1.15);
     opacity: 0.75;
@@ -614,13 +615,10 @@
   border-radius: 8px;
   font-size: 0.82rem;
   line-height: 1.4;
-  background: color-mix(
-    in srgb,
-    var(--status-warning, #f59e0b) 12%,
-    var(--bg-main) 88%
-  );
-  border: 1px solid
-    color-mix(in srgb, var(--status-warning, #f59e0b) 35%, transparent);
+  background: color-mix(in srgb,
+      var(--status-warning, #f59e0b) 12%,
+      var(--bg-main) 88%);
+  border: 1px solid color-mix(in srgb, var(--status-warning, #f59e0b) 35%, transparent);
   color: var(--status-warning, #f59e0b);
   text-align: left;
 }

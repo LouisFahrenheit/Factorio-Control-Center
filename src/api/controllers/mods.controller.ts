@@ -392,14 +392,26 @@ export class ModsController {
   @Get('mods/download-all')
   @ApiOperation({ summary: 'Download all mods as a ZIP archive' })
   @ApiQuery({ name: 'instance_id', required: false })
+  @ApiQuery({ name: 'include_disabled', required: false })
+  @ApiQuery({ name: 'include_settings', required: false })
   @ApiResponse({ status: 200, description: 'ZIP archive with all mods' })
   @ApiResponse({ status: 404, description: 'Archive could not be built' })
   async modsDownloadAll(
     @Res() res: Response,
     @Query('instance_id') instanceId?: string,
+    @Query('include_disabled') includeDisabled?: string,
+    @Query('include_settings') includeSettings?: string,
   ) {
     const iid = this.explicitInstanceId(instanceId);
-    const data = (await this.bridge.submit('build_mods_archive', {}, iid)) as {
+    const data = (await this.bridge.submit(
+      'build_mods_archive',
+      {
+        include_disabled:
+          includeDisabled !== '0' && includeDisabled !== 'false',
+        include_settings: includeSettings === '1' || includeSettings === 'true',
+      },
+      iid,
+    )) as {
       path?: string;
       name?: string;
     };
@@ -449,6 +461,119 @@ export class ModsController {
         mod: body?.mod,
         version: body?.version,
       },
+      iid,
+    );
+  }
+
+  @Get('mods/portal-search')
+  @ApiOperation({ summary: 'Search mods on Factorio Mod Portal' })
+  @ApiQuery({ name: 'q', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'only_compatible', required: false })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiQuery({ name: 'version', required: false })
+  @ApiQuery({ name: 'include_deprecated', required: false })
+  @ApiQuery({ name: 'space_age', required: false })
+  @ApiQuery({ name: 'include_categories', required: false })
+  @ApiQuery({ name: 'exclude_categories', required: false })
+  @ApiQuery({ name: 'only_bookmarked', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'sort', required: false })
+  @ApiResponse({ status: 200, description: 'Portal search results' })
+  modsPortalSearch(
+    @Query('q') q?: string,
+    @Query('limit') limit?: string,
+    @Query('only_compatible') onlyCompatible?: string,
+    @Query('instance_id') instanceId?: string,
+    @Query('version') version?: string,
+    @Query('include_deprecated') includeDeprecated?: string,
+    @Query('space_age') spaceAge?: string,
+    @Query('include_categories') includeCategories?: string,
+    @Query('exclude_categories') excludeCategories?: string,
+    @Query('only_bookmarked') onlyBookmarked?: string,
+    @Query('page') page?: string,
+    @Query('sort') sort?: string,
+    @Query('search_in_description') searchInDescription?: string,
+    @Query('owner') owner?: string,
+    @Query('hide_installed') hideInstalled?: string,
+    @Query('only_installed') onlyInstalled?: string,
+    @Query('only_updates') onlyUpdates?: string,
+    @Query('refresh') refresh?: string,
+  ) {
+    const iid = this.explicitInstanceId(instanceId);
+    const parsedLimit = limit ? parseInt(limit, 10) : 20;
+    const parsedPage = page ? parseInt(page, 10) : 1;
+    return this.bridge.submit(
+      'mods_portal_search',
+      {
+        q: q ?? '',
+        page: Number.isFinite(parsedPage) && parsedPage >= 1 ? parsedPage : 1,
+        limit: Number.isFinite(parsedLimit) ? parsedLimit : 20,
+        sort: sort ?? 'relevance',
+        only_compatible: onlyCompatible !== '0' && onlyCompatible !== 'false',
+        version,
+        include_deprecated:
+          includeDeprecated === '1' || includeDeprecated === 'true',
+        space_age: spaceAge ?? 'neutral',
+        include_categories: includeCategories ?? '',
+        exclude_categories: excludeCategories ?? '',
+        only_bookmarked: onlyBookmarked === '1' || onlyBookmarked === 'true',
+        search_in_description:
+          searchInDescription !== '0' && searchInDescription !== 'false',
+        owner: owner ?? '',
+        hide_installed: hideInstalled === '1' || hideInstalled === 'true',
+        only_installed: onlyInstalled === '1' || onlyInstalled === 'true',
+        only_updates: onlyUpdates === '1' || onlyUpdates === 'true',
+        refresh: refresh === '1' || refresh === 'true',
+      },
+      iid,
+    );
+  }
+
+  @Get('mods/portal-details')
+  @ApiOperation({ summary: 'Get full mod details from Factorio Mod Portal' })
+  @ApiQuery({ name: 'name', required: true })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'Full mod details' })
+  modsPortalDetails(
+    @Query('name') name?: string,
+    @Query('instance_id') instanceId?: string,
+  ) {
+    const iid = this.explicitInstanceId(instanceId);
+    return this.bridge.submit('mods_portal_details', { name: name ?? '' }, iid);
+  }
+
+  @Post('mods/portal-bookmark')
+  @ApiOperation({ summary: 'Toggle mod bookmark on Factorio Mod Portal' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'Bookmark toggled' })
+  modsPortalBookmark(
+    @Body() body: { mod?: string; bookmarked?: boolean },
+    @Query('instance_id') instanceId?: string,
+  ) {
+    const iid = this.explicitInstanceId(instanceId);
+    return this.bridge.submit(
+      'mods_portal_bookmark',
+      {
+        mod: body?.mod ?? '',
+        bookmarked: Boolean(body?.bookmarked),
+      },
+      iid,
+    );
+  }
+
+  @Post('mods/portal-thumbnails')
+  @ApiOperation({ summary: 'Resolve thumbnail URLs for Factorio portal mods' })
+  @ApiQuery({ name: 'instance_id', required: false })
+  @ApiResponse({ status: 200, description: 'Mod thumbnails map' })
+  modsPortalThumbnails(
+    @Body() body: { names?: string[] },
+    @Query('instance_id') instanceId?: string,
+  ) {
+    const iid = this.explicitInstanceId(instanceId);
+    return this.bridge.submit(
+      'mods_portal_thumbnails',
+      { names: Array.isArray(body?.names) ? body.names : [] },
       iid,
     );
   }

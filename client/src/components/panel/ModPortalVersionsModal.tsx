@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IconRefresh } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
-import { CancelButton } from '../CancelButton';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { api } from '../../api/client';
 import { formatPanelDateOnly } from '../../lib/datetimeUtils';
@@ -172,6 +171,7 @@ export function ModPortalVersionsModal({
       onClose={onClose}
       closeOnEscape={!serverBusy}
       closeOnBackdropClick={!serverBusy}
+      backdropClassName="fu-modal-backdrop--stacked"
     >
       <div
         className="fu-modal mod-portal-versions-dialog"
@@ -180,46 +180,46 @@ export function ModPortalVersionsModal({
         aria-labelledby="modPortalVersionsHeading"
       >
         <div className="mod-update-all-flow mod-portal-versions-dialog__flow">
-          <div className="mod-update-all-flow__header mod-portal-versions__header">
-            <AppIcon
-              name="history"
-              size={22}
-              className="mod-portal-versions__header-icon"
-            />
-            <div className="mod-update-all-flow__header-text">
-              <span
-                className="mod-update-all-flow__header-title"
-                id="modPortalVersionsHeading"
-              >
-                {title}
-              </span>
-              <div className="mod-portal-versions__header-meta">
-                <span className="mod-portal-versions__header-badge">
+          <div className="mod-install-dialog__header">
+            <div className="mod-install-dialog__header-main">
+              <div className="mod-install-dialog__header-icon-wrap">
+                <AppIcon name="history" size={18} />
+              </div>
+              <div className="mod-install-dialog__header-titles">
+                <h2
+                  className="mod-install-dialog__title"
+                  id="modPortalVersionsHeading"
+                >
+                  {title}
+                </h2>
+                <p className="mod-install-dialog__subtitle">
                   {t('mod_portal_versions_modal_title')}
-                </span>
-                {portalUrl ? (
-                  <a
-                    href={portalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mod-portal-versions__link-pill"
-                    title={t('mod_list_open_portal_btn')}
-                  >
-                    <AppIcon name="open_portal" size={13} />
-                    <span>mods.factorio.com</span>
-                  </a>
-                ) : null}
+                </p>
               </div>
             </div>
-            <button
-              type="button"
-              className="mod-update-all-flow__close"
-              aria-label={t('close')}
-              disabled={serverBusy}
-              onClick={onClose}
-            >
-              <AppIcon name="close" size={16} />
-            </button>
+            <div className="mod-install-dialog__header-right">
+              {portalUrl ? (
+                <a
+                  href={portalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mod-install-dialog__portal-link"
+                  title={t('mod_list_open_portal_btn')}
+                >
+                  <span>mods.factorio.com</span>
+                  <AppIcon name="external_link" size={13} />
+                </a>
+              ) : null}
+              <button
+                type="button"
+                className="mod-install-dialog__close"
+                aria-label={t('close')}
+                disabled={serverBusy}
+                onClick={onClose}
+              >
+                <AppIcon name="close" size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="mod-update-all-flow__panel mod-portal-versions-dialog__panel">
@@ -342,13 +342,16 @@ export function ModPortalVersionsModal({
                     </div>
                     <button
                       type="button"
-                      className="btn btn--toolbar-icon mod-portal-versions__refresh-btn"
+                      className={
+                        'mod-install-search__refresh-btn' +
+                        (loading ? ' is-spinning' : '')
+                      }
                       title={t('refresh')}
                       aria-label={t('refresh')}
                       disabled={loading || serverBusy}
                       onClick={() => fetchReleases(true)}
                     >
-                      <IconRefresh size={16} />
+                      <IconRefresh size={14} />
                     </button>
                   </div>
                 </div>
@@ -559,10 +562,6 @@ export function ModPortalVersionsModal({
                 </div>
               </>
             ) : null}
-          </div>
-
-          <div className="mod-update-all-flow__footer mod-portal-versions__footer">
-            <CancelButton onClick={onClose} disabled={serverBusy} t={t} />
           </div>
         </div>
       </div>

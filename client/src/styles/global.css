@@ -7073,6 +7073,113 @@ table.data thead th.saves-sort-th--asc::after {
   flex: 0 0 auto !important;
 }
 
+/* ── Hint Info Banner inside Toolbar ─────────────────────────────────── */
+
+.server-settings-tab__hint-banner {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  box-sizing: border-box !important;
+  padding: 0 8px 0 12px !important;
+  border-radius: var(--r-md, 8px) !important;
+  background: color-mix(
+    in srgb,
+    var(--accent) 10%,
+    var(--bg-main) 90%
+  ) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--accent) 30%, var(--fcc-btn-border) 70%) !important;
+  color: var(--text-muted) !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  user-select: none !important;
+  cursor: default !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.server-settings-tab__hint-banner--hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.server-settings-tab__hint-banner .app-icon {
+  color: var(--accent) !important;
+  flex-shrink: 0 !important;
+}
+
+.server-settings-tab__hint-banner-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.server-settings-tab__hint-banner-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  margin-left: 2px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.server-settings-tab__hint-banner-close:hover {
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.server-settings-tab__hint-banner-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  margin-left: 2px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.server-settings-tab__hint-banner-close:hover {
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (max-width: 1280px) {
+  .server-settings-tab__hint-banner {
+    display: none !important;
+  }
+}
+
 .server-settings-tab__actions .btn,
 .server-settings-tab__toolbar .btn {
   height: var(--sst-btn-height) !important;
@@ -7088,9 +7195,15 @@ table.data thead th.saves-sort-th--asc::after {
   font-weight: 600 !important;
   border-radius: var(--r-md, 8px) !important;
   background: var(--fcc-btn-bg) !important;
-  border: 1px solid var(--fcc-btn-border) !important;
-  box-shadow: var(--fcc-btn-shadow) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
   color: var(--text) !important;
+}
+
+.server-settings-tab__actions .btn:not(.btn--update-available),
+.server-settings-tab__toolbar .btn:not(.btn--update-available) {
+  border-color: var(--fcc-btn-border) !important;
+  box-shadow: var(--fcc-btn-shadow) !important;
 }
 
 .server-settings-tab__actions .btn:not(.btn--danger):hover:not(:disabled),

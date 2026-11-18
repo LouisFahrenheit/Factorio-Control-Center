@@ -410,7 +410,10 @@ export class DispatchService {
       case 'get_mod_download_path':
         return this.mods.downloadPath(s(kwargs.name, ''));
       case 'build_mods_archive':
-        return this.mods.buildArchive();
+        return this.mods.buildArchive({
+          includeDisabled: kwargs.include_disabled !== false,
+          includeSettings: kwargs.include_settings === true,
+        });
       case 'mods_install_plan':
         return this.mods.installPlan(
           s(kwargs.mod, ''),
@@ -418,6 +421,22 @@ export class DispatchService {
         );
       case 'get_mod_portal_releases':
         return this.mods.portalReleases(s(kwargs.name, ''));
+      case 'mods_portal_search':
+        return this.mods.searchPortal(
+          s(kwargs.q, ''),
+          Number(kwargs.limit) || 40,
+          kwargs.only_compatible !== false,
+          kwargs,
+        );
+      case 'mods_portal_thumbnails':
+        return this.mods.portalThumbnails(kwargs.names);
+      case 'mods_portal_details':
+        return this.mods.portalDetails(s(kwargs.name, ''));
+      case 'mods_portal_bookmark':
+        return this.mods.togglePortalBookmark(
+          s(kwargs.mod, ''),
+          Boolean(kwargs.bookmarked),
+        );
       case 'mods_install_plan_batch':
         return this.mods.installPlanBatch(kwargs.mods);
       case 'mods_update_all_plan':

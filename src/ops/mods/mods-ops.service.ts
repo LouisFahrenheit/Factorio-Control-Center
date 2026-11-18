@@ -12,10 +12,14 @@ import { basename, join } from 'path';
 import { tmpdir } from 'os';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { InstancesService } from '../../instances/instances.service';
-import { ModPortalService } from '../mod-portal/mod-portal.service';
+import {
+  ModPortalService,
+  type ModPortalSortBy,
+} from '../mod-portal/mod-portal.service';
 import { RuntimeService } from '../runtime.service';
 import {
   OpResult,
+  compareVersions,
   ensureModListEntry,
   gameVersion,
   hasSpaceAge,
@@ -39,13 +43,16 @@ import {
 import {
   buildInstallConflictInfo,
   isBuiltinModName,
+  isConflictDependencyName,
   isOptionalDependencyString,
   isSpaceAgeDependency,
   manifestConflictNames,
   manifestRequiresSpaceAge,
   normalizeModListName,
+  parseConflictModName,
   parseDependencyModName,
   portalDependencyNames,
+  serverHasBuiltinRecycler,
   type ModInstallConflictInfo,
 } from '../mod-deps';
 import { ModsJobService } from './mods-job.service';
@@ -171,14 +178,32 @@ export class ModsOpsService {
     for (const row of rows) {
       row.display_name = titles[row.name] || row.display_name;
     }
-    const portalUsername =
+    let portalUsername =
       await this.portal.resolveVerifiedServerSettingsUsername(sel.pm);
+    let portalUsernameSource = portalUsername ? 'server-settings.json' : '';
+    if (!portalUsername && typeof this.portal.loadCredentials === 'function') {
+      const creds = this.portal.loadCredentials(
+        sel.pm,
+        this.config.webPanel?.global_username,
+        this.config.webPanel?.global_token,
+      );
+      const fallbackUsername = safeTrim(creds?.user);
+      if (fallbackUsername) {
+        portalUsername = fallbackUsername;
+        portalUsernameSource =
+          safeTrim(this.config.webPanel?.global_username) &&
+          safeTrim(this.config.webPanel?.global_token)
+            ? 'webPanel (global)'
+            : 'server-settings.json';
+      }
+    }
     return {
       ok: true,
       mods: rows,
       game_version: gameVersion(sel.item.serverPath),
       remove_old_zips: this.readRemoveOldZips(sel.item.serverPath),
       portal_username: portalUsername,
+      portal_username_source: portalUsernameSource,
     };
   }
 
@@ -496,14 +521,38 @@ export class ModsOpsService {
     return { ok: false, error: 'not_found' };
   }
 
-  buildArchive(): OpResult {
+  buildArchive(options?: {
+    includeDisabled?: boolean;
+    includeSettings?: boolean;
+  }): OpResult {
     const sel = selectedInstance(this.instances);
     if (isErrorResult(sel)) return sel;
+    const includeDisabled = options?.includeDisabled !== false;
+    const includeSettings = options?.includeSettings === true;
+
+    let enabledNames: Set<string> | null = null;
+    if (!includeDisabled) {
+      const modList = readModList(sel.pm);
+      enabledNames = new Set(
+        modList.mods
+          .filter((r) => r.enabled !== false)
+          .map((r) => safeTrim(r.name).toLowerCase())
+          .filter(Boolean),
+      );
+    }
+
     const out = join(tmpdir(), `fcc_mods_${Date.now()}.zip`);
     const zip = new AdmZip();
     for (const f of readdirSync(sel.pm.modsDir)) {
-      if (f.toLowerCase().endsWith('.zip'))
-        zip.addLocalFile(join(sel.pm.modsDir, f));
+      if (!f.toLowerCase().endsWith('.zip')) continue;
+      if (enabledNames) {
+        const modName = safeTrim(modNameFromZip(f)).toLowerCase();
+        if (!modName || !enabledNames.has(modName)) continue;
+      }
+      zip.addLocalFile(join(sel.pm.modsDir, f));
+    }
+    if (includeSettings && existsSync(sel.pm.modSettingsDat)) {
+      zip.addLocalFile(sel.pm.modSettingsDat);
     }
     zip.writeZip(out);
     const archiveName = `${safeName(sel.item.name, 'server')}-mods.zip`;
@@ -518,6 +567,638 @@ export class ModsOpsService {
       mod,
       version,
     ) as Promise<OpResult>;
+  }
+
+  private parseCsvParam(val: unknown): string[] {
+    if (Array.isArray(val)) {
+      return val.map((x) => safeTrim(x).toLowerCase()).filter(Boolean);
+    }
+    const raw = safeTrim(val);
+    if (!raw) return [];
+    return raw
+      .split(',')
+      .map((x) => x.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  async searchPortal(
+    query: string,
+    limit = 40,
+    onlyCompatible = true,
+    extra?: Record<string, unknown>,
+  ): Promise<OpResult> {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return sel;
+    try {
+      const gv = gameVersion(sel.item.serverPath);
+      const serverFv = this.portal.factorioMajorMinor(gv);
+      const creds =
+        typeof this.portal.loadCredentials === 'function'
+          ? this.portal.loadCredentials(
+              sel.pm,
+              this.config.webPanel?.global_username,
+              this.config.webPanel?.global_token,
+            )
+          : null;
+
+      let bookmarksList: string[] = [];
+      if (creds && typeof this.portal.fetchBookmarks === 'function') {
+        try {
+          bookmarksList = await this.portal.fetchBookmarks(
+            creds.user,
+            creds.token,
+          );
+        } catch {
+          bookmarksList = [];
+        }
+      }
+      const bookmarksLower = new Set(bookmarksList.map((b) => b.toLowerCase()));
+
+      const rawVersion =
+        extra?.version !== undefined ? safeTrim(extra.version) : undefined;
+      const rawSpaceAge = safeTrim(extra?.space_age).toLowerCase();
+      const spaceAgeMode: 'neutral' | 'include' | 'exclude' =
+        rawSpaceAge === 'include' || rawSpaceAge === 'exclude'
+          ? rawSpaceAge
+          : 'neutral';
+      const rawSort = safeTrim(extra?.sort).toLowerCase();
+      const sortBy: ModPortalSortBy =
+        rawSort === 'downloads' ||
+        rawSort === 'updated' ||
+        rawSort === 'trending'
+          ? rawSort
+          : 'relevance';
+      const parsedPage = Number(extra?.page);
+      const page =
+        Number.isFinite(parsedPage) && parsedPage >= 1
+          ? Math.floor(parsedPage)
+          : 1;
+
+      const hideInstalled = Boolean(extra?.hide_installed);
+      const onlyInstalled = Boolean(extra?.only_installed);
+      const onlyUpdates = Boolean(extra?.only_updates);
+      const installedNamesLower = new Set<string>();
+      if (
+        (hideInstalled || onlyInstalled || onlyUpdates) &&
+        existsSync(sel.pm.modsDir)
+      ) {
+        try {
+          for (const f of readdirSync(sel.pm.modsDir)) {
+            if (!/\.zip$/i.test(f)) continue;
+            const mName = modNameFromZip(f).trim().toLowerCase();
+            if (mName) installedNamesLower.add(mName);
+          }
+        } catch {
+          /* ignore unreadable modsDir */
+        }
+      }
+
+      const modList = readModList(sel.pm);
+      const pinnedMap = new Map<string, string>();
+      for (const row of modList.mods) {
+        const key = safeTrim(row.name).toLowerCase();
+        const pinned = safeTrim(row.version);
+        if (key && pinned) pinnedMap.set(key, pinned);
+      }
+      const resolveInstalledVersion = (name: string): string => {
+        const installedVers = installedModVersions(sel.pm.modsDir, name);
+        const pinned = pinnedMap.get(name.toLowerCase()) || '';
+        return (
+          (pinned && installedVers.includes(pinned) ? pinned : '') ||
+          latestVersion(installedVers) ||
+          ''
+        );
+      };
+
+      const searchRes = await this.portal.searchMods(query, {
+        factorioVersion: rawVersion,
+        gameVersion: gv,
+        page,
+        limit,
+        sort: sortBy,
+        onlyCompatible,
+        includeDeprecated: Boolean(extra?.include_deprecated),
+        spaceAgeMode,
+        includeCategories: this.parseCsvParam(extra?.include_categories),
+        excludeCategories: this.parseCsvParam(extra?.exclude_categories),
+        onlyBookmarked: Boolean(extra?.only_bookmarked),
+        bookmarkedNamesLower: bookmarksLower,
+        searchInDescription: extra?.search_in_description !== false,
+        owner: safeTrim(extra?.owner),
+        hideInstalled: hideInstalled && !onlyUpdates,
+        onlyInstalled: onlyInstalled || onlyUpdates,
+        installedNamesLower,
+        extraFilter: onlyUpdates
+          ? (item) => {
+              const local = resolveInstalledVersion(item.name);
+              return (
+                Boolean(local) &&
+                Boolean(item.latest_version) &&
+                compareVersions(item.latest_version, local) > 0
+              );
+            }
+          : undefined,
+        collectAllNames: onlyUpdates,
+        forceRefresh: Boolean(extra?.refresh),
+      });
+
+      const enriched = searchRes.results.map((item) => {
+        const nameLower = item.name.toLowerCase();
+        return {
+          ...item,
+          installed_version: resolveInstalledVersion(item.name),
+          bookmarked: bookmarksLower.has(nameLower),
+        };
+      });
+      return {
+        ok: true,
+        results: enriched,
+        total: searchRes.total,
+        page: searchRes.page,
+        page_size: searchRes.pageSize,
+        total_pages: searchRes.totalPages,
+        game_version: gv,
+        server_factorio_version: serverFv,
+        factorio_version: searchRes.factorioVersion,
+        facets: searchRes.facets,
+        ...(searchRes.allNames ? { all_names: searchRes.allNames } : {}),
+        ...(searchRes.installedVersions
+          ? { portal_versions: searchRes.installedVersions }
+          : {}),
+        has_credentials: Boolean(creds),
+        bookmarks_count: bookmarksList.length,
+      };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message || 'fetch_failed' };
+    }
+  }
+
+  private checkVersionConstraint(
+    localVer: string,
+    op: string,
+    reqVer: string,
+  ): boolean {
+    if (!op || !reqVer) return true;
+    const cmp = compareVersions(localVer, reqVer);
+    switch (op) {
+      case '>=':
+        return cmp >= 0;
+      case '<=':
+        return cmp <= 0;
+      case '!=':
+        return cmp !== 0;
+      case '>':
+        return cmp > 0;
+      case '<':
+        return cmp < 0;
+      case '=':
+        return cmp === 0;
+      default:
+        return true;
+    }
+  }
+
+  private parseDepOperatorAndVersion(raw: string): {
+    op: string;
+    version: string;
+  } {
+    const m = /(?<op>>=|<=|!=|>|<|=)\s*(?<ver>\d+(?:\.\d+)*)\s*$/.exec(
+      raw.trim(),
+    );
+    if (!m?.groups) return { op: '', version: '' };
+    return {
+      op: m.groups.op || '',
+      version: m.groups.ver || '',
+    };
+  }
+
+  async portalDetails(modRaw: unknown): Promise<OpResult> {
+    const clean = safeTrim(modRaw);
+    const modId = this.portal.modIdFromInput(clean) || clean;
+    if (
+      !modId ||
+      this.portal.isBuiltin(modId) ||
+      !this.portal.isValidPortalModId(modId)
+    ) {
+      return { ok: false, error: 'invalid_mod_id' };
+    }
+    try {
+      const sel = selectedInstance(this.instances);
+      const hasSel = !isErrorResult(sel);
+      const gv = hasSel ? gameVersion(sel.item.serverPath) : '';
+      const details = await this.portal.fetchModDetails(
+        modId,
+        hasSel
+          ? { serverPath: sel.item.serverPath, gameVersion: gv }
+          : undefined,
+      );
+      let installedVersion = '';
+      let bookmarked = false;
+
+      type DepStatus =
+        | 'installed_ok'
+        | 'installed_disabled'
+        | 'needs_update'
+        | 'missing_dlc'
+        | 'will_download'
+        | 'not_installed'
+        | 'conflict_active'
+        | 'conflict_inactive';
+
+      interface DepEntry {
+        name: string;
+        title: string;
+        kind: 'required' | 'optional' | 'conflict';
+        operator: string;
+        version: string;
+        local_version: string;
+        is_builtin: boolean;
+        status: DepStatus;
+      }
+
+      const missingDlc: string[] = [];
+      const activeConflicts: DepEntry[] = [];
+      const requiredDeps: DepEntry[] = [];
+      const optionalDeps: DepEntry[] = [];
+      const inactiveConflicts: DepEntry[] = [];
+
+      const modListMap = new Map<
+        string,
+        { name: string; enabled: boolean; pinned: string }
+      >();
+      let serverHasSa = true;
+
+      if (hasSel) {
+        serverHasSa = hasSpaceAge(sel.item.serverPath);
+        const modList = readModList(sel.pm);
+        for (const row of modList.mods) {
+          const rName = safeTrim(row.name);
+          if (!rName) continue;
+          modListMap.set(normalizeModListName(rName), {
+            name: rName,
+            enabled: row.enabled !== false,
+            pinned: safeTrim(row.version),
+          });
+        }
+
+        const installedVers = installedModVersions(
+          sel.pm.modsDir,
+          details.name,
+        );
+        const selfEntry = modListMap.get(normalizeModListName(details.name));
+        const pinned = selfEntry?.pinned || '';
+        installedVersion =
+          (pinned && installedVers.includes(pinned) ? pinned : '') ||
+          latestVersion(installedVers) ||
+          '';
+
+        const creds =
+          typeof this.portal.loadCredentials === 'function'
+            ? this.portal.loadCredentials(
+                sel.pm,
+                this.config.webPanel?.global_username,
+                this.config.webPanel?.global_token,
+              )
+            : null;
+        if (creds && typeof this.portal.fetchBookmarks === 'function') {
+          try {
+            const bms = await this.portal.fetchBookmarks(
+              creds.user,
+              creds.token,
+            );
+            const target = details.name.toLowerCase();
+            bookmarked = bms.some((b) => safeTrim(b).toLowerCase() === target);
+          } catch {
+            /* ignore bookmark check error */
+          }
+        }
+      }
+
+      const lookupTitle = (name: string): string => {
+        if (typeof this.portal.lookupCatalogModTitle === 'function') {
+          const found = this.portal.lookupCatalogModTitle(name);
+          if (found) return found;
+        }
+        return name;
+      };
+
+      const resolveLocalModState = (
+        depName: string,
+      ): { localVer: string; enabled: boolean } => {
+        if (!hasSel) return { localVer: '', enabled: false };
+        const norm = normalizeModListName(depName);
+        const ml = modListMap.get(norm);
+        const lookupName = ml?.name || depName;
+        const vers = installedModVersions(sel.pm.modsDir, lookupName);
+        const pinned = ml?.pinned || '';
+        const localVer =
+          (pinned && vers.includes(pinned) ? pinned : '') ||
+          latestVersion(vers) ||
+          '';
+        return {
+          localVer,
+          enabled: ml ? ml.enabled : false,
+        };
+      };
+
+      const seenKeys = new Set<string>();
+      for (const rawDep of details.raw_dependencies || []) {
+        const trimmed = safeTrim(rawDep);
+        if (!trimmed) continue;
+
+        const isConflict = isConflictDependencyName(trimmed);
+        const isOptional = !isConflict && isOptionalDependencyString(trimmed);
+        const kind: 'required' | 'optional' | 'conflict' = isConflict
+          ? 'conflict'
+          : isOptional
+            ? 'optional'
+            : 'required';
+        const depName = isConflict
+          ? parseConflictModName(trimmed)
+          : parseDependencyModName(trimmed);
+        if (!depName) continue;
+
+        const normKey = `${kind}:${normalizeModListName(depName)}`;
+        if (seenKeys.has(normKey)) continue;
+        seenKeys.add(normKey);
+
+        const { op, version } = this.parseDepOperatorAndVersion(trimmed);
+        const normMod = normalizeModListName(depName);
+        const builtin = isBuiltinModName(depName);
+
+        if (normMod === 'base') {
+          if (
+            kind === 'required' &&
+            gv &&
+            op &&
+            version &&
+            !this.checkVersionConstraint(gv, op, version)
+          ) {
+            requiredDeps.push({
+              name: 'base',
+              title: 'Factorio (base)',
+              kind: 'required',
+              operator: op,
+              version,
+              local_version: gv,
+              is_builtin: true,
+              status: 'needs_update',
+            });
+          }
+          continue;
+        }
+
+        if (builtin) {
+          const isRecycler = normMod === 'recycler';
+          const hasDlcBinary = isRecycler
+            ? serverHasBuiltinRecycler(gv)
+            : serverHasSa;
+          const ml = modListMap.get(normMod);
+          const enabled = ml ? ml.enabled : true;
+
+          if (kind === 'conflict') {
+            const active = hasSel && hasDlcBinary && enabled;
+            const entry: DepEntry = {
+              name: depName,
+              title: depName,
+              kind: 'conflict',
+              operator: op,
+              version,
+              local_version: hasDlcBinary ? gv : '',
+              is_builtin: true,
+              status: active ? 'conflict_active' : 'conflict_inactive',
+            };
+            if (active) activeConflicts.push(entry);
+            else inactiveConflicts.push(entry);
+          } else if (kind === 'required') {
+            if (hasSel && !hasDlcBinary) {
+              missingDlc.push(depName);
+              requiredDeps.push({
+                name: depName,
+                title: depName,
+                kind: 'required',
+                operator: op,
+                version,
+                local_version: '',
+                is_builtin: true,
+                status: 'missing_dlc',
+              });
+            } else {
+              requiredDeps.push({
+                name: depName,
+                title: depName,
+                kind: 'required',
+                operator: op,
+                version,
+                local_version: gv,
+                is_builtin: true,
+                status: enabled ? 'installed_ok' : 'installed_disabled',
+              });
+            }
+          } else {
+            optionalDeps.push({
+              name: depName,
+              title: depName,
+              kind: 'optional',
+              operator: op,
+              version,
+              local_version: hasDlcBinary ? gv : '',
+              is_builtin: true,
+              status:
+                hasDlcBinary && enabled
+                  ? 'installed_ok'
+                  : hasDlcBinary
+                    ? 'installed_disabled'
+                    : 'not_installed',
+            });
+          }
+          continue;
+        }
+
+        const { localVer, enabled } = resolveLocalModState(depName);
+        const title = lookupTitle(depName);
+
+        if (kind === 'conflict') {
+          const active =
+            Boolean(localVer) &&
+            enabled &&
+            this.checkVersionConstraint(localVer, op, version);
+          const entry: DepEntry = {
+            name: depName,
+            title,
+            kind: 'conflict',
+            operator: op,
+            version,
+            local_version: localVer,
+            is_builtin: false,
+            status: active ? 'conflict_active' : 'conflict_inactive',
+          };
+          if (active) activeConflicts.push(entry);
+          else inactiveConflicts.push(entry);
+        } else if (kind === 'required') {
+          let status: DepStatus = 'will_download';
+          if (localVer) {
+            if (!this.checkVersionConstraint(localVer, op, version)) {
+              status = 'needs_update';
+            } else if (!enabled) {
+              status = 'installed_disabled';
+            } else {
+              status = 'installed_ok';
+            }
+          }
+          requiredDeps.push({
+            name: depName,
+            title,
+            kind: 'required',
+            operator: op,
+            version,
+            local_version: localVer,
+            is_builtin: false,
+            status,
+          });
+        } else {
+          optionalDeps.push({
+            name: depName,
+            title,
+            kind: 'optional',
+            operator: op,
+            version,
+            local_version: localVer,
+            is_builtin: false,
+            status: localVer
+              ? enabled
+                ? 'installed_ok'
+                : 'installed_disabled'
+              : 'not_installed',
+          });
+        }
+      }
+
+      if (hasSel && modListMap.size <= 60) {
+        const selfNorm = normalizeModListName(details.name);
+        const activeConflictNorms = new Set(
+          activeConflicts.map((c) => normalizeModListName(c.name)),
+        );
+        for (const [normKey, mlRow] of modListMap.entries()) {
+          if (!mlRow.enabled || normKey === 'base' || normKey === selfNorm) {
+            continue;
+          }
+          if (
+            isBuiltinModName(mlRow.name) ||
+            activeConflictNorms.has(normKey)
+          ) {
+            continue;
+          }
+          const vers = installedModVersions(sel.pm.modsDir, mlRow.name);
+          const ver =
+            (mlRow.pinned && vers.includes(mlRow.pinned) ? mlRow.pinned : '') ||
+            latestVersion(vers);
+          if (!ver) continue;
+          const zipPath = join(sel.pm.modsDir, `${mlRow.name}_${ver}.zip`);
+          const manifest = existsSync(zipPath)
+            ? readModManifest(zipPath)
+            : null;
+          if (!manifest) continue;
+          const revConflicts = manifestConflictNames(manifest);
+          if (
+            revConflicts.some((rc) => normalizeModListName(rc) === selfNorm)
+          ) {
+            activeConflictNorms.add(normKey);
+            activeConflicts.push({
+              name: mlRow.name,
+              title: lookupTitle(mlRow.name),
+              kind: 'conflict',
+              operator: '',
+              version: '',
+              local_version: ver,
+              is_builtin: false,
+              status: 'conflict_active',
+            });
+          }
+        }
+      }
+
+      optionalDeps.sort((a, b) => {
+        const aInst =
+          a.status === 'installed_ok'
+            ? 0
+            : a.status === 'installed_disabled'
+              ? 1
+              : 2;
+        const bInst =
+          b.status === 'installed_ok'
+            ? 0
+            : b.status === 'installed_disabled'
+              ? 1
+              : 2;
+        return aInst - bInst || a.title.localeCompare(b.title);
+      });
+
+      return {
+        ok: true,
+        mod: {
+          ...details,
+          installed_version: installedVersion,
+          bookmarked,
+          dependencies_info: {
+            target_release_version: details.target_release_version,
+            missing_dlc: missingDlc,
+            active_conflicts: activeConflicts,
+            required: requiredDeps,
+            optional: optionalDeps,
+            conflicts: inactiveConflicts,
+          },
+        },
+      };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message || 'fetch_failed' };
+    }
+  }
+
+  async togglePortalBookmark(
+    rawModName: string,
+    bookmarked: boolean,
+  ): Promise<OpResult> {
+    const sel = selectedInstance(this.instances);
+    if (isErrorResult(sel)) return sel;
+    const creds = this.portal.loadCredentials(
+      sel.pm,
+      this.config.webPanel?.global_username,
+      this.config.webPanel?.global_token,
+    );
+    if (!creds) {
+      return { ok: false, error: 'missing_credentials' };
+    }
+    try {
+      const res = await this.portal.toggleBookmark(
+        creds.user,
+        creds.token,
+        rawModName,
+        bookmarked,
+      );
+      return {
+        ok: true,
+        mod: safeTrim(rawModName),
+        bookmarked: res.bookmarked,
+        bookmarks_count: res.bookmarks.length,
+      };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message || 'fetch_failed' };
+    }
+  }
+
+  async portalThumbnails(names: unknown): Promise<OpResult> {
+    const list = Array.isArray(names)
+      ? names.map((x) => safeTrim(x)).filter(Boolean)
+      : [];
+    if (list.length === 0) {
+      return { ok: true, thumbnails: {} };
+    }
+    const thumbnails = await this.portal.fetchThumbnails(list);
+    return { ok: true, thumbnails };
   }
 
   async portalReleases(rawName: string): Promise<OpResult> {
