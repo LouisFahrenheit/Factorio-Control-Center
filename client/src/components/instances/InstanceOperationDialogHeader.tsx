@@ -24,19 +24,34 @@ export function InstanceOperationDialogHeader({
     <div
       id={id}
       className={
-        'fu-modal__header server-update-dialog__header instance-operation-dialog__header instance-operation-dialog__header--' +
+        'mod-install-dialog__header instance-operation-dialog__header instance-operation-dialog__header--' +
         tone
       }
     >
-      <AppIcon name={icon} size={22} className="server-update-dialog__header-icon" />
-      <div className="server-update-dialog__header-text">
-        <span className="server-update-dialog__header-title">{title}</span>
-        {running && runningLabel ? (
-          <span className="server-update-dialog__header-badge server-update-dialog__header-badge--active">
-            {runningLabel}
-          </span>
-        ) : null}
+      <div className="mod-install-dialog__header-main">
+        <div
+          className="mod-install-dialog__header-icon-wrap"
+          style={
+            tone === 'danger'
+              ? {
+                  color: 'var(--error, #ef4444)',
+                  borderColor: 'rgba(239, 68, 68, 0.35)',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                }
+              : undefined
+          }
+        >
+          <AppIcon name={icon} size={18} />
+        </div>
+        <div className="mod-install-dialog__header-titles">
+          <h2 className="mod-install-dialog__title">{title}</h2>
+        </div>
       </div>
+      {running && runningLabel ? (
+        <span className="server-update-dialog__header-badge server-update-dialog__header-badge--active">
+          {runningLabel}
+        </span>
+      ) : null}
     </div>
   );
 }

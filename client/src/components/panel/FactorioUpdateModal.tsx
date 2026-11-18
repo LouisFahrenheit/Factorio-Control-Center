@@ -374,25 +374,22 @@ export function FactorioUpdateModal({
         aria-modal="true"
         aria-labelledby="fuTitle"
       >
-        <div
-          className="fu-modal__header server-update-dialog__header"
-          id="fuTitle"
-        >
-          <AppIcon
-            name="update"
-            size={22}
-            className="server-update-dialog__header-icon"
-          />
-          <div className="server-update-dialog__header-text">
-            <span className="server-update-dialog__header-title">
-              {t('web_update_modal_title')}
-            </span>
-            {!isPick && !isChecking && running ? (
-              <span className="server-update-dialog__header-badge server-update-dialog__header-badge--active">
-                {t('about_factorio_update_dialog_starting').replace('…', '')}
-              </span>
-            ) : null}
+        <div className="mod-install-dialog__header" id="fuTitle">
+          <div className="mod-install-dialog__header-main">
+            <div className="mod-install-dialog__header-icon-wrap">
+              <AppIcon name="update" size={18} />
+            </div>
+            <div className="mod-install-dialog__header-titles">
+              <h2 className="mod-install-dialog__title">
+                {t('web_update_modal_title')}
+              </h2>
+            </div>
           </div>
+          {!isPick && !isChecking && running ? (
+            <span className="server-update-dialog__header-badge server-update-dialog__header-badge--active">
+              {t('about_factorio_update_dialog_starting').replace('…', '')}
+            </span>
+          ) : null}
         </div>
 
         <div className="fu-modal__body server-update-dialog__body">

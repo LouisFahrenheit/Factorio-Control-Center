@@ -336,14 +336,24 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       params.experimental === true ||
       params.experimental === 'true' ||
       !!sel.item.experimentalUpdates;
+    const target = safeTrim(targetVersion);
     const picked = this.pickUpdates(
       prep.avail,
       prep.pkg,
       prep.ver,
       experimental,
+      target || undefined,
     );
-    let updates = picked.updates;
+    const updates = picked.updates;
     if (!updates.length) {
+      if (target) {
+        return {
+          ok: false,
+          error: 'target_version_not_available',
+          target_version: target,
+          available: picked.reachable,
+        };
+      }
       return {
         ok: true,
         updated: false,
@@ -351,18 +361,13 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         latest_stable: picked.latest[0] || prep.ver,
       };
     }
-    const target = safeTrim(targetVersion);
-    if (target) {
-      const targets = updates.map((u) => u.to);
-      if (!targets.includes(target)) {
-        return {
-          ok: false,
-          error: 'target_version_not_available',
-          target_version: target,
-          available: targets,
-        };
-      }
-      updates = updates.slice(0, targets.indexOf(target) + 1);
+    if (target && updates[updates.length - 1]?.to !== target) {
+      return {
+        ok: false,
+        error: 'target_version_not_available',
+        target_version: target,
+        available: picked.reachable,
+      };
     }
     this.state = this.idle();
     Object.assign(this.state, {
@@ -599,7 +604,6 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
       ]);
     }
     try {
-      let completed = 0;
       for (const [idx, update] of updates.entries()) {
         if (this.state.stop_requested) throw new Error('cancelled');
         const installed = await this.installedVersion(ctx.serverPath, ctx.exe);
@@ -611,7 +615,6 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
               'about_factorio_update_log_skip_already',
               [installed, update.from, update.to],
             );
-            completed = idx + 1;
             continue;
           }
           if (compareVersions(installed, update.from) > 0) {
@@ -621,7 +624,6 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
               'about_factorio_update_log_skip_ahead',
               [installed, update.from, update.to],
             );
-            completed = idx + 1;
             continue;
           }
         }
@@ -633,62 +635,136 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
           download_cur: 0,
           download_tot: 0,
         });
-        let url: string;
-        try {
-          url = await this.getDownloadLink(
+      }
+
+      // Phase 1: download all required patches before mutating server files
+      const preInstalled = await this.installedVersion(ctx.serverPath, ctx.exe);
+      const downloadedZips = new Array<string | null>(updates.length).fill(
+        null,
+      );
+      let nextDlIdx = 0;
+      let downloadedCount = 0;
+      const dlWorkers = Math.max(1, Math.min(4, updates.length));
+
+      const downloadWorker = async (): Promise<void> => {
+        while (true) {
+          if (this.state.stop_requested) throw new Error('cancelled');
+          const idx = nextDlIdx++;
+          if (idx >= updates.length) return;
+          const update = updates[idx];
+          if (
+            preInstalled &&
+            (compareVersions(preInstalled, update.to) >= 0 ||
+              compareVersions(preInstalled, update.from) > 0)
+          ) {
+            downloadedCount += 1;
+            continue;
+          }
+          const url = await this.getDownloadLink(
             ctx.user,
             ctx.token,
             ctx.pkg,
             update.from,
             update.to,
           );
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          if (
-            completed > 0 &&
-            (await this.tryFinishPartialUpdate(
-              ctx,
-              installed || update.from,
-              updates,
-              idx,
-            ))
-          ) {
-            return;
-          }
-          throw new Error(
-            `get-download-link ${update.from}->${update.to}: ${msg}`,
+          if (this.state.stop_requested) throw new Error('cancelled');
+          const zip = await this.downloadZip(url, dlDir);
+          if (this.state.stop_requested) throw new Error('cancelled');
+          downloadedZips[idx] = zip;
+          downloadedCount += 1;
+          Object.assign(this.state, {
+            current_step: downloadedCount,
+            from: update.from,
+            to: update.to,
+            phase: 'download',
+          });
+          this.log(
+            'success',
+            `Downloaded: ${basename(zip)} (${(statSync(zip).size / (1024 * 1024)).toFixed(1)} MB)`,
           );
         }
-        const zip = await this.downloadZip(url, dlDir);
+      };
+
+      await Promise.all(
+        Array.from({ length: dlWorkers }, () => downloadWorker()),
+      );
+      if (this.state.stop_requested) throw new Error('cancelled');
+
+      // Phase 2: apply all downloaded patches sequentially
+      for (let idx = 0; idx < updates.length; idx++) {
         if (this.state.stop_requested) throw new Error('cancelled');
-        this.log(
-          'success',
-          `Downloaded: ${basename(zip)} (${(statSync(zip).size / (1024 * 1024)).toFixed(1)} MB)`,
-        );
-        this.state.phase = 'apply';
+        const update = updates[idx];
+        const zip = downloadedZips[idx];
+        if (!zip) continue;
+
+        const installed = await this.installedVersion(ctx.serverPath, ctx.exe);
+        if (installed) {
+          if (compareVersions(installed, update.to) >= 0) {
+            this.log(
+              'info',
+              `Already at ${installed}, skip patch ${update.from} -> ${update.to}`,
+              'about_factorio_update_log_skip_already',
+              [installed, update.from, update.to],
+            );
+            rmSync(zip, { force: true });
+            continue;
+          }
+          if (compareVersions(installed, update.from) > 0) {
+            this.log(
+              'info',
+              `Version ${installed} is ahead of planned ${update.from}, skip patch to ${update.to}`,
+              'about_factorio_update_log_skip_ahead',
+              [installed, update.from, update.to],
+            );
+            rmSync(zip, { force: true });
+            continue;
+          }
+        }
+
+        Object.assign(this.state, {
+          current_step: idx + 1,
+          from: update.from,
+          to: update.to,
+          phase: 'apply',
+        });
         let stdout = '';
         let stderr = '';
         let exitCode = 0;
-        try {
-          const proc = await execFileAsync(ctx.exe, ['--apply-update', zip], {
-            timeout: 900_000,
-            windowsHide: true,
-          });
-          stdout = proc.stdout || '';
-          stderr = proc.stderr || '';
-        } catch (e) {
-          const err = e as {
-            stdout?: string;
-            stderr?: string;
-            code?: number | string;
-          };
-          stdout = err.stdout || '';
-          stderr = err.stderr || '';
-          exitCode = typeof err.code === 'number' ? err.code : 1;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          stdout = '';
+          stderr = '';
+          exitCode = 0;
+          try {
+            const proc = await execFileAsync(ctx.exe, ['--apply-update', zip], {
+              timeout: 900_000,
+              windowsHide: true,
+            });
+            stdout = proc.stdout || '';
+            stderr = proc.stderr || '';
+          } catch (e) {
+            const err = e as {
+              stdout?: string;
+              stderr?: string;
+              code?: number | string;
+            };
+            stdout = err.stdout || '';
+            stderr = err.stderr || '';
+            exitCode = typeof err.code === 'number' ? err.code : 1;
+          }
+          await this.waitApplySlaves();
+          if (exitCode === 0) break;
+          const errText = `${stdout}\n${stderr}`.toLowerCase();
+          if (
+            attempt < 2 &&
+            errText.includes('being used by another process')
+          ) {
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
+          break;
         }
         if (stdout.trim()) this.log('out', stdout.trim());
         if (stderr.trim()) this.log('out', stderr.trim());
-        await this.waitApplySlaves();
         const combined = `${stdout}\n${stderr}`.toLowerCase();
         if (combined.includes('unexpected content')) {
           this.fail('', 'about_factorio_update_log_unexpected_content');
@@ -700,7 +776,6 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         }
         rmSync(zip, { force: true });
         this.log('success', `Patch ${update.from} -> ${update.to} applied`);
-        completed = idx + 1;
       }
       const finalVer = await this.installedVersion(ctx.serverPath, ctx.exe);
       this.state.phase = 'done';
@@ -814,7 +889,12 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     pkg: string,
     fromVersion: string,
     experimental: boolean,
-  ): { updates: { from: string; to: string }[]; latest: [string, string] } {
+    requestedTarget?: string,
+  ): {
+    updates: { from: string; to: string }[];
+    latest: [string, string];
+    reachable: string[];
+  } {
     const rows = Array.isArray(avail[pkg])
       ? (avail[pkg] as Record<string, string>[])
       : [];
@@ -825,22 +905,64 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
         if (row.from && (!latest[1] || compareVersions(row.to, latest[1]) > 0))
           latest[1] = row.to;
     }
-    const map = new Map<string, string>();
+    const adj = new Map<string, string[]>();
     for (const row of rows) {
-      if (!row.from) continue;
+      if (!row.from || !row.to) continue;
       if (compareVersions(row.from, fromVersion) < 0) continue;
-      if (experimental || compareVersions(row.to, latest[0]) <= 0)
-        map.set(row.from, row.to);
+      if (!experimental && latest[0] && compareVersions(row.to, latest[0]) > 0)
+        continue;
+      const list = adj.get(row.from);
+      if (list) {
+        if (!list.includes(row.to)) list.push(row.to);
+      } else {
+        adj.set(row.from, [row.to]);
+      }
     }
+    for (const list of adj.values()) {
+      list.sort((a, b) => compareVersions(b, a));
+    }
+
+    const target = requestedTarget || (experimental ? latest[1] : latest[0]);
+    if (!target || compareVersions(fromVersion, target) >= 0) {
+      return { updates: [], latest, reachable: [] };
+    }
+
+    const parent = new Map<string, string>();
+    const queue: string[] = [fromVersion];
+    let bestReached = fromVersion;
+    let foundTarget = false;
+
+    for (let head = 0; head < queue.length; head++) {
+      const cur = queue[head];
+      if (cur === target) {
+        foundTarget = true;
+        if (requestedTarget) break;
+      }
+      for (const next of adj.get(cur) || []) {
+        if (next === fromVersion || parent.has(next)) continue;
+        parent.set(next, cur);
+        if (compareVersions(next, bestReached) > 0) {
+          bestReached = next;
+        }
+        queue.push(next);
+      }
+    }
+
+    const reachable = Array.from(parent.keys()).sort((a, b) =>
+      compareVersions(a, b),
+    );
+    const endNode = foundTarget ? target : requestedTarget ? '' : bestReached;
     const updates: { from: string; to: string }[] = [];
-    let cur = fromVersion;
-    while (map.has(cur)) {
-      const to = map.get(cur)!;
-      if (!experimental && compareVersions(cur, latest[0]) >= 0) break;
-      updates.push({ from: cur, to });
-      cur = to;
+    if (endNode) {
+      let cur = endNode;
+      while (cur !== fromVersion && parent.has(cur)) {
+        const prev = parent.get(cur)!;
+        updates.push({ from: prev, to: cur });
+        cur = prev;
+      }
+      updates.reverse();
     }
-    return { updates, latest };
+    return { updates, latest, reachable };
   }
 
   private async installedVersion(
