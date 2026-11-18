@@ -36,6 +36,9 @@ Server dependencies (production node_modules)
   License: MIT
   Repository: https://github.com/cspotcode/node-source-map-support
 
+@isaacs/nonrecursive-glob-match@1.1.0
+  License: BlueOak-1.0.0
+
 @jridgewell/resolve-uri@3.1.2
   License: MIT
   Repository: https://github.com/jridgewell/resolve-uri
@@ -528,7 +531,7 @@ get-proto@1.0.1
   License: MIT
   Repository: https://github.com/ljharb/get-proto
 
-glob@13.0.6
+glob@14.0.6
   License: BlueOak-1.0.0
   Repository: https://github.com/isaacs/node-glob
 
@@ -632,7 +635,7 @@ lodash@4.18.1
   License: MIT
   Repository: https://github.com/lodash/lodash
 
-lru-cache@11.4.0
+lru-cache@11.5.3
   License: BlueOak-1.0.0
   Repository: https://github.com/isaacs/node-lru-cache
 
@@ -672,11 +675,7 @@ mime-types@3.0.2
   License: MIT
   Repository: https://github.com/jshttp/mime-types
 
-minimatch@10.2.5
-  License: BlueOak-1.0.0
-  Repository: https://github.com/isaacs/minimatch
-
-minimatch@10.2.6
+minimatch@11.0.9
   License: BlueOak-1.0.0
   Repository: https://github.com/isaacs/minimatch
 
@@ -756,7 +755,7 @@ path-exists@4.0.0
   License: MIT
   Repository: https://github.com/sindresorhus/path-exists
 
-path-scurry@2.0.2
+path-scurry@3.0.0
   License: BlueOak-1.0.0
   Repository: https://github.com/isaacs/path-scurry
 
@@ -812,7 +811,7 @@ readable-stream@4.7.0
   License: MIT
   Repository: https://github.com/nodejs/readable-stream
 
-readdir-glob@3.0.0
+readdir-glob@4.0.0
   License: Apache-2.0
   Repository: https://github.com/Yqnn/node-readdir-glob
 

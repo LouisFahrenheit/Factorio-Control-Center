@@ -101,8 +101,15 @@
     "typescript-eslint": "^8.20.0"
   },
   "overrides": {
-    "glob": "^13.0.6",
-    "test-exclude": "^8.0.0",
+    "glob": "^14.0.6",
+    "readdir-glob": "^4.0.0",
+    "test-exclude": {
+      "glob": "^14.0.6",
+      "minimatch": "^11.0.9"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.9"
+    },
     "multer": "^2.4.0",
     "js-yaml": "^4.3.2",
     "handlebars": "^4.7.10",
