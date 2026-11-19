@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { TAB_PANEL_MOTION } from '../lib/motionPresets';
 import { webEffectsReduced } from '../theme/webEffects';
+import { useUserWebDisableEffects } from '../hooks/useUserWebDisableEffects';
 
 type TabPanelsTransitionProps = {
   activeKey: string;
@@ -17,17 +18,27 @@ export function TabPanelsTransition({
   className,
   stageClassName = 'tab-panels__stage',
 }: TabPanelsTransitionProps) {
-  const reduced = webEffectsReduced();
+  const userDisabled = useUserWebDisableEffects();
+  const reduced = userDisabled || webEffectsReduced();
+
+  if (reduced) {
+    const content = (
+      <div key={activeKey} className={stageClassName}>
+        {children}
+      </div>
+    );
+    return className ? <div className={className}>{content}</div> : content;
+  }
 
   const stage = (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={activeKey}
         className={stageClassName}
-        initial={reduced ? false : TAB_PANEL_MOTION.initial}
-        animate={reduced ? undefined : TAB_PANEL_MOTION.animate}
-        exit={reduced ? undefined : TAB_PANEL_MOTION.exit}
-        transition={reduced ? { duration: 0 } : TAB_PANEL_MOTION.transition}
+        initial={TAB_PANEL_MOTION.initial}
+        animate={TAB_PANEL_MOTION.animate}
+        exit={TAB_PANEL_MOTION.exit}
+        transition={TAB_PANEL_MOTION.transition}
       >
         {children}
       </motion.div>

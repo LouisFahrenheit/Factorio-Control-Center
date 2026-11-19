@@ -7,7 +7,9 @@ export { playAccessGrantedAnimation };
 function preferredUiLanguage(): string {
   const localOverride = getLocalLanguageOverride();
   if (localOverride) return localOverride;
-  return String(document.documentElement.getAttribute('lang') || 'en').trim() || 'en';
+  return (
+    String(document.documentElement.getAttribute('lang') || 'en').trim() || 'en'
+  );
 }
 
 export function useLoginClock(active: boolean) {
@@ -35,11 +37,23 @@ export function useLoginClock(active: boolean) {
   return clockRef;
 }
 
-export async function fetchAppHealth(): Promise<{ version?: string; build?: string } | null> {
+export interface AppHealthPayload {
+  ok?: boolean;
+  version?: string;
+  build?: string;
+  host_os?: 'windows' | 'linux' | 'unix' | string;
+  is_docker?: boolean;
+  docker_volumes?: unknown[];
+  host_ips?: string[];
+  uptime?: number;
+  node_version?: string;
+}
+
+export async function fetchAppHealth(): Promise<AppHealthPayload | null> {
   try {
     const r = await fetch('/api/health');
     if (!r.ok) return null;
-    const j = (await r.json()) as { ok?: boolean; version?: string; build?: string };
+    const j = (await r.json()) as AppHealthPayload;
     return j && j.ok ? j : null;
   } catch {
     return null;

@@ -45,7 +45,7 @@ export function AnimatedContextMenu({
             } as CSSProperties
           }
           initial={reduced ? false : { opacity: 0, scale: 0.94, y: -6 }}
-          animate={reduced ? undefined : { opacity: 1, scale: 1, y: 0 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={
             reduced
               ? undefined

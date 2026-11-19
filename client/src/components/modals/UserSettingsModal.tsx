@@ -31,6 +31,8 @@ import {
   setUserCircuitWireEnabled,
   readUserInterfaceHintsEnabled,
   setUserInterfaceHintsEnabled,
+  readUserWebDisableEffects,
+  setUserWebDisableEffects,
 } from '../../lib/userPrefs';
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
@@ -74,9 +76,7 @@ export function UserSettingsModal({
     setScale(getStoredUiScale());
     setLang(getLocalLanguageOverride());
     setToastSec(readUserToastDurationSec());
-    setDisableEffects(
-      localStorage.getItem('fcc_user_web_disable_effects') === '1',
-    );
+    setDisableEffects(readUserWebDisableEffects());
     setShowModBadges(readUserShowServerListModBadges());
     setShowSABadge(readUserShowServerListSpaceAgeBadge());
     setServerLogColorize(readUserServerLogColorize());
@@ -116,13 +116,7 @@ export function UserSettingsModal({
     applyUiScale(uiScale as FccUiScale);
     setLocalLanguageOverride(lang);
     setUserToastDurationSec(toastSec);
-    if (disableEffects)
-      document.documentElement.setAttribute('data-web-disable-effects', '1');
-    else document.documentElement.removeAttribute('data-web-disable-effects');
-    localStorage.setItem(
-      'fcc_user_web_disable_effects',
-      disableEffects ? '1' : '0',
-    );
+    setUserWebDisableEffects(disableEffects);
     setUserShowServerListModBadges(showModBadges);
     setUserShowServerListSpaceAgeBadge(showSABadge);
     setUserServerLogColorize(serverLogColorize);

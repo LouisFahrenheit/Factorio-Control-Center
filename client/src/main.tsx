@@ -9,6 +9,10 @@ import '@mantine/nprogress/styles.css';
 import App from './App.tsx';
 import { applyEffectiveTheme } from './theme/themes';
 import { initDynamicFavicon } from './theme/dynamicFavicon';
+import {
+  readUserWebDisableEffects,
+  syncWebDisableEffectsDOM,
+} from './lib/userPrefs';
 import '../../public/app.css';
 import './styles/global.css';
 import './styles/workspace-layout.css';
@@ -34,6 +38,7 @@ import './styles/panel-buttons.css';
 import './styles/modals/index.css';
 import './theme/index.css';
 
+syncWebDisableEffectsDOM(readUserWebDisableEffects());
 applyEffectiveTheme();
 initDynamicFavicon();
 

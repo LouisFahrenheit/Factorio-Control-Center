@@ -136,6 +136,8 @@ describe('SystemController', () => {
       expect(typeof res.version).toBe('string');
       expect(typeof res.host_os).toBe('string');
       expect(Array.isArray(res.host_ips)).toBe(true);
+      expect(typeof res.uptime).toBe('number');
+      expect(typeof res.node_version).toBe('string');
     });
 
     it('hostIps returns host_ips list', () => {

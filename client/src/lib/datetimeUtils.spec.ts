@@ -4,6 +4,7 @@ import {
   formatPanelDateOnly,
   formatPanelClock,
   formatRelativeAge,
+  formatUptimeDuration,
 } from './datetimeUtils';
 
 describe('datetimeUtils lib', () => {
@@ -40,7 +41,9 @@ describe('datetimeUtils lib', () => {
 
     it('should parse bracketed timestamps', () => {
       const stamp = '[2026-05-10T14:30:00.000Z]';
-      expect(parsePanelDateTime(stamp)).toBe(Date.parse('2026-05-10T14:30:00.000Z'));
+      expect(parsePanelDateTime(stamp)).toBe(
+        Date.parse('2026-05-10T14:30:00.000Z'),
+      );
     });
 
     it('should parse YYYY-MM-DD HH:mm:ss without timezone as UTC', () => {
@@ -71,6 +74,23 @@ describe('datetimeUtils lib', () => {
     it('should extract or format clock string', () => {
       const res = formatPanelClock('2026-05-10 14:30:00');
       expect(res).toMatch(/\d{2}:\d{2}:\d{2}/);
+    });
+  });
+
+  describe('formatUptimeDuration', () => {
+    it('returns placeholder for invalid or negative seconds', () => {
+      expect(formatUptimeDuration(null)).toBe('—');
+      expect(formatUptimeDuration(undefined)).toBe('—');
+      expect(formatUptimeDuration(-10)).toBe('—');
+      expect(formatUptimeDuration('invalid', 'N/A')).toBe('N/A');
+    });
+
+    it('formats seconds, minutes, hours, and days correctly', () => {
+      expect(formatUptimeDuration(45)).toBe('45s');
+      expect(formatUptimeDuration(135)).toBe('2m 15s');
+      expect(formatUptimeDuration(3665)).toBe('1h 01m');
+      expect(formatUptimeDuration(90000)).toBe('1d 01h');
+      expect(formatUptimeDuration(86400 * 5 + 3600 * 4)).toBe('5d 04h');
     });
   });
 });

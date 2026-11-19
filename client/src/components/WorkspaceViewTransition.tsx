@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { hasPendingAppReveal } from '../hooks/useAppShellReveal';
 import { FCC_EASE_OUT } from '../lib/motionPresets';
 import { webEffectsReduced } from '../theme/webEffects';
+import { useUserWebDisableEffects } from '../hooks/useUserWebDisableEffects';
 
 const VIEW_ENTER: Transition = { duration: 0.22, ease: FCC_EASE_OUT };
 const VIEW_EXIT: Transition = { duration: 0.15, ease: [0.4, 0, 0.65, 0.2] };
@@ -19,15 +20,26 @@ export function WorkspaceViewTransition({
   view,
   children,
 }: WorkspaceViewTransitionProps) {
-  const reduced = webEffectsReduced();
+  const userDisabled = useUserWebDisableEffects();
+  const reduced = userDisabled || webEffectsReduced();
   const toPanel = view === 'panel';
   const postLogin = hasPendingAppReveal();
+
+  if (reduced) {
+    return (
+      <div className="fcc-workspace-stage">
+        <div key={view} className="fcc-workspace-view">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={`fcc-workspace-stage${postLogin ? ' fcc-workspace-stage--login-reveal' : ''}`}
     >
-      <AnimatePresence mode="wait" initial={!reduced}>
+      <AnimatePresence mode="wait" initial={true}>
         <motion.div
           key={view}
           className="fcc-workspace-view"
