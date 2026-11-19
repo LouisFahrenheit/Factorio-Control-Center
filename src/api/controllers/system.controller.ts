@@ -88,6 +88,8 @@ export class SystemController {
       is_docker,
       docker_volumes,
       host_ips: listHostIPv4(),
+      uptime: Math.floor(process.uptime()),
+      node_version: process.version,
     };
   }
 

@@ -12,6 +12,7 @@ import {
 } from '../../hooks/useSlidingTabIndicator';
 import { AppIcon } from '../AppIcon';
 import { SlidingTabIndicator } from '../SlidingTabHighlight';
+import { useUserWebDisableEffects } from '../../hooks/useUserWebDisableEffects';
 
 const PANEL_TAB_ICONS: Record<PanelTabKey, AppIconName> = {
   main: 'start',
@@ -41,10 +42,46 @@ export function PanelTabBar({
   t,
 }: PanelTabBarProps) {
   const tabs = allowedPanelTabs(user);
-  const reduced = webEffectsReduced() || !animate;
+  const userDisabled = useUserWebDisableEffects();
+  const reduced = userDisabled || webEffectsReduced() || !animate;
   const tablistRef = useRef<HTMLElement>(null);
   const indicator = useSlidingTabIndicator(tablistRef, active);
   if (!tabs.length) return null;
+
+  if (reduced) {
+    return (
+      <nav
+        ref={tablistRef}
+        className="tabs"
+        role="tablist"
+        aria-label="sections"
+      >
+        <SlidingTabIndicator rect={indicator} />
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={
+              'tabs__tab btn--with-icon' +
+              (active === tab.key ? ' tabs__tab--active' : '')
+            }
+            role="tab"
+            id={tab.btnId}
+            aria-controls={tab.panelId}
+            aria-selected={active === tab.key}
+            data-i18n={tab.i18n}
+            {...{ [TAB_INDICATOR_ID_ATTR]: tab.key }}
+            onClick={() => onChange(tab.key)}
+          >
+            <span className="tabs__tab-inner">
+              <AppIcon name={PANEL_TAB_ICONS[tab.key]} size={20} />
+              {t(tab.i18n)}
+            </span>
+          </button>
+        ))}
+      </nav>
+    );
+  }
 
   return (
     <motion.nav
@@ -52,9 +89,9 @@ export function PanelTabBar({
       className="tabs"
       role="tablist"
       aria-label="sections"
-      variants={reduced ? undefined : SCREEN_HEADER_VARIANTS}
-      initial={reduced ? false : 'hidden'}
-      animate={reduced ? undefined : 'show'}
+      variants={SCREEN_HEADER_VARIANTS}
+      initial="hidden"
+      animate="show"
     >
       <SlidingTabIndicator rect={indicator} />
       {tabs.map((tab) => (

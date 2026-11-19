@@ -9,7 +9,11 @@ import {
 } from 'react';
 import { applyEffectiveTheme } from '../theme/themes';
 import { initUiScaleFromStorage } from '../theme/uiScale';
-import { setDefaultToastDurationSec } from '../lib/userPrefs';
+import {
+  readUserWebDisableEffects,
+  setDefaultToastDurationSec,
+  syncWebDisableEffectsDOM,
+} from '../lib/userPrefs';
 import {
   applyI18nToDocument,
   getLocalLanguageOverride,
@@ -89,9 +93,9 @@ export function useT() {
   return useContext(LocaleContext).t;
 }
 
-function syncWebDisableEffects(on: boolean): void {
-  if (on) document.documentElement.setAttribute('data-web-disable-effects', '1');
-  else document.documentElement.removeAttribute('data-web-disable-effects');
+function syncWebDisableEffects(serverDefault = false): void {
+  const on = readUserWebDisableEffects(serverDefault);
+  syncWebDisableEffectsDOM(on);
 }
 
 async function fetchLocaleBootstrap(): Promise<LocaleBootstrapPayload> {
@@ -115,22 +119,34 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [publicPageTheme, setPublicPageTheme] = useState('');
   const [publicPageHideTitle, setPublicPageHideTitle] = useState(false);
   const [publicPageHideSubtitle, setPublicPageHideSubtitle] = useState(false);
-  const [publicPageAllowModDownloads, setPublicPageAllowModDownloads] = useState(false);
+  const [publicPageAllowModDownloads, setPublicPageAllowModDownloads] =
+    useState(false);
   const [publicPageShowPlayers, setPublicPageShowPlayers] = useState(false);
   const [publicPageContactLink, setPublicPageContactLink] = useState('');
 
   const load = useCallback(async () => {
     initUiScaleFromStorage();
+    syncWebDisableEffects(false);
     try {
       const j = await fetchLocaleBootstrap();
       const next = j.strings || {};
       setStrings(next);
       setAvailableLanguages(
         Array.isArray(j.available_languages)
-          ? j.available_languages.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)
+          ? j.available_languages
+              .map((x) =>
+                String(x || '')
+                  .trim()
+                  .toLowerCase(),
+              )
+              .filter(Boolean)
           : [],
       );
-      setPanelDefaultLanguage(String(j.panel_default_language || 'en').trim().toLowerCase() || 'en');
+      setPanelDefaultLanguage(
+        String(j.panel_default_language || 'en')
+          .trim()
+          .toLowerCase() || 'en',
+      );
       if (typeof j.default_toast_duration_sec === 'number') {
         setDefaultToastDurationSec(j.default_toast_duration_sec);
       }
@@ -148,7 +164,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       setPublicPageTheme(j.public_page_theme || '');
       setPublicPageHideTitle(j.public_page_hide_title === true);
       setPublicPageHideSubtitle(j.public_page_hide_subtitle === true);
-      setPublicPageAllowModDownloads(j.public_page_allow_mod_downloads === true);
+      setPublicPageAllowModDownloads(
+        j.public_page_allow_mod_downloads === true,
+      );
       setPublicPageShowPlayers(j.public_page_show_players === true);
       setPublicPageContactLink(j.public_page_contact_link || '');
       if (j.lang) {
@@ -173,7 +191,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string, ...args: (string | number)[]) => translate(strings, key, ...args),
+    (key: string, ...args: (string | number)[]) =>
+      translate(strings, key, ...args),
     [strings],
   );
 
@@ -202,8 +221,28 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       t,
       reload: load,
     }),
-    [ready, strings, availableLanguages, panelDefaultLanguage, needsSetup, publicPageEnabled, publicPageRoute, publicPageTitle, publicPageSubtitle, publicPageTheme, publicPageHideTitle, publicPageHideSubtitle, publicPageAllowModDownloads, publicPageShowPlayers, publicPageContactLink, t, load],
+    [
+      ready,
+      strings,
+      availableLanguages,
+      panelDefaultLanguage,
+      needsSetup,
+      publicPageEnabled,
+      publicPageRoute,
+      publicPageTitle,
+      publicPageSubtitle,
+      publicPageTheme,
+      publicPageHideTitle,
+      publicPageHideSubtitle,
+      publicPageAllowModDownloads,
+      publicPageShowPlayers,
+      publicPageContactLink,
+      t,
+      load,
+    ],
   );
 
-  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
+  return (
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+  );
 }

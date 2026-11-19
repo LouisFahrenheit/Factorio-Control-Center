@@ -88,13 +88,14 @@ export function formatPanelClock(raw: unknown, placeholder = '—'): string {
   return m ? m[1] : s.length > 8 ? s.slice(-8) : s;
 }
 
-const AGE_UNITS: readonly { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
-  { unit: 'year', ms: 365 * 24 * 3600 * 1000 },
-  { unit: 'month', ms: 30 * 24 * 3600 * 1000 },
-  { unit: 'day', ms: 24 * 3600 * 1000 },
-  { unit: 'hour', ms: 3600 * 1000 },
-  { unit: 'minute', ms: 60 * 1000 },
-];
+const AGE_UNITS: readonly { unit: Intl.RelativeTimeFormatUnit; ms: number }[] =
+  [
+    { unit: 'year', ms: 365 * 24 * 3600 * 1000 },
+    { unit: 'month', ms: 30 * 24 * 3600 * 1000 },
+    { unit: 'day', ms: 24 * 3600 * 1000 },
+    { unit: 'hour', ms: 3600 * 1000 },
+    { unit: 'minute', ms: 60 * 1000 },
+  ];
 
 /** Relative age of a timestamp ("2 hours ago") in the panel UI locale. */
 export function formatRelativeAge(
@@ -106,15 +107,44 @@ export function formatRelativeAge(
   if (ms == null) return placeholder;
   const diff = ms - nowMs;
   const abs = Math.abs(diff);
-  const { unit, ms: unitMs } =
-    AGE_UNITS.find((u) => abs >= u.ms) ?? { unit: 'second' as const, ms: 1000 };
+  const { unit, ms: unitMs } = AGE_UNITS.find((u) => abs >= u.ms) ?? {
+    unit: 'second' as const,
+    ms: 1000,
+  };
   const value = unit === 'second' ? 0 : Math.round(diff / unitMs);
   try {
-    return new Intl.RelativeTimeFormat(panelUiLocale(), { numeric: 'auto' }).format(
-      value,
-      unit,
-    );
+    return new Intl.RelativeTimeFormat(panelUiLocale(), {
+      numeric: 'auto',
+    }).format(value, unit);
   } catch {
     return placeholder;
   }
+}
+
+/** Format duration in seconds into human-readable compact uptime (e.g. "14d 06h", "2h 45m", "38s"). */
+export function formatUptimeDuration(
+  totalSeconds: unknown,
+  placeholder = '—',
+): string {
+  if (totalSeconds == null || totalSeconds === '') return placeholder;
+  const sec =
+    typeof totalSeconds === 'number' ? totalSeconds : Number(totalSeconds);
+  if (!Number.isFinite(sec) || sec < 0) return placeholder;
+
+  const total = Math.floor(sec);
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, '0')}h`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+  }
+  return `${seconds}s`;
 }

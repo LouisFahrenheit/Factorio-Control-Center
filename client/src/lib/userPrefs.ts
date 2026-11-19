@@ -224,3 +224,36 @@ export function setUserInterfaceHintsEnabled(enabled: boolean): void {
     /* ignore */
   }
 }
+
+const WEB_DISABLE_EFFECTS_KEY = 'fcc_user_web_disable_effects';
+
+export function readUserWebDisableEffects(serverDefault = false): boolean {
+  try {
+    if (typeof localStorage === 'undefined') return serverDefault;
+    const raw = localStorage.getItem(WEB_DISABLE_EFFECTS_KEY);
+    if (raw === '1') return true;
+    if (raw === '0') return false;
+  } catch {
+    /* ignore */
+  }
+  return serverDefault;
+}
+
+export function syncWebDisableEffectsDOM(on: boolean): void {
+  if (typeof document === 'undefined') return;
+  if (on)
+    document.documentElement.setAttribute('data-web-disable-effects', '1');
+  else document.documentElement.removeAttribute('data-web-disable-effects');
+}
+
+export function setUserWebDisableEffects(disable: boolean): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(WEB_DISABLE_EFFECTS_KEY, disable ? '1' : '0');
+    }
+    syncWebDisableEffectsDOM(disable);
+    dispatchUserPrefsChanged();
+  } catch {
+    /* ignore */
+  }
+}

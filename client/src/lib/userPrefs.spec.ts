@@ -6,6 +6,8 @@ import {
   setUserServerLogColorize,
   readUserCircuitWireEnabled,
   setUserCircuitWireEnabled,
+  readUserWebDisableEffects,
+  setUserWebDisableEffects,
   USER_PREFS_CHANGED_EVENT,
 } from './userPrefs';
 
@@ -123,3 +125,33 @@ describe('userPrefs - circuitWireEnabled', () => {
   });
 });
 
+describe('userPrefs - webDisableEffects', () => {
+  it('defaults to false when nothing is stored', () => {
+    expect(readUserWebDisableEffects()).toBe(false);
+  });
+
+  it('respects fallback parameter when nothing is stored', () => {
+    expect(readUserWebDisableEffects(true)).toBe(true);
+  });
+
+  it('saves true and dispatches user prefs changed event', () => {
+    let eventFired = false;
+    const target = new EventTarget();
+    Object.defineProperty(globalThis, 'window', {
+      value: target,
+      writable: true,
+      configurable: true,
+    });
+
+    target.addEventListener(USER_PREFS_CHANGED_EVENT, () => {
+      eventFired = true;
+    });
+
+    setUserWebDisableEffects(true);
+    expect(readUserWebDisableEffects()).toBe(true);
+    expect(eventFired).toBe(true);
+
+    setUserWebDisableEffects(false);
+    expect(readUserWebDisableEffects()).toBe(false);
+  });
+});
