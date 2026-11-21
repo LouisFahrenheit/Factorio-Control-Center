@@ -8,11 +8,14 @@ import {
 import { fetchAppHealth } from '../../hooks/useLoginScreen';
 import { formatUptimeDuration } from '../../lib/datetimeUtils';
 import {
+  FACTORIO_ABOUT_URL,
+  FCC_GITHUB_URL,
   MATERIAL_SYMBOLS_LICENSE_URL,
   MATERIAL_SYMBOLS_SOURCE_URL,
   MIT_LICENSE_URL,
   NSSM_URL,
-  TABLER_ICONS_URL,
+  PUBLIC_DOMAIN_URL,
+  TABLER_ICONS_WEB_URL,
 } from '../../lib/appIcons';
 import { AppIcon } from '../AppIcon';
 import { ModalBackdrop } from './ModalBackdrop';
@@ -437,9 +440,16 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
                     <span className="about-modal__credit-mark" />
                     <span>{t('about_factorio_block_label')}</span>
                   </h4>
-                  <span className="about-modal__credit-badge">
-                    Wube Software
-                  </span>
+                  <a
+                    href={FACTORIO_ABOUT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-badge about-modal__credit-badge--link"
+                    title="Wube Software"
+                  >
+                    <span>Wube Software</span>
+                    <IconExternalLink size={10} stroke={2.2} />
+                  </a>
                 </div>
                 <div className="about-modal__credit-body">
                   <ul
@@ -466,20 +476,30 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
                     <span className="about-modal__credit-mark" />
                     <span>{t('window_title')}</span>
                   </h4>
-                  <span className="about-modal__credit-badge">MIT</span>
+                  <a
+                    href={MIT_LICENSE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-badge about-modal__credit-badge--link"
+                    title="MIT License"
+                  >
+                    <span>MIT</span>
+                    <IconExternalLink size={10} stroke={2.2} />
+                  </a>
                 </div>
                 <div className="about-modal__credit-body" id="aboutAppLicense">
-                  <p style={{ margin: 0 }}>
-                    {t('about_app_license_credit_intro')}
-                    <a
-                      href={MIT_LICENSE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      MIT License
-                    </a>
-                    {t('about_app_license_credit_outro')}
+                  <p className="about-modal__credit-desc">
+                    {t('about_fcc_credit_desc')}
                   </p>
+                  <a
+                    href={FCC_GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-link"
+                  >
+                    <span>GitHub</span>
+                    <IconExternalLink size={11} stroke={2} />
+                  </a>
                 </div>
               </article>
 
@@ -488,30 +508,32 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
                 <div className="about-modal__credit-head">
                   <h4 className="about-modal__credit-title">
                     <span className="about-modal__credit-mark" />
-                    <span>{t('about_ui_icons_label')}</span>
+                    <span>{t('about_material_symbols_label')}</span>
                   </h4>
-                  <span className="about-modal__credit-badge">Apache 2.0</span>
+                  <a
+                    href={MATERIAL_SYMBOLS_LICENSE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-badge about-modal__credit-badge--link"
+                    title="Apache License 2.0"
+                  >
+                    <span>Apache 2.0</span>
+                    <IconExternalLink size={10} stroke={2.2} />
+                  </a>
                 </div>
                 <div className="about-modal__credit-body" id="aboutIconsCredit">
-                  <p style={{ margin: 0 }}>
-                    {t('about_ui_icons_credit_intro')}
-                    <a
-                      href={MATERIAL_SYMBOLS_SOURCE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Material Symbols
-                    </a>
-                    {t('about_material_icons_credit_suffix')}
-                    <a
-                      href={MATERIAL_SYMBOLS_LICENSE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Apache License 2.0
-                    </a>
-                    {t('about_ui_icons_credit_outro')}
+                  <p className="about-modal__credit-desc">
+                    {t('about_material_symbols_desc')}
                   </p>
+                  <a
+                    href={MATERIAL_SYMBOLS_SOURCE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-link"
+                  >
+                    <span>Google Fonts</span>
+                    <IconExternalLink size={11} stroke={2} />
+                  </a>
                 </div>
               </article>
 
@@ -522,22 +544,33 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
                     <span className="about-modal__credit-mark" />
                     <span>{t('about_tabler_icons_label')}</span>
                   </h4>
-                  <span className="about-modal__credit-badge">MIT</span>
+                  <a
+                    href={MIT_LICENSE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-badge about-modal__credit-badge--link"
+                    title="MIT License"
+                  >
+                    <span>MIT</span>
+                    <IconExternalLink size={10} stroke={2.2} />
+                  </a>
                 </div>
                 <div
                   className="about-modal__credit-body"
                   id="aboutTablerIconsCredit"
                 >
-                  <p style={{ margin: 0 }}>
-                    <a
-                      href={TABLER_ICONS_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Tabler Icons
-                    </a>
-                    {t('about_tabler_icons_credit')}
+                  <p className="about-modal__credit-desc">
+                    {t('about_tabler_icons_desc')}
                   </p>
+                  <a
+                    href={TABLER_ICONS_WEB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-link"
+                  >
+                    <span>tabler.io</span>
+                    <IconExternalLink size={11} stroke={2} />
+                  </a>
                 </div>
               </article>
 
@@ -548,21 +581,30 @@ export function AboutModal({ open, onClose, t }: AboutModalProps) {
                     <span className="about-modal__credit-mark" />
                     <span>{t('about_nssm_label')}</span>
                   </h4>
-                  <span className="about-modal__credit-badge">
-                    Public Domain
-                  </span>
+                  <a
+                    href={PUBLIC_DOMAIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-badge about-modal__credit-badge--link"
+                    title="Public Domain"
+                  >
+                    <span>Public Domain</span>
+                    <IconExternalLink size={10} stroke={2.2} />
+                  </a>
                 </div>
                 <div className="about-modal__credit-body" id="aboutNssmCredit">
-                  <p style={{ margin: 0 }}>
-                    <a
-                      href={NSSM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      NSSM
-                    </a>
-                    {t('about_nssm_credit')}
+                  <p className="about-modal__credit-desc">
+                    {t('about_nssm_desc')}
                   </p>
+                  <a
+                    href={NSSM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-modal__credit-link"
+                  >
+                    <span>nssm.cc</span>
+                    <IconExternalLink size={11} stroke={2} />
+                  </a>
                 </div>
               </article>
             </div>
