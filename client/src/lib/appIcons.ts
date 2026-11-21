@@ -88,5 +88,11 @@ export const MATERIAL_SYMBOLS_LICENSE_URL =
   'https://www.apache.org/licenses/LICENSE-2.0';
 export const MATERIAL_SYMBOLS_SOURCE_URL = 'https://fonts.google.com/icons';
 export const MIT_LICENSE_URL = 'https://opensource.org/licenses/MIT';
+export const PUBLIC_DOMAIN_URL =
+  'https://creativecommons.org/publicdomain/mark/1.0/';
 export const NSSM_URL = 'https://nssm.cc/';
 export const TABLER_ICONS_URL = 'https://github.com/tabler/tabler-icons';
+export const TABLER_ICONS_WEB_URL = 'https://tabler.io/icons';
+export const FACTORIO_ABOUT_URL = 'https://www.factorio.com/game/about';
+export const FCC_GITHUB_URL =
+  'https://github.com/LouisFahrenheit/Factorio-Control-Center';
