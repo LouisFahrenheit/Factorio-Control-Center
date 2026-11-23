@@ -65,7 +65,7 @@ export function normalizeModListName(name: string): string {
 }
 
 const SPACE_AGE_DEP_RE = /^\s*space-age(?:\s|>|<|=|$)/i;
-const OPTIONAL_DEP_PREFIX_RE = /^(?:\(\?\)|\(optional\)|\?|~|\+)/i;
+const OPTIONAL_DEP_PREFIX_RE = /^(?:~\s*)*(?:\(\?\)|\(optional\)|\?|\+)/i;
 
 const MISSING_DEP_RE =
   /Missing\s+required\s+dependency\s+(.+?)(?:\s*>=|\s*$|\s*\()/i;

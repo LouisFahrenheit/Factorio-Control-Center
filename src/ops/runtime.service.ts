@@ -139,6 +139,7 @@ export class RuntimeService implements OnModuleDestroy {
     this.playerStatsTimer = setInterval(() => {
       this.flushOnlinePlayersStats();
     }, 60000);
+    this.playerStatsTimer.unref();
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -592,7 +593,7 @@ export class RuntimeService implements OnModuleDestroy {
           return;
         }
 
-        await new Promise((r) => setTimeout(r, STOP_WATCHDOG_POLL_MS));
+        await new Promise((r) => setTimeout(r, STOP_WATCHDOG_POLL_MS).unref());
       }
     } finally {
       rt.stopWatchdogActive = false;

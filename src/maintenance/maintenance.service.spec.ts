@@ -133,10 +133,12 @@ describe('MaintenanceService', () => {
 
     mockDispatch = {
       dispatch: jest.fn(),
+      dispatchWithInstance: jest.fn(),
     };
 
     mockAuditLog = {
       listReports: jest.fn().mockReturnValue([{ run_id: 'rep-1' }]),
+      appendMaintenanceRun: jest.fn(),
       endManualSession: jest.fn(),
       appendManualResumeStep: jest.fn(),
     };
@@ -330,6 +332,275 @@ describe('MaintenanceService', () => {
       const clearRes = service.clearManual({ instance_id: 'inst-1' });
       expect(clearRes).toEqual({ ok: true });
       expect(service.hasPendingManual('inst-1')).toBe(false);
+    });
+  });
+
+  describe('job execution pipeline', () => {
+    interface MaintenanceServicePrivate {
+      runJob(
+        task: MaintenanceTask,
+        fireIso: string,
+        taskId: string,
+        initiatedBy?: string,
+      ): Promise<void>;
+    }
+
+    it('runs stop -> lock -> factorio & mod updates -> start -> unlock and disables oneshot task', async () => {
+      storedSchedules.push({
+        id: 'oneshot-update',
+        active: true,
+        timeHhmm: '04:00',
+        weekdays: [1],
+        repeatWeekly: false,
+        manualOnly: false,
+        timezone: 'UTC',
+        instanceIds: ['inst-1'],
+        options: {
+          update_factorio: true,
+          update_mods: true,
+          maintenance: false,
+        },
+        lastRunKey: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      let currentStatus = 'running';
+      const opCalls: Array<{ op: string; payload?: Record<string, unknown> }> =
+        [];
+
+      (mockDispatch.dispatchWithInstance as jest.Mock).mockImplementation(
+        (_iid: string, op: string, payload?: Record<string, unknown>) => {
+          opCalls.push({ op, payload });
+          if (op === 'stop_server') {
+            currentStatus = 'stopped';
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'start_server') {
+            currentStatus = 'running';
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'status') {
+            return Promise.resolve({ status_kind: currentStatus });
+          }
+          if (op === 'instance_maintenance_lock') {
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'factorio_update') {
+            return Promise.resolve({ ok: true, started: true });
+          }
+          if (op === 'factorio_update_status') {
+            return Promise.resolve({ phase: 'done' });
+          }
+          if (op === 'mods_job_start') {
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'mods_job_status') {
+            return Promise.resolve({ phase: 'done', summary: { updated: 2 } });
+          }
+          return Promise.resolve({ ok: true });
+        },
+      );
+
+      const priv = service as unknown as MaintenanceServicePrivate;
+      await priv.runJob(
+        {
+          id: 'oneshot-update',
+          active: true,
+          time_hhmm: '04:00',
+          weekdays: [1],
+          repeat_weekly: false,
+          manual_only: false,
+          instance_ids: ['inst-1'],
+          options: {
+            update_factorio: true,
+            update_mods: true,
+            maintenance: false,
+          },
+        },
+        '2026-06-01T04:00:00.000Z',
+        'oneshot-update',
+      );
+
+      const ops = opCalls.map((c) => c.op);
+      expect(ops).toEqual([
+        'stop_server',
+        'status',
+        'instance_maintenance_lock',
+        'factorio_update',
+        'factorio_update_status',
+        'mods_job_start',
+        'mods_job_status',
+        'start_server',
+        'status',
+        'instance_maintenance_lock',
+      ]);
+
+      const lockCalls = opCalls.filter(
+        (c) => c.op === 'instance_maintenance_lock',
+      );
+      expect(lockCalls[0].payload?.locked).toBe(true);
+      expect(lockCalls[1].payload?.locked).toBe(false);
+
+      // Oneshot task disabled after successful run
+      expect(storedSchedules[0].active).toBe(false);
+      expect(mockAuditLog.appendMaintenanceRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          task_id: 'oneshot-update',
+          success: true,
+          error: '',
+        }),
+      );
+    });
+
+    it('stops server without restarting and records pending state in maintenance-only mode', async () => {
+      (mockDispatch.dispatchWithInstance as jest.Mock).mockImplementation(
+        (_iid: string, op: string) => {
+          if (op === 'status') {
+            return Promise.resolve({ status_kind: 'stopped' });
+          }
+          return Promise.resolve({ ok: true });
+        },
+      );
+
+      const priv = service as unknown as MaintenanceServicePrivate;
+      await priv.runJob(
+        {
+          id: 'maint-stop',
+          active: true,
+          time_hhmm: '02:00',
+          weekdays: [],
+          repeat_weekly: false,
+          manual_only: true,
+          instance_ids: ['inst-1'],
+          options: {
+            maintenance: true,
+            update_mods: false,
+            update_factorio: false,
+          },
+        },
+        '2026-06-01T02:00:00.000Z-manual',
+        'maint-stop',
+        'Admin',
+      );
+
+      expect(service.hasPendingManual('inst-1')).toBe(true);
+      const calledOps = (
+        mockDispatch.dispatchWithInstance as jest.Mock
+      ).mock.calls.map((args: unknown[]) => args[1]);
+      expect(calledOps).toContain('stop_server');
+      expect(calledOps).not.toContain('start_server');
+      expect(mockAuditLog.appendMaintenanceRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          web_actor: 'Admin',
+        }),
+      );
+    });
+
+    it('skips mod update when policy is cancel and mods require newer Factorio, then restarts server', async () => {
+      let currentStatus = 'running';
+      (mockDispatch.dispatchWithInstance as jest.Mock).mockImplementation(
+        (_iid: string, op: string) => {
+          if (op === 'stop_server') {
+            currentStatus = 'stopped';
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'start_server') {
+            currentStatus = 'running';
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'status') {
+            return Promise.resolve({ status_kind: currentStatus });
+          }
+          if (op === 'mods_update_all_plan') {
+            return Promise.resolve({
+              ok: true,
+              mods_needing_game_update: [{ name: 'space-exploration' }],
+            });
+          }
+          return Promise.resolve({ ok: true });
+        },
+      );
+
+      const priv = service as unknown as MaintenanceServicePrivate;
+      await priv.runJob(
+        {
+          id: 'mods-cancel-policy',
+          active: true,
+          time_hhmm: '03:00',
+          weekdays: [1],
+          repeat_weekly: true,
+          manual_only: false,
+          instance_ids: ['inst-1'],
+          options: {
+            update_mods: true,
+            update_factorio: false,
+            maintenance: false,
+            mods_game_version_policy: 'cancel',
+          },
+        },
+        '2026-06-01T03:00:00.000Z',
+        'mods-cancel-policy',
+      );
+
+      const calledOps = (
+        mockDispatch.dispatchWithInstance as jest.Mock
+      ).mock.calls.map((args: unknown[]) => args[1]);
+      expect(calledOps).toContain('mods_update_all_plan');
+      expect(calledOps).not.toContain('mods_job_start');
+      expect(calledOps).toContain('start_server');
+      expect(mockAuditLog.appendMaintenanceRun).toHaveBeenCalledWith(
+        expect.objectContaining({ success: true }),
+      );
+    });
+
+    it('releases maintenance lock and logs failure when mod update job fails to start', async () => {
+      const unlockCalls: boolean[] = [];
+      (mockDispatch.dispatchWithInstance as jest.Mock).mockImplementation(
+        (_iid: string, op: string, payload?: Record<string, unknown>) => {
+          if (op === 'status') {
+            return Promise.resolve({ status_kind: 'stopped' });
+          }
+          if (op === 'instance_maintenance_lock') {
+            unlockCalls.push(Boolean(payload?.locked));
+            return Promise.resolve({ ok: true });
+          }
+          if (op === 'mods_job_start') {
+            return Promise.resolve({ ok: false, error: 'portal_unreachable' });
+          }
+          return Promise.resolve({ ok: true });
+        },
+      );
+
+      const priv = service as unknown as MaintenanceServicePrivate;
+      await priv.runJob(
+        {
+          id: 'failing-mods',
+          active: true,
+          time_hhmm: '03:00',
+          weekdays: [1],
+          repeat_weekly: true,
+          manual_only: false,
+          instance_ids: ['inst-1'],
+          options: {
+            update_mods: true,
+            update_factorio: false,
+            maintenance: false,
+          },
+        },
+        '2026-06-01T03:00:00.000Z',
+        'failing-mods',
+      );
+
+      // Acquired true, then guaranteed unlock false in finally
+      expect(unlockCalls).toEqual([true, false]);
+      expect(mockAuditLog.appendMaintenanceRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: 'portal_unreachable',
+        }),
+      );
     });
   });
 });

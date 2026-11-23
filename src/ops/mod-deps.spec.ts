@@ -196,20 +196,26 @@ describe('mod-deps', () => {
   });
 
   describe('Space Age requirements detection', () => {
-    it('detects optional dependency strings', () => {
+    it('detects optional dependency strings while treating load-order ~ as required', () => {
       expect(isOptionalDependencyString('? optional-dep')).toBe(true);
       expect(isOptionalDependencyString('(optional) optional-dep')).toBe(true);
       expect(isOptionalDependencyString('(?) optional-dep')).toBe(true);
-      expect(isOptionalDependencyString('~ hidden-dep')).toBe(true);
+      expect(isOptionalDependencyString('~ ? optional-dep')).toBe(true);
       expect(isOptionalDependencyString('+ recommended-dep')).toBe(true);
       expect(isOptionalDependencyString('! conflict-dep')).toBe(true);
       expect(isOptionalDependencyString('')).toBe(true);
       expect(isOptionalDependencyString('required-dep >= 1.0')).toBe(false);
+      expect(
+        isOptionalDependencyString('~ space-exploration-postprocess >= 0.7.7'),
+      ).toBe(false);
     });
 
     it('checks if a dependency requires Space Age', () => {
       expect(dependencyStringRequiresSpaceAge('space-age')).toBe(true);
       expect(dependencyStringRequiresSpaceAge('space-age >= 2.0.0')).toBe(true);
+      expect(dependencyStringRequiresSpaceAge('~ space-age >= 2.0.0')).toBe(
+        true,
+      );
       expect(dependencyStringRequiresSpaceAge('? space-age')).toBe(false);
       expect(dependencyStringRequiresSpaceAge('flib >= 1.0')).toBe(false);
     });
@@ -260,18 +266,19 @@ describe('mod-deps', () => {
       ]);
     });
 
-    it('extracts required portal dependencies filtering out optional and builtin', () => {
+    it('extracts required portal dependencies including ~ load-order deps while filtering optional and builtin', () => {
       const release = {
         dependencies: [
           'base >= 2.0',
           'space-age',
           '? optional-mod',
           'flib >= 0.14.0',
+          '~ space-exploration-postprocess >= 0.7.7',
           '+ recommended-mod',
         ],
       };
       const required = portalDependencyNames(release);
-      expect(required).toEqual(['flib']);
+      expect(required).toEqual(['flib', 'space-exploration-postprocess']);
     });
 
     it('extracts recommended portal dependencies', () => {

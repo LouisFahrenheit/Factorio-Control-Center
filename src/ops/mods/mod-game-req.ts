@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { gameVersion, hasSpaceAge } from '../ops-utils';
-import { isOptionalDependencyString } from '../mod-deps';
 import { safeTrim } from '../../common/trim.util';
 
 const GAME_ENGINE_DEP_VER_RE =
@@ -29,7 +28,7 @@ function stripOptionalDepChain(raw: string): {
       opt = true;
       s = s.slice(3).trim();
       changed = true;
-    } else if (s.startsWith('?')) {
+    } else if (s.startsWith('?') || s.startsWith('+')) {
       opt = true;
       s = s.slice(1).trim();
       changed = true;
@@ -247,7 +246,6 @@ export function gameBelowModFactorioReq(
   const deps = info?.dependencies;
   if (Array.isArray(deps)) {
     for (const raw of deps) {
-      if (isOptionalDependencyString(String(raw || ''))) continue;
       const parsed = parseRequiredGameEngineDep(String(raw || ''));
       if (!parsed) continue;
       if (parsed.name === 'base')

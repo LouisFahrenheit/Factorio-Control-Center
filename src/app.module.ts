@@ -92,7 +92,9 @@ const reactAssets = join(fccRoot, 'client', 'dist', 'vite-assets');
 const clientDist = join(fccRoot, 'client', 'dist');
 
 // Ensure data/db directory exists
-const dataDir = join(fccRoot, 'data');
+const dataDir = resolve(
+  trimPath(process.env.FCC_DATA_DIR) || join(fccRoot, 'data'),
+);
 const dbDir = join(dataDir, 'db');
 if (!existsSync(dbDir)) mkdirSync(dbDir, { recursive: true });
 
@@ -125,7 +127,7 @@ const configureSqlitePragmas = (db: unknown): void => {
     BackupModule,
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
-      database: join(fccRoot, 'data', 'db', 'fcc_database.sqlite'),
+      database: join(dbDir, 'fcc_database.sqlite'),
       entities: [User, SystemPreference, GameInstance, MaintenanceSchedule],
       synchronize: true, // Auto-create tables (good for this use-case, but use migrations in prod ideally)
       enableWAL: true,
@@ -135,7 +137,7 @@ const configureSqlitePragmas = (db: unknown): void => {
     TypeOrmModule.forRoot({
       name: 'metricsConnection',
       type: 'better-sqlite3',
-      database: join(fccRoot, 'data', 'db', 'fcc_metrics.sqlite'),
+      database: join(dbDir, 'fcc_metrics.sqlite'),
       entities: [InstanceRawMetric, InstanceHourlyMetric],
       synchronize: true,
       enableWAL: true,

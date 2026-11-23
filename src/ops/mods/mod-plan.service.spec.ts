@@ -258,5 +258,67 @@ describe('ModPlanService', () => {
         expect(result.requires_confirmation).toBe(true);
       }
     });
+
+    it('resolves ~ load-order postprocess dependencies without self-listing or infinite cycles', async () => {
+      mockHasSpaceAge.mockReturnValue(true);
+      mockInstalledModVersions.mockReturnValue([]);
+      mockReadModList.mockReturnValue({
+        mods: [{ name: 'base', enabled: true }],
+      });
+
+      const seRelease = {
+        version: '0.7.64',
+        dependencies: [
+          'base >= 2.0.0',
+          '~ space-exploration-postprocess >= 0.7.7',
+        ],
+      };
+      const postRelease = {
+        version: '0.7.7',
+        dependencies: ['base >= 2.0.0', 'space-exploration >= 0.7.0'],
+      };
+
+      (mockPortal.fetchFull as jest.Mock).mockImplementation((name: string) => {
+        if (name === 'space-exploration') {
+          return Promise.resolve({
+            title: 'Space Exploration',
+            releases: [seRelease],
+          });
+        }
+        if (name === 'space-exploration-postprocess') {
+          return Promise.resolve({
+            title: 'Space Exploration Postprocess',
+            releases: [postRelease],
+          });
+        }
+        return Promise.reject(new Error(`Unexpected mod: ${name}`));
+      });
+
+      (mockPortal.resolveRelease as jest.Mock).mockImplementation(
+        (meta: { title?: string }) => {
+          if (meta.title === 'Space Exploration') return seRelease;
+          if (meta.title === 'Space Exploration Postprocess')
+            return postRelease;
+          return null;
+        },
+      );
+
+      const pm = {
+        serverPath: '/server',
+        modsDir: '/server/mods',
+      } as unknown as Parameters<typeof service.installPlanDetail>[0];
+
+      const result = await service.installPlanDetail(pm, 'space-exploration');
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.dependencies).toEqual(['space-exploration-postprocess']);
+        expect(result.to_install.map((m) => m.name)).toEqual([
+          'space-exploration',
+          'space-exploration-postprocess',
+        ]);
+      }
+      expect(mockPortal.fetchFull).toHaveBeenCalledTimes(2);
+    });
   });
 });

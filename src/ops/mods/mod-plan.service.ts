@@ -133,8 +133,9 @@ export class ModPlanService {
 
     const walk = async (name: string, isRoot = false): Promise<void> => {
       const n = String(name || '').trim();
-      if (!n || seen.has(n) || this.portal.isBuiltin(n)) return;
-      seen.add(n);
+      const key = n.toLowerCase();
+      if (!n || seen.has(key) || this.portal.isBuiltin(n)) return;
+      seen.add(key);
 
       const pv = await this.portalVersionsForMod(n, {
         version: isRoot ? targetVersion : undefined,
@@ -266,8 +267,9 @@ export class ModPlanService {
       isRoot = false,
     ): Promise<{ ok: true } | { ok: false; error: string; mod?: string }> => {
       const n = String(name || '').trim();
-      if (!n || seen.has(n) || this.portal.isBuiltin(n)) return { ok: true };
-      seen.add(n);
+      const key = n.toLowerCase();
+      if (!n || seen.has(key) || this.portal.isBuiltin(n)) return { ok: true };
+      seen.add(key);
       installTree.add(normalizeModListName(n));
 
       const pv = await this.portalVersionsForMod(n, {
@@ -327,8 +329,12 @@ export class ModPlanService {
         .filter((dep) => dep && !this.portal.isBuiltin(dep));
 
       for (const d of depList) {
-        if (!depsRequired.some((x) => x.toLowerCase() === d.toLowerCase()))
+        if (
+          d.toLowerCase() !== id.toLowerCase() &&
+          !depsRequired.some((x) => x.toLowerCase() === d.toLowerCase())
+        ) {
           depsRequired.push(d);
+        }
       }
 
       const depResults = await Promise.all(
@@ -344,7 +350,7 @@ export class ModPlanService {
         const isInstalled = installedModVersions(pm.modsDir, d).length > 0;
         if (
           !isInstalled &&
-          !seen.has(d) &&
+          !seen.has(d.toLowerCase()) &&
           !installTree.has(normalizeModListName(d))
         ) {
           recommendedMods.add(d);
@@ -464,8 +470,9 @@ export class ModPlanService {
 
     const walk = async (name: string): Promise<void> => {
       const n = String(name || '').trim();
-      if (!n || seen.has(n) || this.portal.isBuiltin(n)) return;
-      seen.add(n);
+      const key = n.toLowerCase();
+      if (!n || seen.has(key) || this.portal.isBuiltin(n)) return;
+      seen.add(key);
       installTree.add(normalizeModListName(n));
 
       const pv = await this.portalVersionsForMod(n, {
