@@ -888,8 +888,7 @@
 }
 
 :root[data-theme='cryogenics'] .status-bar .muted,
-:root[data-theme='cryogenics'] .status-meta,
-:root[data-theme='cryogenics'] #authUserInfo {
+:root[data-theme='cryogenics'] .status-meta {
   color: var(--cryo-panel-muted);
 }
 

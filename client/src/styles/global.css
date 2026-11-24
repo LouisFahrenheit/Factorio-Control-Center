@@ -5851,50 +5851,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   }
 }
 
-/* ── Instance Dashboard Host CPU, RAM & DISK Alerts ─────── */
-
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-warn
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-warn
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-warn
-  .instance-dashboard-stat__icon {
-  background: color-mix(
-    in srgb,
-    var(--starting, #ffb833) 14%,
-    var(--bg-main) 86%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--starting, #ffb833) 30%,
-    transparent
-  ) !important;
-}
-
-.instance-dashboard-top
-  .instance-dashboard-stat--cpu-danger
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--ram-danger
-  .instance-dashboard-stat__icon,
-.instance-dashboard-top
-  .instance-dashboard-stat--disk-danger
-  .instance-dashboard-stat__icon {
-  background: color-mix(
-    in srgb,
-    var(--error, #ff4d4d) 16%,
-    var(--bg-main) 84%
-  ) !important;
-  border-color: color-mix(
-    in srgb,
-    var(--error, #ff4d4d) 32%,
-    transparent
-  ) !important;
-}
-
 .instance-dashboard-top {
   display: inline-flex;
   align-items: stretch;
@@ -5979,6 +5935,32 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   .instance-dashboard-stat__icon {
   color: var(--text, #fff) !important;
   border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
+}
+
+/* ── Instance Dashboard Host CPU, RAM & DISK Alerts ─────── */
+
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-warn
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-warn
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-warn
+  .instance-dashboard-stat__icon {
+  color: var(--starting, #ffb833) !important;
+}
+
+.instance-dashboard-top
+  .instance-dashboard-stat--cpu-danger
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--ram-danger
+  .instance-dashboard-stat__icon,
+.instance-dashboard-top
+  .instance-dashboard-stat--disk-danger
+  .instance-dashboard-stat__icon {
+  color: var(--error, #ff4d4d) !important;
 }
 
 .instance-dashboard-top .instance-dashboard-stat__value {
@@ -6427,110 +6409,6 @@ body > .fu-modal-backdrop.mod-job-backdrop--top {
   box-shadow: none;
   border-color: transparent;
   background: transparent;
-}
-
-.instance-dashboard-user {
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  box-sizing: border-box;
-  padding: 5px 12px 5px 8px !important;
-  gap: 10px !important;
-  border-radius: 9px;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--bg-widget) 92%, white 8%) 0%,
-    color-mix(in srgb, var(--bg-main) 78%, var(--bg-widget) 22%) 100%
-  ) !important;
-  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 1px 0 rgba(0, 0, 0, 0.14) !important;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease !important;
-}
-
-.instance-dashboard-user:hover {
-  border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 2px 10px rgba(0, 0, 0, 0.22) !important;
-}
-
-.instance-dashboard-user__avatar {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 8px !important;
-  flex: 0 0 auto;
-  color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 70%,
-    var(--bg-data) 30%
-  ) !important;
-  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition:
-    color 0.18s ease,
-    border-color 0.18s ease,
-    background-color 0.18s ease !important;
-}
-
-.instance-dashboard-user:hover .instance-dashboard-user__avatar {
-  color: var(--text, #fff) !important;
-  border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 60%,
-    var(--bg-data) 40%
-  ) !important;
-}
-
-.instance-dashboard-user__body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
-}
-
-.instance-dashboard-user__name {
-  font-size: 0.9em !important;
-  font-weight: 700 !important;
-  line-height: 1.15;
-  color: var(--text, #fff) !important;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.instance-dashboard-user__role.access-users-role {
-  align-self: flex-start;
-  font-size: 0.65em !important;
-  font-weight: 650 !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase;
-  padding: 1px 6px !important;
-  border-radius: 4px !important;
-  line-height: 1.2 !important;
-  color: var(--text-muted, #9ba3af) !important;
-  background: color-mix(
-    in srgb,
-    var(--bg-main) 65%,
-    var(--bg-data) 35%
-  ) !important;
-  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
-  transition:
-    color 0.18s ease,
-    border-color 0.18s ease !important;
-}
-
-.instance-dashboard-user:hover
-  .instance-dashboard-user__role.access-users-role {
-  color: var(--text, #fff) !important;
-  border-color: color-mix(in srgb, var(--border) 65%, transparent) !important;
 }
 
 .status-bar .instance-dashboard-toolbar {

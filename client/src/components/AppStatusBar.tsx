@@ -1,9 +1,20 @@
 import { useLayoutEffect, useRef } from 'react';
 import { AppIcon } from './AppIcon';
-import { roleLabel, userRoleClass } from '../lib/webUserUtils';
-import { formatDashboardGameVersion, resolveStatusKind, statusLabel, statusTooltip, type PanelStatus } from '../types/panel';
+import { roleLabel } from '../lib/webUserUtils';
+import {
+  formatDashboardGameVersion,
+  resolveStatusKind,
+  statusLabel,
+  statusTooltip,
+  type PanelStatus,
+} from '../types/panel';
 import { formatRamGb, formatUptime } from '../lib/instanceUtils';
-import type { AuthUser, HostCpuInfo, HostDiskInfo, HostMemoryInfo } from '../types/instance';
+import type {
+  AuthUser,
+  HostCpuInfo,
+  HostDiskInfo,
+  HostMemoryInfo,
+} from '../types/instance';
 
 interface AppStatusBarProps {
   mode: 'instances' | 'panel';
@@ -27,7 +38,10 @@ interface AppStatusBarProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-function formatPanelUptime(sec: number | null | undefined, placeholder: string): string {
+function formatPanelUptime(
+  sec: number | null | undefined,
+  placeholder: string,
+): string {
   return formatUptime(sec, placeholder);
 }
 
@@ -61,11 +75,17 @@ function useAutoFitText(text: string, minScale = 0.58) {
 
         const computed = window.getComputedStyle(el);
         const baseFontSizePx = parseFloat(computed.fontSize) || 14.72;
-        const minPx = Math.max(8, Math.round(baseFontSizePx * minScale * 10) / 10);
+        const minPx = Math.max(
+          8,
+          Math.round(baseFontSizePx * minScale * 10) / 10,
+        );
 
         // Calculate target font size to fit inside clientWidth (with 4% safety margin)
         const ratio = clientWidth / scrollWidth;
-        let currentPx = Math.max(minPx, Math.floor(baseFontSizePx * ratio * 0.96 * 10) / 10);
+        let currentPx = Math.max(
+          minPx,
+          Math.floor(baseFontSizePx * ratio * 0.96 * 10) / 10,
+        );
 
         const applyFontSize = (px: number) => {
           el.style.setProperty('--panel-server-name-font-size', `${px}px`);
@@ -125,6 +145,9 @@ export function AppStatusBar({
   const serverNameRef = useAutoFitText(panelServerName);
   const kind = resolveStatusKind(status);
   const roleText = user ? roleLabel(user.role, t) : '';
+  const userSettingsTitle = user
+    ? `${t('web_user_settings_title')} — ${t('web_auth_user_info', user.username || '?', roleText)}`
+    : t('web_user_settings_title');
   const statusIcon =
     kind === 'running'
       ? 'start'
@@ -154,13 +177,23 @@ export function AppStatusBar({
           onClick={onServers}
         >
           <span className="instance-dashboard-stat__icon" aria-hidden="true">
-            <AppIcon name="arrow_back" size={16} title={t('web_back_to_servers')} />
+            <AppIcon
+              name="arrow_back"
+              size={16}
+              title={t('web_back_to_servers')}
+            />
           </span>
           <div className="instance-dashboard-stat__body">
-            <span className="instance-dashboard-stat__label" data-i18n="instances_tab_servers">
+            <span
+              className="instance-dashboard-stat__label"
+              data-i18n="instances_tab_servers"
+            >
               {t('instances_tab_servers')}
             </span>
-            <span className="instance-dashboard-stat__value" data-i18n="web_back">
+            <span
+              className="instance-dashboard-stat__value"
+              data-i18n="web_back"
+            >
               {t('web_back')}
             </span>
           </div>
@@ -170,53 +203,89 @@ export function AppStatusBar({
         {isInstances ? (
           <div id="serversTopDash" className="instance-dashboard-top">
             <div className="instance-dashboard-stat instance-dashboard-stat--total">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+              <span
+                className="instance-dashboard-stat__icon"
+                aria-hidden="true"
+              >
                 <AppIcon name="server" size={14} />
               </span>
               <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_total_servers">
+                <span
+                  className="instance-dashboard-stat__label"
+                  data-i18n="instances_total_servers"
+                >
                   {t('instances_total_servers')}
                 </span>
-                <span className="instance-dashboard-stat__value" id="instancesTotalTop">
+                <span
+                  className="instance-dashboard-stat__value"
+                  id="instancesTotalTop"
+                >
                   {dashboard?.total ?? 0}
                 </span>
               </div>
             </div>
             <div className="instance-dashboard-stat instance-dashboard-stat--running">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+              <span
+                className="instance-dashboard-stat__icon"
+                aria-hidden="true"
+              >
                 <AppIcon name="start" size={18} />
               </span>
               <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_running_servers">
+                <span
+                  className="instance-dashboard-stat__label"
+                  data-i18n="instances_running_servers"
+                >
                   {t('instances_running_servers')}
                 </span>
-                <span className="instance-dashboard-stat__value" id="instancesRunningTop">
+                <span
+                  className="instance-dashboard-stat__value"
+                  id="instancesRunningTop"
+                >
                   {dashboard?.running ?? 0}
                 </span>
               </div>
             </div>
             <div className="instance-dashboard-stat instance-dashboard-stat--stopped">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+              <span
+                className="instance-dashboard-stat__icon"
+                aria-hidden="true"
+              >
                 <AppIcon name="stop" size={18} />
               </span>
               <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_stopped_servers">
+                <span
+                  className="instance-dashboard-stat__label"
+                  data-i18n="instances_stopped_servers"
+                >
                   {t('instances_stopped_servers')}
                 </span>
-                <span className="instance-dashboard-stat__value" id="instancesStoppedTop">
+                <span
+                  className="instance-dashboard-stat__value"
+                  id="instancesStoppedTop"
+                >
                   {dashboard?.stopped ?? 0}
                 </span>
               </div>
             </div>
             <div className="instance-dashboard-stat instance-dashboard-stat--online">
-              <span className="instance-dashboard-stat__icon" aria-hidden="true">
+              <span
+                className="instance-dashboard-stat__icon"
+                aria-hidden="true"
+              >
                 <AppIcon name="users" size={16} />
               </span>
               <div className="instance-dashboard-stat__body">
-                <span className="instance-dashboard-stat__label" data-i18n="instances_online_all">
+                <span
+                  className="instance-dashboard-stat__label"
+                  data-i18n="instances_online_all"
+                >
                   {t('instances_online_all')}
                 </span>
-                <span className="instance-dashboard-stat__value" id="instancesOnlineTop">
+                <span
+                  className="instance-dashboard-stat__value"
+                  id="instancesOnlineTop"
+                >
                   {dashboard?.online ?? 0}
                 </span>
               </div>
@@ -225,157 +294,246 @@ export function AppStatusBar({
             dashboard?.hostRam ||
             dashboard?.hostDisk ||
             typeof dashboard?.hostUptime === 'number' ? (
-              <div className="instance-dashboard-top__divider" aria-hidden="true" />
+              <div
+                className="instance-dashboard-top__divider"
+                aria-hidden="true"
+              />
             ) : null}
-            {dashboard?.hostCpu ? (() => {
-              const pct = Math.max(0, Math.min(100, Math.round(dashboard.hostCpu.percent)));
-              const isCpuDanger = pct >= 90;
-              const isCpuWarn = !isCpuDanger && pct >= 75;
-              const cpuTitle = t('instances_host_cpu_title', pct, dashboard.hostCpu.cores);
-              return (
-                <div
-                  className={
-                    'instance-dashboard-stat instance-dashboard-stat--cpu' +
-                    (isCpuDanger
-                      ? ' instance-dashboard-stat--cpu-danger'
-                      : isCpuWarn
-                        ? ' instance-dashboard-stat--cpu-warn'
-                        : '')
-                  }
-                  title={cpuTitle}
-                >
-                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                    <AppIcon name="cpu" size={16} />
-                  </span>
-                  <div className="instance-dashboard-stat__body">
-                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_cpu">
-                      {t('instances_host_cpu')}
-                    </span>
-                    <span className="instance-dashboard-stat__value" id="instancesCpuTop">
-                      {pct}<span className="instance-dashboard-stat__unit">%</span>
-                    </span>
-                  </div>
-                </div>
-              );
-            })() : null}
-            {dashboard?.hostRam ? (() => {
-              const usedGb = formatRamGb(dashboard.hostRam.used);
-              const totalGb = formatRamGb(dashboard.hostRam.total);
-              const freeGb = formatRamGb(dashboard.hostRam.free);
-              const pct =
-                dashboard.hostRam.total > 0
-                  ? Math.round((dashboard.hostRam.used / dashboard.hostRam.total) * 100)
-                  : 0;
-              const isRamDanger = pct >= 90 || dashboard.hostRam.free < 1.5 * 1024 * 1024 * 1024;
-              const isRamWarn = !isRamDanger && pct >= 75;
-              const ramTitle = t('instances_host_ram_title', usedGb, totalGb, pct, freeGb);
-              return (
-                <div
-                  className={
-                    'instance-dashboard-stat instance-dashboard-stat--ram' +
-                    (isRamDanger
-                      ? ' instance-dashboard-stat--ram-danger'
-                      : isRamWarn
-                        ? ' instance-dashboard-stat--ram-warn'
-                        : '')
-                  }
-                  title={ramTitle}
-                >
-                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                    <AppIcon name="memory" size={16} />
-                  </span>
-                  <div className="instance-dashboard-stat__body">
-                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_ram">
-                      {t('instances_host_ram')}
-                    </span>
-                    <span
-                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
-                      id="instancesRamTop"
+            {dashboard?.hostCpu
+              ? (() => {
+                  const pct = Math.max(
+                    0,
+                    Math.min(100, Math.round(dashboard.hostCpu.percent)),
+                  );
+                  const isCpuDanger = pct >= 90;
+                  const isCpuWarn = !isCpuDanger && pct >= 75;
+                  const cpuTitle = t(
+                    'instances_host_cpu_title',
+                    pct,
+                    dashboard.hostCpu.cores,
+                  );
+                  return (
+                    <div
+                      className={
+                        'instance-dashboard-stat instance-dashboard-stat--cpu' +
+                        (isCpuDanger
+                          ? ' instance-dashboard-stat--cpu-danger'
+                          : isCpuWarn
+                            ? ' instance-dashboard-stat--cpu-warn'
+                            : '')
+                      }
+                      title={cpuTitle}
                     >
-                      {usedGb} / {totalGb} <span className="instance-dashboard-stat__unit">GB</span>
-                    </span>
-                  </div>
-                </div>
-              );
-            })() : null}
-            {dashboard?.hostDisk ? (() => {
-              const usedGb = formatRamGb(dashboard.hostDisk.used);
-              const totalGb = formatRamGb(dashboard.hostDisk.total);
-              const freeGb = formatRamGb(dashboard.hostDisk.free);
-              const pct =
-                dashboard.hostDisk.total > 0
-                  ? Math.round((dashboard.hostDisk.used / dashboard.hostDisk.total) * 100)
-                  : 0;
-              const isDiskDanger =
-                pct >= 90 || dashboard.hostDisk.free < 10 * 1024 * 1024 * 1024;
-              const isDiskWarn =
-                !isDiskDanger &&
-                (pct >= 80 || dashboard.hostDisk.free < 25 * 1024 * 1024 * 1024);
-              const diskTitle = t('instances_host_disk_title', usedGb, totalGb, pct, freeGb);
-              return (
-                <div
-                  className={
-                    'instance-dashboard-stat instance-dashboard-stat--disk' +
-                    (isDiskDanger
-                      ? ' instance-dashboard-stat--disk-danger'
-                      : isDiskWarn
-                        ? ' instance-dashboard-stat--disk-warn'
-                        : '')
-                  }
-                  title={diskTitle}
-                >
-                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                    <AppIcon name="disk" size={16} />
-                  </span>
-                  <div className="instance-dashboard-stat__body">
-                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_disk">
-                      {t('instances_host_disk')}
-                    </span>
-                    <span
-                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
-                      id="instancesDiskTop"
+                      <span
+                        className="instance-dashboard-stat__icon"
+                        aria-hidden="true"
+                      >
+                        <AppIcon name="cpu" size={16} />
+                      </span>
+                      <div className="instance-dashboard-stat__body">
+                        <span
+                          className="instance-dashboard-stat__label"
+                          data-i18n="instances_host_cpu"
+                        >
+                          {t('instances_host_cpu')}
+                        </span>
+                        <span
+                          className="instance-dashboard-stat__value"
+                          id="instancesCpuTop"
+                        >
+                          {pct}
+                          <span className="instance-dashboard-stat__unit">
+                            %
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              : null}
+            {dashboard?.hostRam
+              ? (() => {
+                  const usedGb = formatRamGb(dashboard.hostRam.used);
+                  const totalGb = formatRamGb(dashboard.hostRam.total);
+                  const freeGb = formatRamGb(dashboard.hostRam.free);
+                  const pct =
+                    dashboard.hostRam.total > 0
+                      ? Math.round(
+                          (dashboard.hostRam.used / dashboard.hostRam.total) *
+                            100,
+                        )
+                      : 0;
+                  const isRamDanger =
+                    pct >= 90 ||
+                    dashboard.hostRam.free < 1.5 * 1024 * 1024 * 1024;
+                  const isRamWarn = !isRamDanger && pct >= 75;
+                  const ramTitle = t(
+                    'instances_host_ram_title',
+                    usedGb,
+                    totalGb,
+                    pct,
+                    freeGb,
+                  );
+                  return (
+                    <div
+                      className={
+                        'instance-dashboard-stat instance-dashboard-stat--ram' +
+                        (isRamDanger
+                          ? ' instance-dashboard-stat--ram-danger'
+                          : isRamWarn
+                            ? ' instance-dashboard-stat--ram-warn'
+                            : '')
+                      }
+                      title={ramTitle}
                     >
-                      {usedGb} / {totalGb} <span className="instance-dashboard-stat__unit">GB</span>
-                    </span>
-                  </div>
-                </div>
-              );
-            })() : null}
-            {typeof dashboard?.hostUptime === 'number' && dashboard.hostUptime >= 0 ? (() => {
-              const uptimeFormatted = formatUptime(dashboard.hostUptime, placeholder);
-              const uptimeTitle = t('instances_host_uptime_title', uptimeFormatted);
-              return (
-                <div
-                  className="instance-dashboard-stat instance-dashboard-stat--uptime"
-                  title={uptimeTitle}
-                >
-                  <span className="instance-dashboard-stat__icon" aria-hidden="true">
-                    <AppIcon name="history" size={16} />
-                  </span>
-                  <div className="instance-dashboard-stat__body">
-                    <span className="instance-dashboard-stat__label" data-i18n="instances_host_uptime">
-                      {t('instances_host_uptime')}
-                    </span>
-                    <span
-                      className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
-                      id="instancesUptimeTop"
+                      <span
+                        className="instance-dashboard-stat__icon"
+                        aria-hidden="true"
+                      >
+                        <AppIcon name="memory" size={16} />
+                      </span>
+                      <div className="instance-dashboard-stat__body">
+                        <span
+                          className="instance-dashboard-stat__label"
+                          data-i18n="instances_host_ram"
+                        >
+                          {t('instances_host_ram')}
+                        </span>
+                        <span
+                          className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                          id="instancesRamTop"
+                        >
+                          {usedGb} / {totalGb}{' '}
+                          <span className="instance-dashboard-stat__unit">
+                            GB
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              : null}
+            {dashboard?.hostDisk
+              ? (() => {
+                  const usedGb = formatRamGb(dashboard.hostDisk.used);
+                  const totalGb = formatRamGb(dashboard.hostDisk.total);
+                  const freeGb = formatRamGb(dashboard.hostDisk.free);
+                  const pct =
+                    dashboard.hostDisk.total > 0
+                      ? Math.round(
+                          (dashboard.hostDisk.used / dashboard.hostDisk.total) *
+                            100,
+                        )
+                      : 0;
+                  const isDiskDanger =
+                    pct >= 90 ||
+                    dashboard.hostDisk.free < 10 * 1024 * 1024 * 1024;
+                  const isDiskWarn =
+                    !isDiskDanger &&
+                    (pct >= 80 ||
+                      dashboard.hostDisk.free < 25 * 1024 * 1024 * 1024);
+                  const diskTitle = t(
+                    'instances_host_disk_title',
+                    usedGb,
+                    totalGb,
+                    pct,
+                    freeGb,
+                  );
+                  return (
+                    <div
+                      className={
+                        'instance-dashboard-stat instance-dashboard-stat--disk' +
+                        (isDiskDanger
+                          ? ' instance-dashboard-stat--disk-danger'
+                          : isDiskWarn
+                            ? ' instance-dashboard-stat--disk-warn'
+                            : '')
+                      }
+                      title={diskTitle}
                     >
-                      {uptimeFormatted}
-                    </span>
-                  </div>
-                </div>
-              );
-            })() : null}
+                      <span
+                        className="instance-dashboard-stat__icon"
+                        aria-hidden="true"
+                      >
+                        <AppIcon name="disk" size={16} />
+                      </span>
+                      <div className="instance-dashboard-stat__body">
+                        <span
+                          className="instance-dashboard-stat__label"
+                          data-i18n="instances_host_disk"
+                        >
+                          {t('instances_host_disk')}
+                        </span>
+                        <span
+                          className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                          id="instancesDiskTop"
+                        >
+                          {usedGb} / {totalGb}{' '}
+                          <span className="instance-dashboard-stat__unit">
+                            GB
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              : null}
+            {typeof dashboard?.hostUptime === 'number' &&
+            dashboard.hostUptime >= 0
+              ? (() => {
+                  const uptimeFormatted = formatUptime(
+                    dashboard.hostUptime,
+                    placeholder,
+                  );
+                  const uptimeTitle = t(
+                    'instances_host_uptime_title',
+                    uptimeFormatted,
+                  );
+                  return (
+                    <div
+                      className="instance-dashboard-stat instance-dashboard-stat--uptime"
+                      title={uptimeTitle}
+                    >
+                      <span
+                        className="instance-dashboard-stat__icon"
+                        aria-hidden="true"
+                      >
+                        <AppIcon name="history" size={16} />
+                      </span>
+                      <div className="instance-dashboard-stat__body">
+                        <span
+                          className="instance-dashboard-stat__label"
+                          data-i18n="instances_host_uptime"
+                        >
+                          {t('instances_host_uptime')}
+                        </span>
+                        <span
+                          className="instance-dashboard-stat__value instance-dashboard-stat__value--compact-stat"
+                          id="instancesUptimeTop"
+                        >
+                          {uptimeFormatted}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              : null}
           </div>
         ) : (
           <>
             <div className="panel-dashboard-top">
               <div className="instance-dashboard-stat panel-dashboard-stat--name">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="open_panel" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label" data-i18n="dashboard_server_name_label">
+                  <span
+                    className="instance-dashboard-stat__label"
+                    data-i18n="dashboard_server_name_label"
+                  >
                     {t('dashboard_server_name_label')}
                   </span>
                   <span
@@ -389,19 +547,31 @@ export function AppStatusBar({
                 </div>
               </div>
               <div
-                className={'instance-dashboard-stat panel-dashboard-stat--status panel-dashboard-stat--' + kind}
+                className={
+                  'instance-dashboard-stat panel-dashboard-stat--status panel-dashboard-stat--' +
+                  kind
+                }
                 title={status ? statusTooltip(status, t) : undefined}
               >
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name={statusIcon} size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label" data-i18n="server_status">
+                  <span
+                    className="instance-dashboard-stat__label"
+                    data-i18n="server_status"
+                  >
                     {t('server_status')}
                   </span>
                   <span
                     id="statusLed"
-                    className={'instance-dashboard-stat__value panel-dashboard-stat__value panel-dashboard-stat__value--' + kind}
+                    className={
+                      'instance-dashboard-stat__value panel-dashboard-stat__value panel-dashboard-stat__value--' +
+                      kind
+                    }
                     title={status ? statusTooltip(status, t) : undefined}
                   >
                     {status ? statusLabel(status, t) : '—'}
@@ -409,34 +579,61 @@ export function AppStatusBar({
                 </div>
               </div>
               <div className="instance-dashboard-stat panel-dashboard-stat--meta">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="open_portal" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label" data-i18n="dashboard_ip_port_label">
+                  <span
+                    className="instance-dashboard-stat__label"
+                    data-i18n="dashboard_ip_port_label"
+                  >
                     {t('dashboard_ip_port_label')}
                   </span>
-                  <span id="bindDisplay" className="instance-dashboard-stat__value instance-dashboard-stat__value--compact">
+                  <span
+                    id="bindDisplay"
+                    className="instance-dashboard-stat__value instance-dashboard-stat__value--compact"
+                  >
                     {status?.game_bind || placeholder}
                   </span>
                 </div>
               </div>
               <div className="instance-dashboard-stat panel-dashboard-stat--flags">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="open_portal" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label">{t('web_panel_visibility_label')}</span>
-                  <div className="panel-dashboard-flags" title={t('web_panel_visibility_label')}>
+                  <span className="instance-dashboard-stat__label">
+                    {t('web_panel_visibility_label')}
+                  </span>
+                  <div
+                    className="panel-dashboard-flags"
+                    title={t('web_panel_visibility_label')}
+                  >
                     <span
                       id="flagLan"
-                      className={'panel-dashboard-flag' + (status?.visibility_lan ? ' panel-dashboard-flag--on' : '')}
+                      className={
+                        'panel-dashboard-flag' +
+                        (status?.visibility_lan
+                          ? ' panel-dashboard-flag--on'
+                          : '')
+                      }
                     >
                       LAN
                     </span>
                     <span
                       id="flagPub"
-                      className={'panel-dashboard-flag' + (status?.visibility_public ? ' panel-dashboard-flag--on' : '')}
+                      className={
+                        'panel-dashboard-flag' +
+                        (status?.visibility_public
+                          ? ' panel-dashboard-flag--on'
+                          : '')
+                      }
                     >
                       PUB
                     </span>
@@ -444,7 +641,9 @@ export function AppStatusBar({
                       id="flagRuv"
                       className={
                         'panel-dashboard-flag' +
-                        (status?.require_user_verification ? ' panel-dashboard-flag--on' : '')
+                        (status?.require_user_verification
+                          ? ' panel-dashboard-flag--on'
+                          : '')
                       }
                     >
                       RUV
@@ -453,38 +652,67 @@ export function AppStatusBar({
                 </div>
               </div>
               <div className="instance-dashboard-stat panel-dashboard-stat--meta">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="update" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label">{t('web_panel_game_version_label')}</span>
-                  <span id="gameVersion" className="instance-dashboard-stat__value instance-dashboard-stat__value--compact">
-                    {formatDashboardGameVersion(status?.game_version, placeholder)}
+                  <span className="instance-dashboard-stat__label">
+                    {t('web_panel_game_version_label')}
+                  </span>
+                  <span
+                    id="gameVersion"
+                    className="instance-dashboard-stat__value instance-dashboard-stat__value--compact"
+                  >
+                    {formatDashboardGameVersion(
+                      status?.game_version,
+                      placeholder,
+                    )}
                   </span>
                 </div>
               </div>
               <div className="instance-dashboard-stat panel-dashboard-stat--online">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="users" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label" data-i18n="players_online">
+                  <span
+                    className="instance-dashboard-stat__label"
+                    data-i18n="players_online"
+                  >
                     {t('players_online')}
                   </span>
-                  <span id="onlineVal" className="instance-dashboard-stat__value">
+                  <span
+                    id="onlineVal"
+                    className="instance-dashboard-stat__value"
+                  >
                     {String(status?.online_players?.length ?? 0)}
                   </span>
                 </div>
               </div>
               <div className="instance-dashboard-stat panel-dashboard-stat--uptime">
-                <span className="instance-dashboard-stat__icon" aria-hidden="true">
+                <span
+                  className="instance-dashboard-stat__icon"
+                  aria-hidden="true"
+                >
                   <AppIcon name="history" size={16} />
                 </span>
                 <div className="instance-dashboard-stat__body">
-                  <span className="instance-dashboard-stat__label" data-i18n="server_uptime">
+                  <span
+                    className="instance-dashboard-stat__label"
+                    data-i18n="server_uptime"
+                  >
                     {t('server_uptime')}
                   </span>
-                  <span id="uptimeVal" className="instance-dashboard-stat__value">
+                  <span
+                    id="uptimeVal"
+                    className="instance-dashboard-stat__value"
+                  >
                     {status?.server_running
                       ? formatPanelUptime(status.uptime_seconds, placeholder)
                       : placeholder}
@@ -496,23 +724,6 @@ export function AppStatusBar({
         )}
       </div>
       <div className="status-meta status-meta--right">
-        {user && isInstances ? (
-          <div
-            id="authUserInfo"
-            className="instance-dashboard-user"
-            title={t('web_auth_user_info', user.username || '?', roleText)}
-          >
-            <span className="instance-dashboard-user__avatar" aria-hidden="true">
-              <AppIcon name="badge" size={16} />
-            </span>
-            <div className="instance-dashboard-user__body">
-              <span className="instance-dashboard-user__name">{user.username || '?'}</span>
-              <span className={'access-users-role instance-dashboard-user__role ' + userRoleClass(user.role)}>
-                {roleText}
-              </span>
-            </div>
-          </div>
-        ) : null}
         <div className="instance-dashboard-toolbar status-meta__actions status-meta__toolbar-icons">
           <button
             type="button"
@@ -530,8 +741,8 @@ export function AppStatusBar({
             className="instance-dashboard-toolbar__btn"
             id="btnUserSettings"
             data-i18n-title="web_user_settings_title"
-            title={t('web_user_settings_title')}
-            aria-label={t('web_user_settings_title')}
+            title={userSettingsTitle}
+            aria-label={userSettingsTitle}
             onClick={onUserSettings}
           >
             <AppIcon name="settings_account" size={18} />
