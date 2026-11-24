@@ -815,7 +815,6 @@
   "mobile_start_all_btn": "Start all",
   "mobile_refresh_btn": "Refresh",
   "mobile_whitelist_empty": "Whitelist is empty",
-  "warning_title": "Warning",
   "cannot_start_no_save": "Server cannot start without a save file.",
   "create_success_msg": "server-settings.json has been created.",
   "create_save_prompt": "Enter save file name",

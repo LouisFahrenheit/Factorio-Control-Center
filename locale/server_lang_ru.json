@@ -1425,7 +1425,6 @@
   "commands_add_category_first": "Сначала добавьте категорию.",
   "server_settings_json_not_found": "Файл server-settings.json не найден.",
   "default_command_name": "эту команду",
-  "warning_title": "Предупреждение",
   "saves_manager_btn": "Сохранения",
   "saves_manager_tree_header": "Файлы сохранений",
   "saves_manager_filter_none": "Нет сохранений по фильтру.",
