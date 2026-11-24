@@ -852,11 +852,13 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
   const previewLocalVer = previewItem
     ? installedByName.get(previewKey) || previewItem.installed_version || ''
     : '';
+  const previewTargetVer =
+    previewItem?.target_release_version || previewItem?.latest_version || '';
   const previewHasUpdate =
     Boolean(previewItem) &&
     Boolean(previewLocalVer) &&
-    Boolean(previewItem?.latest_version) &&
-    portalVersionNewer(previewItem?.latest_version || '', previewLocalVer);
+    Boolean(previewTargetVer) &&
+    portalVersionNewer(previewTargetVer, previewLocalVer);
   const previewThumb = previewItem
     ? previewItem.thumbnail || thumbMap[previewKey] || ''
     : '';
@@ -1519,10 +1521,12 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                           installedByName.get(key) ||
                           item.installed_version ||
                           '';
+                        const targetVer =
+                          item.target_release_version || item.latest_version;
                         const hasUpdate =
                           Boolean(localVer) &&
-                          Boolean(item.latest_version) &&
-                          portalVersionNewer(item.latest_version, localVer);
+                          Boolean(targetVer) &&
+                          portalVersionNewer(targetVer, localVer);
                         const portalModUrl = getModPortalUrl(item.name);
                         const resolvedThumb =
                           item.thumbnail || thumbMap[key] || '';
@@ -1591,9 +1595,17 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                                 >
                                   {item.title}
                                 </button>
-                                {item.latest_version ? (
-                                  <span className="mod-install-card__id">
-                                    v{item.latest_version}
+                                {targetVer ? (
+                                  <span
+                                    className="mod-install-card__id"
+                                    title={
+                                      item.latest_version &&
+                                      item.latest_version !== targetVer
+                                        ? `v${item.latest_version}`
+                                        : undefined
+                                    }
+                                  >
+                                    v{targetVer}
                                   </span>
                                 ) : null}
                                 {item.requires_space_age ? (

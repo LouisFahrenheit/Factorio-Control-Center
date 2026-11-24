@@ -177,6 +177,21 @@ describe('mod-game-req', () => {
       writeDataModInfo('space-age', { version: '2.0.32' });
       expect(gameBelowModFactorioReq(tempDir, release).below).toBe(false);
     });
+
+    it('uses fallbackGameVersion when serverPath has no base info.json', () => {
+      const release = {
+        info_json: {
+          factorio_version: '2.0',
+          dependencies: ['base >= 2.0.77'],
+        },
+      };
+      const resOutdated = gameBelowModFactorioReq('', release, '2.0.20');
+      expect(resOutdated.below).toBe(true);
+      expect(resOutdated.current).toBe('base 2.0.20');
+
+      const resCompatible = gameBelowModFactorioReq('', release, '2.0.80');
+      expect(resCompatible.below).toBe(false);
+    });
   });
 
   describe('firstPlanItemRequiringNewerGame', () => {

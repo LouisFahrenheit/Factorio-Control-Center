@@ -702,28 +702,120 @@ export class ModsOpsService {
         forceRefresh: Boolean(extra?.refresh),
       });
 
-      const enriched = searchRes.results.map((item) => {
+      // Collect all candidate mod names that are installed and might have updates
+      const candidateModNames = new Set<string>();
+      if (searchRes.allNames) {
+        for (const name of searchRes.allNames) {
+          candidateModNames.add(name);
+        }
+      }
+      for (const item of searchRes.results) {
+        const local = resolveInstalledVersion(item.name);
+        if (
+          local &&
+          item.latest_version &&
+          compareVersions(item.latest_version, local) > 0
+        ) {
+          candidateModNames.add(item.name);
+        }
+      }
+      if (searchRes.installedVersions) {
+        for (const [name, catVer] of Object.entries(
+          searchRes.installedVersions,
+        )) {
+          const local = resolveInstalledVersion(name);
+          if (local && catVer && compareVersions(catVer, local) > 0) {
+            candidateModNames.add(name);
+          }
+        }
+      }
+
+      const verifiedVersions = new Map<string, string>();
+      if (candidateModNames.size > 0) {
+        await Promise.all(
+          Array.from(candidateModNames).map(async (name) => {
+            try {
+              const pv = await this.portalVersionsForMod(name);
+              if (pv.ok && pv.version) {
+                verifiedVersions.set(name, pv.version);
+              }
+            } catch {
+              /* ignore individual mod check error */
+            }
+          }),
+        );
+      }
+
+      const resolvedPortalVersions: Record<string, string> = {};
+      if (searchRes.installedVersions) {
+        for (const [name, catVer] of Object.entries(
+          searchRes.installedVersions,
+        )) {
+          resolvedPortalVersions[name] = verifiedVersions.get(name) || catVer;
+        }
+      }
+      for (const [name, ver] of verifiedVersions.entries()) {
+        resolvedPortalVersions[name] = ver;
+      }
+
+      let finalResults = searchRes.results;
+      let finalAllNames = searchRes.allNames;
+      let finalTotal = searchRes.total;
+
+      if (onlyUpdates) {
+        const isTrueUpdate = (name: string, latestVer: string): boolean => {
+          const local = resolveInstalledVersion(name);
+          if (!local) return false;
+          const targetVer = verifiedVersions.get(name) || latestVer;
+          return compareVersions(targetVer, local) > 0;
+        };
+
+        finalResults = finalResults.filter((item) =>
+          isTrueUpdate(item.name, item.latest_version),
+        );
+        if (finalAllNames) {
+          finalAllNames = finalAllNames.filter((name) => {
+            const catVer = searchRes.installedVersions?.[name] || '';
+            return isTrueUpdate(name, catVer);
+          });
+          finalTotal = finalAllNames.length;
+        } else {
+          finalTotal = finalResults.length;
+        }
+      }
+
+      const enriched = finalResults.map((item) => {
         const nameLower = item.name.toLowerCase();
+        const targetReleaseVersion = verifiedVersions.get(item.name);
         return {
           ...item,
+          ...(targetReleaseVersion
+            ? { target_release_version: targetReleaseVersion }
+            : {}),
           installed_version: resolveInstalledVersion(item.name),
           bookmarked: bookmarksLower.has(nameLower),
         };
       });
+
+      const finalTotalPages =
+        onlyUpdates && searchRes.pageSize > 0
+          ? Math.max(1, Math.ceil(finalTotal / searchRes.pageSize))
+          : searchRes.totalPages;
+
       return {
         ok: true,
         results: enriched,
-        total: searchRes.total,
+        total: finalTotal,
         page: searchRes.page,
         page_size: searchRes.pageSize,
-        total_pages: searchRes.totalPages,
+        total_pages: finalTotalPages,
         game_version: gv,
         server_factorio_version: serverFv,
         factorio_version: searchRes.factorioVersion,
         facets: searchRes.facets,
-        ...(searchRes.allNames ? { all_names: searchRes.allNames } : {}),
-        ...(searchRes.installedVersions
-          ? { portal_versions: searchRes.installedVersions }
+        ...(finalAllNames ? { all_names: finalAllNames } : {}),
+        ...(Object.keys(resolvedPortalVersions).length > 0
+          ? { portal_versions: resolvedPortalVersions }
           : {}),
         has_credentials: Boolean(creds),
         bookmarks_count: bookmarksList.length,

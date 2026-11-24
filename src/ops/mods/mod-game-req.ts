@@ -227,9 +227,17 @@ function releaseFactorioRequirementString(
 export function gameBelowModFactorioReq(
   serverPath: string,
   release: Record<string, unknown>,
+  fallbackGameVersion?: string,
 ): { below: boolean; current: string; required: string } {
-  const { base: baseCur, spaceAge: saCur } =
-    installedBaseSpaceAgeVersions(serverPath);
+  const { base: baseInstalled, spaceAge: saCur } = serverPath
+    ? installedBaseSpaceAgeVersions(serverPath)
+    : { base: '', spaceAge: '' };
+  let baseCur = baseInstalled;
+  if (!baseCur && fallbackGameVersion) {
+    baseCur = fallbackGameVersion;
+  } else if (!baseCur && serverPath) {
+    baseCur = gameVersion(serverPath);
+  }
   const baseCurT = versionTuple(baseCur);
   const saCurT = versionTuple(saCur);
 

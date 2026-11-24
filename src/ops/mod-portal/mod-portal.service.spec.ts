@@ -278,6 +278,38 @@ describe('ModPortalService', () => {
       expect(rel?.['version']).toBe('2.0.0');
     });
 
+    it('skips release that requires newer game engine sub-version', () => {
+      mockOpsUtils.gameVersion.mockReturnValue('2.0.20');
+      mockModGameReq.gameBelowModFactorioReq.mockImplementation(
+        (_path: string, release: Record<string, unknown>) => ({
+          below: release.version === '2.0.0',
+          current: 'base 2.0.20',
+          required: 'base >= 2.0.77',
+        }),
+      );
+
+      const multiRelMeta = {
+        releases: [
+          {
+            version: '1.9.0',
+            info_json: { factorio_version: '2.0' },
+          },
+          {
+            version: '2.0.0',
+            info_json: {
+              factorio_version: '2.0',
+              dependencies: ['base >= 2.0.77'],
+            },
+          },
+        ],
+      };
+
+      const rel = service.resolveRelease(multiRelMeta, {
+        serverPath: '/factorio/server',
+      });
+      expect(rel?.['version']).toBe('1.9.0');
+    });
+
     it('falls back to newest release overall if no match or empty meta', () => {
       expect(service.resolveRelease({ releases: [] })).toBeNull();
       const rel = service.resolveRelease(sampleMeta, { gameVersion: '0.18.0' });

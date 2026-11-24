@@ -114,6 +114,7 @@ export interface ModPortalSearchItem {
   latest_version: string;
   factorio_version: string;
   released_at: string;
+  target_release_version?: string;
   installed_version?: string;
   bookmarked?: boolean;
 }
@@ -218,6 +219,7 @@ export interface ModPortalFullDetails {
   latest_version: string;
   released_at: string;
   requires_space_age: boolean;
+  target_release_version?: string;
   installed_version?: string;
   bookmarked?: boolean;
   dependencies_info?: ModPortalDependenciesInfo;

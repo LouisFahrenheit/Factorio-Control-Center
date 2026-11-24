@@ -5,7 +5,10 @@ import { join } from 'path';
 import { ModsOpsService } from './mods-ops.service';
 import { InstancesService } from '../../instances/instances.service';
 import { RuntimeService } from '../runtime.service';
-import { ModPortalService } from '../mod-portal/mod-portal.service';
+import {
+  ModPortalService,
+  ModPortalSearchItem,
+} from '../mod-portal/mod-portal.service';
 import { FccConfigService } from '../../config/fcc-config.service';
 import { ModsJobService } from './mods-job.service';
 import { ModPlanService } from './mod-plan.service';
@@ -113,6 +116,7 @@ describe('ModsOpsService', () => {
     pruneOldZips: jest.MockedFunction<
       (mod: string, ver: string, dir: string) => void
     >;
+    searchMods: jest.Mock;
   };
   let configMock: {
     langCode: string;
@@ -212,6 +216,7 @@ describe('ModsOpsService', () => {
       resolveRelease: jest.fn().mockReturnValue({ version: '0.14.0' }),
       factorioMajorMinor: jest.fn((_v: string) => '2.0'),
       pruneOldZips: jest.fn(),
+      searchMods: jest.fn(),
     };
     configMock = {
       langCode: 'ru',
@@ -792,6 +797,103 @@ describe('ModsOpsService', () => {
 
       expect(service.jobStop()).toEqual({ ok: true, cancelled: true });
       expect(jobsMock.stop).toHaveBeenCalled();
+    });
+  });
+
+  describe('searchPortal', () => {
+    it('resolves compatible release version when catalog latest exceeds installed build', async () => {
+      // Installed mod flib has version 0.14.0 (setup in beforeEach mockZip)
+      portalMock.searchMods.mockResolvedValue({
+        results: [
+          {
+            name: 'flib',
+            title: 'Factorio Library',
+            summary: '',
+            owner: 'raiguard',
+            downloads_count: 100,
+            thumbnail: '',
+            category: '',
+            requires_space_age: false,
+            latest_version: '5.0.0', // Catalog advertises 5.0.0
+            factorio_version: '2.0',
+            released_at: '2026-01-01',
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 40,
+        totalPages: 1,
+        factorioVersion: '2.0',
+        facets: { space_age: 0, categories: {} },
+        allNames: ['flib'],
+        installedVersions: { flib: '5.0.0' },
+      });
+
+      // But resolveRelease indicates compatible version for this server is 0.13.0 (same as installed 0.13.0)
+      portalMock.fetchFull.mockResolvedValue({
+        name: 'flib',
+        releases: [{ version: '0.13.0' }, { version: '5.0.0' }],
+      });
+      portalMock.resolveRelease.mockReturnValue({ version: '0.13.0' });
+
+      const res = await service.searchPortal('flib', 40, true, {
+        only_updates: true,
+      });
+
+      expect(res.ok).toBe(true);
+      // Because 0.13.0 <= local 0.13.0, this false-positive mod is filtered out of only_updates!
+      expect(res.results).toEqual([]);
+      expect(res.all_names).toEqual([]);
+      expect(res.total).toBe(0);
+      // And portal_versions reports the true compatible version, not the phantom 5.0.0!
+      expect(res.portal_versions).toEqual({ flib: '0.13.0' });
+    });
+
+    it('keeps genuine updates where compatible release exceeds installed build', async () => {
+      portalMock.searchMods.mockResolvedValue({
+        results: [
+          {
+            name: 'flib',
+            title: 'Factorio Library',
+            summary: '',
+            owner: 'raiguard',
+            downloads_count: 100,
+            thumbnail: '',
+            category: '',
+            requires_space_age: false,
+            latest_version: '0.15.0',
+            factorio_version: '2.0',
+            released_at: '2026-01-01',
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 40,
+        totalPages: 1,
+        factorioVersion: '2.0',
+        facets: { space_age: 0, categories: {} },
+        allNames: ['flib'],
+        installedVersions: { flib: '0.15.0' },
+      });
+
+      portalMock.fetchFull.mockResolvedValue({
+        name: 'flib',
+        releases: [{ version: '0.14.0' }, { version: '0.15.0' }],
+      });
+      portalMock.resolveRelease.mockReturnValue({ version: '0.15.0' });
+
+      const res = await service.searchPortal('flib', 40, true, {
+        only_updates: true,
+      });
+
+      expect(res.ok).toBe(true);
+      const results = (res as { results?: ModPortalSearchItem[] }).results;
+      expect(results).toHaveLength(1);
+      expect(results?.[0]?.name).toBe('flib');
+      expect(results?.[0]?.target_release_version).toBe('0.15.0');
+      expect(res.all_names).toEqual(['flib']);
+      expect(res.total).toBe(1);
+      expect(res.portal_versions).toEqual({ flib: '0.15.0' });
     });
   });
 });

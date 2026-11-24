@@ -5,7 +5,7 @@ import {
   formatRelativeAge,
 } from '../../lib/datetimeUtils';
 import { localizeModError } from '../../lib/modErrorUtils';
-import { getModPortalUrl } from '../../lib/modUtils';
+import { getModPortalUrl, portalVersionNewer } from '../../lib/modUtils';
 import { SPACE_AGE_LIST_ICON_URL } from '../../lib/serverListIcons';
 import type {
   ModPortalDependencyEntry,
@@ -639,7 +639,18 @@ export function ModPortalPreviewPane({
   const title = details?.title || seedItem.title;
   const owner = details?.owner || seedItem.owner;
   const summary = details?.summary || seedItem.summary;
+  const targetVer =
+    details?.target_release_version ||
+    details?.dependencies_info?.target_release_version ||
+    seedItem.target_release_version ||
+    details?.latest_version ||
+    seedItem.latest_version;
   const latestVer = details?.latest_version || seedItem.latest_version;
+  const effectiveHasUpdate = details
+    ? Boolean(localVersion) &&
+      Boolean(targetVer) &&
+      portalVersionNewer(targetVer, localVersion)
+    : hasUpdate;
   const releasedAt = details?.released_at || seedItem.released_at;
   const downloads = details?.downloads_count ?? seedItem.downloads_count;
   const requiresSpaceAge =
@@ -820,8 +831,17 @@ export function ModPortalPreviewPane({
           <div className="mod-portal-preview__hero-main">
             <div className="mod-portal-preview__title-row">
               <h3 className="mod-portal-preview__title">{title}</h3>
-              {latestVer ? (
-                <span className="mod-install-card__id">v{latestVer}</span>
+              {targetVer ? (
+                <span
+                  className="mod-install-card__id"
+                  title={
+                    latestVer && latestVer !== targetVer
+                      ? `v${latestVer}`
+                      : undefined
+                  }
+                >
+                  v{targetVer}
+                </span>
               ) : null}
               {requiresSpaceAge ? (
                 <span className="mod-install-card__sa-pill">
@@ -839,12 +859,15 @@ export function ModPortalPreviewPane({
                 <span
                   className={
                     'mod-install-card__badge' +
-                    (hasUpdate
+                    (effectiveHasUpdate
                       ? ' mod-install-card__badge--update'
                       : ' mod-install-card__badge--installed')
                   }
                 >
-                  <AppIcon name={hasUpdate ? 'update' : 'check'} size={12} />
+                  <AppIcon
+                    name={effectiveHasUpdate ? 'update' : 'check'}
+                    size={12}
+                  />
                   {t('mod_install_search_installed_badge', localVersion)}
                 </span>
               ) : null}
@@ -954,8 +977,8 @@ export function ModPortalPreviewPane({
               type="button"
               className={
                 'btn btn--with-icon mod-install-card__install-btn' +
-                (hasUpdate ? ' btn--update-available' : '') +
-                (localVersion && !hasUpdate ? ' is-installed' : '')
+                (effectiveHasUpdate ? ' btn--update-available' : '') +
+                (localVersion && !effectiveHasUpdate ? ' is-installed' : '')
               }
               title={
                 !canUseBookmarks
@@ -963,7 +986,7 @@ export function ModPortalPreviewPane({
                   : undefined
               }
               disabled={
-                (Boolean(localVersion) && !hasUpdate) ||
+                (Boolean(localVersion) && !effectiveHasUpdate) ||
                 serverBusy ||
                 blockUpdates ||
                 !canUseBookmarks
@@ -972,7 +995,7 @@ export function ModPortalPreviewPane({
             >
               <AppIcon
                 name={
-                  hasUpdate
+                  effectiveHasUpdate
                     ? 'package_update'
                     : localVersion
                       ? 'check'
@@ -980,7 +1003,7 @@ export function ModPortalPreviewPane({
                 }
                 size={15}
               />
-              {hasUpdate
+              {effectiveHasUpdate
                 ? t('mod_install_search_update_btn')
                 : localVersion
                   ? t('mod_install_search_installed_btn')

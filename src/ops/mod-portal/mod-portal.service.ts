@@ -46,6 +46,7 @@ export interface ModPortalSearchItem {
   latest_version: string;
   factorio_version: string;
   released_at: string;
+  target_release_version?: string;
 }
 
 export type ModPortalSortBy =
@@ -427,10 +428,15 @@ export class ModPortalService {
         (r) => this.releaseFactorioVersion(r) === targetFv,
       );
       if (matchingFv.length > 0) {
-        if (options?.serverPath) {
-          const compatible = matchingFv.filter(
-            (r) => !gameBelowModFactorioReq(options.serverPath!, r).below,
-          );
+        if (options?.serverPath || gv) {
+          const compatible = matchingFv.filter((r) => {
+            const check = gameBelowModFactorioReq(
+              options?.serverPath || '',
+              r,
+              gv,
+            );
+            return !check?.below;
+          });
           if (compatible.length > 0) {
             return compatible.sort((a, b) =>
               this.versionNewer(safeStr(a.version), safeStr(b.version))
