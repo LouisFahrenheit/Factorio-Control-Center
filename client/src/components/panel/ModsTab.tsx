@@ -440,18 +440,6 @@ export function ModsTab({ mods, t }: ModsTabProps) {
                 <button
                   type="button"
                   className="btn btn--with-icon"
-                  id="btnModUpdateAll"
-                  disabled={
-                    !mods.hasPortalMods || mods.serverBusy || mods.blockUpdates
-                  }
-                  onClick={() => void mods.updateAll()}
-                >
-                  <AppIcon name="package_update" size={16} />
-                  {t('mod_list_update_all_btn')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--with-icon"
                   id="btnModToggleAll"
                   disabled={!mods.hasPortalMods || mods.serverProcessBusy}
                   onClick={() => void mods.toggleAllEnabled()}

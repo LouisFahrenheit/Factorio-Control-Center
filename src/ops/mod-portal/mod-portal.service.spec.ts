@@ -974,6 +974,13 @@ describe('ModPortalService', () => {
       });
       expect(fetchMock).toHaveBeenCalledTimes(2);
 
+      const byBookmarkedPromise = await service.searchMods('', {
+        gameVersion: '2.0.28',
+        onlyBookmarked: true,
+        bookmarkedNamesLower: Promise.resolve(new Set(['flib'])),
+      });
+      expect(byBookmarkedPromise.results.map((r) => r.name)).toEqual(['flib']);
+
       const details = await service.fetchModDetails('flib');
       expect(details.title).toBe('Factorio Library');
       expect(details.images).toHaveLength(1);

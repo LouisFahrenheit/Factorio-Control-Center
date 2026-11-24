@@ -437,7 +437,6 @@
   "mod_list_builtin_installed_by": "Встроенный",
   "mod_list_check_portal_btn": "Проверить обновления",
   "mod_list_update_selected_btn": "Обновить",
-  "mod_list_update_all_btn": "Обновить все",
   "mod_list_disable_all_btn": "Отключить все",
   "mod_list_enable_all_btn": "Включить все",
   "mod_list_disable_all_ok": "Отключено модов: {0}.",

@@ -1117,7 +1117,7 @@ export class ModPortalService {
       includeCategories?: string[];
       excludeCategories?: string[];
       onlyBookmarked?: boolean;
-      bookmarkedNamesLower?: Set<string>;
+      bookmarkedNamesLower?: Set<string> | Promise<Set<string>>;
       searchInDescription?: boolean;
       owner?: string;
       hideInstalled?: boolean;
@@ -1171,7 +1171,10 @@ export class ModPortalService {
     );
     const spaceAgeMode = options?.spaceAgeMode || 'neutral';
     const onlyBookmarked = Boolean(options?.onlyBookmarked);
-    const bookmarksSet = options?.bookmarkedNamesLower;
+    const bookmarksSet =
+      options?.bookmarkedNamesLower instanceof Promise
+        ? await options.bookmarkedNamesLower
+        : options?.bookmarkedNamesLower;
     const hideInstalled = Boolean(options?.hideInstalled);
     const onlyInstalled = !hideInstalled && Boolean(options?.onlyInstalled);
     const installedSet = options?.installedNamesLower;

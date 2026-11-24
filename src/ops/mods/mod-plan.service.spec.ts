@@ -6,6 +6,7 @@ jest.mock('../ops-utils', () => {
   const actual = jest.requireActual<typeof opsUtils>('../ops-utils');
   return {
     ...actual,
+    gameVersion: jest.fn(),
     hasSpaceAge: jest.fn(),
     installedModVersions: jest.fn(),
     readModList: jest.fn(),
@@ -26,6 +27,9 @@ describe('ModPlanService', () => {
   const mockReadModList = opsUtils.readModList as jest.MockedFunction<
     typeof opsUtils.readModList
   >;
+  const mockGameVersion = opsUtils.gameVersion as jest.MockedFunction<
+    typeof opsUtils.gameVersion
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,6 +49,18 @@ describe('ModPlanService', () => {
       versionNewer: jest.fn((a: string, b: string) => a > b),
       listReleasesSummary: jest.fn(() => []),
       isValidPortalModId: jest.fn(() => true),
+      factorioMajorMinor: jest.fn((v: string) => {
+        const m = /^(\d+\.\d+)/.exec(v);
+        return m ? m[1] : '';
+      }),
+      releaseFactorioVersion: jest.fn((r: Record<string, unknown>) => {
+        const info = r.info_json as Record<string, unknown> | undefined;
+        return typeof info?.factorio_version === 'string'
+          ? info.factorio_version
+          : typeof r.factorio_version === 'string'
+            ? r.factorio_version
+            : '';
+      }),
     };
 
     service = new ModPlanService(mockPortal as ModPortalService);
@@ -319,6 +335,126 @@ describe('ModPlanService', () => {
         ]);
       }
       expect(mockPortal.fetchFull).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('scanUpdatesNeedingNewerGame', () => {
+    it('detects mods where latest portal release requires a newer engine version', async () => {
+      mockGameVersion.mockReturnValue('2.0.20');
+      mockReadModList.mockReturnValue({
+        mods: [
+          { name: 'base', enabled: true },
+          { name: 'more-infinite-research', enabled: true },
+        ],
+      });
+      mockInstalledModVersions.mockImplementation((_dir, name) => {
+        if (name === 'more-infinite-research') return ['2.4.9'];
+        return [];
+      });
+
+      const releases = [
+        {
+          version: '2.4.9',
+          factorio_version: '2.0',
+          info_json: {
+            factorio_version: '2.0',
+            dependencies: ['base >= 2.0.0'],
+          },
+        },
+        {
+          version: '5.0.20022',
+          factorio_version: '2.0',
+          info_json: {
+            factorio_version: '2.0',
+            dependencies: ['base >= 2.0.77'],
+          },
+        },
+      ];
+
+      (mockPortal.fetchFull as jest.Mock).mockResolvedValue({
+        title: 'More Infinite Research',
+        releases,
+      });
+
+      const pm = {
+        serverPath: '/server',
+        modsDir: '/server/mods',
+      } as unknown as Parameters<typeof service.scanUpdatesNeedingNewerGame>[0];
+
+      const res = await service.scanUpdatesNeedingNewerGame(pm);
+      expect(res).toEqual([
+        {
+          name: 'more-infinite-research',
+          current_factorio: 'base 2.0.20',
+          required_factorio: 'base ≥ 2.0.77',
+        },
+      ]);
+    });
+
+    it('ignores mods where latest portal release is already compatible', async () => {
+      mockGameVersion.mockReturnValue('2.0.80');
+      mockReadModList.mockReturnValue({
+        mods: [{ name: 'flib', enabled: true }],
+      });
+      mockInstalledModVersions.mockImplementation((_dir, name) => {
+        if (name === 'flib') return ['0.13.0'];
+        return [];
+      });
+
+      (mockPortal.fetchFull as jest.Mock).mockResolvedValue({
+        title: 'Flib Library',
+        releases: [
+          {
+            version: '0.14.0',
+            factorio_version: '2.0',
+            info_json: {
+              factorio_version: '2.0',
+              dependencies: ['base >= 2.0.0'],
+            },
+          },
+        ],
+      });
+
+      const pm = {
+        serverPath: '/server',
+        modsDir: '/server/mods',
+      } as unknown as Parameters<typeof service.scanUpdatesNeedingNewerGame>[0];
+
+      const res = await service.scanUpdatesNeedingNewerGame(pm);
+      expect(res).toEqual([]);
+    });
+
+    it('ignores mods that have no newer releases on the portal', async () => {
+      mockGameVersion.mockReturnValue('2.0.20');
+      mockReadModList.mockReturnValue({
+        mods: [{ name: 'flib', enabled: true }],
+      });
+      mockInstalledModVersions.mockImplementation((_dir, name) => {
+        if (name === 'flib') return ['0.14.0'];
+        return [];
+      });
+
+      (mockPortal.fetchFull as jest.Mock).mockResolvedValue({
+        title: 'Flib Library',
+        releases: [
+          {
+            version: '0.14.0',
+            factorio_version: '2.0',
+            info_json: {
+              factorio_version: '2.0',
+              dependencies: ['base >= 2.0.0'],
+            },
+          },
+        ],
+      });
+
+      const pm = {
+        serverPath: '/server',
+        modsDir: '/server/mods',
+      } as unknown as Parameters<typeof service.scanUpdatesNeedingNewerGame>[0];
+
+      const res = await service.scanUpdatesNeedingNewerGame(pm);
+      expect(res).toEqual([]);
     });
   });
 });

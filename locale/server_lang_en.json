@@ -436,7 +436,6 @@
   "mod_list_builtin_installed_by": "Built-in",
   "mod_list_check_portal_btn": "Check for updates",
   "mod_list_update_selected_btn": "Update",
-  "mod_list_update_all_btn": "Update all",
   "mod_list_disable_all_btn": "Disable all",
   "mod_list_enable_all_btn": "Enable all",
   "mod_list_disable_all_ok": "Disabled {0} mod(s).",

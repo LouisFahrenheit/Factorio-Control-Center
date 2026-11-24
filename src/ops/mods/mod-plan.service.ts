@@ -618,6 +618,8 @@ export class ModPlanService {
     const rows = readModList(pm).mods;
     const out: ModGameUpgradeHint[] = [];
     const seen = new Set<string>();
+    const gv = gameVersion(pm.serverPath);
+    const targetFv = this.portal.factorioMajorMinor(gv);
 
     for (const row of rows) {
       const name = safeTrim(row.name);
@@ -625,23 +627,48 @@ export class ModPlanService {
 
       const localVer =
         latestVersion(installedModVersions(pm.modsDir, name)) || '';
-      const pv = await this.portalVersionsForMod(name, {
-        serverPath: pm.serverPath,
-      });
-      if (!pv.ok) continue;
-      if (!this.portal.versionNewer(pv.version, localVer)) continue;
 
-      const { below, current, required } = gameBelowModFactorioReq(
-        pm.serverPath,
-        pv.release,
-      );
-      if (below) {
-        seen.add(name);
-        out.push({
-          name,
-          current_factorio: current,
-          required_factorio: required,
-        });
+      try {
+        const meta = await this.portal.fetchFull(name);
+        const rels = Array.isArray(meta?.releases)
+          ? (meta.releases as Record<string, unknown>[])
+          : [];
+        if (!rels.length) continue;
+
+        const candidates = targetFv
+          ? rels.filter(
+              (r) => this.portal.releaseFactorioVersion(r) === targetFv,
+            )
+          : rels;
+        if (!candidates.length) continue;
+
+        const topRel = candidates
+          .slice()
+          .sort((a, b) =>
+            this.portal.versionNewer(safeTrim(a.version), safeTrim(b.version))
+              ? -1
+              : 1,
+          )[0];
+        const topVer = safeTrim(topRel?.version);
+        if (!topVer) continue;
+
+        if (this.portal.versionNewer(topVer, localVer)) {
+          const { below, current, required } = gameBelowModFactorioReq(
+            pm.serverPath,
+            topRel,
+            gv,
+          );
+          if (below) {
+            seen.add(name);
+            out.push({
+              name,
+              current_factorio: current,
+              required_factorio: required,
+            });
+          }
+        }
+      } catch {
+        /* skip portal fetch errors for individual mods */
       }
     }
 

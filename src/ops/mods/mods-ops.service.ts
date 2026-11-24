@@ -601,18 +601,19 @@ export class ModsOpsService {
             )
           : null;
 
-      let bookmarksList: string[] = [];
-      if (creds && typeof this.portal.fetchBookmarks === 'function') {
-        try {
-          bookmarksList = await this.portal.fetchBookmarks(
-            creds.user,
-            creds.token,
-          );
-        } catch {
-          bookmarksList = [];
+      const bookmarksPromise = (async (): Promise<string[]> => {
+        if (!creds || typeof this.portal.fetchBookmarks !== 'function') {
+          return [];
         }
-      }
-      const bookmarksLower = new Set(bookmarksList.map((b) => b.toLowerCase()));
+        try {
+          return await this.portal.fetchBookmarks(creds.user, creds.token);
+        } catch {
+          return [];
+        }
+      })();
+      const bookmarksLowerPromise = bookmarksPromise.then(
+        (list) => new Set(list.map((b) => b.toLowerCase())),
+      );
 
       const rawVersion =
         extra?.version !== undefined ? safeTrim(extra.version) : undefined;
@@ -682,7 +683,7 @@ export class ModsOpsService {
         includeCategories: this.parseCsvParam(extra?.include_categories),
         excludeCategories: this.parseCsvParam(extra?.exclude_categories),
         onlyBookmarked: Boolean(extra?.only_bookmarked),
-        bookmarkedNamesLower: bookmarksLower,
+        bookmarkedNamesLower: bookmarksLowerPromise,
         searchInDescription: extra?.search_in_description !== false,
         owner: safeTrim(extra?.owner),
         hideInstalled: hideInstalled && !onlyUpdates,
@@ -701,6 +702,11 @@ export class ModsOpsService {
         collectAllNames: onlyUpdates,
         forceRefresh: Boolean(extra?.refresh),
       });
+
+      const [bookmarksList, bookmarksLower] = await Promise.all([
+        bookmarksPromise,
+        bookmarksLowerPromise,
+      ]);
 
       // Collect all candidate mod names that are installed and might have updates
       const candidateModNames = new Set<string>();
@@ -732,8 +738,18 @@ export class ModsOpsService {
 
       const verifiedVersions = new Map<string, string>();
       if (candidateModNames.size > 0) {
-        await Promise.all(
-          Array.from(candidateModNames).map(async (name) => {
+        const candidateList = Array.from(candidateModNames);
+        const workers = Math.max(
+          1,
+          Math.min(PORTAL_CHECK_WORKERS, candidateList.length),
+        );
+        let index = 0;
+        const worker = async (): Promise<void> => {
+          while (true) {
+            const i = index;
+            index += 1;
+            if (i >= candidateList.length) return;
+            const name = candidateList[i];
             try {
               const pv = await this.portalVersionsForMod(name);
               if (pv.ok && pv.version) {
@@ -742,8 +758,9 @@ export class ModsOpsService {
             } catch {
               /* ignore individual mod check error */
             }
-          }),
-        );
+          }
+        };
+        await Promise.all(Array.from({ length: workers }, () => worker()));
       }
 
       const resolvedPortalVersions: Record<string, string> = {};
@@ -751,7 +768,22 @@ export class ModsOpsService {
         for (const [name, catVer] of Object.entries(
           searchRes.installedVersions,
         )) {
-          resolvedPortalVersions[name] = verifiedVersions.get(name) || catVer;
+          const verified = verifiedVersions.get(name);
+          if (verified) {
+            resolvedPortalVersions[name] = verified;
+          } else {
+            const cached = this.portalVersionFromCache(name);
+            if (cached.ok && cached.version) {
+              resolvedPortalVersions[name] = cached.version;
+            } else {
+              const local = resolveInstalledVersion(name);
+              // Avoid setting phantom unverified newer version if catVer > local
+              resolvedPortalVersions[name] =
+                local && catVer && compareVersions(catVer, local) > 0
+                  ? local
+                  : catVer;
+            }
+          }
         }
       }
       for (const [name, ver] of verifiedVersions.entries()) {
