@@ -71,10 +71,30 @@ function phaseIcon(kind: string): AppIconName {
   }
 }
 
+function multiModProgress(status: ModJobStatus | null): {
+  cur: number;
+  tot: number;
+  pct: number;
+} | null {
+  const tot = Number(status?.total_steps || 0);
+  if (tot <= 1) return null;
+  const cur = Math.max(0, Math.min(tot, Number(status?.current_step || 0)));
+  const pct = Math.min(100, Math.round((cur / tot) * 100));
+  return { cur, tot, pct };
+}
+
 function barClass(status: ModJobStatus | null, running: boolean): string {
   const base = 'server-update-dialog__bar mod-job-modal__bar';
   if (!status) return base + ' server-update-dialog__bar--indeterminate';
   const phase = status.phase || 'idle';
+  if (phase === 'error') return base + ' server-update-dialog__bar--error';
+  if (phase === 'cancelled')
+    return base + ' server-update-dialog__bar--cancelled';
+  if (phase === 'done') return base + ' server-update-dialog__bar--done';
+  const multi = multiModProgress(status);
+  if (multi && (phase === 'download' || phase === 'install')) {
+    return base + (running ? ' mod-job-modal__bar--streaming' : '');
+  }
   if (phase === 'download') {
     const tot = Number(status.download_tot || 0);
     if (tot > 0) {
@@ -82,16 +102,18 @@ function barClass(status: ModJobStatus | null, running: boolean): string {
     }
     return base + ' server-update-dialog__bar--indeterminate';
   }
-  if (phase === 'error') return base + ' server-update-dialog__bar--error';
-  if (phase === 'cancelled')
-    return base + ' server-update-dialog__bar--cancelled';
-  if (phase === 'done') return base + ' server-update-dialog__bar--done';
   return base + ' server-update-dialog__bar--indeterminate';
 }
 
 function barWidth(status: ModJobStatus | null): string {
   if (!status) return '0%';
   const phase = status.phase || 'idle';
+  if (phase === 'done' || phase === 'error' || phase === 'cancelled')
+    return '100%';
+  const multi = multiModProgress(status);
+  if (multi && (phase === 'download' || phase === 'install')) {
+    return multi.pct + '%';
+  }
   if (phase === 'download') {
     const cur = Number(status.download_cur || 0);
     const tot = Number(status.download_tot || 0);
@@ -101,8 +123,6 @@ function barWidth(status: ModJobStatus | null): string {
     }
     return '0%';
   }
-  if (phase === 'done' || phase === 'error' || phase === 'cancelled')
-    return '100%';
   return '0%';
 }
 
@@ -112,6 +132,13 @@ function barText(
 ): string {
   if (!status) return '';
   const phase = status.phase || 'idle';
+  if (phase === 'done') return t('web_update_phase_done');
+  if (phase === 'error') return t('mod_job_phase_error');
+  if (phase === 'cancelled') return t('mod_job_phase_cancelled');
+  const multi = multiModProgress(status);
+  if (multi && (phase === 'download' || phase === 'install')) {
+    return multi.pct + '% · ' + multi.cur + ' / ' + multi.tot;
+  }
   if (phase === 'download') {
     const cur = Number(status.download_cur || 0);
     const tot = Number(status.download_tot || 0);
@@ -122,9 +149,6 @@ function barText(
     }
     return '';
   }
-  if (phase === 'done') return t('web_update_phase_done');
-  if (phase === 'error') return t('mod_job_phase_error');
-  if (phase === 'cancelled') return t('mod_job_phase_cancelled');
   return '';
 }
 
@@ -209,14 +233,6 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
     status?.total_steps && status.total_steps > 0
       ? t('web_update_step_label', status.current_step || 0, status.total_steps)
       : '';
-
-  const stepPct =
-    status?.total_steps && status.total_steps > 0
-      ? Math.min(
-          100,
-          Math.round(((status.current_step || 0) / status.total_steps) * 100),
-        )
-      : 0;
 
   const currentActionText = actionLabel(status, modJob.stopRequested, t);
   const progressMetaText = barText(status, t);
@@ -337,14 +353,6 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
                     style={{ width: barWidth(status) }}
                   />
                 </div>
-                {stepLabel ? (
-                  <div className="mod-job-modal__step-track" aria-hidden="true">
-                    <div
-                      className="mod-job-modal__step-fill"
-                      style={{ width: stepPct + '%' }}
-                    />
-                  </div>
-                ) : null}
               </div>
             </div>
           </section>

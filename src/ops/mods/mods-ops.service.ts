@@ -134,7 +134,9 @@ export class ModsOpsService {
         const name = safeTrim(row.name);
         const versions = installedModVersions(sel.pm.modsDir, name);
         const pinned = safeTrim(row.version);
-        const local = pinned || latestVersion(versions);
+        const effectivePinned =
+          pinned && versions.includes(pinned) ? pinned : '';
+        const local = effectivePinned || latestVersion(versions);
         const zip = local ? join(sel.pm.modsDir, `${name}_${local}.zip`) : '';
         const manifest = zip && existsSync(zip) ? readModManifest(zip) : null;
         const isBuiltin = this.portal.isBuiltin(name);

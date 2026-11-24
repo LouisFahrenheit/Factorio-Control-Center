@@ -2790,24 +2790,6 @@ table#tblBackups thead th.backup-sort-th--asc::after {
   animation: mod-job-bar-sheen 1.65s ease-in-out infinite;
 }
 
-.mod-job-modal__step-track {
-  height: 3px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--bg-log) 82%, var(--border-dark) 18%);
-}
-
-.mod-job-modal__step-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: color-mix(in srgb, var(--accent) 68%, var(--text-muted) 32%);
-  transition: width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mod-job-modal__section--done .mod-job-modal__step-fill {
-  background: color-mix(in srgb, var(--running) 72%, var(--text-muted) 28%);
-}
-
 .mod-job-modal__downloads-body {
   flex: 1 1 auto;
   min-height: 0;

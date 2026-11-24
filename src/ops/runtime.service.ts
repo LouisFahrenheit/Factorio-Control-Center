@@ -86,7 +86,7 @@ export interface InstanceRuntime {
 const STOP_WATCHDOG_POLL_MS = 500;
 const STOP_WATCHDOG_TIMEOUT_SEC = 30;
 const STOP_SAVE_FALLBACK_MS = 180_000;
-const STOP_MARKER_KILL_DELAY_MS = 2500;
+const STOP_MARKER_KILL_DELAY_MS = 4000;
 const STOP_WAIT_POLL_MS = 450;
 
 const execFileAsync = promisify(execFile);
@@ -115,7 +115,7 @@ const WHITELIST_CLEAR_MSG_RE =
 const COMMAND_RE = /\[COMMAND\]\s*([^\s:]+)(?:\s+\(command\))?:\s+(.*)/i;
 const COMMAND_FAILED_RE =
   /\[COMMAND\]\s*([^\s]+)\s+tried to run a command, which isn't allowed for them:\s+(.*)/i;
-const SAVE_PROGRESS_100_RE = /100%/i;
+const SAVE_PROGRESS_100_RE = /saving progress:\s*100(?:\.0+)?%/i;
 
 @Injectable()
 export class RuntimeService implements OnModuleDestroy {
@@ -460,16 +460,28 @@ export class RuntimeService implements OnModuleDestroy {
       return { ok: false, error: 'rcon_password_missing' };
     }
 
+    if (rt) {
+      rt.sawSaveProgress100 = false;
+      rt.sawShutdownMarker = false;
+      rt.shutdownMarkerAt = 0;
+      rt.shutdownKillScheduled = false;
+      rt.sawRemoteQuit = false;
+    }
+
     try {
       await this.rcon.run(ep.host, ep.port, ep.password, '/quit', 25000);
-      if (rt) {
+      if (rt && rt.proc && rt.proc.exitCode === null) {
         rt.stopping = true;
         rt.inGame = false;
+        if (rt.sawShutdownMarker) {
+          this.scheduleShutdownKill(rt);
+        }
         this.startStopWatchdog(rt);
       }
       return { ok: true };
-    } catch (e) {
-      return { ok: false, error: `rcon_stop_failed: ${e}` };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return { ok: false, error: `rcon_stop_failed: ${msg}` };
     }
   }
 
@@ -574,10 +586,7 @@ export class RuntimeService implements OnModuleDestroy {
         const afterMarkerMs =
           rt.shutdownMarkerAt > 0 ? now - rt.shutdownMarkerAt : 0;
         const shutdownOk =
-          rt.sawShutdownMarker &&
-          (rt.sawSaveProgress100 ||
-            wallElapsed >= STOP_SAVE_FALLBACK_MS ||
-            afterMarkerMs >= STOP_MARKER_KILL_DELAY_MS);
+          rt.sawShutdownMarker && afterMarkerMs >= STOP_MARKER_KILL_DELAY_MS;
 
         if (shutdownOk) {
           await this.finalizeShutdownKill(rt);
@@ -610,7 +619,7 @@ export class RuntimeService implements OnModuleDestroy {
     rt.shutdownKillScheduled = true;
     setTimeout(() => {
       void this.finalizeShutdownKill(rt);
-    }, STOP_MARKER_KILL_DELAY_MS);
+    }, STOP_MARKER_KILL_DELAY_MS).unref();
   }
 
   private async finalizeShutdownKill(rt: InstanceRuntime): Promise<void> {
@@ -1148,15 +1157,22 @@ export class RuntimeService implements OnModuleDestroy {
         hasSpaceAge(rt.serverPath),
       );
     }
-    if (line.includes('Deleting active scenario (global = true)')) {
+    const low = line.toLowerCase();
+    if (low.includes('remote-quit') && low.includes('quitting')) {
+      rt.sawRemoteQuit = true;
+    }
+    if ((rt.stopping || rt.sawRemoteQuit) && SAVE_PROGRESS_100_RE.test(line)) {
+      rt.sawSaveProgress100 = true;
+    }
+    const isShutdownLine =
+      line.includes('Deleting active scenario (global = true)') ||
+      ((rt.stopping || rt.sawRemoteQuit) &&
+        line.includes('changing state from(Disconnected) to(Closed)'));
+    if (isShutdownLine) {
       rt.sawShutdownMarker = true;
       if (!rt.shutdownMarkerAt) rt.shutdownMarkerAt = Date.now();
       this.scheduleShutdownKill(rt);
     }
-    if (SAVE_PROGRESS_100_RE.test(line)) rt.sawSaveProgress100 = true;
-    const low = line.toLowerCase();
-    if (low.includes('remote-quit') && low.includes('quitting'))
-      rt.sawRemoteQuit = true;
   }
 
   private appendPlayerHistory(

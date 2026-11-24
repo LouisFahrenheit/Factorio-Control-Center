@@ -415,7 +415,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
         .toLowerCase();
       if (!key) continue;
       const ver =
-        String(row.pinned_version || row.local_version || '').trim() ||
+        String(row.local_version || row.pinned_version || '').trim() ||
         maxInstalledModVersion(row);
       if (ver) map.set(key, ver);
     }
@@ -430,7 +430,22 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
         .join(','),
     [installedByName],
   );
-  const updatesRefreshKey = onlyUpdates ? installedSignature : '';
+  const updatesRefreshKey =
+    onlyUpdates || hideInstalled ? installedSignature : '';
+
+  const visibleSearchResults = useMemo(() => {
+    if (!onlyUpdates) return searchResults;
+    return searchResults.filter((item) => {
+      const key = item.name.toLowerCase();
+      const localVer = installedByName.get(key) || item.installed_version || '';
+      const targetVer = item.target_release_version || item.latest_version;
+      return (
+        Boolean(localVer) &&
+        Boolean(targetVer) &&
+        portalVersionNewer(targetVer, localVer)
+      );
+    });
+  }, [onlyUpdates, searchResults, installedByName]);
 
   useEffect(() => {
     setSelectedUpdates(new Set());
@@ -1481,7 +1496,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                     <AppIcon name="warning" size={20} />
                     <span>{searchError}</span>
                   </div>
-                ) : searchLoading && searchResults.length === 0 ? (
+                ) : searchLoading && visibleSearchResults.length === 0 ? (
                   <div className="mod-install-search__list" aria-hidden="true">
                     {Array.from({ length: 6 }, (_, idx) => (
                       <div
@@ -1496,7 +1511,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                       </div>
                     ))}
                   </div>
-                ) : searchResults.length === 0 ? (
+                ) : visibleSearchResults.length === 0 ? (
                   <div className="mod-install-search__state">
                     <AppIcon
                       name={
@@ -1515,7 +1530,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                 ) : (
                   <>
                     <div className="mod-install-search__list" ref={listRef}>
-                      {searchResults.map((item) => {
+                      {visibleSearchResults.map((item) => {
                         const key = item.name.toLowerCase();
                         const localVer =
                           installedByName.get(key) ||

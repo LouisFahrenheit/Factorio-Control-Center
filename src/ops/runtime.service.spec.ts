@@ -613,5 +613,53 @@ describe('RuntimeService', () => {
       expect(mockRcon.run).toHaveBeenCalledTimes(2);
       expect(killSpy).toHaveBeenCalledWith('SIGTERM');
     });
+
+    it('detects 100.000000% shutdown save and Closed state marker for Factorio 2.0.10 without triggering on autosaves', async () => {
+      setupValidServerFiles();
+      const fakeProc = createFakeChildProcess();
+      mockedSpawn.mockReturnValue(
+        fakeProc as unknown as ChildProcessWithoutNullStreams,
+      );
+
+      await service.start(makeInstanceItem());
+      const rt = service.get('inst-1');
+      expect(rt).toBeDefined();
+
+      // Normal gameplay autosave must NOT set shutdown save flag
+      fakeProc.stdout.emit(
+        'data',
+        Buffer.from(
+          '12.345 Info MainLoop.cpp:446: Saving progress: 100.000000%\n',
+        ),
+      );
+      expect(rt?.sawSaveProgress100).toBe(false);
+      expect(rt?.sawShutdownMarker).toBe(false);
+
+      // Initiate stop and emit Factorio 2.0.10 shutdown log sequence (no "Deleting active scenario" line)
+      (mockRcon.run as jest.Mock).mockResolvedValueOnce('');
+      await service.stop('inst-1');
+      expect(rt?.stopping).toBe(true);
+
+      fakeProc.stdout.emit(
+        'data',
+        Buffer.from(
+          [
+            '2026-11-24 20:51:59.457  Quitting: remote-quit.',
+            '2026-11-24 20:51:59.522  Info MainLoop.cpp:446: Saving progress: 100.000000%',
+            '2026-11-24 20:51:59.662  Info ServerMultiplayerManager.cpp:805: updateTick(1) changing state from(Disconnected) to(Closed)',
+            '',
+          ].join('\n'),
+        ),
+      );
+
+      expect(rt?.sawRemoteQuit).toBe(true);
+      expect(rt?.sawSaveProgress100).toBe(true);
+      expect(rt?.sawShutdownMarker).toBe(true);
+      expect(rt?.shutdownMarkerAt).toBeGreaterThan(0);
+
+      // Clean up fake process
+      fakeProc.exitCode = 0;
+      fakeProc.emit('close', 0);
+    });
   });
 });

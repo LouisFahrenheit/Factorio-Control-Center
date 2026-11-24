@@ -14,6 +14,7 @@ export function useModJob(
   const pollTimerRef = useRef<number | null>(null);
   const logCountRef = useRef(0);
   const cancelledToastRef = useRef(false);
+  const didNotifyCompleteRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
@@ -31,7 +32,10 @@ export function useModJob(
     setStopRequested(false);
     cancelledToastRef.current = false;
     logCountRef.current = 0;
-    onCompleteRef.current();
+    if (!didNotifyCompleteRef.current) {
+      didNotifyCompleteRef.current = true;
+      onCompleteRef.current();
+    }
   }, [clearPoll]);
 
   const poll = useCallback(async () => {
@@ -42,7 +46,13 @@ export function useModJob(
         cancelledToastRef.current = true;
         notifyWarn(t('mods_btn'), t('mod_job_stopped'));
       }
-      if (!s?.running) clearPoll();
+      if (!s?.running) {
+        clearPoll();
+        if (!didNotifyCompleteRef.current) {
+          didNotifyCompleteRef.current = true;
+          onCompleteRef.current();
+        }
+      }
     } catch {
       /* keep polling */
     }
@@ -56,26 +66,27 @@ export function useModJob(
     void poll();
   }, [clearPoll, poll]);
 
-  const showError = useCallback(
-    (msg: string) => {
-      setStatus({
-        running: false,
-        phase: 'error',
-        error: msg,
-        log: [{ ts: Date.now() / 1000, level: 'error', text: msg }],
-      });
-    },
-    [],
-  );
+  const showError = useCallback((msg: string) => {
+    setStatus({
+      running: false,
+      phase: 'error',
+      error: msg,
+      log: [{ ts: Date.now() / 1000, level: 'error', text: msg }],
+    });
+  }, []);
 
-  const openPreparing = useCallback((label?: string) => {
-    clearPoll();
-    setOpen(true);
-    setStatus({ running: true, phase: 'preparing', current_name: label });
-    setStopRequested(false);
-    cancelledToastRef.current = false;
-    logCountRef.current = 0;
-  }, [clearPoll]);
+  const openPreparing = useCallback(
+    (label?: string) => {
+      clearPoll();
+      setOpen(true);
+      setStatus({ running: true, phase: 'preparing', current_name: label });
+      setStopRequested(false);
+      cancelledToastRef.current = false;
+      didNotifyCompleteRef.current = false;
+      logCountRef.current = 0;
+    },
+    [clearPoll],
+  );
 
   const fail = useCallback(
     (msg: string) => {
@@ -90,10 +101,13 @@ export function useModJob(
     async (endpoint: string, body: Record<string, unknown>) => {
       setOpen(true);
       setStatus((prev) =>
-        prev?.running ? { ...prev, phase: 'preparing' } : { running: true, phase: 'preparing' },
+        prev?.running
+          ? { ...prev, phase: 'preparing' }
+          : { running: true, phase: 'preparing' },
       );
       setStopRequested(false);
       cancelledToastRef.current = false;
+      didNotifyCompleteRef.current = false;
       logCountRef.current = 0;
       try {
         const j = await api<{ ok?: boolean; error?: string }>(endpoint, {
@@ -134,6 +148,7 @@ export function useModJob(
       try {
         const s = await api<ModJobStatus>('/api/mods/job/status');
         if (cancelled || !s?.running) return;
+        didNotifyCompleteRef.current = false;
         setOpen(true);
         setStatus(s);
         startPoll();
