@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  IconAdjustmentsHorizontal,
+  IconPalette,
+  IconShieldLock,
+  IconUser,
+} from '@tabler/icons-react';
 import { api } from '../../api/client';
 import { useLocale } from '../../i18n/LocaleProvider';
 import {
@@ -37,6 +43,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgramSettings } from '../../types/programSettings';
 import { AppIcon } from '../AppIcon';
+import { CancelButton } from '../CancelButton';
 import { FccSwitch } from '../FccSwitch';
 import { ModalBackdrop } from './ModalBackdrop';
 import { TwoFactorSetupModal } from './TwoFactorSetupModal';
@@ -139,310 +146,350 @@ export function UserSettingsModal({
     return label !== key ? label : code.toUpperCase();
   }
 
+  const hasLanguages = availableLanguages.length > 0;
+  const twoFactorOn = Boolean(user?.twoFactorEnabled);
+
   return (
-    <ModalBackdrop open={open} onClose={onClose} id="userSettingsBackdrop">
+    <ModalBackdrop
+      open={open}
+      onClose={onClose}
+      id="userSettingsBackdrop"
+      closeOnBackdropClick={false}
+    >
       <div
         className="fu-modal user-settings-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="userSettingsHeading"
       >
-        <div
-          className="fu-modal__header fu-modal__header--with-icon"
-          id="userSettingsHeading"
-        >
-          <AppIcon name="settings_account" size={20} />
-          {t('web_user_settings_title')}
-        </div>
-        <div className="fu-modal__body user-settings-modal__body">
-          <section className="user-settings-modal__hero">
-            <div className="user-settings-modal__brand" aria-hidden="true">
-              <AppIcon name="settings_account" size={22} />
-            </div>
-            <p className="user-settings-modal__intro">
-              {t('web_user_settings_intro')}
-            </p>
-          </section>
-
-          <section className="user-settings-modal__section user-settings-modal__section--security">
-            <h3 className="user-settings-modal__section-title">
-              {t('web_user_settings_section_security')}
-            </h3>
+        <div className="mod-install-dialog__header">
+          <div className="mod-install-dialog__header-main">
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border:
-                  '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))',
-                borderRadius: 6,
-                gap: 12,
-              }}
+              className="mod-install-dialog__header-icon-wrap"
+              aria-hidden="true"
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 36,
-                    height: 36,
-                    borderRadius: 6,
-                    background: user?.twoFactorEnabled
-                      ? 'rgba(76, 175, 80, 0.15)'
-                      : 'rgba(255, 255, 255, 0.05)',
-                    color: user?.twoFactorEnabled
-                      ? 'var(--color-success, #4caf50)'
-                      : 'var(--text-dim, #777)',
-                  }}
-                >
-                  <AppIcon name="person_shield" size={20} />
-                </span>
-                <div>
-                  <div
-                    style={{
-                      fontWeight: 600,
-                      fontSize: 13,
-                      color: 'var(--text-main)',
-                    }}
+              <AppIcon name="settings_account" size={18} />
+            </div>
+            <div className="mod-install-dialog__header-titles">
+              <h2
+                className="mod-install-dialog__title"
+                id="userSettingsHeading"
+              >
+                {t('web_user_settings_title')}
+              </h2>
+            </div>
+          </div>
+          {user?.username ? (
+            <div className="mod-install-dialog__header-right">
+              <span className="user-settings-modal__user-badge">
+                <IconUser
+                  size={14}
+                  stroke={2}
+                  className="user-settings-modal__user-badge-icon"
+                  aria-hidden="true"
+                />
+                <span>{user.username}</span>
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="fu-modal__body user-settings-modal__body">
+          <p className="user-settings-modal__lead">
+            {t('web_user_settings_intro')}
+          </p>
+
+          <section className="user-settings-modal__card">
+            <div className="user-settings-modal__card-head">
+              <IconShieldLock
+                size={15}
+                stroke={2}
+                className="user-settings-modal__card-head-icon"
+                aria-hidden="true"
+              />
+              <h3 className="user-settings-modal__section-title">
+                {t('web_user_settings_section_security')}
+              </h3>
+            </div>
+            <div className="user-settings-modal__card-body">
+              <div
+                className={
+                  'user-settings-modal__security-row' +
+                  (twoFactorOn
+                    ? ' user-settings-modal__security-row--enabled'
+                    : '')
+                }
+              >
+                <div className="user-settings-modal__security-info">
+                  <span
+                    className="user-settings-modal__security-icon"
+                    aria-hidden="true"
                   >
-                    {user?.twoFactorEnabled
-                      ? t('web_2fa_status_enabled')
-                      : t('web_2fa_status_disabled')}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--text-dim, #777)',
-                      marginTop: 2,
-                    }}
-                  >
-                    {t('web_user_settings_security_desc')}
+                    <AppIcon name="person_shield" size={20} />
+                  </span>
+                  <div className="user-settings-modal__security-text">
+                    <span className="user-settings-modal__security-status">
+                      {twoFactorOn
+                        ? t('web_2fa_status_enabled')
+                        : t('web_2fa_status_disabled')}
+                    </span>
+                    <span className="user-settings-modal__security-desc">
+                      {t('web_user_settings_security_desc')}
+                    </span>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                {user?.twoFactorEnabled ? (
-                  <button
-                    type="button"
-                    className="btn btn--danger btn--with-icon"
-                    onClick={() => setTwoFactorDisableOpen(true)}
-                  >
-                    <AppIcon name="person_shield" size={14} />
-                    {t('web_2fa_disable_btn')}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn--primary btn--with-icon"
-                    onClick={() => setTwoFactorSetupOpen(true)}
-                  >
-                    <AppIcon name="person_shield" size={14} />
-                    {t('web_2fa_enable_btn')}
-                  </button>
-                )}
+                <div className="user-settings-modal__security-actions">
+                  {twoFactorOn ? (
+                    <button
+                      type="button"
+                      className="btn btn--danger btn--with-icon"
+                      onClick={() => setTwoFactorDisableOpen(true)}
+                    >
+                      <AppIcon name="person_shield" size={14} />
+                      {t('web_2fa_disable_btn')}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn--primary btn--with-icon"
+                      onClick={() => setTwoFactorSetupOpen(true)}
+                    >
+                      <AppIcon name="person_shield" size={14} />
+                      {t('web_2fa_enable_btn')}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="user-settings-modal__section">
-            <h3 className="user-settings-modal__section-title">
-              {t('web_user_settings_section_appearance')}
-            </h3>
-            <div className="user-settings-grid user-settings-grid--appearance">
-              {availableLanguages.length > 0 ? (
+          <section className="user-settings-modal__card">
+            <div className="user-settings-modal__card-head">
+              <IconPalette
+                size={15}
+                stroke={2}
+                className="user-settings-modal__card-head-icon"
+                aria-hidden="true"
+              />
+              <h3 className="user-settings-modal__section-title">
+                {t('web_user_settings_section_appearance')}
+              </h3>
+            </div>
+            <div className="user-settings-modal__card-body">
+              <div
+                className={
+                  'user-settings-grid user-settings-grid--appearance' +
+                  (hasLanguages ? ' user-settings-grid--appearance-3col' : '')
+                }
+              >
+                {hasLanguages ? (
+                  <label
+                    className="user-settings-field user-settings-field--select"
+                    htmlFor="selLanguage"
+                  >
+                    <span className="user-settings-field__label">
+                      {t('program_language_label')}
+                    </span>
+                    <select
+                      id="selLanguage"
+                      className="input input--narrow"
+                      value={lang}
+                      onChange={(e) => setLang(e.target.value)}
+                    >
+                      <option value="">
+                        {t('program_language_default_user')}
+                      </option>
+                      {availableLanguages.map((code) => (
+                        <option key={code} value={code}>
+                          {languageLabel(code)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <label
                   className="user-settings-field user-settings-field--select"
-                  htmlFor="selLanguage"
+                  htmlFor="selTheme"
                 >
                   <span className="user-settings-field__label">
-                    {t('program_language_label')}
+                    {t('program_theme_label')}
                   </span>
                   <select
-                    id="selLanguage"
+                    id="selTheme"
                     className="input input--narrow"
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value)}
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
                   >
                     <option value="">
-                      {t('program_language_default_user')}
+                      {t('program_language_panel_default_tip') || 'Default'}
                     </option>
-                    {availableLanguages.map((code) => (
-                      <option key={code} value={code}>
-                        {languageLabel(code)}
+                    {FCC_THEMES.map((th) => (
+                      <option key={th.id} value={th.id}>
+                        {t('ui_theme_' + th.id) || th.label}
                       </option>
                     ))}
                   </select>
                 </label>
-              ) : null}
-              <label
-                className="user-settings-field user-settings-field--select"
-                htmlFor="selTheme"
-              >
-                <span className="user-settings-field__label">
-                  {t('program_theme_label')}
-                </span>
-                <select
-                  id="selTheme"
-                  className="input input--narrow"
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
+                <label
+                  className="user-settings-field user-settings-field--select"
+                  htmlFor="selUiScale"
                 >
-                  <option value="">
-                    {t('program_language_panel_default_tip') || 'Default'}
-                  </option>
-                  {FCC_THEMES.map((th) => (
-                    <option key={th.id} value={th.id}>
-                      {t('ui_theme_' + th.id) || th.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label
-                className="user-settings-field user-settings-field--select"
-                htmlFor="selUiScale"
-              >
-                <span className="user-settings-field__label">
-                  {t('program_ui_scale_label')}
-                </span>
-                <select
-                  id="selUiScale"
-                  className="input input--narrow"
-                  value={uiScale}
-                  onChange={(e) => setScale(e.target.value)}
-                >
-                  <option value="auto">{t('ui_scale_auto')}</option>
-                  <option value="1">100%</option>
-                  <option value="1.25">125%</option>
-                  <option value="1.5">150%</option>
-                  <option value="1.75">175%</option>
-                  <option value="2">200%</option>
-                </select>
-              </label>
+                  <span className="user-settings-field__label">
+                    {t('program_ui_scale_label')}
+                  </span>
+                  <select
+                    id="selUiScale"
+                    className="input input--narrow"
+                    value={uiScale}
+                    onChange={(e) => setScale(e.target.value)}
+                  >
+                    <option value="auto">{t('ui_scale_auto')}</option>
+                    <option value="1">100%</option>
+                    <option value="1.25">125%</option>
+                    <option value="1.5">150%</option>
+                    <option value="1.75">175%</option>
+                    <option value="2">200%</option>
+                  </select>
+                </label>
+              </div>
             </div>
           </section>
 
-          <section className="user-settings-modal__section user-settings-modal__section--interface">
-            <h3 className="user-settings-modal__section-title">
-              {t('web_user_settings_section_interface')}
-            </h3>
-            <div className="user-settings-grid user-settings-grid--interface">
-              <label
-                className="user-settings-field user-settings-field--select user-settings-field--full"
-                htmlFor="inpToastDurationSec"
-              >
-                <span className="user-settings-field__label">
-                  {t('program_toast_duration_sec_label')}
-                </span>
-                <input
-                  type="number"
-                  id="inpToastDurationSec"
-                  className="input input--narrow"
-                  min={1}
-                  max={20}
-                  step={1}
-                  value={toastSec}
-                  onChange={(e) => setToastSec(e.target.value)}
-                />
-                <span className="user-settings-field__hint">
-                  {t('program_toast_duration_sec_tip')}
-                </span>
-              </label>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('program_translate_mod_names_tip')}
-              >
-                <FccSwitch
-                  id="cbTranslateModNames"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={translateModNames}
-                  onChange={(checked) => void saveTranslateModNames(checked)}
-                  label={t('program_translate_mod_names_cb')}
-                />
-              </div>
-              <div className="user-settings-field user-settings-field--switch">
-                <FccSwitch
-                  id="cbWebDisableEffects"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={disableEffects}
-                  onChange={setDisableEffects}
-                  label={t('program_web_disable_effects_cb')}
-                />
-              </div>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('program_show_server_list_mod_badges_tip')}
-              >
-                <FccSwitch
-                  id="cbShowServerListModBadges"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={showModBadges}
-                  onChange={setShowModBadges}
-                  label={t('program_show_server_list_mod_badges_cb')}
-                />
-              </div>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('program_show_server_list_sa_badge_tip')}
-              >
-                <FccSwitch
-                  id="cbShowServerListSABadges"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={showSABadge}
-                  onChange={setShowSABadge}
-                  label={t('program_show_server_list_sa_badge_cb')}
-                />
-              </div>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('user_server_log_colorize_tip')}
-              >
-                <FccSwitch
-                  id="cbServerLogColorize"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={serverLogColorize}
-                  onChange={setServerLogColorize}
-                  label={t('user_server_log_colorize_cb')}
-                />
-              </div>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('user_circuit_wire_tip')}
-              >
-                <FccSwitch
-                  id="cbCircuitWire"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={circuitWireEnabled}
-                  onChange={setCircuitWireEnabled}
-                  label={t('user_circuit_wire_cb')}
-                />
-              </div>
-              <div
-                className="user-settings-field user-settings-field--switch"
-                title={t('user_interface_hints_tip')}
-              >
-                <FccSwitch
-                  id="cbInterfaceHints"
-                  className="user-settings-field__switch"
-                  labelClassName="user-settings-field__switch-label"
-                  checked={interfaceHintsEnabled}
-                  onChange={setInterfaceHintsEnabled}
-                  label={t('user_interface_hints_cb')}
-                />
+          <section className="user-settings-modal__card">
+            <div className="user-settings-modal__card-head">
+              <IconAdjustmentsHorizontal
+                size={15}
+                stroke={2}
+                className="user-settings-modal__card-head-icon"
+                aria-hidden="true"
+              />
+              <h3 className="user-settings-modal__section-title">
+                {t('web_user_settings_section_interface')}
+              </h3>
+            </div>
+            <div className="user-settings-modal__card-body">
+              <div className="user-settings-grid user-settings-grid--interface">
+                <label
+                  className="user-settings-field user-settings-field--select user-settings-field--full"
+                  htmlFor="inpToastDurationSec"
+                >
+                  <div className="user-settings-modal__toast-row">
+                    <div className="user-settings-modal__toast-meta">
+                      <span className="user-settings-field__label">
+                        {t('program_toast_duration_sec_label')}
+                      </span>
+                      <span className="user-settings-field__hint">
+                        {t('program_toast_duration_sec_tip')}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      id="inpToastDurationSec"
+                      className="input input--narrow"
+                      min={1}
+                      max={20}
+                      step={1}
+                      value={toastSec}
+                      onChange={(e) => setToastSec(e.target.value)}
+                    />
+                  </div>
+                </label>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('program_translate_mod_names_tip')}
+                >
+                  <FccSwitch
+                    id="cbTranslateModNames"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={translateModNames}
+                    onChange={(checked) => void saveTranslateModNames(checked)}
+                    label={t('program_translate_mod_names_cb')}
+                  />
+                </div>
+                <div className="user-settings-field user-settings-field--switch">
+                  <FccSwitch
+                    id="cbWebDisableEffects"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={disableEffects}
+                    onChange={setDisableEffects}
+                    label={t('program_web_disable_effects_cb')}
+                  />
+                </div>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('program_show_server_list_mod_badges_tip')}
+                >
+                  <FccSwitch
+                    id="cbShowServerListModBadges"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={showModBadges}
+                    onChange={setShowModBadges}
+                    label={t('program_show_server_list_mod_badges_cb')}
+                  />
+                </div>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('program_show_server_list_sa_badge_tip')}
+                >
+                  <FccSwitch
+                    id="cbShowServerListSABadges"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={showSABadge}
+                    onChange={setShowSABadge}
+                    label={t('program_show_server_list_sa_badge_cb')}
+                  />
+                </div>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('user_server_log_colorize_tip')}
+                >
+                  <FccSwitch
+                    id="cbServerLogColorize"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={serverLogColorize}
+                    onChange={setServerLogColorize}
+                    label={t('user_server_log_colorize_cb')}
+                  />
+                </div>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('user_circuit_wire_tip')}
+                >
+                  <FccSwitch
+                    id="cbCircuitWire"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={circuitWireEnabled}
+                    onChange={setCircuitWireEnabled}
+                    label={t('user_circuit_wire_cb')}
+                  />
+                </div>
+                <div
+                  className="user-settings-field user-settings-field--switch"
+                  title={t('user_interface_hints_tip')}
+                >
+                  <FccSwitch
+                    id="cbInterfaceHints"
+                    className="user-settings-field__switch"
+                    labelClassName="user-settings-field__switch-label"
+                    checked={interfaceHintsEnabled}
+                    onChange={setInterfaceHintsEnabled}
+                    label={t('user_interface_hints_cb')}
+                  />
+                </div>
               </div>
             </div>
           </section>
         </div>
-        <div className="fu-modal__footer">
+
+        <div className="fu-modal__footer user-settings-modal__footer">
+          <CancelButton onClick={onClose} t={t} />
           <button
             type="button"
             className="btn btn--primary btn--with-icon"
