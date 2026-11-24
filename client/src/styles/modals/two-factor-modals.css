@@ -1,0 +1,332 @@
+/* ==========================================================================
+   Two-Factor Authentication Modals (Setup & Disable)
+   ========================================================================== */
+
+.fu-modal.two-factor-setup-modal {
+  width: min(540px, 94vw);
+  max-height: min(
+    90vh,
+    calc(100dvh / var(--ui-scale, 1) - 2 * max(12px, 2vh) - 8px)
+  );
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.fu-modal.two-factor-disable-modal {
+  width: min(460px, 94vw);
+  max-height: min(
+    90vh,
+    calc(100dvh / var(--ui-scale, 1) - 2 * max(12px, 2vh) - 8px)
+  );
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.two-factor-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* ── Lead Callouts ─────────────────────────────────────────────────────── */
+
+.two-factor-modal__lead {
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  border-left: 3px solid var(--accent-selected);
+  background: color-mix(in srgb, var(--bg-main) 40%, var(--bg-widget) 60%);
+  font-size: 0.88rem;
+  line-height: 1.48;
+  color: var(--text-muted);
+}
+
+.two-factor-modal__lead--danger {
+  border-left-color: var(--color-danger, #ef4444);
+  background: color-mix(
+    in srgb,
+    var(--color-danger, #ef4444) 6%,
+    var(--bg-widget) 94%
+  );
+}
+
+/* ── Card Containers ───────────────────────────────────────────────────── */
+
+.two-factor-modal__card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-main) 34%, var(--bg-widget) 66%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.two-factor-modal__card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 14px;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.two-factor-modal__card-head-icon {
+  color: var(--accent-selected);
+  flex: 0 0 auto;
+  opacity: 0.92;
+}
+
+.two-factor-modal__card-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.two-factor-modal__card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.two-factor-modal__card-body--center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── QR Box & Secret ───────────────────────────────────────────────────── */
+
+.two-factor-modal__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  width: 100%;
+}
+
+.two-factor-modal__qr-box {
+  display: inline-flex;
+  padding: 10px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.two-factor-modal__qr-img {
+  width: 180px;
+  height: 180px;
+  display: block;
+}
+
+.two-factor-modal__secret-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.two-factor-modal__secret-code {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-data) 90%, var(--bg-widget) 10%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 85%, transparent);
+  user-select: all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.two-factor-modal__copy-btn {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* ── Code Input & Field Group ─────────────────────────────────────────── */
+
+.two-factor-modal__code-input {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  height: 44px;
+  font-family: var(--font-mono, monospace);
+  width: 100%;
+}
+
+.two-factor-modal__field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.two-factor-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.two-factor-modal__field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.two-factor-modal__or-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-dim, #777);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.two-factor-modal__or-divider::before,
+.two-factor-modal__or-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--border-dark) 80%, transparent);
+}
+
+.two-factor-modal__or-divider:not(:empty)::before {
+  margin-right: 12px;
+}
+
+.two-factor-modal__or-divider:not(:empty)::after {
+  margin-left: 12px;
+}
+
+/* ── Success & Recovery Codes View ────────────────────────────────────── */
+
+.two-factor-modal__success-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: color-mix(
+    in srgb,
+    var(--running, #34d399) 12%,
+    var(--bg-widget) 88%
+  );
+  border: 1px solid color-mix(in srgb, var(--running, #34d399) 36%, transparent);
+  color: var(--running, #34d399);
+}
+
+.two-factor-modal__success-icon {
+  flex: 0 0 auto;
+}
+
+.two-factor-modal__success-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.two-factor-modal__recovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--bg-data) 92%, var(--bg-widget) 8%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 88%, transparent);
+}
+
+.two-factor-modal__recovery-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--text);
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-main) 60%, var(--bg-widget) 40%);
+  border: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  user-select: all;
+}
+
+/* ── Error Banner ─────────────────────────────────────────────────────── */
+
+.two-factor-modal__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  color: var(--color-danger, #ef4444);
+  background: color-mix(
+    in srgb,
+    var(--color-danger, #ef4444) 10%,
+    var(--bg-widget) 90%
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--color-danger, #ef4444) 30%, transparent);
+}
+
+/* ── Danger Header Icon ───────────────────────────────────────────────── */
+
+.mod-install-dialog__header-icon-wrap--danger {
+  color: var(--color-danger, #ef4444);
+  background: color-mix(
+    in srgb,
+    var(--color-danger, #ef4444) 14%,
+    var(--bg-main) 86%
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--color-danger, #ef4444) 32%,
+    transparent
+  );
+}
+
+/* ── Modal Footer ─────────────────────────────────────────────────────── */
+
+.two-factor-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--bg-main) 50%, var(--bg-widget) 50%);
+  border-top: 1px solid color-mix(in srgb, var(--border-dark) 80%, transparent);
+  flex-shrink: 0;
+}
+
+.two-factor-modal__footer--between {
+  justify-content: space-between;
+}
+
+@media (max-width: 480px) {
+  .two-factor-modal__recovery-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
 import { AppIcon } from '../AppIcon';
+import { CancelButton } from '../CancelButton';
 import { ModalBackdrop } from './ModalBackdrop';
 
 interface TwoFactorSetupModalProps {
@@ -55,7 +56,7 @@ export function TwoFactorSetupModal({
           setError(t('web_error_failed_fetch'));
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!active) return;
         setError(err instanceof Error ? err.message : String(err));
       })
@@ -75,10 +76,13 @@ export function TwoFactorSetupModal({
     setError('');
 
     try {
-      const res = await api<{ recoveryCodes?: string[] }>('/api/auth/2fa/enable', {
-        method: 'POST',
-        body: JSON.stringify({ code: c }),
-      });
+      const res = await api<{ recoveryCodes?: string[] }>(
+        '/api/auth/2fa/enable',
+        {
+          method: 'POST',
+          body: JSON.stringify({ code: c }),
+        },
+      );
 
       if (res.recoveryCodes && res.recoveryCodes.length > 0) {
         setRecoveryCodes(res.recoveryCodes);
@@ -87,7 +91,7 @@ export function TwoFactorSetupModal({
       } else {
         setError(t('invalid_code'));
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
@@ -116,209 +120,200 @@ export function TwoFactorSetupModal({
   return (
     <ModalBackdrop
       open={open}
-      onClose={step === 'codes' ? onClose : onClose}
+      onClose={onClose}
       id="twoFactorSetupBackdrop"
+      backdropClassName="fu-modal-backdrop--stacked"
+      closeOnBackdropClick={false}
     >
       <div
         className="fu-modal two-factor-setup-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="twoFactorSetupTitle"
-        style={{ maxWidth: 520 }}
       >
-        <div className="fu-modal__header fu-modal__header--with-icon" id="twoFactorSetupTitle">
-          <AppIcon name="person_shield" size={20} />
-          {step === 'setup' ? t('web_2fa_setup_title') : t('web_2fa_setup_success_title')}
+        <div className="mod-install-dialog__header">
+          <div className="mod-install-dialog__header-main">
+            <div className="mod-install-dialog__header-icon-wrap">
+              <AppIcon name="person_shield" size={20} />
+            </div>
+            <div className="mod-install-dialog__header-titles">
+              <h2
+                className="mod-install-dialog__title"
+                id="twoFactorSetupTitle"
+              >
+                {step === 'setup'
+                  ? t('web_2fa_setup_title')
+                  : t('web_2fa_setup_success_title')}
+              </h2>
+            </div>
+          </div>
         </div>
 
-        <div className="fu-modal__body" style={{ padding: '20px 24px' }}>
+        <div className="two-factor-modal__body">
           {step === 'setup' ? (
-            <div>
-              <p style={{ margin: '0 0 16px', fontSize: 13, lineHeight: 1.5, color: 'var(--text-muted)' }}>
+            <>
+              <p className="two-factor-modal__lead">
                 {t('web_2fa_setup_step1')}
               </p>
 
-              {loading && !qrDataUrl ? (
-                <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                  <span className="spinner" />
+              <div className="two-factor-modal__card">
+                <div className="two-factor-modal__card-body two-factor-modal__card-body--center">
+                  {loading && !qrDataUrl ? (
+                    <div className="two-factor-modal__loading">
+                      <span className="spinner" />
+                    </div>
+                  ) : qrDataUrl ? (
+                    <div className="two-factor-modal__qr-box">
+                      <img
+                        src={qrDataUrl}
+                        alt="2FA QR Code"
+                        className="two-factor-modal__qr-img"
+                      />
+                    </div>
+                  ) : null}
+
+                  {secret && (
+                    <div className="two-factor-modal__secret-row">
+                      <code className="two-factor-modal__secret-code">
+                        {secret}
+                      </code>
+                      <button
+                        type="button"
+                        className="btn btn--subtle btn--with-icon two-factor-modal__copy-btn"
+                        onClick={copySecret}
+                        title={
+                          secretCopied
+                            ? t('copied_to_clipboard')
+                            : t('copy_to_clipboard')
+                        }
+                      >
+                        <AppIcon
+                          name={secretCopied ? 'check' : 'file_copy'}
+                          size={14}
+                        />
+                        <span>{secretCopied ? t('copied') : t('copy')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ) : qrDataUrl ? (
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                  <div
-                    style={{
-                      display: 'inline-block',
-                      background: '#ffffff',
-                      padding: 10,
-                      borderRadius: 8,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              </div>
+
+              <div className="two-factor-modal__card">
+                <div className="two-factor-modal__card-head">
+                  <AppIcon
+                    name="asterisk"
+                    size={14}
+                    className="two-factor-modal__card-head-icon"
+                  />
+                  <h3 className="two-factor-modal__card-title">
+                    {t('web_2fa_setup_step2')}
+                  </h3>
+                </div>
+                <div className="two-factor-modal__card-body">
+                  <input
+                    type="text"
+                    id="twoFactorSetupCodeInput"
+                    className="input two-factor-modal__code-input"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder={t('web_2fa_code_placeholder')}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === 'Enter' &&
+                        code.trim().length === 6 &&
+                        !loading
+                      ) {
+                        e.preventDefault();
+                        void handleActivate();
+                      }
                     }}
-                  >
-                    <img
-                      src={qrDataUrl}
-                      alt="2FA QR Code"
-                      style={{ width: 180, height: 180, display: 'block' }}
-                    />
-                  </div>
+                    autoFocus
+                  />
                 </div>
-              ) : null}
-
-              {secret && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    marginBottom: 20,
-                  }}
-                >
-                  <code
-                    style={{
-                      fontSize: 13,
-                      letterSpacing: '1.5px',
-                      background: 'rgba(255,255,255,0.06)',
-                      padding: '6px 12px',
-                      borderRadius: 4,
-                      userSelect: 'all',
-                      border: '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
-                    }}
-                  >
-                    {secret}
-                  </code>
-                  <button
-                    type="button"
-                    className="btn btn--subtle btn--with-icon"
-                    onClick={copySecret}
-                    title={secretCopied ? t('copied_to_clipboard') : t('copy_to_clipboard')}
-                    style={{ padding: '6px 10px', fontSize: 12 }}
-                  >
-                    <AppIcon name="file_copy" size={14} />
-                    {secretCopied ? t('copied') : t('copy')}
-                  </button>
-                </div>
-              )}
-
-              <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500, color: 'var(--text-main)' }}>
-                {t('web_2fa_setup_step2')}
-              </p>
-
-              <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-                <input
-                  type="text"
-                  className="input"
-                  inputMode="numeric"
-                  maxLength={6}
-                  placeholder={t('web_2fa_code_placeholder')}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      void handleActivate();
-                    }
-                  }}
-                  style={{
-                    textAlign: 'center',
-                    fontSize: 18,
-                    fontWeight: 600,
-                    letterSpacing: '4px',
-                    flex: 1,
-                  }}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={() => void handleActivate()}
-                  disabled={loading || code.trim().length !== 6}
-                >
-                  {loading ? <span className="spinner" /> : t('web_2fa_setup_activate_btn')}
-                </button>
               </div>
 
               {error && (
-                <p style={{ color: 'var(--color-danger, #e53935)', fontSize: 13, margin: '8px 0 0' }}>
-                  {error}
-                </p>
+                <div className="two-factor-modal__error" role="alert">
+                  <AppIcon name="info" size={16} />
+                  <span>{error}</span>
+                </div>
               )}
-            </div>
+            </>
           ) : (
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 14,
-                  padding: '10px 14px',
-                  borderRadius: 6,
-                  background: 'rgba(76, 175, 80, 0.12)',
-                  border: '1px solid rgba(76, 175, 80, 0.3)',
-                  color: 'var(--color-success, #4caf50)',
-                }}
-              >
-                <AppIcon name="check" size={20} />
-                <span style={{ fontSize: 14, fontWeight: 600 }}>{t('web_2fa_setup_success_title')}</span>
+            <>
+              <div className="two-factor-modal__success-banner">
+                <AppIcon
+                  name="check"
+                  size={20}
+                  className="two-factor-modal__success-icon"
+                />
+                <span className="two-factor-modal__success-title">
+                  {t('web_2fa_setup_success_title')}
+                </span>
               </div>
 
-              <p style={{ margin: '0 0 14px', fontSize: 13, lineHeight: 1.5, color: 'var(--text-muted)' }}>
+              <p className="two-factor-modal__lead">
                 {t('web_2fa_recovery_codes_desc')}
               </p>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 8,
-                  background: 'rgba(0,0,0,0.25)',
-                  padding: 14,
-                  borderRadius: 6,
-                  border: '1px solid var(--border-subtle, rgba(255,255,255,0.08))',
-                  marginBottom: 16,
-                }}
-              >
+              <div className="two-factor-modal__recovery-grid">
                 {recoveryCodes.map((rc, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      fontFamily: 'monospace',
-                      fontSize: 14,
-                      fontWeight: 600,
-                      letterSpacing: '1px',
-                      color: 'var(--text-main)',
-                      textAlign: 'center',
-                      padding: '4px 8px',
-                      background: 'rgba(255,255,255,0.04)',
-                      borderRadius: 4,
-                    }}
-                  >
+                  <div key={idx} className="two-factor-modal__recovery-code">
                     {rc}
                   </div>
                 ))}
               </div>
-
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between' }}>
-                <button
-                  type="button"
-                  className="btn btn--subtle btn--with-icon"
-                  onClick={copyRecoveryCodes}
-                >
-                  <AppIcon name="file_copy" size={16} />
-                  {copied ? t('web_2fa_recovery_codes_copied') : t('web_2fa_copy_recovery_codes')}
-                </button>
-
-                <button type="button" className="btn btn--primary" onClick={onClose}>
-                  {t('close')}
-                </button>
-              </div>
-            </div>
+            </>
           )}
         </div>
 
-        {step === 'setup' && (
-          <div className="fu-modal__footer" style={{ justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn--subtle" onClick={onClose}>
-              {t('cancel')}
+        {step === 'setup' ? (
+          <div className="two-factor-modal__footer">
+            <CancelButton
+              id="btnTwoFactorSetupCancel"
+              onClick={onClose}
+              disabled={loading}
+              t={t}
+            />
+            <button
+              type="button"
+              id="btnTwoFactorSetupActivate"
+              className="btn btn--primary btn--with-icon"
+              onClick={() => void handleActivate()}
+              disabled={loading || code.trim().length !== 6}
+            >
+              {loading ? (
+                <span className="spinner" />
+              ) : (
+                <AppIcon name="check" size={16} />
+              )}
+              {t('web_2fa_setup_activate_btn')}
+            </button>
+          </div>
+        ) : (
+          <div className="two-factor-modal__footer two-factor-modal__footer--between">
+            <button
+              type="button"
+              id="btnTwoFactorCopyRecovery"
+              className="btn btn--subtle btn--with-icon"
+              onClick={copyRecoveryCodes}
+            >
+              <AppIcon name={copied ? 'check' : 'file_copy'} size={16} />
+              {copied
+                ? t('web_2fa_recovery_codes_copied')
+                : t('web_2fa_copy_recovery_codes')}
+            </button>
+
+            <button
+              type="button"
+              id="btnTwoFactorSetupDone"
+              className="btn btn--primary btn--with-icon"
+              onClick={onClose}
+            >
+              <AppIcon name="check" size={16} />
+              {t('close')}
             </button>
           </div>
         )}
