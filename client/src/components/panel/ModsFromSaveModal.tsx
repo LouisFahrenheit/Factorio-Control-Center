@@ -36,7 +36,7 @@ export function ModsFromSaveModal({ mods, t }: ModsFromSaveModalProps) {
       id="modsFromSaveBackdrop"
       onClose={mods.closeFromSaveDialog}
       closeOnEscape={!st.preparing}
-      closeOnBackdropClick={!st.preparing}
+      closeOnBackdropClick={false}
       backdropClassName="fu-modal-backdrop--stacked"
     >
       <div
@@ -65,16 +65,6 @@ export function ModsFromSaveModal({ mods, t }: ModsFromSaveModalProps) {
                 </span>
               ) : null}
             </div>
-            {!st.preparing ? (
-              <button
-                type="button"
-                className="mod-update-all-flow__close"
-                aria-label={t('close')}
-                onClick={mods.closeFromSaveDialog}
-              >
-                <AppIcon name="close" size={16} />
-              </button>
-            ) : null}
           </div>
 
           <div className="mod-update-all-flow__body">

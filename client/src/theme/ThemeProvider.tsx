@@ -11,9 +11,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <MantineProvider theme={fccMantineTheme} defaultColorScheme="dark" forceColorScheme="dark">
+    <MantineProvider
+      theme={fccMantineTheme}
+      defaultColorScheme="dark"
+      forceColorScheme="dark"
+    >
       <ModalsProvider
         modalProps={{
+          withCloseButton: false,
+          closeOnClickOutside: false,
           classNames: { content: 'fcc-modal' },
           overlayProps: { backgroundOpacity: 0.65, blur: 7 },
           transitionProps: { transition: 'pop', duration: 280 },

@@ -1021,7 +1021,7 @@
   "no": "Нет",
   "server_settings_download_btn": "Скачать настройки",
   "server_settings_upload_btn": "Загрузить настройки",
-  "server_settings_upload_confirm": "Заменить файл server-settings.json выбранным файлом?",
+  "server_settings_upload_confirm": "Перезаписать текущие настройки сервера?",
   "server_settings_download_ok": "Файл server-settings.json скачан.",
   "server_settings_upload_ok": "Файл server-settings.json загружен и применён.",
   "server_settings_hover_hint_banner": "Наведите курсор на название параметра, чтобы увидеть подсказку",

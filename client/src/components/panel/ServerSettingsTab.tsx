@@ -4,10 +4,8 @@ import { useUserInterfaceHintsEnabled } from '../../hooks/useUserInterfaceHintsE
 import { setUserInterfaceHintsEnabled } from '../../lib/userPrefs';
 import { TabLoadingPlaceholder } from '../TabLoadingPlaceholder';
 import { AppIcon } from '../AppIcon';
-import { CancelButton } from '../CancelButton';
 import { RefreshButton } from '../RefreshButton';
 import { SearchField } from '../SearchField';
-import { ModalBackdrop } from '../modals/ModalBackdrop';
 import { ServerSettingsForm } from './ServerSettingsForm';
 import { ServerSettingsResetModal } from './ServerSettingsResetModal';
 
@@ -180,46 +178,6 @@ export function ServerSettingsTab({
           </div>
         </div>
       </div>
-
-      <ModalBackdrop
-        open={settings.uploadOpen}
-        onClose={settings.cancelUpload}
-        id="serverSettingsUploadBackdrop"
-      >
-        <div
-          className="fu-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="serverSettingsUploadHeading"
-        >
-          <div
-            className="fu-modal__header"
-            id="serverSettingsUploadHeading"
-            data-i18n="warning_title"
-          >
-            {t('warning_title')}
-          </div>
-          <div className="fu-modal__body">
-            <p
-              id="serverSettingsUploadText"
-              data-i18n="server_settings_upload_confirm"
-            >
-              {t('server_settings_upload_confirm')}
-            </p>
-          </div>
-          <div className="fu-modal__footer">
-            <CancelButton onClick={settings.cancelUpload} t={t} />
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => void settings.confirmUpload()}
-              data-i18n="confirm"
-            >
-              {t('confirm') !== 'confirm' ? t('confirm') : 'OK'}
-            </button>
-          </div>
-        </div>
-      </ModalBackdrop>
 
       <ServerSettingsResetModal
         open={settings.resetOpen}

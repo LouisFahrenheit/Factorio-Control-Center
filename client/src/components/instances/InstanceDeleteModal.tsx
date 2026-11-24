@@ -39,7 +39,12 @@ export function InstanceDeleteModal({
     .join('\n');
 
   return (
-    <ModalBackdrop open id="instanceDeleteBackdrop" onClose={onClose}>
+    <ModalBackdrop
+      open
+      id="instanceDeleteBackdrop"
+      onClose={onClose}
+      closeOnBackdropClick={false}
+    >
       <div
         className="fu-modal server-update-dialog instance-operation-dialog instance-operation-dialog--delete instance-delete-dialog mod-job-modal instance-delete-modal"
         role="dialog"
@@ -54,17 +59,6 @@ export function InstanceDeleteModal({
             <span className="mod-job-modal__header-title">
               {t('instances_delete_dialog_title')}
             </span>
-          </div>
-
-          <div className="mod-job-modal__header-right">
-            <button
-              type="button"
-              className="mod-job-modal__close"
-              aria-label={t('close')}
-              onClick={onClose}
-            >
-              <AppIcon name="close" size={18} />
-            </button>
           </div>
         </div>
 

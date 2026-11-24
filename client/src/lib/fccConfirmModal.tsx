@@ -18,6 +18,7 @@ export type OpenFccConfirmOptions = {
   confirmIconName?: AppIconName;
   cancelIcon?: ReactNode;
   cancelIconName?: AppIconName;
+  closeOnClickOutside?: boolean;
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
 };
@@ -27,7 +28,10 @@ function parseConfirmMessage(message: string): {
   details: string[];
   question?: string;
 } {
-  const parts = message.split('\n\n').map((p) => p.trim()).filter(Boolean);
+  const parts = message
+    .split('\n\n')
+    .map((p) => p.trim())
+    .filter(Boolean);
   if (!parts.length) return { lead: message, details: [] };
   if (parts.length === 1) return { lead: parts[0], details: [] };
 
@@ -76,7 +80,13 @@ function FccConfirmModalBody({
           ),
         )
       : null,
-    question ? createElement('p', { className: 'fcc-confirm-modal__question' }, question) : null,
+    question
+      ? createElement(
+          'p',
+          { className: 'fcc-confirm-modal__question' },
+          question,
+        )
+      : null,
   );
 }
 
@@ -97,13 +107,17 @@ function confirmTitle(title: string, variant: FccConfirmVariant): ReactNode {
 
 export function openFccConfirmModal(options: OpenFccConfirmOptions): string {
   const variant = options.variant || 'default';
-  const confirmClass = variant === 'danger' ? 'btn btn--danger' : 'btn btn--primary';
+  const confirmClass =
+    variant === 'danger' ? 'btn btn--danger' : 'btn btn--primary';
 
   let confirmIcon: ReactNode = undefined;
   if (options.confirmIcon !== undefined) {
     confirmIcon = options.confirmIcon;
   } else if (options.confirmIconName) {
-    confirmIcon = createElement(AppIcon, { name: options.confirmIconName, size: 15 });
+    confirmIcon = createElement(AppIcon, {
+      name: options.confirmIconName,
+      size: 15,
+    });
   } else if (variant === 'danger') {
     confirmIcon = createElement(IconAlertTriangle, {
       size: 15,
@@ -118,7 +132,10 @@ export function openFccConfirmModal(options: OpenFccConfirmOptions): string {
   if (options.cancelIcon !== undefined) {
     cancelIcon = options.cancelIcon;
   } else if (options.cancelIconName) {
-    cancelIcon = createElement(AppIcon, { name: options.cancelIconName, size: 15 });
+    cancelIcon = createElement(AppIcon, {
+      name: options.cancelIconName,
+      size: 15,
+    });
   } else {
     cancelIcon = createElement(AppIcon, { name: 'close', size: 15 });
   }
@@ -127,6 +144,8 @@ export function openFccConfirmModal(options: OpenFccConfirmOptions): string {
     title: confirmTitle(options.title, variant),
     centered: true,
     size: options.size || 'auto',
+    withCloseButton: false,
+    closeOnClickOutside: options.closeOnClickOutside ?? false,
     classNames: {
       content: 'fcc-modal fcc-modal--confirm',
       header: 'fcc-confirm-modal__header',

@@ -1,5 +1,9 @@
 import { Modal } from '@mantine/core';
-import { IconAlertTriangle, IconArchive, IconRotateClockwise } from '@tabler/icons-react';
+import {
+  IconAlertTriangle,
+  IconArchive,
+  IconRotateClockwise,
+} from '@tabler/icons-react';
 import type { BackupEntry, RestoreMode } from '../../hooks/useBackup';
 
 interface BackupRestoreModalProps {
@@ -44,9 +48,14 @@ export function BackupRestoreModal({
       onClose={onClose}
       centered
       size={520}
+      withCloseButton={false}
+      closeOnClickOutside={false}
       title={
         <span className="backup-restore-modal__header-title">
-          <IconAlertTriangle size={20} className="backup-restore-modal__header-icon" />
+          <IconAlertTriangle
+            size={20}
+            className="backup-restore-modal__header-icon"
+          />
           <span>{t('backup_restore_confirm_title')}</span>
         </span>
       }
@@ -59,16 +68,23 @@ export function BackupRestoreModal({
     >
       <div className="backup-restore-modal__content">
         {/* Описание и имя архива */}
-        <p className="backup-restore-modal__msg">{t('backup_restore_confirm_msg')}</p>
+        <p className="backup-restore-modal__msg">
+          {t('backup_restore_confirm_msg')}
+        </p>
 
         <div className="backup-restore-modal__file-badge">
           <IconArchive size={20} className="backup-restore-modal__file-icon" />
-          <span className="backup-restore-modal__file-name">{target.filename}</span>
+          <span className="backup-restore-modal__file-name">
+            {target.filename}
+          </span>
         </div>
 
         {/* Предупреждение о перезапуске */}
         <div className="backup-restore-modal__callout">
-          <IconAlertTriangle size={18} className="backup-restore-modal__callout-icon" />
+          <IconAlertTriangle
+            size={18}
+            className="backup-restore-modal__callout-icon"
+          />
           <span className="backup-restore-modal__callout-text">
             {t('backup_restore_restart_warn')}
           </span>
@@ -91,8 +107,12 @@ export function BackupRestoreModal({
                   }`}
                   onClick={() => onModeChange(m.id)}
                 >
-                  <span className={`backup-restore-modal__radio ${isSelected ? 'backup-restore-modal__radio--checked' : ''}`} />
-                  <span className="backup-restore-modal__option-label">{m.label}</span>
+                  <span
+                    className={`backup-restore-modal__radio ${isSelected ? 'backup-restore-modal__radio--checked' : ''}`}
+                  />
+                  <span className="backup-restore-modal__option-label">
+                    {m.label}
+                  </span>
                 </button>
               );
             })}
@@ -101,11 +121,7 @@ export function BackupRestoreModal({
 
         {/* Кнопки действий */}
         <div className="backup-restore-modal__actions">
-          <button
-            type="button"
-            className="btn"
-            onClick={onClose}
-          >
+          <button type="button" className="btn" onClick={onClose}>
             {t('cancel')}
           </button>
           <button

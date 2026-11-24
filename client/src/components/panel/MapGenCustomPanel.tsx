@@ -1245,42 +1245,72 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
         open={cs.savePresetDialogOpen}
         onClose={cs.closeSavePresetDialog}
         id="mapGenSavePresetBackdrop"
+        backdropClassName="fu-modal-backdrop--stacked"
+        closeOnBackdropClick={false}
       >
         <div
-          className="fu-modal create-save__preset-save-dialog"
+          className="fu-modal modpack-form-dialog create-save__preset-save-dialog save-map-modal"
           role="dialog"
           aria-modal="true"
           aria-labelledby="mapGenSavePresetTitle"
         >
-          <div className="fu-modal__header" id="mapGenSavePresetTitle">
-            {t('map_gen_user_preset_save_title')}
+          <div className="mod-install-dialog__header">
+            <div className="mod-install-dialog__header-main">
+              <div
+                className="mod-install-dialog__header-icon-wrap"
+                aria-hidden="true"
+              >
+                <AppIcon name="save" size={18} />
+              </div>
+              <div className="mod-install-dialog__header-titles">
+                <h2
+                  className="mod-install-dialog__title"
+                  id="mapGenSavePresetTitle"
+                >
+                  {t('map_gen_user_preset_save_title')}
+                </h2>
+              </div>
+            </div>
           </div>
+
           <div className="fu-modal__body">
-            <label className="modpack-import-dialog__field">
-              <span>{t('map_gen_user_preset_name_label')}</span>
+            <label
+              className="modpack-form-dialog__field-card"
+              htmlFor="mapGenSavePresetInput"
+            >
+              <span className="modpack-form-dialog__field-label">
+                {t('map_gen_user_preset_name_label')}
+              </span>
               <input
+                id="mapGenSavePresetInput"
                 type="text"
                 className="input"
                 maxLength={64}
+                autoFocus
                 value={cs.savePresetName}
                 placeholder={t('map_gen_user_preset_name_placeholder')}
                 onChange={(e) => cs.setSavePresetName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') cs.confirmSaveUserPreset();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    cs.confirmSaveUserPreset();
+                  }
                 }}
               />
             </label>
-            {cs.savePresetError ? (
-              <p className="create-save__preview-error">{cs.savePresetError}</p>
-            ) : null}
+            <p className="save-map-modal__error" aria-live="polite">
+              {cs.savePresetError}
+            </p>
           </div>
-          <div className="fu-modal__footer">
+
+          <div className="fu-modal__footer modpack-form-dialog__footer">
             <CancelButton onClick={cs.closeSavePresetDialog} t={t} />
             <button
               type="button"
-              className="btn btn--primary"
+              className="btn btn--primary btn--with-icon"
               onClick={cs.confirmSaveUserPreset}
             >
+              <AppIcon name="save" size={16} />
               {t('map_gen_user_preset_save_confirm')}
             </button>
           </div>
@@ -1291,60 +1321,91 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
         open={cs.presetImportOpen}
         onClose={cs.closePresetImportDialog}
         id="mapGenPresetImportBackdrop"
+        backdropClassName="fu-modal-backdrop--stacked"
+        closeOnBackdropClick={false}
+        closeOnEscape={!cs.presetImportBusy}
       >
         <div
-          className="fu-modal modpack-import-dialog create-save__preset-transfer-dialog"
+          className="fu-modal modpack-import-dialog modpack-form-dialog create-save__preset-transfer-dialog save-map-modal save-map-modal--transfer"
           role="dialog"
           aria-modal="true"
           aria-labelledby="mapGenPresetImportTitle"
         >
-          <div className="fu-modal__header" id="mapGenPresetImportTitle">
-            {t('map_gen_preset_import_dialog_title')}
+          <div className="mod-install-dialog__header">
+            <div className="mod-install-dialog__header-main">
+              <div
+                className="mod-install-dialog__header-icon-wrap"
+                aria-hidden="true"
+              >
+                <AppIcon name="upload" size={18} />
+              </div>
+              <div className="mod-install-dialog__header-titles">
+                <h2
+                  className="mod-install-dialog__title"
+                  id="mapGenPresetImportTitle"
+                >
+                  {t('map_gen_preset_import_dialog_title')}
+                </h2>
+              </div>
+            </div>
+            <div className="mod-install-dialog__header-right">
+              <span className="save-map-modal__badge">
+                {cs.presetImportSelected.length} /{' '}
+                {cs.presetImportCandidates.length}
+              </span>
+            </div>
           </div>
+
           <div className="fu-modal__body">
-            <p className="modpack-import-dialog__desc">
-              {t('map_gen_preset_import_dialog_hint')}
-            </p>
-            <ul className="modpack-import-dialog__mods create-save__preset-transfer-list">
-              {cs.presetImportCandidates.map((candidate) => {
+            <div className="save-map-modal__hint-card">
+              <AppIcon
+                name="info"
+                size={16}
+                className="save-map-modal__hint-icon"
+              />
+              <p className="save-map-modal__hint-text">
+                {t('map_gen_preset_import_dialog_hint')}
+              </p>
+            </div>
+
+            <ul className="save-map-modal__preset-list create-save__preset-transfer-list">
+              {cs.presetImportCandidates.map((candidate, idx) => {
                 const checked = cs.presetImportSelected.includes(candidate.key);
                 return (
                   <li
                     key={candidate.key}
-                    className={candidate.exists ? 'is-disabled' : undefined}
+                    className={
+                      'save-map-modal__preset-item' +
+                      (checked ? ' is-selected' : '')
+                    }
                   >
-                    <label className="modpack-import-dialog__option">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(e) =>
-                          cs.togglePresetImportSelection(
-                            candidate.key,
-                            e.target.checked,
-                          )
-                        }
-                      />
-                      <span>
-                        {candidate.name}
-                        {candidate.exists ? (
-                          <span className="create-save__preset-transfer-note">
-                            {' '}
-                            ({t('map_gen_preset_import_exists')})
-                          </span>
-                        ) : null}
+                    <FccSwitch
+                      id={`mapGenPresetImport_${idx}`}
+                      className="save-map-modal__preset-switch"
+                      labelClassName="save-map-modal__preset-name"
+                      checked={checked}
+                      disabled={cs.presetImportBusy}
+                      onChange={(val) =>
+                        cs.togglePresetImportSelection(candidate.key, val)
+                      }
+                      label={candidate.name}
+                    />
+                    {candidate.exists ? (
+                      <span className="save-map-modal__exists-badge">
+                        {t('map_gen_preset_import_exists')}
                       </span>
-                    </label>
+                    ) : null}
                   </li>
                 );
               })}
             </ul>
-            {cs.presetImportError ? (
-              <p className="create-save__preview-error">
-                {cs.presetImportError}
-              </p>
-            ) : null}
+
+            <p className="save-map-modal__error" aria-live="polite">
+              {cs.presetImportError}
+            </p>
           </div>
-          <div className="fu-modal__footer">
+
+          <div className="fu-modal__footer modpack-form-dialog__footer">
             <CancelButton
               onClick={cs.closePresetImportDialog}
               t={t}
@@ -1352,10 +1413,11 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
             />
             <button
               type="button"
-              className="btn btn--primary"
+              className="btn btn--primary btn--with-icon"
               disabled={cs.presetImportBusy}
               onClick={() => void cs.confirmPresetImport()}
             >
+              <AppIcon name="upload" size={16} />
               {t('map_gen_preset_import_confirm')}
             </button>
           </div>
@@ -1366,55 +1428,90 @@ export function MapGenCustomPanel({ cs, t }: MapGenCustomPanelProps) {
         open={cs.presetExportOpen}
         onClose={cs.closePresetExportDialog}
         id="mapGenPresetExportBackdrop"
+        backdropClassName="fu-modal-backdrop--stacked"
+        closeOnBackdropClick={false}
       >
         <div
-          className="fu-modal modpack-import-dialog create-save__preset-transfer-dialog"
+          className="fu-modal modpack-import-dialog modpack-form-dialog create-save__preset-transfer-dialog save-map-modal save-map-modal--transfer"
           role="dialog"
           aria-modal="true"
           aria-labelledby="mapGenPresetExportTitle"
         >
-          <div className="fu-modal__header" id="mapGenPresetExportTitle">
-            {t('map_gen_preset_export_dialog_title')}
+          <div className="mod-install-dialog__header">
+            <div className="mod-install-dialog__header-main">
+              <div
+                className="mod-install-dialog__header-icon-wrap"
+                aria-hidden="true"
+              >
+                <AppIcon name="download" size={18} />
+              </div>
+              <div className="mod-install-dialog__header-titles">
+                <h2
+                  className="mod-install-dialog__title"
+                  id="mapGenPresetExportTitle"
+                >
+                  {t('map_gen_preset_export_dialog_title')}
+                </h2>
+              </div>
+            </div>
+            <div className="mod-install-dialog__header-right">
+              <span className="save-map-modal__badge">
+                {cs.presetExportSelected.length} / {cs.userPresets.length}
+              </span>
+            </div>
           </div>
+
           <div className="fu-modal__body">
-            <p className="modpack-import-dialog__desc">
-              {t('map_gen_preset_export_dialog_hint')}
-            </p>
-            <ul className="modpack-import-dialog__mods create-save__preset-transfer-list">
-              {cs.userPresets.map((preset) => {
+            <div className="save-map-modal__hint-card">
+              <AppIcon
+                name="info"
+                size={16}
+                className="save-map-modal__hint-icon"
+              />
+              <p className="save-map-modal__hint-text">
+                {t('map_gen_preset_export_dialog_hint')}
+              </p>
+            </div>
+
+            <ul className="save-map-modal__preset-list create-save__preset-transfer-list">
+              {cs.userPresets.map((preset, idx) => {
                 const checked = cs.presetExportSelected.includes(preset.id);
                 return (
-                  <li key={preset.id}>
-                    <label className="modpack-import-dialog__option">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(e) =>
-                          cs.togglePresetExportSelection(
-                            preset.id,
-                            e.target.checked,
-                          )
-                        }
-                      />
-                      <span>{preset.name}</span>
-                    </label>
+                  <li
+                    key={preset.id}
+                    className={
+                      'save-map-modal__preset-item' +
+                      (checked ? ' is-selected' : '')
+                    }
+                  >
+                    <FccSwitch
+                      id={`mapGenPresetExport_${idx}`}
+                      className="save-map-modal__preset-switch"
+                      labelClassName="save-map-modal__preset-name"
+                      checked={checked}
+                      onChange={(val) =>
+                        cs.togglePresetExportSelection(preset.id, val)
+                      }
+                      label={preset.name}
+                    />
                   </li>
                 );
               })}
             </ul>
-            {cs.presetExportError ? (
-              <p className="create-save__preview-error">
-                {cs.presetExportError}
-              </p>
-            ) : null}
+
+            <p className="save-map-modal__error" aria-live="polite">
+              {cs.presetExportError}
+            </p>
           </div>
-          <div className="fu-modal__footer">
+
+          <div className="fu-modal__footer modpack-form-dialog__footer">
             <CancelButton onClick={cs.closePresetExportDialog} t={t} />
             <button
               type="button"
-              className="btn btn--primary"
+              className="btn btn--primary btn--with-icon"
               onClick={cs.confirmPresetExport}
             >
+              <AppIcon name="download" size={16} />
               {t('map_gen_preset_export_confirm')}
             </button>
           </div>

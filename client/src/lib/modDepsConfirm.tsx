@@ -267,6 +267,7 @@ function openDepsModal(
       title: modalTitle(title, conflictsOnly),
       centered: true,
       size: 'auto',
+      withCloseButton: false,
       closeOnClickOutside: false,
       closeOnEscape: false,
       classNames: {

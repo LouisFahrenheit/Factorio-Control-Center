@@ -64,6 +64,8 @@ export function BackupCreateModal({
       onClose={onClose}
       centered
       size={560}
+      withCloseButton={false}
+      closeOnClickOutside={false}
       title={
         <span className="backup-modal-title">
           <IconArchive size={21} className="backup-modal-title__icon" />
@@ -78,9 +80,7 @@ export function BackupCreateModal({
       }}
     >
       <div className="backup-modal__content">
-        <p className="backup-modal__desc">
-          {t('backup_create_modal_desc')}
-        </p>
+        <p className="backup-modal__desc">{t('backup_create_modal_desc')}</p>
 
         {/* ── Секция: По умолчанию в архиве ──────────────────────── */}
         <div className="backup-create-section">
@@ -102,8 +102,13 @@ export function BackupCreateModal({
                   <div className="backup-included-item__icon">
                     <Icon size={17} />
                   </div>
-                  <span className="backup-included-item__text">{item.title}</span>
-                  <IconCheck size={16} className="backup-included-item__check" />
+                  <span className="backup-included-item__text">
+                    {item.title}
+                  </span>
+                  <IconCheck
+                    size={16}
+                    className="backup-included-item__check"
+                  />
                 </div>
               );
             })}

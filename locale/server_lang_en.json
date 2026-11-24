@@ -1021,7 +1021,7 @@
   "no": "No",
   "server_settings_download_btn": "Download settings",
   "server_settings_upload_btn": "Upload settings",
-  "server_settings_upload_confirm": "Replace server-settings.json with the selected file?",
+  "server_settings_upload_confirm": "Overwrite current server settings?",
   "server_settings_download_ok": "server-settings.json downloaded.",
   "server_settings_upload_ok": "server-settings.json uploaded and applied.",
   "server_settings_hover_hint_banner": "Hover over a setting name to view details",

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { openFccConfirmModal } from '../lib/fccConfirmModal';
 import type { LocaleStrings } from '../i18n/locale';
 import type { ProgramSettings } from '../types/programSettings';
 import {
@@ -22,7 +23,9 @@ interface ServerSettingsResponse {
 
 async function ensureServerSettingsFileSilently(): Promise<void> {
   try {
-    const existing = await api<ServerSettingsResponse>('/api/files/server-settings');
+    const existing = await api<ServerSettingsResponse>(
+      '/api/files/server-settings',
+    );
     if (existing?.ok === false) {
       const exErr = String(existing.error || 'not_found').trim();
       if (isNotFoundApiError(exErr)) throw new Error('not_found');
@@ -34,9 +37,12 @@ async function ensureServerSettingsFileSilently(): Promise<void> {
     if (!isNotFoundApiError(err)) throw e;
   }
 
-  const createdResp = await api<ServerSettingsResponse>('/api/files/server-settings/create-from-example', {
-    method: 'POST',
-  });
+  const createdResp = await api<ServerSettingsResponse>(
+    '/api/files/server-settings/create-from-example',
+    {
+      method: 'POST',
+    },
+  );
   if (createdResp?.ok === false) {
     throw new Error(String(createdResp.error || 'create_failed'));
   }
@@ -44,16 +50,24 @@ async function ensureServerSettingsFileSilently(): Promise<void> {
   let created: ServerSettingsResponse;
   try {
     created = await api<ServerSettingsResponse>('/api/files/server-settings');
-    if (created?.ok === false) throw new Error(String(created.error || 'not_found'));
+    if (created?.ok === false)
+      throw new Error(String(created.error || 'not_found'));
   } catch {
     return;
   }
 
-  const data = created.data && typeof created.data === 'object' ? created.data : {};
-  const vis = data.visibility && typeof data.visibility === 'object' ? (data.visibility as Record<string, unknown>) : {};
+  const data =
+    created.data && typeof created.data === 'object' ? created.data : {};
+  const vis =
+    data.visibility && typeof data.visibility === 'object'
+      ? (data.visibility as Record<string, unknown>)
+      : {};
   if (vis.public === false) return;
   data.visibility = { ...vis, public: false };
-  await api('/api/files/server-settings', { method: 'PUT', body: JSON.stringify(data) });
+  await api('/api/files/server-settings', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
 
 export function useServerSettings(
@@ -67,18 +81,22 @@ export function useServerSettings(
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [rawEntries, setRawEntries] = useState<[string, unknown][]>([]);
   const [fileMissing, setFileMissing] = useState(false);
-  const [pendingUpload, setPendingUpload] = useState<Record<string, unknown> | null>(null);
-  const [uploadOpen, setUploadOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
   const kind = resolveStatusKind(status);
-  const locked = kind === 'running' || kind === 'starting' || kind === 'stopping' || kind === 'maintenance';
+  const locked =
+    kind === 'running' ||
+    kind === 'starting' ||
+    kind === 'stopping' ||
+    kind === 'maintenance';
   const sourceTitle = t('settings_btn');
 
   const toast = useCallback(
     (text: string, isErr: boolean) => {
-      const msg = isErr ? localizeServerSettingsError(text, t) : String(text || '');
+      const msg = isErr
+        ? localizeServerSettingsError(text, t)
+        : String(text || '');
       if (!msg) return;
       if (isErr) notifyErr(sourceTitle, msg);
       else notifyOk(sourceTitle, msg);
@@ -101,7 +119,9 @@ export function useServerSettings(
         const err = String(j.error || 'not_found').trim();
         if (isNotFoundApiError(err)) {
           await ensureServerSettingsFileSilently();
-          const j2 = await api<ServerSettingsResponse>('/api/files/server-settings');
+          const j2 = await api<ServerSettingsResponse>(
+            '/api/files/server-settings',
+          );
           if (j2?.ok === false) throw new Error(err);
           applyLoadedData(j2.data == null ? {} : j2.data);
           return j2;
@@ -115,7 +135,9 @@ export function useServerSettings(
       if (isNotFoundApiError(err)) {
         try {
           await ensureServerSettingsFileSilently();
-          const j2 = await api<ServerSettingsResponse>('/api/files/server-settings');
+          const j2 = await api<ServerSettingsResponse>(
+            '/api/files/server-settings',
+          );
           applyLoadedData(j2.data == null ? {} : j2.data);
           return j2;
         } catch {
@@ -143,7 +165,8 @@ export function useServerSettings(
     staleTime: 30_000,
   });
 
-  const resetDefaultPublicOff = programQuery.data?.server_settings_default_public_off !== false;
+  const resetDefaultPublicOff =
+    programQuery.data?.server_settings_default_public_off !== false;
   const resetApplyGlobalCredentials =
     programQuery.data?.server_settings_apply_global_credentials !== false &&
     !!programQuery.data?.factorio_global_credentials_present;
@@ -176,13 +199,19 @@ export function useServerSettings(
       toast(serialized.error, true);
       return;
     }
-    const credErr = validateFactorioServerSettingsCredentials(serialized.data, t);
+    const credErr = validateFactorioServerSettingsCredentials(
+      serialized.data,
+      t,
+    );
     if (credErr) {
       toast(credErr, true);
       return;
     }
     try {
-      await api('/api/files/server-settings', { method: 'PUT', body: JSON.stringify(serialized.data) });
+      await api('/api/files/server-settings', {
+        method: 'PUT',
+        body: JSON.stringify(serialized.data),
+      });
       setIsDirty(false);
       toast(t('updated_successfully'), false);
       await qc.invalidateQueries({ queryKey: ['status'] });
@@ -215,7 +244,9 @@ export function useServerSettings(
 
   const createFromExample = useCallback(async () => {
     try {
-      await api('/api/files/server-settings/create-from-example', { method: 'POST' });
+      await api('/api/files/server-settings/create-from-example', {
+        method: 'POST',
+      });
       await qc.invalidateQueries({ queryKey: ['server-settings'] });
       toast(t('create_success_msg'), false);
     } catch (e) {
@@ -235,42 +266,39 @@ export function useServerSettings(
   const onUploadPicked = useCallback(
     async (file: File | null) => {
       if (!file) return;
+      let data: Record<string, unknown>;
       try {
         const text = await file.text();
-        const data = JSON.parse(text) as Record<string, unknown>;
-        setPendingUpload(data);
-        setUploadOpen(true);
-      } catch (e) {
-        setPendingUpload(null);
+        data = JSON.parse(text) as Record<string, unknown>;
+      } catch (e: unknown) {
         toast(e instanceof Error ? e.message : String(e), true);
+        return;
       }
+      openFccConfirmModal({
+        title: t('server_settings_upload_btn'),
+        message: `${t('server_settings_upload_confirm')}\n\n${t('reset_confirm_warn_1')}`,
+        confirmLabel: t('server_settings_upload_btn'),
+        cancelLabel: t('cancel'),
+        variant: 'danger',
+        confirmIconName: 'upload',
+        onConfirm: async () => {
+          try {
+            await api('/api/files/server-settings', {
+              method: 'PUT',
+              body: JSON.stringify(data),
+            });
+            setIsDirty(false);
+            await qc.invalidateQueries({ queryKey: ['server-settings'] });
+            await qc.invalidateQueries({ queryKey: ['status'] });
+            toast(t('server_settings_upload_ok'), false);
+          } catch (e: unknown) {
+            toast(e instanceof Error ? e.message : String(e), true);
+          }
+        },
+      });
     },
-    [toast],
+    [qc, t, toast],
   );
-
-  const confirmUpload = useCallback(async () => {
-    if (!pendingUpload) {
-      setUploadOpen(false);
-      return;
-    }
-    const data = pendingUpload;
-    setPendingUpload(null);
-    setUploadOpen(false);
-    try {
-      await api('/api/files/server-settings', { method: 'PUT', body: JSON.stringify(data) });
-      setIsDirty(false);
-      await qc.invalidateQueries({ queryKey: ['server-settings'] });
-      await qc.invalidateQueries({ queryKey: ['status'] });
-      toast(t('server_settings_upload_ok'), false);
-    } catch (e) {
-      toast(e instanceof Error ? e.message : String(e), true);
-    }
-  }, [pendingUpload, qc, t, toast]);
-
-  const cancelUpload = useCallback(() => {
-    setPendingUpload(null);
-    setUploadOpen(false);
-  }, []);
 
   return {
     loading: query.isLoading,
@@ -281,11 +309,9 @@ export function useServerSettings(
     values,
     strings,
     uploadRef,
-    uploadOpen,
     resetOpen,
     resetDefaultPublicOff,
     resetApplyGlobalCredentials,
-    setUploadOpen,
     setResetOpen,
     setField,
     checkVisibilityPublic,
@@ -296,8 +322,6 @@ export function useServerSettings(
     confirmReset,
     pickUpload,
     onUploadPicked,
-    confirmUpload,
-    cancelUpload,
   };
 }
 

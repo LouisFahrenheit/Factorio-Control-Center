@@ -65,6 +65,8 @@ export function BackupAutoSettingsModal({
       onClose={onClose}
       centered
       size={540}
+      withCloseButton={false}
+      closeOnClickOutside={false}
       title={
         <span className="backup-modal-title">
           <IconClock size={21} className="backup-modal-title__icon" />
@@ -93,8 +95,10 @@ export function BackupAutoSettingsModal({
             </span>
             <span className="backup-auto-hero__hint">
               {enabled
-                ? (t('backup_auto_status_active_desc') || 'Архивы создаются автоматически в фоновом режиме')
-                : (t('backup_auto_status_disabled_desc') || 'Создание резервных копий по расписанию отключено')}
+                ? t('backup_auto_status_active_desc') ||
+                  'Архивы создаются автоматически в фоновом режиме'
+                : t('backup_auto_status_disabled_desc') ||
+                  'Создание резервных копий по расписанию отключено'}
             </span>
           </div>
           <div
@@ -110,7 +114,9 @@ export function BackupAutoSettingsModal({
         </div>
 
         {/* ── Секция: Параметры расписания ───────────────────────── */}
-        <div className={`backup-create-section ${!enabled ? 'backup-section--muted' : ''}`}>
+        <div
+          className={`backup-create-section ${!enabled ? 'backup-section--muted' : ''}`}
+        >
           <span className="backup-create-section__title">
             {t('backup_schedule_section_title') || 'Параметры расписания'}
           </span>
@@ -119,7 +125,10 @@ export function BackupAutoSettingsModal({
             {/* Интервал */}
             <div className="backup-auto-param-card">
               <div className="backup-auto-param-card__label-row">
-                <IconCalendar size={16} className="backup-auto-param-card__icon" />
+                <IconCalendar
+                  size={16}
+                  className="backup-auto-param-card__icon"
+                />
                 <span className="backup-auto-param-card__label">
                   {t('backup_auto_interval_label')}
                 </span>
@@ -144,7 +153,10 @@ export function BackupAutoSettingsModal({
             {/* Глубина хранения */}
             <div className="backup-auto-param-card">
               <div className="backup-auto-param-card__label-row">
-                <IconArchive size={16} className="backup-auto-param-card__icon" />
+                <IconArchive
+                  size={16}
+                  className="backup-auto-param-card__icon"
+                />
                 <span className="backup-auto-param-card__label">
                   {t('backup_auto_max_count_label')}
                 </span>
@@ -169,7 +181,9 @@ export function BackupAutoSettingsModal({
         </div>
 
         {/* ── Секция: Дополнительные данные ──────────────────────── */}
-        <div className={`backup-create-section ${!enabled ? 'backup-section--muted' : ''}`}>
+        <div
+          className={`backup-create-section ${!enabled ? 'backup-section--muted' : ''}`}
+        >
           <span className="backup-create-section__title">
             {t('backup_optional_title')}
           </span>
@@ -244,7 +258,9 @@ export function BackupAutoSettingsModal({
                   <IconRotateClockwise size={15} />
                   <span>{t('backup_auto_last_run')}</span>
                 </div>
-                <span className="backup-auto-status-value">{formatDate(lastRunAt)}</span>
+                <span className="backup-auto-status-value">
+                  {formatDate(lastRunAt)}
+                </span>
               </div>
             ) : null}
             {nextRunAt ? (

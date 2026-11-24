@@ -182,16 +182,6 @@ export function ModUpdateAllFlowBody({
             </span>
           ) : null}
         </div>
-        {step !== 'loading' ? (
-          <button
-            type="button"
-            className="mod-update-all-flow__close"
-            aria-label={t('close')}
-            onClick={cancel}
-          >
-            <AppIcon name="close" size={16} />
-          </button>
-        ) : null}
       </div>
 
       <div className="mod-update-all-flow__body">
