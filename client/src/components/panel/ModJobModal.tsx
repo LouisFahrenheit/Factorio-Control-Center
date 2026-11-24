@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { AppIcon } from '../AppIcon';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import type { ModJobApi } from '../../hooks/useModJob';
 import { formatModJobLogLine, mjLocalizeError } from '../../lib/modErrorUtils';
+import { FCC_EASE_OUT } from '../../lib/motionPresets';
+import { webEffectsReduced } from '../../theme/webEffects';
 import type { ModJobLogEntry, ModJobStatus } from '../../types/modJob';
 import type { AppIconName } from '../../lib/appIcons';
 
@@ -11,31 +14,44 @@ interface ModJobModalProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-function actionLabel(status: ModJobStatus | null, stopRequested: boolean, t: ModJobModalProps['t']): string {
+function actionLabel(
+  status: ModJobStatus | null,
+  stopRequested: boolean,
+  t: ModJobModalProps['t'],
+): string {
   if (stopRequested) return t('about_factorio_update_log_stop_requested');
   if (!status) return t('mod_job_phase_preparing');
   const phase = status.phase || 'idle';
   if (phase === 'download') return t('mod_job_phase_downloading');
   if (phase === 'install') return t('mod_job_phase_install');
-  if (phase === 'preparing') return status.current_name || t('mod_job_phase_preparing');
+  if (phase === 'preparing')
+    return status.current_name || t('mod_job_phase_preparing');
   if (phase === 'done') return t('mod_job_phase_done');
   if (phase === 'cancelled') return t('mod_job_phase_cancelled');
-  if (phase === 'error') return mjLocalizeError(status.error_key, status.error_args, status.error, t);
+  if (phase === 'error')
+    return mjLocalizeError(
+      status.error_key,
+      status.error_args,
+      status.error,
+      t,
+    );
   return t('mod_job_phase_preparing');
 }
 
 function phaseKind(status: ModJobStatus | null): string {
   if (!status) return 'preparing';
   const phase = status.phase || 'idle';
-  if (phase === 'download' || phase === 'install' || phase === 'preparing') return phase;
+  if (phase === 'download' || phase === 'install' || phase === 'preparing')
+    return phase;
   if (phase === 'done') return 'done';
   if (phase === 'cancelled') return 'cancelled';
   if (phase === 'error') return 'error';
   return 'preparing';
 }
 
-function statusCardKind(kind: string): string {
-  return kind === 'install' ? 'apply' : kind;
+function headerIconName(kind: string): AppIconName {
+  if (kind === 'error' || kind === 'cancelled') return 'warning';
+  return 'packages';
 }
 
 function phaseIcon(kind: string): AppIconName {
@@ -45,26 +61,30 @@ function phaseIcon(kind: string): AppIconName {
     case 'install':
       return 'folder_check';
     case 'done':
-      return 'folder_check';
+      return 'check';
     case 'error':
-      return 'info';
+      return 'warning';
     case 'cancelled':
       return 'close';
     default:
-      return 'mod_update_';
+      return 'packages';
   }
 }
 
-function barClass(status: ModJobStatus | null): string {
-  const base = 'server-update-dialog__bar';
+function barClass(status: ModJobStatus | null, running: boolean): string {
+  const base = 'server-update-dialog__bar mod-job-modal__bar';
   if (!status) return base + ' server-update-dialog__bar--indeterminate';
   const phase = status.phase || 'idle';
   if (phase === 'download') {
     const tot = Number(status.download_tot || 0);
-    return tot > 0 ? base : base + ' server-update-dialog__bar--indeterminate';
+    if (tot > 0) {
+      return base + (running ? ' mod-job-modal__bar--streaming' : '');
+    }
+    return base + ' server-update-dialog__bar--indeterminate';
   }
   if (phase === 'error') return base + ' server-update-dialog__bar--error';
-  if (phase === 'cancelled') return base + ' server-update-dialog__bar--cancelled';
+  if (phase === 'cancelled')
+    return base + ' server-update-dialog__bar--cancelled';
   if (phase === 'done') return base + ' server-update-dialog__bar--done';
   return base + ' server-update-dialog__bar--indeterminate';
 }
@@ -81,11 +101,15 @@ function barWidth(status: ModJobStatus | null): string {
     }
     return '0%';
   }
-  if (phase === 'done' || phase === 'error' || phase === 'cancelled') return '100%';
+  if (phase === 'done' || phase === 'error' || phase === 'cancelled')
+    return '100%';
   return '0%';
 }
 
-function barText(status: ModJobStatus | null, t: ModJobModalProps['t']): string {
+function barText(
+  status: ModJobStatus | null,
+  t: ModJobModalProps['t'],
+): string {
   if (!status) return '';
   const phase = status.phase || 'idle';
   if (phase === 'download') {
@@ -104,12 +128,20 @@ function barText(status: ModJobStatus | null, t: ModJobModalProps['t']): string 
   return '';
 }
 
-function formatLogLine(entry: ModJobLogEntry, t: ModJobModalProps['t']): string {
+function formatLogLine(
+  entry: ModJobLogEntry,
+  t: ModJobModalProps['t'],
+): string {
   return formatModJobLogLine(entry, t);
 }
 
-function activeDownloadRows(status: ModJobStatus | null): { name: string; version?: string }[] {
-  const rows = Array.isArray(status?.active_downloads) ? status.active_downloads : [];
+function activeDownloadRows(
+  status: ModJobStatus | null,
+): { name: string; version?: string }[] {
+  if (status?.phase !== 'download') return [];
+  const rows = Array.isArray(status?.active_downloads)
+    ? status.active_downloads
+    : [];
   const clean = rows
     .map((row) => ({
       name: String(row?.name || '').trim(),
@@ -117,28 +149,39 @@ function activeDownloadRows(status: ModJobStatus | null): { name: string; versio
     }))
     .filter((row) => row.name);
   if (clean.length) return clean;
-  if (status?.phase === 'download') {
-    const name = String(status.current_name || '').trim();
-    if (name) {
-      const version = String(status.current_version || '').trim();
-      return [{ name, version: version || undefined }];
-    }
+  const name = String(status.current_name || '').trim();
+  if (name) {
+    const version = String(status.current_version || '').trim();
+    return [{ name, version: version || undefined }];
   }
   return [];
 }
 
 export function ModJobModal({ modJob, t }: ModJobModalProps) {
   const logRef = useRef<HTMLDivElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const status = modJob.status;
   const running = !!status?.running;
-  const logs = useMemo(() => (Array.isArray(status?.log) ? status.log : []), [status?.log]);
+  const logs = useMemo(
+    () => (Array.isArray(status?.log) ? status.log : []),
+    [status?.log],
+  );
   const kind = phaseKind(status);
   const downloadRows = activeDownloadRows(status);
+  const reduced = webEffectsReduced();
 
   useEffect(() => {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [logs.length, status?.phase]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const copyLog = useCallback(() => {
     const text = logs
@@ -150,7 +193,14 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
         return `[${hh}:${mm}:${ss}] ${formatLogLine(entry, t)}`;
       })
       .join('\n');
-    void navigator.clipboard?.writeText(text).catch(() => {});
+    void navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopied(true);
+        if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = setTimeout(() => setCopied(false), 1400);
+      },
+      () => {},
+    );
   }, [logs, t]);
 
   if (!modJob.open) return null;
@@ -162,98 +212,181 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
 
   const stepPct =
     status?.total_steps && status.total_steps > 0
-      ? Math.min(100, Math.round(((status.current_step || 0) / status.total_steps) * 100))
+      ? Math.min(
+          100,
+          Math.round(((status.current_step || 0) / status.total_steps) * 100),
+        )
       : 0;
+
+  const currentActionText = actionLabel(status, modJob.stopRequested, t);
+  const progressMetaText = barText(status, t);
+
+  const headerBadge = running ? (
+    <span className="mod-job-modal__badge mod-job-modal__badge--running">
+      <span className="mod-job-modal__badge-dot" aria-hidden="true" />
+      {t('mod_job_modal_running_badge')}
+    </span>
+  ) : kind === 'done' ? (
+    <span className="mod-job-modal__badge mod-job-modal__badge--done">
+      {t('web_update_phase_done')}
+    </span>
+  ) : kind === 'error' ? (
+    <span className="mod-job-modal__badge mod-job-modal__badge--error">
+      {t('mod_job_phase_error')}
+    </span>
+  ) : kind === 'cancelled' ? (
+    <span className="mod-job-modal__badge mod-job-modal__badge--warn">
+      {t('mod_job_phase_cancelled')}
+    </span>
+  ) : null;
 
   return (
     <ModalBackdrop
       open
       id="mjModal"
       onClose={modJob.close}
-      closeOnBackdropClick={false}
-      closeOnEscape={false}
+      closeOnBackdropClick={!running}
+      closeOnEscape={!running}
       backdropClassName="mod-job-backdrop--top"
     >
       <div
-        className="fu-modal server-update-dialog server-update-dialog--progress server-update-dialog--mod-job"
+        className="fu-modal server-update-dialog server-update-dialog--progress server-update-dialog--mod-job mod-job-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="mjTitle"
       >
-        <div className="fu-modal__header server-update-dialog__header" id="mjTitle">
-          <AppIcon name="mod_update_" size={22} className="server-update-dialog__header-icon" />
-          <div className="server-update-dialog__header-text">
-            <span className="server-update-dialog__header-title">{t('mod_job_modal_title')}</span>
-            {running ? (
-              <span className="server-update-dialog__header-badge server-update-dialog__header-badge--active">
-                {t('mod_job_modal_running_badge')}
+        <div className="mod-job-modal__header" id="mjTitle">
+          <div className="mod-job-modal__header-main">
+            <span
+              className={
+                'mod-job-modal__title-icon-wrap' +
+                (running ? ' is-running' : '') +
+                (kind === 'error' || kind === 'cancelled' ? ' is-warn' : '')
+              }
+              aria-hidden="true"
+            >
+              <AppIcon name={headerIconName(kind)} size={19} />
+            </span>
+            <span className="mod-job-modal__header-title">
+              {t('mod_job_modal_title')}
+            </span>
+            {headerBadge}
+          </div>
+
+          <div className="mod-job-modal__header-right">
+            {stepLabel ? (
+              <span className="mod-job-modal__step-pill" id="mjStepLabel">
+                {stepLabel}
               </span>
+            ) : null}
+            {!running ? (
+              <button
+                type="button"
+                className="mod-job-modal__close"
+                aria-label={t('close')}
+                onClick={modJob.close}
+              >
+                <AppIcon name="close" size={18} />
+              </button>
             ) : null}
           </div>
         </div>
 
-        <div className="fu-modal__body server-update-dialog__body">
-          <div className="server-update-dialog__progress">
-            {stepLabel ? (
-              <div className="server-update-dialog__step-row" id="mjStepLabel">
-                <span className="server-update-dialog__step-badge">{stepLabel}</span>
-                <div className="server-update-dialog__step-track" aria-hidden="true">
-                  <div className="server-update-dialog__step-fill" style={{ width: stepPct + '%' }} />
-                </div>
+        <div className="mod-job-modal__body">
+          <section
+            className={
+              'mod-job-modal__section mod-job-modal__section--status mod-job-modal__section--' +
+              kind
+            }
+            id="mjActionLabel"
+          >
+            <div className="mod-job-modal__section-head">
+              <div className="mod-job-modal__status-main">
+                <span
+                  className={
+                    'mod-job-modal__phase-icon' +
+                    (running && kind === 'download'
+                      ? ' mod-job-modal__phase-icon--downloading'
+                      : '') +
+                    (running && kind !== 'download'
+                      ? ' mod-job-modal__phase-icon--pulse'
+                      : '')
+                  }
+                  aria-hidden="true"
+                >
+                  <AppIcon name={phaseIcon(kind)} size={17} />
+                </span>
+                <span className="mod-job-modal__status-title">
+                  {currentActionText}
+                </span>
               </div>
-            ) : null}
-
-            <div
-              className={
-                'server-update-dialog__status-card server-update-dialog__status-card--' + statusCardKind(kind)
-              }
-              id="mjActionLabel"
-            >
-              <span className="server-update-dialog__status-icon-wrap" aria-hidden="true">
-                <AppIcon name={phaseIcon(kind)} size={18} className="server-update-dialog__status-icon" />
+              <span className="mod-job-modal__progress-stats" id="mjBarText">
+                {progressMetaText}
               </span>
-              <div className="mod-job-status-body">
-                <span className="server-update-dialog__status-text">{actionLabel(status, modJob.stopRequested, t)}</span>
-                {kind === 'download' && downloadRows.length ? (
-                  <ul className="mod-job-download-list" role="list" aria-label={t('mod_job_phase_downloading')}>
-                    {downloadRows.map((row) => (
-                      <li key={row.name} className="mod-job-download-list__item">
-                        <span className="mod-job-download-list__name">{row.name}</span>
-                        {row.version ? (
-                          <span className="mod-job-download-list__ver">v{row.version}</span>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
+            </div>
+
+            <div className="mod-job-modal__progress-body">
+              <div className="mod-job-modal__bars">
+                <div
+                  className="server-update-dialog__progress-track fu-progress mod-job-modal__track"
+                  aria-hidden="true"
+                >
+                  <div
+                    className={barClass(status, running)}
+                    id="mjBar"
+                    style={{ width: barWidth(status) }}
+                  />
+                </div>
+                {stepLabel ? (
+                  <div className="mod-job-modal__step-track" aria-hidden="true">
+                    <div
+                      className="mod-job-modal__step-fill"
+                      style={{ width: stepPct + '%' }}
+                    />
+                  </div>
                 ) : null}
               </div>
             </div>
+          </section>
 
-            <div className="server-update-dialog__progress-block">
-              <div className="server-update-dialog__progress-track fu-progress" aria-hidden="true">
-                <div className={barClass(status)} id="mjBar" style={{ width: barWidth(status) }} />
-              </div>
-              <div className="server-update-dialog__progress-meta">
-                <span className="server-update-dialog__progress-text" id="mjBarText">
-                  {barText(status, t)}
-                </span>
-              </div>
-            </div>
+          <div className="mod-job-modal__workspace">
+            <section className="mod-job-modal__section mod-job-modal__section--log">
+              <div className="mod-job-modal__section-head">
+                <div className="mod-job-modal__log-title-wrap">
+                  <AppIcon
+                    name="terminal"
+                    size={15}
+                    className="mod-job-modal__log-icon"
+                  />
+                  <span className="mod-job-modal__log-title">
+                    {t('about_factorio_update_dialog_log_label')}
+                  </span>
+                  {logs.length > 0 ? (
+                    <span className="mod-job-modal__log-count">
+                      {logs.length}
+                    </span>
+                  ) : null}
+                </div>
 
-            <div className="server-update-dialog__log-card">
-              <div className="server-update-dialog__log-head">
-                <span className="server-update-dialog__log-title">{t('about_factorio_update_dialog_log_label')}</span>
                 <button
                   type="button"
-                  className="btn btn--compact btn--with-icon server-update-dialog__log-copy"
+                  className={
+                    'btn btn--compact btn--with-icon mod-job-modal__copy-btn' +
+                    (copied ? ' is-copied' : '')
+                  }
                   disabled={!logs.length}
                   onClick={copyLog}
                 >
-                  <AppIcon name="file_copy" size={14} />
+                  <AppIcon name={copied ? 'check' : 'file_copy'} size={14} />
                   {t('about_factorio_update_dialog_copy_log')}
                 </button>
               </div>
-              <div className="fu-log server-update-dialog__log" id="mjLog" ref={logRef}>
+
+              <div
+                className="fu-log server-update-dialog__log mod-job-modal__log"
+                id="mjLog"
+                ref={logRef}
+              >
                 {logs.length ? (
                   logs.map((entry, i) => {
                     const d = new Date((entry.ts || 0) * 1000);
@@ -261,30 +394,146 @@ export function ModJobModal({ modJob, t }: ModJobModalProps) {
                     const mm = String(d.getMinutes()).padStart(2, '0');
                     const ss = String(d.getSeconds()).padStart(2, '0');
                     return (
-                      <div key={i} className={'fu-log__line fu-log__line--' + (entry.level || 'info')}>
+                      <div
+                        key={`${entry.ts || 0}-${i}`}
+                        className={
+                          'fu-log__line mod-job-modal__log-line fu-log__line--' +
+                          (entry.level || 'info')
+                        }
+                      >
                         <span className="fu-log__ts">
                           [{hh}:{mm}:{ss}]
                         </span>
-                        {formatLogLine(entry, t)}
+                        <span className="mod-job-modal__log-msg">
+                          {formatLogLine(entry, t)}
+                        </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="server-update-dialog__log-empty muted">{t('mod_job_phase_preparing')}</div>
+                  <div className="server-update-dialog__log-empty muted">
+                    {t('mod_job_phase_preparing')}
+                  </div>
                 )}
               </div>
-            </div>
+            </section>
+
+            <aside className="mod-job-modal__section mod-job-modal__section--downloads">
+              <div className="mod-job-modal__section-head">
+                <div className="mod-job-modal__log-title-wrap">
+                  <AppIcon
+                    name="download"
+                    size={15}
+                    className="mod-job-modal__log-icon"
+                  />
+                  <span className="mod-job-modal__log-title">
+                    {t('mod_job_active_downloads_title')}
+                  </span>
+                </div>
+                <span
+                  className={
+                    'mod-job-modal__log-count' +
+                    (downloadRows.length > 0 ? ' is-active' : '')
+                  }
+                >
+                  {downloadRows.length}
+                </span>
+              </div>
+
+              <div className="mod-job-modal__downloads-body">
+                {downloadRows.length > 0 ? (
+                  <ul
+                    className="mod-job-download-grid"
+                    role="list"
+                    aria-label={t('mod_job_active_downloads_title')}
+                  >
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {downloadRows.map((row) =>
+                        reduced ? (
+                          <li key={row.name} className="mod-job-download-card">
+                            <span
+                              className="mod-job-download-card__icon"
+                              aria-hidden="true"
+                            >
+                              <AppIcon name="download" size={14} />
+                            </span>
+                            <div className="mod-job-download-card__meta">
+                              <span className="mod-job-download-card__name">
+                                {row.name}
+                              </span>
+                              {row.version ? (
+                                <span className="mod-job-download-card__ver">
+                                  v{row.version}
+                                </span>
+                              ) : null}
+                            </div>
+                          </li>
+                        ) : (
+                          <motion.li
+                            key={row.name}
+                            layout
+                            initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.97 }}
+                            transition={{ duration: 0.18, ease: FCC_EASE_OUT }}
+                            className="mod-job-download-card"
+                          >
+                            <span
+                              className="mod-job-download-card__icon"
+                              aria-hidden="true"
+                            >
+                              <AppIcon name="download" size={14} />
+                            </span>
+                            <div className="mod-job-download-card__meta">
+                              <span className="mod-job-download-card__name">
+                                {row.name}
+                              </span>
+                              {row.version ? (
+                                <span className="mod-job-download-card__ver">
+                                  v{row.version}
+                                </span>
+                              ) : null}
+                            </div>
+                          </motion.li>
+                        ),
+                      )}
+                    </AnimatePresence>
+                  </ul>
+                ) : running ? (
+                  <div className="mod-job-modal__downloads-empty">
+                    <span
+                      className="mod-job-modal__downloads-empty-icon"
+                      aria-hidden="true"
+                    >
+                      <AppIcon name="packages" size={18} />
+                    </span>
+                    <span className="mod-job-modal__downloads-empty-text">
+                      {currentActionText}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+            </aside>
           </div>
         </div>
 
-        <div className="fu-modal__footer server-update-dialog__footer" id="mjFooter">
+        <div className="fu-modal__footer mod-job-modal__footer" id="mjFooter">
           {running ? (
-            <button type="button" className="btn btn--danger btn--with-icon" onClick={() => void modJob.stop()}>
+            <button
+              type="button"
+              className="btn btn--danger btn--with-icon"
+              disabled={modJob.stopRequested}
+              onClick={() => void modJob.stop()}
+            >
               <AppIcon name="stop" size={16} />
               {t('about_factorio_update_dialog_stop')}
             </button>
           ) : (
-            <button type="button" className="btn btn--with-icon" onClick={modJob.close}>
+            <button
+              type="button"
+              className="btn btn--with-icon"
+              onClick={modJob.close}
+            >
               <AppIcon name="close" size={16} />
               {t('close')}
             </button>

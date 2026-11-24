@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FccConfigService } from '../config/fcc-config.service';
 import { FactorioUpdateService } from '../ops/factorio-update/factorio-update.service';
@@ -297,6 +300,79 @@ describe('InstanceBootstrapService', () => {
       expect(st.running).toBe(false);
       expect(st.phase).toBe('cancelled');
       expect(st.error).toBe('');
+    });
+
+    it('should abort active file stream cleanly without unhandled WriteStream errors when stopped mid-download', async () => {
+      const tempRoot = mkdtempSync(join(tmpdir(), 'fcc-boot-cancel-'));
+      const targetDir = join(tempRoot, 'srv');
+      const origFetch = globalThis.fetch;
+      let releaseSecondRead: (() => void) | null = null;
+      let reads = 0;
+
+      const reader = {
+        read: jest.fn().mockImplementation(() => {
+          reads += 1;
+          if (reads === 1) {
+            return Promise.resolve({
+              done: false,
+              value: new Uint8Array(64 * 1024).fill(65),
+            });
+          }
+          return new Promise<{ done: boolean; value?: Uint8Array }>(
+            (_resolve, reject) => {
+              releaseSecondRead = () =>
+                reject(new Error('This operation was aborted'));
+            },
+          );
+        }),
+        cancel: jest.fn().mockResolvedValue(undefined),
+      };
+
+      globalThis.fetch = jest
+        .fn()
+        .mockImplementation(
+          (_url: unknown, init?: { signal?: AbortSignal }) => {
+            init?.signal?.addEventListener('abort', () => {
+              releaseSecondRead?.();
+            });
+            return Promise.resolve({
+              ok: true,
+              status: 200,
+              headers: new Headers({ 'content-length': String(1024 * 1024) }),
+              body: { getReader: () => reader },
+            });
+          },
+        );
+
+      try {
+        const started = service.start({
+          name: 'Cancelable Server',
+          serverPath: targetDir,
+          packageBuild: process.platform === 'linux' ? 'headless' : 'alpha',
+          packageVersion: '2.0.10',
+        });
+        expect(started).toEqual({ ok: true, started: true });
+
+        for (let i = 0; i < 30 && reads < 2; i += 1) {
+          await new Promise((r) => setTimeout(r, 10));
+        }
+        expect(reads).toBeGreaterThanOrEqual(2);
+
+        const stopRes = service.stop();
+        expect(stopRes).toEqual({ ok: true });
+
+        for (let i = 0; i < 30 && service.status().running; i += 1) {
+          await new Promise((r) => setTimeout(r, 10));
+        }
+
+        const st = service.status();
+        expect(st.running).toBe(false);
+        expect(st.phase).toBe('cancelled');
+        expect(st.error).toBe('');
+      } finally {
+        globalThis.fetch = origFetch;
+        rmSync(tempRoot, { recursive: true, force: true });
+      }
     });
 
     it('should handle instance_path_exists thrown from auto-register', async () => {

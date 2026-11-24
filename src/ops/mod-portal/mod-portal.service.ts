@@ -564,6 +564,10 @@ export class ModPortalService {
     onProgress?.(0, total);
     const hash = createHash('sha1');
     const ws = createWriteStream(dest);
+    const wsState: { err: Error | null } = { err: null };
+    ws.on?.('error', (err: Error) => {
+      wsState.err = err;
+    });
     const reader = res.body.getReader();
     let cur = 0;
     try {
@@ -573,6 +577,7 @@ export class ModPortalService {
           await reader.cancel().catch(() => undefined);
           throw new Error('cancelled');
         }
+        if (wsState.err) throw wsState.err;
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = Buffer.from(value);
@@ -581,6 +586,13 @@ export class ModPortalService {
         cur += chunk.length;
         onProgress?.(cur, total || cur);
       }
+      await new Promise<void>((resolve, reject) => {
+        if (wsState.err) {
+          reject(wsState.err);
+          return;
+        }
+        ws.end((e?: Error) => (e ? reject(e) : resolve()));
+      });
     } catch (e) {
       ws.destroy();
       try {
@@ -596,9 +608,6 @@ export class ModPortalService {
       }
       throw e;
     }
-    await new Promise<void>((resolve, reject) => {
-      ws.end((e?: Error) => (e ? reject(e) : resolve()));
-    });
     const expected = safeTrim(release.sha1).toLowerCase();
     if (expected && hash.digest('hex').toLowerCase() !== expected) {
       try {

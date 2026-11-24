@@ -1188,20 +1188,34 @@ export class FactorioUpdateService implements OnModuleInit, OnModuleDestroy {
     if (!res.ok || !res.body) throw new Error(`download_http_${res.status}`);
     const total = Number(res.headers.get('content-length') || 0);
     const ws = createWriteStream(out);
+    const wsState: { err: Error | null } = { err: null };
+    ws.on?.('error', (err: Error) => {
+      wsState.err = err;
+    });
     let done = 0;
     const reader = res.body.getReader();
-    while (true) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      const buf = Buffer.from(chunk.value);
-      done += buf.length;
-      this.state.download_cur = done;
-      this.state.download_tot = total;
-      ws.write(buf);
+    try {
+      while (true) {
+        if (wsState.err) throw wsState.err;
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        const buf = Buffer.from(chunk.value);
+        done += buf.length;
+        this.state.download_cur = done;
+        this.state.download_tot = total;
+        ws.write(buf);
+      }
+      await new Promise<void>((resolve, reject) => {
+        if (wsState.err) {
+          reject(wsState.err);
+          return;
+        }
+        ws.end((e?: Error) => (e ? reject(e) : resolve()));
+      });
+    } catch (e) {
+      ws.destroy();
+      throw e;
     }
-    await new Promise<void>((resolve, reject) =>
-      ws.end((e?: Error) => (e ? reject(e) : resolve())),
-    );
     new AdmZip(out).test();
     return out;
   }

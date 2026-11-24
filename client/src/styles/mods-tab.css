@@ -511,18 +511,6 @@
   align-items: center;
 }
 
-/* ── Toolbar Install Button Accent Icon ── */
-#tabPanelMods
-  .mods-toolbar
-  #btnModOpenInstall.mods-toolbar__install-open-btn:not(:disabled)
-  .app-icon,
-#tabPanelMods
-  .mods-toolbar
-  #btnModOpenInstall.mods-toolbar__install-open-btn:not(:disabled)
-  svg {
-  color: var(--accent) !important;
-}
-
 /* ==========================================================================
    Mods Install Modal (.mod-install-dialog)
    ========================================================================== */
@@ -2407,26 +2395,32 @@
   position: fixed;
   inset: 0;
   z-index: 1200;
+  container-type: size;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(0, 0, 0, 0.82);
+  padding: 48px 72px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.84);
   backdrop-filter: blur(4px);
+  overflow: hidden;
 }
 
 .mod-portal-lightbox__inner {
   position: relative;
-  max-width: 92vw;
-  max-height: 88vh;
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .mod-portal-lightbox__img {
-  max-width: 90vw;
-  max-height: 86vh;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(calc(100vw - 160px), calc(100cqw - 144px));
+  max-height: min(calc(100vh - 120px), calc(100cqh - 96px));
   object-fit: contain;
   border-radius: 10px;
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
@@ -2436,6 +2430,7 @@
   position: absolute;
   top: -14px;
   right: -14px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   border-radius: 999px;
@@ -2446,17 +2441,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.mod-portal-lightbox__close:hover {
+  border-color: var(--accent);
+  background: var(--bg-widget);
 }
 
 .mod-portal-lightbox__nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   width: 40px;
   height: 40px;
   border-radius: 999px;
   border: 1px solid var(--border-dark);
-  background: color-mix(in srgb, var(--bg-modal) 88%, transparent);
+  background: color-mix(in srgb, var(--bg-modal) 92%, transparent);
   color: var(--text);
   font-size: 1.4rem;
   line-height: 1;
@@ -2464,6 +2469,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.mod-portal-lightbox__nav:hover {
+  border-color: var(--accent);
+  background: var(--bg-widget);
 }
 
 .mod-portal-lightbox__nav--prev {
@@ -2472,6 +2486,30 @@
 
 .mod-portal-lightbox__nav--next {
   right: -52px;
+}
+
+@media (max-width: 640px) {
+  .mod-portal-lightbox {
+    padding: 48px 16px;
+  }
+
+  .mod-portal-lightbox__img {
+    max-width: calc(100cqw - 32px);
+    max-height: calc(100cqh - 96px);
+  }
+
+  .mod-portal-lightbox__close {
+    top: -12px;
+    right: -6px;
+  }
+
+  .mod-portal-lightbox__nav--prev {
+    left: 8px;
+  }
+
+  .mod-portal-lightbox__nav--next {
+    right: 8px;
+  }
 }
 
 /* ── Dependencies, Conflicts & Heavy-Content Guards ── */

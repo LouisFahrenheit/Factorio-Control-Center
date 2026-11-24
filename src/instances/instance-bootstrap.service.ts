@@ -56,6 +56,7 @@ interface BootstrapAddPayload {
 export class InstanceBootstrapService {
   private readonly log = new Logger(InstanceBootstrapService.name);
   private thread: Promise<void> | null = null;
+  private activeAbort: AbortController | null = null;
   private state: BootstrapState = this.idleState();
 
   constructor(
@@ -120,6 +121,7 @@ export class InstanceBootstrapService {
     if (!this.state.running)
       return { ok: false, error: 'instance_bootstrap_not_running' };
     this.state.stop_requested = true;
+    this.activeAbort?.abort();
     return { ok: true };
   }
 
@@ -277,7 +279,7 @@ export class InstanceBootstrapService {
       this.set({ phase: 'extract' });
       await this.extractArchive(tmpFile, target);
 
-      this.set({ phase: 'verify' });
+      this.cancelCheck();
       let detected = this.detectServerRoot(target);
       if (!detected) throw new Error('instance_template_invalid');
       detected = this.flattenExtractedRoot(target, detected);
@@ -419,6 +421,7 @@ export class InstanceBootstrapService {
     let expectedTotal = 0;
     for (let attempt = 1; attempt <= 4; attempt++) {
       const ac = new AbortController();
+      this.activeAbort = ac;
       try {
         this.cancelCheck();
         let existing = 0;
@@ -465,6 +468,24 @@ export class InstanceBootstrapService {
         const stream = createWriteStream(destFile, {
           flags: mode === 'append' ? 'a' : 'w',
         });
+        const streamState: { err: Error | null } = { err: null };
+        stream.on('error', (err: Error) => {
+          streamState.err = err;
+        });
+        const destroyStream = async (): Promise<void> => {
+          if (stream.closed) return;
+          await new Promise<void>((resolveClose) => {
+            let settled = false;
+            const finish = () => {
+              if (settled) return;
+              settled = true;
+              resolveClose();
+            };
+            stream.once('close', finish);
+            stream.destroy();
+            if (stream.closed) finish();
+          });
+        };
         const reader = body.getReader();
         try {
           while (true) {
@@ -473,15 +494,46 @@ export class InstanceBootstrapService {
               await reader.cancel().catch(() => undefined);
               throw new Error('cancelled');
             }
+            if (streamState.err) throw streamState.err;
             const { value, done: eof } = await reader.read();
+            if (this.state.stop_requested) {
+              ac.abort();
+              await reader.cancel().catch(() => undefined);
+              throw new Error('cancelled');
+            }
             if (eof) break;
             if (!value?.length) continue;
-            stream.write(Buffer.from(value));
+            await new Promise<void>((resolveWrite, rejectWrite) => {
+              if (streamState.err) {
+                rejectWrite(streamState.err);
+                return;
+              }
+              if (stream.destroyed || stream.writableEnded) {
+                rejectWrite(new Error('cancelled'));
+                return;
+              }
+              stream.write(Buffer.from(value), (writeErr) => {
+                if (writeErr) rejectWrite(writeErr);
+                else resolveWrite();
+              });
+            });
             done += value.length;
             progress(done, expectedTotal);
           }
+          await new Promise<void>((resolveEnd, rejectEnd) => {
+            if (streamState.err) {
+              rejectEnd(streamState.err);
+              return;
+            }
+            const onErr = (err: Error) => rejectEnd(err);
+            stream.once('error', onErr);
+            stream.end(() => {
+              stream.off('error', onErr);
+              resolveEnd();
+            });
+          });
         } catch (e) {
-          stream.destroy();
+          await destroyStream();
           try {
             rmSync(destFile, { force: true });
           } catch {
@@ -495,10 +547,6 @@ export class InstanceBootstrapService {
           }
           throw e;
         }
-        await new Promise<void>((resolve, reject) => {
-          stream.end(() => resolve());
-          stream.on('error', reject);
-        });
 
         const finalSize = existsSync(destFile) ? statSync(destFile).size : 0;
         if (expectedTotal > 0 && finalSize < expectedTotal) {
@@ -508,9 +556,15 @@ export class InstanceBootstrapService {
         return;
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        if (msg === 'cancelled') throw e;
+        if (this.state.stop_requested || msg === 'cancelled') {
+          throw new Error('cancelled');
+        }
         if (attempt >= 4 || !this.isTransientDownloadError(e)) throw e;
         await new Promise((r) => setTimeout(r, Math.min(6000, 1500 * attempt)));
+      } finally {
+        if (this.activeAbort === ac) {
+          this.activeAbort = null;
+        }
       }
     }
     throw new Error('instance_template_download_failed');

@@ -759,6 +759,7 @@ export function InstanceScreen({
       <InstanceDeleteProgressModal
         open={instances.deleteProgressOpen}
         serverName={instances.deleteProgressName}
+        serverPath={instances.deleteProgressPath}
         t={t}
       />
       <WebAccessHelpModal

@@ -126,10 +126,11 @@ export function useMods(
   const [modCardRequest, setModCardRequest] = useState<ModCardRequest | null>(
     null,
   );
-  /** Timestamp of a pending request to open the install modal in updates mode. */
-  const [updatesModeRequest, setUpdatesModeRequest] = useState<number | null>(
-    null,
-  );
+  /** Pending request to toggle updates-only mode when opening the install modal. */
+  const [updatesModeRequest, setUpdatesModeRequest] = useState<{
+    onlyUpdates: boolean;
+    ts: number;
+  } | null>(null);
   const [portalVersionsModalOpen, setPortalVersionsModalOpen] = useState(false);
   const [portalVersionsModalMod, setPortalVersionsModalMod] = useState('');
   const [checkResults, setCheckResults] = useState<
@@ -161,6 +162,7 @@ export function useMods(
   }, []);
 
   const openInstallModal = useCallback(() => {
+    setUpdatesModeRequest({ onlyUpdates: false, ts: Date.now() });
     setInstallModalOpen(true);
   }, []);
 
@@ -1215,7 +1217,7 @@ export function useMods(
   }, []);
 
   const openUpdatesModal = useCallback(() => {
-    setUpdatesModeRequest(Date.now());
+    setUpdatesModeRequest({ onlyUpdates: true, ts: Date.now() });
     setInstallModalOpen(true);
   }, []);
 

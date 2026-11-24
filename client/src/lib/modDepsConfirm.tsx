@@ -6,7 +6,12 @@ import type { AppIconName } from './appIcons';
 import { ModDependenciesConfirmBody } from '../components/modals/ModDependenciesConfirmBody';
 import type { ModInstallConflictInfo } from '../types/modConflict';
 
-export type ModDepsConfirmVariant = 'install' | 'update' | 'update_all' | 'startup' | 'upload';
+export type ModDepsConfirmVariant =
+  | 'install'
+  | 'update'
+  | 'update_all'
+  | 'startup'
+  | 'upload';
 
 type TFunc = (key: string, ...args: (string | number)[]) => string;
 
@@ -38,10 +43,14 @@ function normalizeNames(names: string[]): string[] {
     seen.add(key);
     out.push(d);
   }
-  return out.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  return out.sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: 'base' }),
+  );
 }
 
-function normalizeConflicts(items: ModInstallConflictInfo[]): ModInstallConflictInfo[] {
+function normalizeConflicts(
+  items: ModInstallConflictInfo[],
+): ModInstallConflictInfo[] {
   const out: ModInstallConflictInfo[] = [];
   const seen = new Set<string>();
   for (const raw of items) {
@@ -56,7 +65,9 @@ function normalizeConflicts(items: ModInstallConflictInfo[]): ModInstallConflict
       will_disable: raw.will_disable !== false,
     });
   }
-  return out.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  return out.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+  );
 }
 
 function variantCopy(
@@ -106,16 +117,25 @@ function variantCopy(
   }
 }
 
-function modalTitle(title: string, hasConflicts: boolean): ReactNode {
+function modalTitle(title: string, conflictsOnly: boolean): ReactNode {
   return createElement(
     'span',
     { className: 'mod-deps-confirm__title' },
-    createElement(AppIcon, {
-      name: hasConflicts ? 'mode_off_on' : 'add_link',
-      size: 20,
-      className: 'mod-deps-confirm__title-icon',
-    }),
-    title,
+    createElement(
+      'span',
+      {
+        className:
+          'mod-deps-confirm__title-icon-wrap' +
+          (conflictsOnly ? ' mod-deps-confirm__title-icon-wrap--warn' : ''),
+        'aria-hidden': true,
+      },
+      createElement(AppIcon, {
+        name: conflictsOnly ? 'warning' : 'packages',
+        size: 19,
+        className: 'mod-deps-confirm__title-icon',
+      }),
+    ),
+    createElement('span', { className: 'mod-deps-confirm__title-text' }, title),
   );
 }
 
@@ -138,7 +158,9 @@ function ModDepsModalWrapper({
   finish: (value: string | null, recommended: string[]) => void;
   t: TFunc;
 }) {
-  const [selectedRecommended, setSelectedRecommended] = useState<Set<string>>(new Set());
+  const [selectedRecommended, setSelectedRecommended] = useState<Set<string>>(
+    new Set(),
+  );
 
   const toggleRecommended = (name: string) => {
     setSelectedRecommended((prev) => {
@@ -159,14 +181,18 @@ function ModDepsModalWrapper({
       countLabel: t('mod_deps_confirm_count', list.length),
       conflicts: conflictList,
       conflictsIntro: copy.conflictsIntro,
-      conflictsCountLabel: conflictList.length ? t('mod_list_conflicts_count', conflictList.length) : '',
+      conflictsCountLabel: conflictList.length
+        ? t('mod_list_conflicts_count', conflictList.length)
+        : '',
       conflictTagLabel: t('mod_list_conflict_tag'),
       conflictBuiltinLabel: t('mod_list_conflict_builtin'),
       recommended: recommendedList,
       recommendedSelection: selectedRecommended,
       onToggleRecommended: toggleRecommended,
       recommendedIntro: t('mod_list_recommended_intro'),
-      recommendedCountLabel: recommendedList.length ? t('mod_list_recommended_count', recommendedList.length) : '',
+      recommendedCountLabel: recommendedList.length
+        ? t('mod_list_recommended_count', recommendedList.length)
+        : '',
       titles,
     }),
     createElement(
@@ -215,13 +241,22 @@ function openDepsModal(
   }
 
   const copy = variantCopy(variant, t);
-  const isSplit = (list.length > 0 || conflictList.length > 0) && recommendedList.length > 0;
-  const title =
-    conflictList.length && !list.length && !recommendedList.length ? t('mod_list_conflicts_title') : copy.title;
+  const conflictsOnly =
+    conflictList.length > 0 &&
+    list.length === 0 &&
+    recommendedList.length === 0;
+  const isSplit =
+    (list.length > 0 &&
+      (recommendedList.length > 0 || conflictList.length > 0)) ||
+    (!list.length && conflictList.length > 0 && recommendedList.length > 0);
+  const title = conflictsOnly ? t('mod_list_conflicts_title') : copy.title;
 
   return new Promise((resolve) => {
     let settled = false;
-    const finish = (value: string | null, checkedRecommended: string[] = []) => {
+    const finish = (
+      value: string | null,
+      checkedRecommended: string[] = [],
+    ) => {
       if (settled) return;
       settled = true;
       modals.closeAll();
@@ -229,7 +264,7 @@ function openDepsModal(
     };
 
     modals.open({
-      title: modalTitle(title, conflictList.length > 0),
+      title: modalTitle(title, conflictsOnly),
       centered: true,
       size: 'auto',
       closeOnClickOutside: false,
@@ -238,21 +273,22 @@ function openDepsModal(
         content: `fcc-modal fcc-modal--mod-deps${isSplit ? ' fcc-modal--mod-deps--split' : ''}`,
         header: 'mod-deps-confirm__modal-header',
         body: 'mod-deps-confirm__modal-body',
+        close: 'mod-deps-confirm__modal-close',
       },
-        children: createElement(ModDepsModalWrapper, {
-          copy,
-          list,
-          conflictList,
-          recommendedList,
-          titles,
-          buttons,
-          finish,
-          t,
-        }),
-        onClose: () => finish(null, []),
-      });
+      children: createElement(ModDepsModalWrapper, {
+        copy,
+        list,
+        conflictList,
+        recommendedList,
+        titles,
+        buttons,
+        finish,
+        t,
+      }),
+      onClose: () => finish(null, []),
     });
-  }
+  });
+}
 
 export async function modDepsConfirm(
   deps: string[],
@@ -272,7 +308,10 @@ export async function modDepsConfirm(
   const recommended = options?.recommended ?? [];
   const titles = options?.titles;
   const confirmIcon: AppIconName =
-    variant === 'install' || variant === 'startup' || variant === 'update' || variant === 'update_all'
+    variant === 'install' ||
+    variant === 'startup' ||
+    variant === 'update' ||
+    variant === 'update_all'
       ? 'download'
       : 'check';
   const { value, checkedRecommended } = await openDepsModal(
@@ -283,11 +322,19 @@ export async function modDepsConfirm(
     t,
     [
       { text: cancelLabel, value: 'cancel', icon: 'close' },
-      { text: confirmLabel, value: 'confirm', primary: true, icon: confirmIcon },
+      {
+        text: confirmLabel,
+        value: 'confirm',
+        primary: true,
+        icon: confirmIcon,
+      },
     ],
     titles,
   );
-  return { confirmed: value === 'confirm', recommendedToInstall: checkedRecommended };
+  return {
+    confirmed: value === 'confirm',
+    recommendedToInstall: checkedRecommended,
+  };
 }
 
 export async function modDepsUploadChoice(
@@ -297,9 +344,19 @@ export async function modDepsUploadChoice(
 ): Promise<ModDepsUploadChoice> {
   const { value } = await openDepsModal(deps, conflicts, [], 'upload', t, [
     { text: t('cancel'), value: 'cancel', icon: 'close' },
-    { text: t('mod_list_upload_missing_deps_install_as_is_btn'), value: 'as_is', icon: 'check' },
-    { text: t('mod_list_upload_missing_deps_download_btn'), value: 'download', primary: true, icon: 'download' },
+    {
+      text: t('mod_list_upload_missing_deps_install_as_is_btn'),
+      value: 'as_is',
+      icon: 'check',
+    },
+    {
+      text: t('mod_list_upload_missing_deps_download_btn'),
+      value: 'download',
+      primary: true,
+      icon: 'download',
+    },
   ]);
-  if (value === 'download' || value === 'as_is' || value === 'cancel') return value;
+  if (value === 'download' || value === 'as_is' || value === 'cancel')
+    return value;
   return 'cancel';
 }

@@ -3,7 +3,6 @@ import { CancelButton } from '../CancelButton';
 import { FccSwitch } from '../FccSwitch';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
 import type { InstanceItem } from '../../types/instance';
-import { InstanceOperationDialogHeader } from './InstanceOperationDialogHeader';
 
 export interface InstanceDeleteOptions {
   deleteData: boolean;
@@ -33,67 +32,171 @@ export function InstanceDeleteModal({
 
   const name = String(item.name || '').trim() || '—';
   const serverPath = String(item.serverPath || '').trim() || '—';
+  const warnText = t('instances_delete_disk_warn', serverPath)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join('\n');
 
   return (
     <ModalBackdrop open id="instanceDeleteBackdrop" onClose={onClose}>
       <div
-        className="fu-modal server-update-dialog instance-operation-dialog instance-operation-dialog--delete instance-delete-dialog"
+        className="fu-modal server-update-dialog instance-operation-dialog instance-operation-dialog--delete instance-delete-dialog mod-job-modal instance-delete-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="instanceDeleteHeading"
       >
-        <InstanceOperationDialogHeader
-          id="instanceDeleteHeading"
-          icon="delete"
-          title={t('instances_delete_dialog_title')}
-          tone="danger"
-        />
-        <div className="fu-modal__body server-update-dialog__body instance-delete-dialog__body">
-          <div className="instance-operation-dialog__target instance-operation-dialog__target--danger">
-            <AppIcon name="list" size={22} className="instance-operation-dialog__target-icon" />
-            <div className="instance-operation-dialog__target-text">
-              <span className="instance-operation-dialog__target-name">{name}</span>
-              <span className="instance-operation-dialog__target-hint" id="instanceDeleteText">
-                {t('instances_delete_confirm', name)}
-              </span>
-              <span className="instance-operation-dialog__target-path">{serverPath}</span>
-            </div>
+        <div className="mod-job-modal__header" id="instanceDeleteHeading">
+          <div className="mod-job-modal__header-main">
+            <span className="mod-job-modal__title-icon-wrap" aria-hidden="true">
+              <AppIcon name="delete" size={19} />
+            </span>
+            <span className="mod-job-modal__header-title">
+              {t('instances_delete_dialog_title')}
+            </span>
           </div>
 
-          <p className="instance-delete-dialog__hint">{t('instances_delete_detach_hint')}</p>
+          <div className="mod-job-modal__header-right">
+            <button
+              type="button"
+              className="mod-job-modal__close"
+              aria-label={t('close')}
+              onClick={onClose}
+            >
+              <AppIcon name="close" size={18} />
+            </button>
+          </div>
+        </div>
 
-          <section className="instance-operation-dialog__form-card instance-delete-dialog__options">
-            <div className="instance-operation-dialog__form-head instance-delete-dialog__options-head">
-              <AppIcon name="settings" size={16} className="instance-operation-dialog__form-head-icon" />
-              <span>{t('instances_delete_section_options')}</span>
-            </div>
-            <div className="instance-delete-dialog__option">
-              <FccSwitch
-                id="instanceDeleteData"
-                className="instance-delete-dialog__switch"
-                checked={options.deleteData}
-                onChange={(checked) => onOptionsChange({ deleteData: checked })}
-                label={t('instances_delete_data_cb')}
-              />
-            </div>
-            <div className="instance-delete-dialog__option">
-              <FccSwitch
-                id="instanceDeleteDisk"
-                className="instance-delete-dialog__switch"
-                checked={options.deleteFromDisk}
-                onChange={(checked) => onOptionsChange({ deleteFromDisk: checked })}
-                label={t('instances_delete_disk_cb')}
-              />
-            </div>
-            {options.deleteFromDisk ? (
-              <div className="instance-delete-dialog__warn" id="instanceDeleteDiskWarn" role="alert">
-                <AppIcon name="info" size={18} className="instance-delete-dialog__warn-icon" />
-                <span>{t('instances_delete_disk_warn', serverPath)}</span>
+        <div className="mod-job-modal__body instance-delete-modal__body">
+          <section className="mod-job-modal__section mod-job-modal__section--error instance-delete-modal__target-card">
+            <div className="mod-job-modal__section-head instance-delete-modal__target-head">
+              <div className="instance-bootstrap-modal__target-main">
+                <span
+                  className="instance-delete-modal__server-icon"
+                  aria-hidden="true"
+                >
+                  <AppIcon name="server" size={17} />
+                </span>
+                <div className="instance-bootstrap-modal__target-meta">
+                  <span className="instance-bootstrap-modal__target-name">
+                    {name}
+                  </span>
+                  <span
+                    className="instance-bootstrap-modal__target-path"
+                    title={serverPath}
+                  >
+                    {serverPath}
+                  </span>
+                </div>
               </div>
-            ) : null}
+            </div>
+
+            <div className="instance-delete-modal__target-body">
+              <span
+                className="instance-delete-modal__warn-icon"
+                aria-hidden="true"
+              >
+                <AppIcon name="warning" size={16} />
+              </span>
+              <div className="instance-delete-modal__target-copy">
+                <span
+                  className="instance-delete-modal__confirm-text"
+                  id="instanceDeleteText"
+                >
+                  {t('instances_delete_confirm', name)}
+                </span>
+                <span className="instance-delete-modal__detach-hint">
+                  {t('instances_delete_detach_hint')}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className="mod-job-modal__section instance-delete-modal__options-card">
+            <div className="mod-job-modal__section-head">
+              <div className="mod-job-modal__log-title-wrap">
+                <AppIcon
+                  name="settings"
+                  size={15}
+                  className="mod-job-modal__log-icon"
+                />
+                <span className="mod-job-modal__log-title">
+                  {t('instances_delete_section_options')}
+                </span>
+              </div>
+            </div>
+
+            <div className="instance-delete-modal__options-body">
+              <div className="instance-delete-modal__option-row">
+                <FccSwitch
+                  id="instanceDeleteData"
+                  className="instance-delete-modal__switch"
+                  labelClassName="instance-delete-modal__switch-copy"
+                  checked={options.deleteData}
+                  onChange={(checked) =>
+                    onOptionsChange({ deleteData: checked })
+                  }
+                  label={
+                    <>
+                      <span className="instance-delete-modal__switch-label">
+                        {t('instances_delete_data_cb')}
+                      </span>
+                      <span className="instance-delete-modal__switch-desc">
+                        {t('instances_delete_data_hint')}
+                      </span>
+                    </>
+                  }
+                />
+                <span
+                  className="instance-delete-modal__option-icon"
+                  aria-hidden="true"
+                >
+                  <AppIcon name="history" size={15} />
+                </span>
+              </div>
+
+              <div className="instance-delete-modal__option-row">
+                <FccSwitch
+                  id="instanceDeleteDisk"
+                  className="instance-delete-modal__switch"
+                  labelClassName="instance-delete-modal__switch-label"
+                  checked={options.deleteFromDisk}
+                  onChange={(checked) =>
+                    onOptionsChange({ deleteFromDisk: checked })
+                  }
+                  label={t('instances_delete_disk_cb')}
+                />
+                <span
+                  className="instance-delete-modal__option-icon"
+                  aria-hidden="true"
+                >
+                  <AppIcon name="folder_open" size={15} />
+                </span>
+              </div>
+
+              {options.deleteFromDisk ? (
+                <div
+                  className="instance-delete-modal__warn"
+                  id="instanceDeleteDiskWarn"
+                  role="alert"
+                >
+                  <span
+                    className="instance-delete-modal__warn-icon"
+                    aria-hidden="true"
+                  >
+                    <AppIcon name="warning" size={16} />
+                  </span>
+                  <span className="instance-delete-modal__warn-text">
+                    {warnText}
+                  </span>
+                </div>
+              ) : null}
+            </div>
           </section>
         </div>
-        <div className="fu-modal__footer server-update-dialog__footer instance-delete-dialog__footer">
+
+        <div className="fu-modal__footer mod-job-modal__footer">
           <CancelButton id="btnInstanceDeleteCancel" onClick={onClose} t={t} />
           <button
             type="button"

@@ -15,17 +15,24 @@ import { notifyNetworkFetchError } from '../lib/networkErrors';
 import { notifyErr, notifyWarn } from '../lib/notify';
 import type { InstanceItem, InstancesListResponse } from '../types/instance';
 import type { AuthUser } from '../types/instance';
-import { getStoredSelectedInstance, setStoredSelectedInstance } from '../lib/selectedInstanceStorage';
+import {
+  getStoredSelectedInstance,
+  setStoredSelectedInstance,
+} from '../lib/selectedInstanceStorage';
 import { isSocketConnected } from '../api/socket';
 
 type StatusOverride = { status: string; until: number };
 
-export function useInstances(enabled: boolean, t: (key: string, ...args: (string | number)[]) => string) {
+export function useInstances(
+  enabled: boolean,
+  t: (key: string, ...args: (string | number)[]) => string,
+) {
   const qc = useQueryClient();
   const overridesRef = useRef<Map<string, StatusOverride>>(new Map());
   const [, bump] = useState(0);
   const [deleteProgressOpen, setDeleteProgressOpen] = useState(false);
   const [deleteProgressName, setDeleteProgressName] = useState('');
+  const [deleteProgressPath, setDeleteProgressPath] = useState('');
   const burstTimerRef = useRef<number | null>(null);
   const burstLeftRef = useRef(0);
   const restoreAttemptedRef = useRef('');
@@ -69,7 +76,9 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     }
     if (
       ov.status === 'stopping' &&
-      (realStatus === 'stopped' || realStatus === 'ready' || realStatus === 'error')
+      (realStatus === 'stopped' ||
+        realStatus === 'ready' ||
+        realStatus === 'error')
     ) {
       overridesRef.current.delete(iid);
       return realStatus;
@@ -81,18 +90,22 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       overridesRef.current.delete(iid);
       return realStatus;
     }
-    if (realStatus === 'starting' || realStatus === 'stopping') return realStatus;
+    if (realStatus === 'starting' || realStatus === 'stopping')
+      return realStatus;
     return String(ov.status || realStatus);
   }, []);
 
-  const setStatusOverride = useCallback((instanceId: string, status: string, ttlMs: number) => {
-    const iid = String(instanceId || '').trim();
-    const st = String(status || '').trim();
-    if (!iid || !st) return;
-    const ttl = Number.isFinite(ttlMs) ? Math.max(800, ttlMs) : 9000;
-    overridesRef.current.set(iid, { status: st, until: Date.now() + ttl });
-    bump((n) => n + 1);
-  }, []);
+  const setStatusOverride = useCallback(
+    (instanceId: string, status: string, ttlMs: number) => {
+      const iid = String(instanceId || '').trim();
+      const st = String(status || '').trim();
+      if (!iid || !st) return;
+      const ttl = Number.isFinite(ttlMs) ? Math.max(800, ttlMs) : 9000;
+      overridesRef.current.set(iid, { status: st, until: Date.now() + ttl });
+      bump((n) => n + 1);
+    },
+    [],
+  );
 
   const setInstanceMsg = useCallback(
     (text: string, isErr = false) => {
@@ -162,7 +175,8 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
   );
 
   const showEndMaintenanceAll = useMemo(
-    () => rows.some((it) => instanceMaintenanceManualMode(it, getEffectiveStatus)),
+    () =>
+      rows.some((it) => instanceMaintenanceManualMode(it, getEffectiveStatus)),
     [rows, getEffectiveStatus],
   );
 
@@ -173,12 +187,17 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
 
   const selectInstance = useCallback(
     async (id: string) => {
-      const j = await api<{ ok?: boolean; error?: string }>('/api/instances/select', {
-        method: 'POST',
-        body: JSON.stringify({ id }),
-      });
+      const j = await api<{ ok?: boolean; error?: string }>(
+        '/api/instances/select',
+        {
+          method: 'POST',
+          body: JSON.stringify({ id }),
+        },
+      );
       if (!j || j.ok === false) {
-        throw new Error(localizeInstanceError(j?.error || 'instance_switch_failed', t));
+        throw new Error(
+          localizeInstanceError(j?.error || 'instance_switch_failed', t),
+        );
       }
       const user = qc.getQueryData<AuthUser>(['auth', 'me']);
       if (user?.username) setStoredSelectedInstance(user.username, id);
@@ -205,13 +224,25 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
   }, [enabled, query.data, rows, selectedId, qc, selectInstance]);
 
   const quickAction = useCallback(
-    async (instanceId: string, action: 'start' | 'stop' | 'kill' | 'restart') => {
+    async (
+      instanceId: string,
+      action: 'start' | 'stop' | 'kill' | 'restart',
+    ) => {
       const iid = String(instanceId || '').trim();
       if (!iid) return;
       const item = rows.find((x) => String(x.id) === iid);
       const name = String(item?.name || iid);
 
-      if (action === 'start' && item && isGamePortBusyByAnotherInstance(rows, iid, item.port, getEffectiveStatus)) {
+      if (
+        action === 'start' &&
+        item &&
+        isGamePortBusyByAnotherInstance(
+          rows,
+          iid,
+          item.port,
+          getEffectiveStatus,
+        )
+      ) {
         setInstanceMsg(localizeInstanceError('port_in_use', t), true);
         return;
       }
@@ -236,18 +267,27 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
 
       if (action === 'start') {
         const qs = new URLSearchParams({ instance_id: iid });
-        const cfg = await api<{ save?: string; latest_label?: string }>(`/api/config/server?${qs}`);
-        const savesResp = await api<{ saves?: { name?: string }[] }>(`/api/saves?${qs}`);
-        const savesList = Array.isArray(savesResp?.saves) ? savesResp.saves : [];
+        const cfg = await api<{ save?: string; latest_label?: string }>(
+          `/api/config/server?${qs}`,
+        );
+        const savesResp = await api<{ saves?: { name?: string }[] }>(
+          `/api/saves?${qs}`,
+        );
+        const savesList = Array.isArray(savesResp?.saves)
+          ? savesResp.saves
+          : [];
         const latestLabel = cfg.latest_label || 'latest';
         const saveSetting = String(cfg.save || '').trim() || latestLabel;
-        const wantsLatest = saveSetting === latestLabel || saveSetting.toLowerCase() === 'latest';
+        const wantsLatest =
+          saveSetting === latestLabel || saveSetting.toLowerCase() === 'latest';
         if (!savesList.length) {
           notifyWarn(t('start_btn'), t('cannot_start_no_save'));
           return;
         }
         if (!wantsLatest) {
-          const okName = savesList.some((r) => r && String(r.name || '') === saveSetting);
+          const okName = savesList.some(
+            (r) => r && String(r.name || '') === saveSetting,
+          );
           if (!okName) {
             notifyWarn(t('start_btn'), t('cannot_start_no_save'));
             return;
@@ -272,7 +312,8 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         method: 'POST',
         body: JSON.stringify({ instance_id: iid }),
       });
-      if (r?.ok === false) throw new Error(String(r.error || action + '_failed'));
+      if (r?.ok === false)
+        throw new Error(String(r.error || action + '_failed'));
 
       if (action === 'kill') {
         overridesRef.current.delete(iid);
@@ -290,7 +331,16 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       await reload();
       triggerBurstRefresh();
     },
-    [rows, getEffectiveStatus, setStatusOverride, reload, triggerBurstRefresh, setInstanceMsg, setInstanceMsgTimed, t],
+    [
+      rows,
+      getEffectiveStatus,
+      setStatusOverride,
+      reload,
+      triggerBurstRefresh,
+      setInstanceMsg,
+      setInstanceMsgTimed,
+      t,
+    ],
   );
 
   const listStartableInstances = useCallback(() => {
@@ -303,22 +353,30 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     });
   }, [rows, getEffectiveStatus]);
 
-  const canStartInstance = useCallback(async (instanceId: string): Promise<boolean> => {
-    const iid = String(instanceId || '').trim();
-    if (!iid) return false;
-    const qs = new URLSearchParams({ instance_id: iid });
-    const cfg = await api<{ save?: string; latest_label?: string }>(`/api/config/server?${qs}`);
-    const savesResp = await api<{ saves?: { name?: string }[] }>(`/api/saves?${qs}`);
-    const savesList = Array.isArray(savesResp?.saves) ? savesResp.saves : [];
-    const latestLabel = cfg.latest_label || 'latest';
-    const saveSetting = String(cfg.save || '').trim() || latestLabel;
-    const wantsLatest = saveSetting === latestLabel || saveSetting.toLowerCase() === 'latest';
-    if (!savesList.length) return false;
-    if (!wantsLatest) {
-      return savesList.some((r) => r && String(r.name || '') === saveSetting);
-    }
-    return true;
-  }, []);
+  const canStartInstance = useCallback(
+    async (instanceId: string): Promise<boolean> => {
+      const iid = String(instanceId || '').trim();
+      if (!iid) return false;
+      const qs = new URLSearchParams({ instance_id: iid });
+      const cfg = await api<{ save?: string; latest_label?: string }>(
+        `/api/config/server?${qs}`,
+      );
+      const savesResp = await api<{ saves?: { name?: string }[] }>(
+        `/api/saves?${qs}`,
+      );
+      const savesList = Array.isArray(savesResp?.saves) ? savesResp.saves : [];
+      const latestLabel = cfg.latest_label || 'latest';
+      const saveSetting = String(cfg.save || '').trim() || latestLabel;
+      const wantsLatest =
+        saveSetting === latestLabel || saveSetting.toLowerCase() === 'latest';
+      if (!savesList.length) return false;
+      if (!wantsLatest) {
+        return savesList.some((r) => r && String(r.name || '') === saveSetting);
+      }
+      return true;
+    },
+    [],
+  );
 
   const startAllRunning = useCallback(async () => {
     const startable = listStartableInstances();
@@ -332,7 +390,14 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       const iid = String(it.id || '');
       const nm = String(it.name || iid);
       try {
-        if (isGamePortBusyByAnotherInstance(rows, iid, it.port, getEffectiveStatus)) {
+        if (
+          isGamePortBusyByAnotherInstance(
+            rows,
+            iid,
+            it.port,
+            getEffectiveStatus,
+          )
+        ) {
           failed += 1;
           continue;
         }
@@ -342,10 +407,13 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         }
         setInstanceMsgTimed(t('instances_quick_starting', nm), false, 2200);
         setStatusOverride(iid, 'starting', 9000);
-        const r = await api<{ ok?: boolean; error?: string }>('/api/server/start', {
-          method: 'POST',
-          body: JSON.stringify({ instance_id: iid }),
-        });
+        const r = await api<{ ok?: boolean; error?: string }>(
+          '/api/server/start',
+          {
+            method: 'POST',
+            body: JSON.stringify({ instance_id: iid }),
+          },
+        );
         if (r?.ok === false) throw new Error(String(r.error || 'start_failed'));
         started += 1;
       } catch {
@@ -354,8 +422,14 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     }
     await reload();
     triggerBurstRefresh();
-    if (!failed) setInstanceMsgTimed(t('instances_start_all_done', started), false, 4000);
-    else setInstanceMsgTimed(t('instances_start_all_partial', started, failed), true, 6000);
+    if (!failed)
+      setInstanceMsgTimed(t('instances_start_all_done', started), false, 4000);
+    else
+      setInstanceMsgTimed(
+        t('instances_start_all_partial', started, failed),
+        true,
+        6000,
+      );
   }, [
     rows,
     listStartableInstances,
@@ -403,10 +477,13 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       try {
         setInstanceMsgTimed(t('instances_quick_stopping', nm), false, 2200);
         setStatusOverride(iid, 'stopping', 9000);
-        const r = await api<{ ok?: boolean; error?: string }>('/api/server/stop', {
-          method: 'POST',
-          body: JSON.stringify({ instance_id: iid }),
-        });
+        const r = await api<{ ok?: boolean; error?: string }>(
+          '/api/server/stop',
+          {
+            method: 'POST',
+            body: JSON.stringify({ instance_id: iid }),
+          },
+        );
         if (r?.ok === false) throw new Error(String(r.error || 'stop_failed'));
         stopped += 1;
       } catch {
@@ -415,9 +492,22 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     }
     await reload();
     triggerBurstRefresh();
-    if (!failed) setInstanceMsgTimed(t('instances_stop_all_done', stopped), false, 4000);
-    else setInstanceMsgTimed(t('instances_stop_all_partial', stopped, failed), true, 6000);
-  }, [rows, setStatusOverride, reload, triggerBurstRefresh, setInstanceMsgTimed, t]);
+    if (!failed)
+      setInstanceMsgTimed(t('instances_stop_all_done', stopped), false, 4000);
+    else
+      setInstanceMsgTimed(
+        t('instances_stop_all_partial', stopped, failed),
+        true,
+        6000,
+      );
+  }, [
+    rows,
+    setStatusOverride,
+    reload,
+    triggerBurstRefresh,
+    setInstanceMsgTimed,
+    t,
+  ]);
 
   const stopAll = useCallback((): Promise<void> => {
     const running = rows.filter((it) =>
@@ -456,10 +546,13 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
       try {
         setInstanceMsgTimed(t('instances_quick_killing', nm), false, 2200);
         setStatusOverride(iid, 'stopping', 1500);
-        const r = await api<{ ok?: boolean; error?: string }>('/api/server/kill', {
-          method: 'POST',
-          body: JSON.stringify({ instance_id: iid }),
-        });
+        const r = await api<{ ok?: boolean; error?: string }>(
+          '/api/server/kill',
+          {
+            method: 'POST',
+            body: JSON.stringify({ instance_id: iid }),
+          },
+        );
         if (r?.ok === false) throw new Error(String(r.error || 'kill_failed'));
         overridesRef.current.delete(iid);
         killed += 1;
@@ -469,9 +562,22 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     }
     await reload();
     triggerBurstRefresh();
-    if (!failed) setInstanceMsgTimed(t('instances_kill_all_done', killed), false, 4000);
-    else setInstanceMsgTimed(t('instances_kill_all_partial', killed, failed), true, 6000);
-  }, [rows, setStatusOverride, reload, triggerBurstRefresh, setInstanceMsgTimed, t]);
+    if (!failed)
+      setInstanceMsgTimed(t('instances_kill_all_done', killed), false, 4000);
+    else
+      setInstanceMsgTimed(
+        t('instances_kill_all_partial', killed, failed),
+        true,
+        6000,
+      );
+  }, [
+    rows,
+    setStatusOverride,
+    reload,
+    triggerBurstRefresh,
+    setInstanceMsgTimed,
+    t,
+  ]);
 
   const killAll = useCallback((): Promise<void> => {
     const running = rows.filter((it) =>
@@ -495,15 +601,33 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
   }, [rows, killAllRunning, t]);
 
   const endMaintenanceAll = useCallback(async () => {
-    const r = await api<{ ok?: boolean; error?: string; cleared?: number; failed?: unknown[] }>(
-      '/api/maintenance/clear-manual',
-      { method: 'POST', body: JSON.stringify({ all: true }) },
-    );
-    if (!r || r.ok === false) throw new Error(localizeInstanceError(r?.error || 'clear_manual_failed', t));
+    const r = await api<{
+      ok?: boolean;
+      error?: string;
+      cleared?: number;
+      failed?: unknown[];
+    }>('/api/maintenance/clear-manual', {
+      method: 'POST',
+      body: JSON.stringify({ all: true }),
+    });
+    if (!r || r.ok === false)
+      throw new Error(
+        localizeInstanceError(r?.error || 'clear_manual_failed', t),
+      );
     const cleared = Number(r.cleared || 0);
     const failed = Array.isArray(r.failed) ? r.failed.length : 0;
-    if (failed) setInstanceMsgTimed(t('instances_end_maintenance_partial', cleared, failed), true, 6000);
-    else setInstanceMsgTimed(t('instances_end_maintenance_all_done', cleared), false, 5000);
+    if (failed)
+      setInstanceMsgTimed(
+        t('instances_end_maintenance_partial', cleared, failed),
+        true,
+        6000,
+      );
+    else
+      setInstanceMsgTimed(
+        t('instances_end_maintenance_all_done', cleared),
+        false,
+        5000,
+      );
     await reload();
     triggerBurstRefresh();
   }, [reload, triggerBurstRefresh, setInstanceMsgTimed, t]);
@@ -512,14 +636,24 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     async (instanceId: string) => {
       const iid = String(instanceId || '').trim();
       if (!iid) return;
-      const r = await api<{ ok?: boolean; error?: string }>('/api/maintenance/clear-manual', {
-        method: 'POST',
-        body: JSON.stringify({ instance_id: iid }),
-      });
-      if (!r || r.ok === false) throw new Error(localizeInstanceError(r?.error || 'clear_manual_failed', t));
+      const r = await api<{ ok?: boolean; error?: string }>(
+        '/api/maintenance/clear-manual',
+        {
+          method: 'POST',
+          body: JSON.stringify({ instance_id: iid }),
+        },
+      );
+      if (!r || r.ok === false)
+        throw new Error(
+          localizeInstanceError(r?.error || 'clear_manual_failed', t),
+        );
       const item = rows.find((x) => String(x.id) === iid);
       const name = String(item?.name || iid);
-      setInstanceMsgTimed(t('instances_end_maintenance_done', name), false, 4000);
+      setInstanceMsgTimed(
+        t('instances_end_maintenance_done', name),
+        false,
+        4000,
+      );
       await reload();
       triggerBurstRefresh();
     },
@@ -542,6 +676,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
 
       if (deleteFromDisk) {
         setDeleteProgressName(name);
+        setDeleteProgressPath(String(item.serverPath || '').trim());
         setDeleteProgressOpen(true);
       }
 
@@ -554,7 +689,10 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
           `/api/instances/${encodeURIComponent(id)}${q ? `?${q}` : ''}`,
           { method: 'DELETE' },
         );
-        if (!j || j.ok === false) throw new Error(localizeInstanceError(j?.error || 'delete_failed', t));
+        if (!j || j.ok === false)
+          throw new Error(
+            localizeInstanceError(j?.error || 'delete_failed', t),
+          );
 
         let msg = t('instances_detached_ok');
         if (deleteFromDisk && deleteData) msg = t('instances_deleted_full_ok');
@@ -566,6 +704,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         if (deleteFromDisk) {
           setDeleteProgressOpen(false);
           setDeleteProgressName('');
+          setDeleteProgressPath('');
         }
       }
     },
@@ -584,7 +723,10 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
         `/api/instances/${encodeURIComponent(String(item.id))}/clone`,
         { method: 'POST', body: JSON.stringify(payload) },
       );
-      if (!j || j.ok === false) throw new Error(localizeInstanceError(j?.error || 'instance_clone_failed', t));
+      if (!j || j.ok === false)
+        throw new Error(
+          localizeInstanceError(j?.error || 'instance_clone_failed', t),
+        );
       setInstanceMsgTimed(t('instances_clone_done', cloneName), false, 4500);
       await reload();
     },
@@ -621,6 +763,7 @@ export function useInstances(enabled: boolean, t: (key: string, ...args: (string
     cloneInstance,
     deleteProgressOpen,
     deleteProgressName,
+    deleteProgressPath,
     handleError,
     setInstanceMsg,
     setInstanceMsgTimed,

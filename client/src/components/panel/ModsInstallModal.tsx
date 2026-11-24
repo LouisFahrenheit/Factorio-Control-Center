@@ -306,12 +306,16 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
   const clearUpdatesModeRequest = mods.clearUpdatesModeRequest;
   useEffect(() => {
     if (!open || updatesModeRequest === null) return;
-    setPreviewStack([]);
-    setPage(1);
     setSelectedUpdates(new Set());
-    setHideInstalled(false);
-    setOnlyInstalled(false);
-    setOnlyUpdates(true);
+    if (updatesModeRequest.onlyUpdates) {
+      setPreviewStack([]);
+      setPage(1);
+      setHideInstalled(false);
+      setOnlyInstalled(false);
+      setOnlyUpdates(true);
+    } else {
+      setOnlyUpdates(false);
+    }
     clearUpdatesModeRequest();
   }, [open, updatesModeRequest, clearUpdatesModeRequest]);
   const [ownerFilter, setOwnerFilter] = useState('');
@@ -397,6 +401,8 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
     if (!open) {
       dragDepthRef.current = 0;
       setIsDraggingFiles(false);
+      setOnlyUpdates(false);
+      setSelectedUpdates(new Set());
     }
   }, [open]);
 
@@ -548,7 +554,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
   const applyPortalVersions = mods.applyPortalVersions;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || updatesModeRequest !== null) return;
     const ctrl = new AbortController();
     setSearchLoading(true);
     setSearchError('');
@@ -634,6 +640,7 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
     return () => ctrl.abort();
   }, [
     open,
+    updatesModeRequest,
     page,
     sortBy,
     selectedFv,
