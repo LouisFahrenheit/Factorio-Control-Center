@@ -473,6 +473,7 @@ export class RuntimeService implements OnModuleDestroy {
       if (rt && rt.proc && rt.proc.exitCode === null) {
         rt.stopping = true;
         rt.inGame = false;
+        this.emitRuntimeStatus(rt);
         if (rt.sawShutdownMarker) {
           this.scheduleShutdownKill(rt);
         }
@@ -623,6 +624,7 @@ export class RuntimeService implements OnModuleDestroy {
   }
 
   private async finalizeShutdownKill(rt: InstanceRuntime): Promise<void> {
+    if (rt.killRequested) return;
     const proc = rt.proc;
     if (!proc || proc.exitCode !== null) {
       rt.stopping = false;

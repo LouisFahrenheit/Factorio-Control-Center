@@ -298,9 +298,9 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
     () => new Set(),
   );
   const [matchedNames, setMatchedNames] = useState<string[]>([]);
-  const allMatchedSelected =
-    matchedNames.length > 0 &&
-    matchedNames.every((n) => selectedUpdates.has(n));
+  const [matchedPortalVersions, setMatchedPortalVersions] = useState<
+    Record<string, string>
+  >({});
 
   const updatesModeRequest = mods.updatesModeRequest;
   const clearUpdatesModeRequest = mods.clearUpdatesModeRequest;
@@ -446,6 +446,29 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
       );
     });
   }, [onlyUpdates, searchResults, installedByName]);
+
+  const visibleMatchedNames = useMemo(() => {
+    if (!onlyUpdates) return matchedNames;
+    return matchedNames.filter((name) => {
+      const key = name.toLowerCase();
+      const localVer = installedByName.get(key) || '';
+      const targetVer = matchedPortalVersions[key] || '';
+      if (!localVer) return false;
+      if (!targetVer) return true;
+      return portalVersionNewer(targetVer, localVer);
+    });
+  }, [onlyUpdates, matchedNames, installedByName, matchedPortalVersions]);
+
+  const allMatchedSelected =
+    visibleMatchedNames.length > 0 &&
+    visibleMatchedNames.every((n) => selectedUpdates.has(n));
+
+  const displayTotal = onlyUpdates
+    ? Math.max(
+        0,
+        searchTotal - (matchedNames.length - visibleMatchedNames.length),
+      )
+    : searchTotal;
 
   useEffect(() => {
     setSelectedUpdates(new Set());
@@ -617,15 +640,27 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
           );
           setSearchResults([]);
           setMatchedNames([]);
+          setMatchedPortalVersions({});
           setSearchTotal(0);
           setTotalPages(1);
           return;
         }
-        setSearchResults(Array.isArray(res.results) ? res.results : []);
+        const nextResults = Array.isArray(res.results) ? res.results : [];
+        setSearchResults(nextResults);
         setMatchedNames(Array.isArray(res.all_names) ? res.all_names : []);
+        const pvMap: Record<string, string> = {};
         if (res.portal_versions) {
+          for (const [k, v] of Object.entries(res.portal_versions)) {
+            if (k && v) pvMap[k.toLowerCase()] = v;
+          }
           applyPortalVersions(res.portal_versions);
         }
+        for (const item of nextResults) {
+          const k = item.name.toLowerCase();
+          const tv = item.target_release_version || item.latest_version;
+          if (k && tv && !pvMap[k]) pvMap[k] = tv;
+        }
+        setMatchedPortalVersions(pvMap);
         setSearchTotal(Number(res.total || 0));
         setTotalPages(Math.max(1, Number(res.total_pages || 1)));
         if (typeof res.page === 'number' && res.page !== page) {
@@ -1413,12 +1448,12 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                       <button
                         type="button"
                         className="btn btn--with-icon mod-install-search__bulk-btn"
-                        disabled={matchedNames.length === 0}
+                        disabled={visibleMatchedNames.length === 0}
                         onClick={() =>
                           setSelectedUpdates(
                             allMatchedSelected
                               ? new Set()
-                              : new Set(matchedNames),
+                              : new Set(visibleMatchedNames),
                           )
                         }
                       >
@@ -1453,14 +1488,19 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                         type="button"
                         className="btn btn--with-icon btn--update-available mod-install-search__bulk-btn"
                         disabled={
-                          matchedNames.length === 0 ||
+                          visibleMatchedNames.length === 0 ||
                           mods.serverBusy ||
                           mods.blockUpdates
                         }
-                        onClick={() => void mods.updateMany(matchedNames)}
+                        onClick={() =>
+                          void mods.updateMany(visibleMatchedNames)
+                        }
                       >
                         <AppIcon name="package_update" size={14} />
-                        {t('mod_portal_update_all_btn', matchedNames.length)}
+                        {t(
+                          'mod_portal_update_all_btn',
+                          visibleMatchedNames.length,
+                        )}
                       </button>
                     </div>
                   ) : null}
@@ -1473,7 +1513,10 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                       />
                     ) : null}
                     <span className="mod-install-search__total-text">
-                      {t('mod_portal_total_mods', searchTotal.toLocaleString())}
+                      {t(
+                        'mod_portal_total_mods',
+                        displayTotal.toLocaleString(),
+                      )}
                     </span>
                     <button
                       type="button"
@@ -1827,9 +1870,9 @@ export function ModsInstallModal({ mods, t }: ModsInstallModalProps) {
                             ((page - 1) * PAGE_SIZE + 1).toLocaleString(),
                             Math.min(
                               page * PAGE_SIZE,
-                              searchTotal,
+                              displayTotal,
                             ).toLocaleString(),
-                            searchTotal.toLocaleString(),
+                            displayTotal.toLocaleString(),
                           )}
                         </span>
                         <div className="mod-install-pagination__buttons">
