@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { IconChevronRight } from '@tabler/icons-react';
 import { AppIcon } from '../AppIcon';
 import { CancelButton } from '../CancelButton';
 import { ModalBackdrop } from '../modals/ModalBackdrop';
@@ -9,15 +10,20 @@ interface InstancePathBrowserModalProps {
   t: (key: string, ...args: (string | number)[]) => string;
 }
 
-export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModalProps) {
+export function InstancePathBrowserModal({
+  editor,
+  t,
+}: InstancePathBrowserModalProps) {
   const createInputRef = useRef<HTMLInputElement>(null);
-  const currentLabel = editor.pathBrowseCurrent || t('instances_path_locations');
+  const isRootLocations = !editor.pathBrowseCurrent;
+  const currentLabel =
+    editor.pathBrowseCurrent || t('instances_path_locations');
   const currentIcon =
     editor.pathBrowseFactorioOk === true
       ? 'folder_check'
       : editor.pathBrowseCurrent
         ? 'folder_open'
-        : 'folder';
+        : 'disk';
 
   useEffect(() => {
     if (!editor.pathBrowseCreateOpen) return;
@@ -29,68 +35,115 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
   }, [editor.pathBrowseCreateOpen]);
 
   return (
-    <ModalBackdrop open={editor.pathBrowserOpen} id="instancePathBrowseBackdrop" onClose={editor.closePathBrowser}>
+    <ModalBackdrop
+      open={editor.pathBrowserOpen}
+      id="instancePathBrowseBackdrop"
+      backdropClassName="fu-modal-backdrop--stacked"
+      closeOnBackdropClick={false}
+      onClose={editor.closePathBrowser}
+    >
       <div
         className="fu-modal instance-path-browse-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="instancePathBrowseHeading"
       >
-        <div className="fu-modal__header instance-path-browse-dialog__header" id="instancePathBrowseHeading">
-          <span className="instance-path-browse-dialog__header-title">{t('instances_path_browser_title')}</span>
-        </div>
-        <div className="fu-modal__body instance-path-browse-dialog__body">
-          <div className="instance-path-browse-toolbar">
-            <button
-              type="button"
-              className="btn btn--compact btn--with-icon"
-              id="btnInstancePathUp"
-              disabled={!editor.pathBrowseParent || editor.pathBrowseCreateOpen}
-              onClick={editor.pathBrowseUp}
+        <div className="mod-install-dialog__header">
+          <div className="mod-install-dialog__header-main">
+            <div
+              className="mod-install-dialog__header-icon-wrap"
+              aria-hidden="true"
             >
-              <AppIcon name="arrow_upward" size={16} />
-              {t('instances_path_up_btn')}
-            </button>
-            <button
-              type="button"
-              className="btn btn--compact btn--with-icon"
-              id="btnInstancePathRoot"
-              disabled={editor.pathBrowseCreateOpen}
-              onClick={editor.pathBrowseRoot}
-            >
-              <AppIcon name="folder" size={16} />
-              {t('instances_path_disks_btn')}
-            </button>
+              <AppIcon name="folder_open" size={18} />
+            </div>
+            <div className="mod-install-dialog__header-titles">
+              <h2
+                className="mod-install-dialog__title"
+                id="instancePathBrowseHeading"
+              >
+                {t('instances_path_browser_title')}
+              </h2>
+            </div>
           </div>
+        </div>
 
-          <div
-            id="instancePathCurrent"
-            className={
-              'instance-path-browse-current' +
-              (editor.pathBrowseFactorioOk === true ? ' instance-path-browse-current--factorio' : '')
-            }
-          >
-            <AppIcon name={currentIcon} size={18} className="instance-path-browse-current__icon" />
-            <span className="instance-path-browse-current__path">{currentLabel}</span>
-            {editor.pathBrowseFactorioOk === true ? (
-              <span className="instance-path-browse-current__badge">{t('instances_path_factorio_ok')}</span>
-            ) : null}
+        <div className="fu-modal__body instance-path-browse-dialog__body">
+          <div className="instance-path-browse-nav-card">
+            <div className="instance-path-browse-toolbar">
+              <button
+                type="button"
+                className="btn btn--secondary btn--compact btn--with-icon"
+                id="btnInstancePathUp"
+                disabled={
+                  !editor.pathBrowseParent || editor.pathBrowseCreateOpen
+                }
+                onClick={editor.pathBrowseUp}
+              >
+                <AppIcon name="arrow_upward" size={16} />
+                {t('instances_path_up_btn')}
+              </button>
+              <button
+                type="button"
+                className="btn btn--secondary btn--compact btn--with-icon"
+                id="btnInstancePathRoot"
+                disabled={editor.pathBrowseCreateOpen}
+                onClick={editor.pathBrowseRoot}
+              >
+                <AppIcon name="disk" size={16} />
+                {t('instances_path_disks_btn')}
+              </button>
+            </div>
+
+            <div
+              id="instancePathCurrent"
+              className={
+                'instance-path-browse-current' +
+                (editor.pathBrowseFactorioOk === true
+                  ? ' instance-path-browse-current--factorio'
+                  : '')
+              }
+            >
+              <AppIcon
+                name={currentIcon}
+                size={18}
+                className="instance-path-browse-current__icon"
+              />
+              <span className="instance-path-browse-current__path">
+                {currentLabel}
+              </span>
+              {editor.pathBrowseFactorioOk === true ? (
+                <span className="instance-path-browse-current__badge">
+                  {t('instances_path_factorio_ok')}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <div
             id="instancePathBrowseList"
             className={
-              'instance-path-browse-list' + (editor.pathBrowseCreateOpen ? ' instance-path-browse-list--dimmed' : '')
+              'instance-path-browse-list' +
+              (editor.pathBrowseCreateOpen
+                ? ' instance-path-browse-list--dimmed'
+                : '')
             }
           >
             {editor.pathBrowseLoading ? (
               <div className="instance-path-browse-empty">
-                <AppIcon name="folder" size={28} className="instance-path-browse-empty__icon" />
-                <span>…</span>
+                <AppIcon
+                  name="folder"
+                  size={28}
+                  className="instance-path-browse-empty__icon"
+                />
+                <span>{t('tab_data_loading')}</span>
               </div>
             ) : !editor.pathBrowseItems.length ? (
               <div className="instance-path-browse-empty">
-                <AppIcon name="folder_open" size={28} className="instance-path-browse-empty__icon" />
+                <AppIcon
+                  name="folder_open"
+                  size={28}
+                  className="instance-path-browse-empty__icon"
+                />
                 <span>{t('instances_path_empty')}</span>
               </div>
             ) : (
@@ -106,8 +159,20 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
                     disabled={editor.pathBrowseCreateOpen}
                     onClick={() => editor.pathBrowseEnter(path)}
                   >
-                    <AppIcon name="folder" size={18} className="instance-path-browse-item__icon" />
-                    <span className="instance-path-browse-item__label">{name || path}</span>
+                    <AppIcon
+                      name={isRootLocations ? 'disk' : 'folder'}
+                      size={18}
+                      className="instance-path-browse-item__icon"
+                    />
+                    <span className="instance-path-browse-item__label">
+                      {name || path}
+                    </span>
+                    <IconChevronRight
+                      size={16}
+                      stroke={1.9}
+                      className="instance-path-browse-item__chevron"
+                      aria-hidden="true"
+                    />
                   </button>
                 );
               })
@@ -115,9 +180,21 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
           </div>
 
           {editor.pathBrowseCreateOpen ? (
-            <div className="instance-path-browse-create" role="form" aria-labelledby="instancePathCreateLabel">
-              <label className="instance-path-browse-create__label" id="instancePathCreateLabel" htmlFor="instancePathCreateName">
-                <AppIcon name="create_new_folder" size={18} className="instance-path-browse-create__label-icon" />
+            <div
+              className="instance-path-browse-create"
+              role="form"
+              aria-labelledby="instancePathCreateLabel"
+            >
+              <label
+                className="instance-path-browse-create__label"
+                id="instancePathCreateLabel"
+                htmlFor="instancePathCreateName"
+              >
+                <AppIcon
+                  name="create_new_folder"
+                  size={18}
+                  className="instance-path-browse-create__label-icon"
+                />
                 {t('instances_path_create_prompt')}
               </label>
               <input
@@ -146,16 +223,12 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
                 </p>
               ) : null}
               <div className="instance-path-browse-create__actions">
-                <button
-                  type="button"
-                  className="btn btn--with-icon"
+                <CancelButton
                   id="btnInstancePathCreateCancel"
                   disabled={editor.pathBrowseCreateSaving}
                   onClick={editor.closePathBrowseCreate}
-                >
-                  <AppIcon name="close" size={16} />
-                  {t('cancel')}
-                </button>
+                  t={t}
+                />
                 <button
                   type="button"
                   className="btn btn--with-icon btn--primary"
@@ -170,10 +243,11 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
             </div>
           ) : null}
         </div>
+
         <div className="fu-modal__footer instance-path-browse-dialog__footer">
           <button
             type="button"
-            className="btn btn--with-icon"
+            className="btn btn--secondary btn--with-icon"
             id="btnInstancePathCreate"
             disabled={!editor.pathBrowseCurrent || editor.pathBrowseCreateOpen}
             onClick={editor.openPathBrowseCreate}
@@ -181,8 +255,15 @@ export function InstancePathBrowserModal({ editor, t }: InstancePathBrowserModal
             <AppIcon name="create_new_folder" size={16} />
             {t('instances_path_create_btn')}
           </button>
-          <span className="instance-path-browse-dialog__footer-spacer" aria-hidden="true" />
-          <CancelButton id="btnInstancePathBrowseCancel" onClick={editor.closePathBrowser} t={t} />
+          <span
+            className="instance-path-browse-dialog__footer-spacer"
+            aria-hidden="true"
+          />
+          <CancelButton
+            id="btnInstancePathBrowseCancel"
+            onClick={editor.closePathBrowser}
+            t={t}
+          />
           <button
             type="button"
             className="btn btn--with-icon btn--primary"
